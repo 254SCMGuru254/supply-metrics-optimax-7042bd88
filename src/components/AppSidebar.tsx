@@ -3,15 +3,16 @@ import {
   Home,
   Network,
   Settings,
-  BookOpen,
-  CreditCard,
+  Truck,
+  Database,
+  Warehouse,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -20,10 +21,12 @@ import { Link } from "react-router-dom";
 
 const menuItems = [
   { title: "Home", icon: Home, path: "/" },
-  { title: "Analytics", icon: BarChart3, path: "/analytics" },
-  { title: "Network", icon: Network, path: "/network" },
-  { title: "Guide", icon: BookOpen, path: "/guide" },
-  { title: "Pricing", icon: CreditCard, path: "/pricing" },
+  { title: "Analytics Dashboard", icon: BarChart3, path: "/analytics" },
+  { title: "Center of Gravity", icon: Warehouse, path: "/center-of-gravity" },
+  { title: "Network Optimization", icon: Network, path: "/network-optimization" },
+  { title: "Simulation", icon: Truck, path: "/simulation" },
+  { title: "Heuristic Analysis", icon: BarChart3, path: "/heuristic" },
+  { title: "Data Management", icon: Database, path: "/data-input" },
   { title: "Settings", icon: Settings, path: "/settings" },
 ];
 
@@ -31,6 +34,9 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
+        <div className="p-4">
+          <h1 className="text-xl font-bold text-primary">Chainalyze.io</h1>
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>

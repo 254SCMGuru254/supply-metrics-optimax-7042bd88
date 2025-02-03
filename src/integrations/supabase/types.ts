@@ -9,7 +9,132 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      demand_points: {
+        Row: {
+          created_at: string | null
+          demand: number
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          service_level: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          demand: number
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          service_level?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          demand?: number
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          service_level?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nodes: {
+        Row: {
+          capacity: number | null
+          created_at: string | null
+          fixed_cost: number | null
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          updated_at: string | null
+          user_id: string
+          variable_cost: number | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string | null
+          fixed_cost?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          updated_at?: string | null
+          user_id: string
+          variable_cost?: number | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string | null
+          fixed_cost?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+          variable_cost?: number | null
+        }
+        Relationships: []
+      }
+      routes: {
+        Row: {
+          cost_per_unit: number | null
+          created_at: string | null
+          destination_id: string | null
+          distance: number | null
+          id: string
+          origin_id: string | null
+          transit_time: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cost_per_unit?: number | null
+          created_at?: string | null
+          destination_id?: string | null
+          distance?: number | null
+          id?: string
+          origin_id?: string | null
+          transit_time?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cost_per_unit?: number | null
+          created_at?: string | null
+          destination_id?: string | null
+          distance?: number | null
+          id?: string
+          origin_id?: string | null
+          transit_time?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routes_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "demand_points"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routes_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
