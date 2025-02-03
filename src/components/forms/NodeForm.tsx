@@ -23,16 +23,21 @@ export const NodeForm = () => {
   const onSubmit = async (data: NodeFormData) => {
     try {
       setLoading(true);
-      const { error } = await supabase.from("nodes").insert([
-        {
-          name: data.name,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          capacity: data.capacity,
-          fixed_cost: data.fixedCost,
-          variable_cost: data.variableCost,
-        },
-      ]);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No authenticated user found");
+      }
+
+      const { error } = await supabase.from("nodes").insert({
+        name: data.name,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        capacity: data.capacity,
+        fixed_cost: data.fixedCost,
+        variable_cost: data.variableCost,
+        user_id: user.id
+      });
 
       if (error) throw error;
 

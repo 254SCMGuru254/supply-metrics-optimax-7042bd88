@@ -55,15 +55,20 @@ export const RouteForm = () => {
   const onSubmit = async (data: RouteFormData) => {
     try {
       setLoading(true);
-      const { error } = await supabase.from("routes").insert([
-        {
-          origin_id: data.originId,
-          destination_id: data.destinationId,
-          distance: data.distance,
-          cost_per_unit: data.costPerUnit,
-          transit_time: data.transitTime,
-        },
-      ]);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No authenticated user found");
+      }
+
+      const { error } = await supabase.from("routes").insert({
+        origin_id: data.originId,
+        destination_id: data.destinationId,
+        distance: data.distance,
+        cost_per_unit: data.costPerUnit,
+        transit_time: data.transitTime,
+        user_id: user.id
+      });
 
       if (error) throw error;
 
