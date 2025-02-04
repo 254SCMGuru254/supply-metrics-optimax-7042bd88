@@ -1,85 +1,101 @@
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { ArrowRight, BarChart3, Network, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const features = [
-  {
-    icon: Network,
-    title: "Network Optimization",
-    description: "Optimize your supply chain network with advanced algorithms",
-  },
-  {
-    icon: BarChart3,
-    title: "Real-time Analytics",
-    description: "Monitor and analyze your supply chain performance in real-time",
-  },
-  {
-    icon: Settings,
-    title: "Custom Solutions",
-    description: "Tailored solutions for your specific business needs",
-  },
-];
+import { MapPin, Box, Route as RouteIcon } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
-      <div className="py-20 sm:py-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto max-w-7xl px-6 lg:px-8"
-        >
-          <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-              Supply Chain Analytics Platform
-            </h1>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Optimize your supply chain with advanced analytics and real-time
-              insights. Make data-driven decisions and improve efficiency.
-            </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link to="/analytics">
-                <Button className="rounded-full">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link
-                to="/guide"
-                className="text-sm font-semibold leading-6 text-gray-900"
-              >
-                Learn more <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          </div>
+    <div className="container mx-auto py-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-6">Supply Chain Network Design</h1>
+        <p className="text-lg text-muted-foreground mb-8">
+          Welcome to Chainalyze.io. Start by inputting your supply chain network data using the forms below.
+        </p>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="mt-20"
-          >
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="relative backdrop-blur-sm bg-white/30 border border-gray-200 rounded-2xl p-8 shadow-sm transition-all duration-200 hover:shadow-md"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                    <feature.icon
-                      className="h-6 w-6 text-white"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <h3 className="mt-6 text-xl font-semibold">{feature.title}</h3>
-                  <p className="mt-2 text-gray-600">{feature.description}</p>
-                </div>
-              ))}
+        <div className="grid gap-6">
+          {/* Supply Nodes Section */}
+          <Card className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <MapPin className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold mb-2">Supply Nodes</h2>
+                <p className="text-muted-foreground mb-4">
+                  Input your supply locations with their capacities and associated costs.
+                </p>
+                <ul className="list-disc list-inside mb-4 space-y-2 text-sm">
+                  <li>Location coordinates (latitude/longitude)</li>
+                  <li>Facility capacity limits</li>
+                  <li>Fixed operational costs</li>
+                  <li>Variable handling costs</li>
+                </ul>
+                <Link to="/data-input?tab=nodes">
+                  <Button>Add Supply Nodes</Button>
+                </Link>
+              </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </Card>
+
+          {/* Demand Points Section */}
+          <Card className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Box className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold mb-2">Demand Points</h2>
+                <p className="text-muted-foreground mb-4">
+                  Define customer locations and their demand requirements.
+                </p>
+                <ul className="list-disc list-inside mb-4 space-y-2 text-sm">
+                  <li>Customer location coordinates</li>
+                  <li>Demand volumes</li>
+                  <li>Required service levels</li>
+                  <li>Location identifiers</li>
+                </ul>
+                <Link to="/data-input?tab=demand">
+                  <Button>Add Demand Points</Button>
+                </Link>
+              </div>
+            </div>
+          </Card>
+
+          {/* Routes Section */}
+          <Card className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <RouteIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold mb-2">Transportation Routes</h2>
+                <p className="text-muted-foreground mb-4">
+                  Connect supply nodes to demand points with transportation details.
+                </p>
+                <ul className="list-disc list-inside mb-4 space-y-2 text-sm">
+                  <li>Origin and destination pairs</li>
+                  <li>Transportation distances</li>
+                  <li>Cost per unit shipped</li>
+                  <li>Transit times</li>
+                </ul>
+                <Link to="/data-input?tab=routes">
+                  <Button>Add Routes</Button>
+                </Link>
+              </div>
+            </div>
+          </Card>
+
+          {/* Getting Started Guide */}
+          <Card className="p-6 bg-muted/50">
+            <h3 className="text-lg font-semibold mb-2">Getting Started</h3>
+            <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+              <li>Start by adding your supply nodes (warehouses, factories, etc.)</li>
+              <li>Next, input your demand points (customer locations)</li>
+              <li>Finally, define the transportation routes between nodes and points</li>
+              <li>Once your network is defined, use the analytics tools to optimize your supply chain</li>
+            </ol>
+          </Card>
+        </div>
       </div>
     </div>
   );
