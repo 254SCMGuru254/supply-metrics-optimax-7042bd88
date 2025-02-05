@@ -61,7 +61,7 @@ export const NetworkMap = ({
   const [map, setMap] = useState<L.Map | null>(null);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || nodes.length === 0) return;
 
     const bounds = L.latLngBounds(nodes.map(node => [node.latitude, node.longitude]));
     if (bounds.isValid()) {
@@ -90,15 +90,16 @@ export const NetworkMap = ({
 
   return (
     <MapContainer
+      style={{ height: "600px", width: "100%" }}
       center={[0, 0]}
       zoom={2}
       className="w-full h-[600px] rounded-lg"
-      whenCreated={setMap}
+      ref={setMap}
       onClick={handleMapClick}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       
       {/* Render routes */}

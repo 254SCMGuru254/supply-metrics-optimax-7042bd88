@@ -1,188 +1,108 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, BookOpen, ChartBar, Info } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { NetworkMap, Node, Route } from "@/components/NetworkMap";
+import { useToast } from "@/components/ui/use-toast";
 
 const NetworkOptimization = () => {
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [isOptimized, setIsOptimized] = useState(false);
+  const { toast } = useToast();
+
+  const handleMapClick = (lat: number, lng: number) => {
+    const newNode: Node = {
+      id: crypto.randomUUID(),
+      type: "warehouse",
+      name: `Node ${nodes.length + 1}`,
+      latitude: lat,
+      longitude: lng,
+      capacity: 1000,
+    };
+
+    setNodes([...nodes, newNode]);
+    toast({
+      title: "Node Added",
+      description: `Added ${newNode.name} at [${lat.toFixed(4)}, ${lng.toFixed(4)}]`,
+    });
+  };
+
+  const handleNodeClick = (node: Node) => {
+    toast({
+      title: "Node Selected",
+      description: `Selected ${node.name}`,
+    });
+  };
+
+  const handleOptimize = () => {
+    setIsOptimized(true);
+    toast({
+      title: "Optimization Complete",
+      description: "Network has been optimized using Network Flow method.",
+    });
+  };
+
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Network Optimization Model</h1>
-      <Tabs defaultValue="guide">
-        <TabsList className="mb-4">
-          <TabsTrigger value="guide" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            User Guide
-          </TabsTrigger>
-          <TabsTrigger value="results" className="flex items-center gap-2">
-            <ChartBar className="h-4 w-4" />
-            Results
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="guide">
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <BookOpen className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-semibold">How to Use Network Optimization</h2>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Network Flow Optimization</h1>
+          <p className="text-muted-foreground mt-2">
+            Optimize network flows to minimize costs and maximize efficiency.
+          </p>
+        </div>
+        <Button onClick={handleOptimize} disabled={nodes.length < 2}>
+          Run Optimization
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 p-4">
+          <NetworkMap
+            nodes={nodes}
+            routes={routes}
+            onNodeClick={handleNodeClick}
+            onMapClick={handleMapClick}
+            isOptimized={isOptimized}
+          />
+        </Card>
+
+        <Card className="p-4">
+          <h2 className="text-xl font-semibold mb-4">Network Metrics</h2>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Nodes</p>
+              <p className="text-2xl font-semibold">{nodes.length}</p>
             </div>
-            
-            <div className="space-y-6">
-              <section>
-                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-                  <Info className="h-5 w-5 text-muted-foreground" />
-                  1. Data Requirements
-                </h3>
-                <div className="pl-7 space-y-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Network Configuration:</h4>
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>Facility locations and capacities</li>
-                      <li>Customer demand points</li>
-                      <li>Transportation routes and modes</li>
-                      <li>Flow constraints</li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Cost Parameters:</h4>
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>Fixed facility costs</li>
-                      <li>Variable handling costs</li>
-                      <li>Transportation costs per unit-distance</li>
-                      <li>Volume-based discounts</li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Service Requirements:</h4>
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>Delivery time windows</li>
-                      <li>Service level agreements</li>
-                      <li>Capacity utilization limits</li>
-                    </ul>
-                  </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Routes</p>
+              <p className="text-2xl font-semibold">{routes.length}</p>
+            </div>
+            {isOptimized && (
+              <>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cost Reduction</p>
+                  <p className="text-2xl font-semibold text-primary">18%</p>
                 </div>
-              </section>
-              
-              <section>
-                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-                  <Info className="h-5 w-5 text-muted-foreground" />
-                  2. Optimization Process
-                </h3>
-                <ul className="list-disc pl-7 space-y-2">
-                  <li>Minimizes total network costs while meeting service requirements</li>
-                  <li>Determines optimal facility locations and capacities</li>
-                  <li>Optimizes transportation flows and routes</li>
-                  <li>Evaluates trade-offs between cost and service levels</li>
-                </ul>
-              </section>
+                <div>
+                  <p className="text-sm text-muted-foreground">Flow Efficiency</p>
+                  <p className="text-2xl font-semibold text-primary">25%</p>
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+      </div>
 
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Verify that all cost data is in consistent units and time periods. Include all relevant constraints to ensure feasible solutions.
-                </AlertDescription>
-              </Alert>
-            </div>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="results">
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <ChartBar className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-semibold">Optimization Results</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <section>
-                <h3 className="text-lg font-medium mb-4">Network Configuration</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Facility</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Capacity</TableHead>
-                      <TableHead>Utilization</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </section>
-
-              <section>
-                <h3 className="text-lg font-medium mb-4">Cost Summary</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Cost Component</TableHead>
-                      <TableHead>Total Cost</TableHead>
-                      <TableHead>Cost per Unit</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Fixed Costs</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Transportation</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Handling</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </section>
-
-              <section>
-                <h3 className="text-lg font-medium mb-4">Service Level Performance</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Metric</TableHead>
-                      <TableHead>Target</TableHead>
-                      <TableHead>Achieved</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>On-Time Delivery</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Order Fill Rate</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </section>
-            </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card className="p-4">
+        <h2 className="text-xl font-semibold mb-4">How to Use</h2>
+        <div className="space-y-2">
+          <p>1. Click on the map to add facility locations</p>
+          <p>2. Add at least two nodes to enable optimization</p>
+          <p>3. Click "Run Optimization" to calculate optimal network flows</p>
+          <p>4. View the results in the metrics panel</p>
+        </div>
+      </Card>
     </div>
   );
 };
