@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom icons for different facility types
-const createCustomIcon = (color: string) =>
+const createCustomIcon = (color: string): L.Icon => 
   new L.Icon({
     iconUrl: `data:image/svg+xml,%3Csvg width='25' height='41' viewBox='0 0 25 41' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.5 0C5.59644 0 0 5.59644 0 12.5C0 19.4036 12.5 41 12.5 41C12.5 41 25 19.4036 25 12.5C25 5.59644 19.4036 0 12.5 0Z' fill='${encodeURIComponent(color)}'/%3E%3C/svg%3E`,
     iconSize: [25, 41],
@@ -69,7 +69,7 @@ export const NetworkMap = ({
     }
   }, [map, nodes]);
 
-  const getNodeIcon = (type: Node["type"]) => {
+  const getNodeIcon = (type: Node["type"]): L.Icon => {
     switch (type) {
       case "warehouse":
         return warehouseIcon;
@@ -91,7 +91,7 @@ export const NetworkMap = ({
   return (
     <MapContainer
       style={{ height: "600px", width: "100%" }}
-      defaultCenter={[0, 0]}
+      center={[20, 0]}
       zoom={2}
       className="w-full h-[600px] rounded-lg"
       ref={setMap}
