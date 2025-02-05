@@ -91,7 +91,7 @@ export const NetworkMap = ({
   return (
     <MapContainer
       style={{ height: "600px", width: "100%" }}
-      center={[0, 0]}
+      defaultCenter={[0, 0]}
       zoom={2}
       className="w-full h-[600px] rounded-lg"
       ref={setMap}
