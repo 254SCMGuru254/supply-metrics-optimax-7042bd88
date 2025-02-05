@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import type { MapContainerProps, TileLayerProps, MarkerProps } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useToast } from "@/components/ui/use-toast";
@@ -94,12 +95,12 @@ export const NetworkMap = ({
       center={[20, 0] as L.LatLngExpression}
       zoom={2}
       className="w-full h-[600px] rounded-lg"
-      ref={setMap}
+      whenCreated={setMap}
       onClick={handleMapClick}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       
       {/* Render routes */}
