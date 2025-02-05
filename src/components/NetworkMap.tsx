@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
-import type { MapContainerProps, TileLayerProps, MarkerProps } from "react-leaflet";
+import type { MapProps } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useToast } from "@/components/ui/use-toast";
@@ -90,65 +90,65 @@ export const NetworkMap = ({
   };
 
   return (
-    <MapContainer
-      style={{ height: "600px", width: "100%" }}
-      center={[20, 0] as L.LatLngExpression}
-      zoom={2}
-      className="w-full h-[600px] rounded-lg"
-      whenCreated={setMap}
-      onClick={handleMapClick}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      />
-      
-      {/* Render routes */}
-      {routes.map((route) => {
-        const fromNode = nodes.find((n) => n.id === route.from);
-        const toNode = nodes.find((n) => n.id === route.to);
+    <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
+      <MapContainer
+        center={[20, 0]}
+        zoom={2}
+        style={{ height: "100%", width: "100%" }}
+        whenCreated={setMap}
+        onClick={handleMapClick}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
         
-        if (!fromNode || !toNode) return null;
+        {/* Render routes */}
+        {routes.map((route) => {
+          const fromNode = nodes.find((n) => n.id === route.from);
+          const toNode = nodes.find((n) => n.id === route.to);
+          
+          if (!fromNode || !toNode) return null;
 
-        return (
-          <Polyline
-            key={route.id}
-            positions={[
-              [fromNode.latitude, fromNode.longitude],
-              [toNode.latitude, toNode.longitude],
-            ] as L.LatLngExpression[]}
-            pathOptions={{
-              color: isOptimized ? "#22c55e" : "#64748b",
-              weight: Math.max(1, Math.min(8, route.volume / 100)),
-              dashArray: route.isOptimized ? undefined : "5, 10",
+          return (
+            <Polyline
+              key={route.id}
+              positions={[
+                [fromNode.latitude, fromNode.longitude],
+                [toNode.latitude, toNode.longitude],
+              ]}
+              pathOptions={{
+                color: isOptimized ? "#22c55e" : "#64748b",
+                weight: Math.max(1, Math.min(8, route.volume / 100)),
+                dashArray: route.isOptimized ? undefined : "5, 10",
+              }}
+            />
+          );
+        })}
+
+        {/* Render nodes */}
+        {nodes.map((node) => (
+          <Marker
+            key={node.id}
+            position={[node.latitude, node.longitude]}
+            eventHandlers={{
+              click: () => onNodeClick?.(node),
             }}
-          />
-        );
-      })}
-
-      {/* Render nodes */}
-      {nodes.map((node) => (
-        <Marker
-          key={node.id}
-          position={[node.latitude, node.longitude] as L.LatLngExpression}
-          icon={getNodeIcon(node.type)}
-          eventHandlers={{
-            click: () => onNodeClick?.(node),
-          }}
-        >
-          <Popup>
-            <div className="p-2">
-              <h3 className="font-semibold">{node.name}</h3>
-              <p className="text-sm text-muted-foreground">Type: {node.type}</p>
-              {node.capacity && (
-                <p className="text-sm text-muted-foreground">
-                  Capacity: {node.capacity.toLocaleString()}
-                </p>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+          >
+            <Popup>
+              <div className="p-2">
+                <h3 className="font-semibold">{node.name}</h3>
+                <p className="text-sm text-muted-foreground">Type: {node.type}</p>
+                {node.capacity && (
+                  <p className="text-sm text-muted-foreground">
+                    Capacity: {node.capacity.toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 };
