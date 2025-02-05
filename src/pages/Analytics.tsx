@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Warehouse, Network, Truck, BarChart3, Cube } from "lucide-react";
+import { Warehouse, Network, Truck, BarChart3, Box } from "lucide-react";
 
 const analyticsModels = [
   {
@@ -32,7 +32,7 @@ const analyticsModels = [
   {
     title: "Isohedron Analysis",
     description: "Optimize territory coverage and spatial distribution",
-    icon: Cube,
+    icon: Box,
     path: "/isohedron",
   },
 ];
