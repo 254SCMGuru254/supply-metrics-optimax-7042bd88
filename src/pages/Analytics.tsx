@@ -1,7 +1,8 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Warehouse, Network, Truck, BarChart3 } from "lucide-react";
+import { Warehouse, Network, Truck, BarChart3, Cube } from "lucide-react";
 
 const analyticsModels = [
   {
@@ -28,13 +29,19 @@ const analyticsModels = [
     icon: BarChart3,
     path: "/heuristic",
   },
+  {
+    title: "Isohedron Analysis",
+    description: "Optimize territory coverage and spatial distribution",
+    icon: Cube,
+    path: "/isohedron",
+  },
 ];
 
 const Analytics = () => {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8">Supply Chain Analytics</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {analyticsModels.map((model) => (
           <Card key={model.title} className="p-6">
             <div className="flex items-center gap-4 mb-4">
