@@ -92,7 +92,7 @@ export const NetworkMap = ({
   return (
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
-        center={[20, 0]}
+        center={[20, 0] as L.LatLngTuple}
         zoom={2}
         style={{ height: "100%", width: "100%" }}
         ref={setMap}
@@ -114,8 +114,8 @@ export const NetworkMap = ({
             <Polyline
               key={route.id}
               positions={[
-                [fromNode.latitude, fromNode.longitude],
-                [toNode.latitude, toNode.longitude],
+                [fromNode.latitude, fromNode.longitude] as L.LatLngTuple,
+                [toNode.latitude, toNode.longitude] as L.LatLngTuple,
               ]}
               pathOptions={{
                 color: isOptimized ? "#22c55e" : "#64748b",
@@ -130,7 +130,7 @@ export const NetworkMap = ({
         {nodes.map((node) => (
           <Marker
             key={node.id}
-            position={[node.latitude, node.longitude]}
+            position={[node.latitude, node.longitude] as L.LatLngTuple}
             icon={getNodeIcon(node.type)}
             eventHandlers={{
               click: () => onNodeClick?.(node),
@@ -153,4 +153,3 @@ export const NetworkMap = ({
     </div>
   );
 };
-
