@@ -92,7 +92,7 @@ export const NetworkMap = ({
   return (
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
-        defaultCenter={[20, 0] as L.LatLngExpression}
+        center={[20, 0]}
         zoom={2}
         style={{ height: "100%", width: "100%" }}
         ref={setMap}
@@ -100,7 +100,7 @@ export const NetworkMap = ({
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attributionUrl='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {/* Render routes */}
@@ -114,8 +114,8 @@ export const NetworkMap = ({
             <Polyline
               key={route.id}
               positions={[
-                [fromNode.latitude, fromNode.longitude] as L.LatLngExpression,
-                [toNode.latitude, toNode.longitude] as L.LatLngExpression,
+                [fromNode.latitude, fromNode.longitude],
+                [toNode.latitude, toNode.longitude],
               ]}
               pathOptions={{
                 color: isOptimized ? "#22c55e" : "#64748b",
@@ -130,7 +130,8 @@ export const NetworkMap = ({
         {nodes.map((node) => (
           <Marker
             key={node.id}
-            position={[node.latitude, node.longitude] as L.LatLngExpression}
+            position={[node.latitude, node.longitude]}
+            icon={getNodeIcon(node.type)}
             eventHandlers={{
               click: () => onNodeClick?.(node),
             }}
@@ -152,3 +153,4 @@ export const NetworkMap = ({
     </div>
   );
 };
+
