@@ -122,7 +122,6 @@ export const NetworkMap = ({
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        zoom={2}
         whenCreated={onMapReady}
       >
         {/* Add map event handler component */}
@@ -130,7 +129,6 @@ export const NetworkMap = ({
         
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {/* Render routes */}
@@ -163,6 +161,7 @@ export const NetworkMap = ({
             <Marker
               key={node.id}
               position={[node.latitude, node.longitude]}
+              icon={icon}
               eventHandlers={{
                 click: () => onNodeClick && onNodeClick(node),
               }}
