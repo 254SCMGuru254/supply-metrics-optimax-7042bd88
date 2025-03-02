@@ -117,7 +117,7 @@ export const NetworkMap = ({
         center={[20, 0]}
         zoom={2}
         style={{ height: "100%", width: "100%" }}
-        whenReady={(e) => setMap(e.target)}
+        whenCreated={setMap}
       >
         {/* Add map event handler component */}
         {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
