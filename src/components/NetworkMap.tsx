@@ -71,6 +71,19 @@ const MapEventHandler = ({ onMapClick }: { onMapClick?: (lat: number, lng: numbe
   return null;
 };
 
+// MapController component to handle initialization and reference
+const MapController = ({ onMapReady }: { onMapReady: (map: L.Map) => void }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (map) {
+      onMapReady(map);
+    }
+  }, [map, onMapReady]);
+  
+  return null;
+};
+
 export const NetworkMap = ({
   nodes,
   routes,
@@ -105,7 +118,7 @@ export const NetworkMap = ({
     }
   }, [nodes, routes]);
 
-  const getNodeIcon = (type: Node["type"]): L.Icon => {
+  const getNodeIcon = (type: Node["type"]) => {
     switch (type) {
       case "warehouse":
         return warehouseIcon;
@@ -118,17 +131,26 @@ export const NetworkMap = ({
     }
   };
 
+  // Set default center if no nodes exist
+  const defaultCenter: [number, number] = [40, -95]; // Center of US
+  const defaultZoom = 4;
+
   return (
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        whenCreated={onMapReady}
+        center={nodes.length ? [nodes[0].latitude, nodes[0].longitude] : defaultCenter}
+        zoom={defaultZoom}
       >
+        {/* Add MapController for map reference */}
+        <MapController onMapReady={onMapReady} />
+        
         {/* Add map event handler component */}
         {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
         
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
         />
         
         {/* Render routes */}
@@ -155,31 +177,27 @@ export const NetworkMap = ({
         })}
 
         {/* Render nodes */}
-        {nodes.map((node) => {
-          const icon = getNodeIcon(node.type);
-          return (
-            <Marker
-              key={node.id}
-              position={[node.latitude, node.longitude]}
-              icon={icon}
-              eventHandlers={{
-                click: () => onNodeClick && onNodeClick(node),
-              }}
-            >
-              <Popup>
-                <div className="p-2">
-                  <h3 className="font-semibold">{node.name}</h3>
-                  <p className="text-sm text-muted-foreground">Type: {node.type}</p>
-                  {node.capacity && (
-                    <p className="text-sm text-muted-foreground">
-                      Capacity: {node.capacity.toLocaleString()}
-                    </p>
-                  )}
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
+        {nodes.map((node) => (
+          <Marker
+            key={node.id}
+            position={[node.latitude, node.longitude]}
+            eventHandlers={{
+              click: () => onNodeClick && onNodeClick(node),
+            }}
+          >
+            <Popup>
+              <div className="p-2">
+                <h3 className="font-semibold">{node.name}</h3>
+                <p className="text-sm text-muted-foreground">Type: {node.type}</p>
+                {node.capacity && (
+                  <p className="text-sm text-muted-foreground">
+                    Capacity: {node.capacity.toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
     </div>
   );
