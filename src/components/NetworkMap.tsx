@@ -96,9 +96,11 @@ export const NetworkMap = ({
         zoom={2}
         style={{ height: "100%", width: "100%" }}
         ref={setMap}
-        whenReady={(mapInstance) => {
-          // Setup click handler for the map
-          mapInstance.target.on('click', handleMapClick);
+        whenReady={() => {
+          // Accessing map via the useState setter is safer
+          if (map) {
+            map.on('click', handleMapClick);
+          }
         }}
       >
         <TileLayer
@@ -134,7 +136,6 @@ export const NetworkMap = ({
           <Marker
             key={node.id}
             position={[node.latitude, node.longitude]}
-            icon={getNodeIcon(node.type)}
             eventHandlers={{
               click: () => onNodeClick?.(node),
             }}
