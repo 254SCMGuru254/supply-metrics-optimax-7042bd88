@@ -92,18 +92,18 @@ export const NetworkMap = ({
   return (
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
-        defaultCenter={[20, 0]}
+        center={[20, 0]}
         zoom={2}
         style={{ height: "100%", width: "100%" }}
         ref={setMap}
-        whenCreated={(mapInstance) => {
+        whenReady={(mapInstance) => {
           // Setup click handler for the map
-          mapInstance.on('click', handleMapClick);
+          mapInstance.target.on('click', handleMapClick);
         }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {/* Render routes */}
@@ -134,9 +134,7 @@ export const NetworkMap = ({
           <Marker
             key={node.id}
             position={[node.latitude, node.longitude]}
-            iconOptions={{
-              icon: getNodeIcon(node.type)
-            }}
+            icon={getNodeIcon(node.type)}
             eventHandlers={{
               click: () => onNodeClick?.(node),
             }}
