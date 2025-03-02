@@ -114,10 +114,10 @@ export const NetworkMap = ({
   return (
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
-        center={[20, 0] as [number, number]}
+        center={[20, 0]}
         zoom={2}
         style={{ height: "100%", width: "100%" }}
-        ref={setMap}
+        whenReady={(e) => setMap(e.target)}
       >
         {/* Add map event handler component */}
         {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
@@ -155,7 +155,6 @@ export const NetworkMap = ({
           <Marker
             key={node.id}
             position={[node.latitude, node.longitude]}
-            icon={getNodeIcon(node.type)}
             eventHandlers={{
               click: () => onNodeClick?.(node),
             }}
