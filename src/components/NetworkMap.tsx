@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -80,6 +80,13 @@ export const NetworkMap = ({
 }: NetworkMapProps) => {
   const { toast } = useToast();
   const [map, setMap] = useState<L.Map | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+
+  // Function to set the map reference
+  const onMapReady = (map: L.Map) => {
+    setMap(map);
+    mapRef.current = map;
+  };
 
   useEffect(() => {
     if (!map || nodes.length === 0) return;
@@ -114,10 +121,9 @@ export const NetworkMap = ({
   return (
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
-        center={[20, 0]}
-        zoom={2}
         style={{ height: "100%", width: "100%" }}
-        whenCreated={setMap}
+        zoom={2}
+        whenCreated={onMapReady}
       >
         {/* Add map event handler component */}
         {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
@@ -151,27 +157,30 @@ export const NetworkMap = ({
         })}
 
         {/* Render nodes */}
-        {nodes.map((node) => (
-          <Marker
-            key={node.id}
-            position={[node.latitude, node.longitude]}
-            eventHandlers={{
-              click: () => onNodeClick?.(node),
-            }}
-          >
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-semibold">{node.name}</h3>
-                <p className="text-sm text-muted-foreground">Type: {node.type}</p>
-                {node.capacity && (
-                  <p className="text-sm text-muted-foreground">
-                    Capacity: {node.capacity.toLocaleString()}
-                  </p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {nodes.map((node) => {
+          const icon = getNodeIcon(node.type);
+          return (
+            <Marker
+              key={node.id}
+              position={[node.latitude, node.longitude]}
+              eventHandlers={{
+                click: () => onNodeClick && onNodeClick(node),
+              }}
+            >
+              <Popup>
+                <div className="p-2">
+                  <h3 className="font-semibold">{node.name}</h3>
+                  <p className="text-sm text-muted-foreground">Type: {node.type}</p>
+                  {node.capacity && (
+                    <p className="text-sm text-muted-foreground">
+                      Capacity: {node.capacity.toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
