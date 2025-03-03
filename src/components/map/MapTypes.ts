@@ -15,6 +15,8 @@ export type Route = {
   from: string;
   to: string;
   volume: number;
+  cost?: number; // Added cost property for optimization
+  transitTime?: number; // Added transit time for simulation
   isOptimized?: boolean;
 };
 
