@@ -7,10 +7,97 @@ import { useToast } from "@/components/ui/use-toast";
 import { HelpSystem } from "@/components/HelpSystem";
 import { ExportPDF } from "@/components/ExportPDF";
 
+interface SimulationResults {
+  serviceLevel: number;
+  inventoryTurns: number;
+  leadTime: number;
+  totalCost: number;
+}
+
+// Utility functions for simulation
+const createInitialRoutes = (nodes: Node[]): Route[] => {
+  const routes: Route[] = [];
+  
+  // Create routes between nodes
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      routes.push({
+        id: crypto.randomUUID(),
+        from: nodes[i].id,
+        to: nodes[j].id,
+        volume: Math.floor(Math.random() * 500) + 100,
+        transitTime: Math.floor(Math.random() * 6) + 1, // 1-7 days transit time
+      });
+    }
+  }
+  
+  return routes;
+};
+
+// Simulate supply chain performance
+const runSupplyChainSimulation = (nodes: Node[], routes: Route[]): [Route[], SimulationResults] => {
+  // Clone routes to avoid mutating the originals
+  const simulatedRoutes = [...routes];
+  
+  // Calculate service level based on network connectivity and capacity
+  const connectivityFactor = Math.min(1, routes.length / Math.max(1, nodes.length * (nodes.length - 1) / 2));
+  const baseServiceLevel = 0.75 + (0.2 * connectivityFactor);
+  
+  // Add random variability to service level
+  const serviceLevel = Math.min(0.995, baseServiceLevel + (Math.random() * 0.05));
+  
+  // Calculate inventory turns based on node count and transit times
+  const averageTransitTime = routes.reduce((sum, route) => sum + (route.transitTime || 3), 0) / Math.max(1, routes.length);
+  const inventoryTurns = 12 * (1 / (averageTransitTime / 30 + 0.25));
+  
+  // Calculate lead time as weighted average of transit times
+  const totalVolume = routes.reduce((sum, route) => sum + (route.volume || 0), 0);
+  const weightedLeadTime = routes.reduce((sum, route) => {
+    return sum + (route.transitTime || 3) * (route.volume || 0);
+  }, 0);
+  const avgLeadTime = totalVolume > 0 ? weightedLeadTime / totalVolume : 3;
+  
+  // Calculate total cost based on volume and distance
+  let totalCost = 0;
+  
+  // Simulate flow for each route
+  simulatedRoutes.forEach(route => {
+    const fromNode = nodes.find(n => n.id === route.from);
+    const toNode = nodes.find(n => n.id === route.to);
+    
+    if (fromNode && toNode) {
+      // Calculate distance between nodes
+      const dx = fromNode.latitude - toNode.latitude;
+      const dy = fromNode.longitude - toNode.longitude;
+      const distance = Math.sqrt(dx * dx + dy * dy) * 111; // Rough km conversion
+      
+      // Calculate cost based on distance and volume
+      const routeCost = Math.round(distance * (route.volume || 0) * 0.1);
+      totalCost += routeCost;
+      
+      // Update route with simulation results
+      route.isOptimized = Math.random() > 0.3; // Some routes are optimized
+      route.cost = routeCost;
+    }
+  });
+  
+  // Return simulated routes and calculated metrics
+  return [
+    simulatedRoutes, 
+    {
+      serviceLevel: serviceLevel * 100, // Convert to percentage
+      inventoryTurns: Math.round(inventoryTurns * 10) / 10,
+      leadTime: Math.round(avgLeadTime * 10) / 10,
+      totalCost: Math.round(totalCost)
+    }
+  ];
+};
+
 const Simulation = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [isSimulated, setIsSimulated] = useState(false);
+  const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
   
@@ -43,18 +130,12 @@ const Simulation = () => {
       capacity: 1000,
     };
 
-    setNodes([...nodes, newNode]);
+    const updatedNodes = [...nodes, newNode];
+    setNodes(updatedNodes);
     
     // Generate routes between the new node and existing nodes
     if (nodes.length > 0) {
-      const newRoutes = nodes.map(existingNode => ({
-        id: crypto.randomUUID(),
-        from: newNode.id,
-        to: existingNode.id,
-        volume: Math.floor(Math.random() * 500) + 100,
-      }));
-      
-      setRoutes([...routes, ...newRoutes]);
+      setRoutes(createInitialRoutes(updatedNodes));
     }
     
     toast({
@@ -71,16 +152,22 @@ const Simulation = () => {
   };
 
   const handleSimulate = () => {
-    setIsSimulated(true);
+    if (nodes.length < 2) {
+      toast({
+        title: "Not Enough Nodes",
+        description: "Add at least two nodes to run a simulation",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    // Run supply chain simulation algorithm (simplified version)
-    const simulatedRoutes = routes.map(route => ({
-      ...route,
-      isOptimized: Math.random() > 0.3, // Randomly optimize some routes
-      volume: route.volume * (Math.random() * 0.5 + 0.75), // Adjust volumes based on simulation
-    }));
+    // Run the simulation
+    const [simulatedRoutes, results] = runSupplyChainSimulation(nodes, routes);
     
+    // Update state
     setRoutes(simulatedRoutes);
+    setIsSimulated(true);
+    setSimulationResults(results);
     
     toast({
       title: "Simulation Complete",
@@ -128,23 +215,23 @@ const Simulation = () => {
               <p className="text-sm text-muted-foreground">Total Routes</p>
               <p className="text-2xl font-semibold">{routes.length}</p>
             </div>
-            {isSimulated && (
+            {isSimulated && simulationResults && (
               <>
                 <div>
                   <p className="text-sm text-muted-foreground">Service Level</p>
-                  <p className="text-2xl font-semibold text-primary">95%</p>
+                  <p className="text-2xl font-semibold text-primary">{simulationResults.serviceLevel.toFixed(1)}%</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Inventory Turns</p>
-                  <p className="text-2xl font-semibold text-primary">12</p>
+                  <p className="text-2xl font-semibold text-primary">{simulationResults.inventoryTurns}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Lead Time (Avg)</p>
-                  <p className="text-2xl font-semibold text-primary">3.2 days</p>
+                  <p className="text-2xl font-semibold text-primary">{simulationResults.leadTime} days</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Cost</p>
-                  <p className="text-2xl font-semibold text-primary">$28,450</p>
+                  <p className="text-2xl font-semibold text-primary">${simulationResults.totalCost.toLocaleString()}</p>
                 </div>
               </>
             )}

@@ -1,6 +1,6 @@
 
-import { useState, useRef } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { useState, useRef, useEffect } from "react";
+import { MapContainer, TileLayer, AttributionControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useToast } from "@/components/ui/use-toast";
@@ -30,15 +30,14 @@ export const NetworkMap = ({
   };
 
   // Fit bounds to nodes when they change
-  // Set bounds of map to fit all nodes
-  const fitBoundsToNodes = () => {
-    if (!map || nodes.length === 0) return;
-
-    const bounds = L.latLngBounds(nodes.map(node => [node.latitude, node.longitude]));
-    if (bounds.isValid()) {
-      map.fitBounds(bounds);
+  useEffect(() => {
+    if (map && nodes.length > 0) {
+      const bounds = L.latLngBounds(nodes.map(node => [node.latitude, node.longitude]));
+      if (bounds.isValid()) {
+        map.fitBounds(bounds);
+      }
     }
-  };
+  }, [map, nodes]);
 
   // Set default position for the map
   const defaultPosition: [number, number] = [40, -95]; // Center of US
@@ -53,9 +52,9 @@ export const NetworkMap = ({
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        // Update these props to match react-leaflet v5 API
-        defaultCenter={initialPosition}
-        defaultZoom={defaultZoom}
+        center={initialPosition}
+        zoom={defaultZoom}
+        attributionControl={false}
       >
         {/* Add MapController for map reference */}
         <MapController onMapReady={onMapReady} />
@@ -64,13 +63,11 @@ export const NetworkMap = ({
         {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
         
         <TileLayer
-          // Update this to match react-leaflet v5 API
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          // Pass attribution through the children prop as supported in v5
-          children={<div className="leaflet-attribution">
-            &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors
-          </div>}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
+        
+        <AttributionControl position="bottomright" />
         
         {/* Render routes */}
         {routes.map((route) => {
