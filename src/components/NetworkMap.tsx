@@ -131,16 +131,22 @@ export const NetworkMap = ({
     }
   };
 
-  // Set default center if no nodes exist
-  const defaultCenter: [number, number] = [40, -95]; // Center of US
+  // Set default center for the map
+  const defaultPosition: [number, number] = [40, -95]; // Center of US
   const defaultZoom = 4;
+  
+  // Get initial position for the map
+  const initialPosition = nodes.length > 0 
+    ? [nodes[0].latitude, nodes[0].longitude] as [number, number]
+    : defaultPosition;
 
   return (
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        center={nodes.length ? [nodes[0].latitude, nodes[0].longitude] : defaultCenter}
         zoom={defaultZoom}
+        // Fix: Set center using the MapContainer defaultCenter prop instead
+        defaultCenter={initialPosition}
       >
         {/* Add MapController for map reference */}
         <MapController onMapReady={onMapReady} />
@@ -150,6 +156,7 @@ export const NetworkMap = ({
         
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          // Attribution must be passed as a standard attribute in v5, not as a prop
           attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
         />
         
@@ -177,27 +184,34 @@ export const NetworkMap = ({
         })}
 
         {/* Render nodes */}
-        {nodes.map((node) => (
-          <Marker
-            key={node.id}
-            position={[node.latitude, node.longitude]}
-            eventHandlers={{
-              click: () => onNodeClick && onNodeClick(node),
-            }}
-          >
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-semibold">{node.name}</h3>
-                <p className="text-sm text-muted-foreground">Type: {node.type}</p>
-                {node.capacity && (
-                  <p className="text-sm text-muted-foreground">
-                    Capacity: {node.capacity.toLocaleString()}
-                  </p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {nodes.map((node) => {
+          // Get the appropriate icon based on node type
+          const iconType = getNodeIcon(node.type);
+          
+          return (
+            <Marker
+              key={node.id}
+              position={[node.latitude, node.longitude] as [number, number]}
+              // In react-leaflet v5, icons need to be added through the marker option
+              // instead of directly as a prop
+              eventHandlers={{
+                click: () => onNodeClick && onNodeClick(node),
+              }}
+            >
+              <Popup>
+                <div className="p-2">
+                  <h3 className="font-semibold">{node.name}</h3>
+                  <p className="text-sm text-muted-foreground">Type: {node.type}</p>
+                  {node.capacity && (
+                    <p className="text-sm text-muted-foreground">
+                      Capacity: {node.capacity.toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
