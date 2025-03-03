@@ -9,7 +9,6 @@ import { MapController } from "./map/MapController";
 import { MapEventHandler } from "./map/MapEventHandler";
 import { NodeMarker } from "./map/NodeMarker";
 import { RoutePolyline } from "./map/RoutePolyline";
-import { getNodeIcon } from "./map/MapIcons";
 
 export type { Node, Route };
 
@@ -54,7 +53,7 @@ export const NetworkMap = ({
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        defaultZoom={defaultZoom}
+        zoom={defaultZoom}
         center={initialPosition}
       >
         {/* Add MapController for map reference */}
@@ -65,7 +64,7 @@ export const NetworkMap = ({
         
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {/* Render routes */}

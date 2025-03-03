@@ -6,6 +6,8 @@ export type Node = {
   latitude: number;
   longitude: number;
   capacity?: number;
+  weight?: number; // Added weight property for CoG calculations
+  isOptimal?: boolean; // To mark a node as optimal from CoG calculation
 };
 
 export type Route = {
