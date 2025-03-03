@@ -53,8 +53,9 @@ export const NetworkMap = ({
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        zoom={defaultZoom}
-        center={initialPosition}
+        // Update these props to match react-leaflet v5 API
+        defaultCenter={initialPosition}
+        defaultZoom={defaultZoom}
       >
         {/* Add MapController for map reference */}
         <MapController onMapReady={onMapReady} />
@@ -63,8 +64,12 @@ export const NetworkMap = ({
         {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
         
         <TileLayer
+          // Update this to match react-leaflet v5 API
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          // Pass attribution through the children prop as supported in v5
+          children={<div className="leaflet-attribution">
+            &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors
+          </div>}
         />
         
         {/* Render routes */}
