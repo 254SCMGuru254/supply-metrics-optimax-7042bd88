@@ -6,6 +6,7 @@ import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
 
 // Simulated annealing parameters
 interface SimulatedAnnealingParams {
@@ -130,6 +131,29 @@ const Heuristic = () => {
   const [coolingRate, setCoolingRate] = useState<number>(0.95);
   const { toast } = useToast();
 
+  const walkthroughSteps: WalkthroughStep[] = [
+    {
+      title: "Create Network Structure",
+      description: "Click on the map to add facility locations that will form your supply chain network. Each node represents a warehouse or distribution center."
+    },
+    {
+      title: "Configure Algorithm Parameters",
+      description: "Adjust the simulated annealing parameters: iterations control how long the algorithm runs, temperature affects the initial probability of accepting worse solutions, and cooling rate determines how quickly the algorithm narrows its search."
+    },
+    {
+      title: "Run Simulated Annealing Algorithm",
+      description: "Click 'Run Optimization' to apply the simulated annealing algorithm to find near-optimal flow patterns in your network. This is especially useful for complex networks with many constraints."
+    },
+    {
+      title: "Analyze Cost Reduction",
+      description: "Review the metrics panel to see the percentage of cost reduction achieved. The algorithm may not find the mathematically optimal solution, but it can find good solutions quickly for complex problems."
+    },
+    {
+      title: "Experiment With Parameters",
+      description: "Reset and try different parameter combinations to see how they affect the solution quality. Higher iterations and slower cooling rates may yield better results but take longer to compute."
+    }
+  ];
+
   const handleMapClick = (lat: number, lng: number) => {
     const newNode: Node = {
       id: crypto.randomUUID(),
@@ -225,6 +249,8 @@ const Heuristic = () => {
           </Button>
         </div>
       </div>
+
+      <ModelWalkthrough steps={walkthroughSteps} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-4">

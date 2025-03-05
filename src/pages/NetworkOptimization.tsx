@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/components/ui/use-toast";
+import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
 
 // Network flow optimization utility functions
 const createInitialNetwork = (nodes: Node[]): Route[] => {
@@ -65,6 +66,29 @@ const NetworkOptimization = () => {
   const [costReduction, setCostReduction] = useState<number | null>(null);
   const [flowEfficiency, setFlowEfficiency] = useState<number | null>(null);
   const { toast } = useToast();
+
+  const walktroughSteps: WalkthroughStep[] = [
+    {
+      title: "Add Network Nodes",
+      description: "Start by clicking on the map to add facility locations. Each click will add a new node at that location. Add at least two nodes to create a network."
+    },
+    {
+      title: "Create Connections",
+      description: "Once you've added multiple nodes, routes will automatically be created between them, forming a connected network with initial flow values."
+    },
+    {
+      title: "Run Optimization Algorithm",
+      description: "Click the 'Run Optimization' button to apply the network flow algorithm that minimizes transportation costs across your supply chain network."
+    },
+    {
+      title: "Analyze Results",
+      description: "After optimization, review the metrics panel to see the cost reduction and flow efficiency. Optimized routes will be highlighted on the map."
+    },
+    {
+      title: "Refine Your Network",
+      description: "Continue adding more nodes to create a more complex network, then re-run the optimization to see how the algorithm handles different scenarios."
+    }
+  ];
 
   const handleMapClick = (lat: number, lng: number) => {
     const newNode: Node = {
@@ -155,6 +179,8 @@ const NetworkOptimization = () => {
         </Button>
       </div>
 
+      <ModelWalkthrough steps={walktroughSteps} />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-4">
           <NetworkMap
@@ -192,16 +218,6 @@ const NetworkOptimization = () => {
           </div>
         </Card>
       </div>
-
-      <Card className="p-4">
-        <h2 className="text-xl font-semibold mb-4">How to Use</h2>
-        <div className="space-y-2">
-          <p>1. Click on the map to add facility locations</p>
-          <p>2. Add at least two nodes to enable optimization</p>
-          <p>3. Click "Run Optimization" to calculate optimal network flows</p>
-          <p>4. View the results in the metrics panel</p>
-        </div>
-      </Card>
     </div>
   );
 };

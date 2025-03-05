@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/components/ui/use-toast";
+import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
 
 // Utility function to calculate distance between two points (haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -52,6 +53,29 @@ const CenterOfGravity = () => {
   const [totalWeight, setTotalWeight] = useState<number>(0);
   const [calculationType, setCalculationType] = useState<'euclidean' | 'haversine'>('haversine');
   const { toast } = useToast();
+
+  const walkthroughSteps: WalkthroughStep[] = [
+    {
+      title: "Add Demand Points",
+      description: "Click on the map to add demand points. Each point represents a customer location with a demand weight."
+    },
+    {
+      title: "Adjust Demand Weights",
+      description: "Use the demand weights panel to adjust the weight of each point. Higher weights represent locations with greater demand or importance."
+    },
+    {
+      title: "Select Calculation Method",
+      description: "Choose between Euclidean (straight-line) or Haversine (accounts for Earth's curvature) distance calculation methods."
+    },
+    {
+      title: "Run the Optimization",
+      description: "Click 'Run Optimization' to calculate the center of gravity - the optimal facility location that minimizes the weighted distance to all demand points."
+    },
+    {
+      title: "Analyze Results",
+      description: "Review the metrics panel to see the distance reduction and optimal location coordinates. The map will show the optimal facility location and routes."
+    }
+  ];
 
   // Update total weight whenever nodes change
   useEffect(() => {
@@ -221,6 +245,8 @@ const CenterOfGravity = () => {
           </Button>
         </div>
       </div>
+
+      <ModelWalkthrough steps={walkthroughSteps} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-4">

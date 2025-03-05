@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
 
 // Types for territory division
 type TerritoryDivisionMethod = 'voronoi' | 'kmeans' | 'hierarchical';
@@ -216,6 +217,29 @@ const Isohedron = () => {
   // All nodes (facilities + demand points)
   const allNodes = [...facilityNodes, ...demandNodes];
 
+  const walkthroughSteps: WalkthroughStep[] = [
+    {
+      title: "Add Territory Centers",
+      description: "Click on the map to add facility locations. Each location will be the center of a territory or service area."
+    },
+    {
+      title: "Generate Demand Points",
+      description: "Use the 'Generate Demand Points' button to create random demand points around your facilities, or add more facilities to define territory boundaries."
+    },
+    {
+      title: "Select Division Method",
+      description: "Choose a territory division method: Voronoi tessellation creates territories based on proximity, K-means clustering groups similar points, and Hierarchical clustering builds a nested structure."
+    },
+    {
+      title: "Set Balance Preferences",
+      description: "Adjust balance factors to prioritize equal territory size, balanced demand distribution, or minimized distances. The balance weight slider controls how strongly these factors influence the division."
+    },
+    {
+      title: "Run Territory Division",
+      description: "Click 'Run Territory Division' to assign each demand point to a territory. Review the balance score and territory metrics to evaluate how well the territories are balanced."
+    }
+  ];
+
   const handleMapClick = (lat: number, lng: number) => {
     if (isOptimized) return;
     
@@ -352,6 +376,8 @@ const Isohedron = () => {
           )}
         </div>
       </div>
+
+      <ModelWalkthrough steps={walkthroughSteps} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-4">

@@ -6,6 +6,7 @@ import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/components/ui/use-toast";
 import { HelpSystem } from "@/components/HelpSystem";
 import { ExportPDF } from "@/components/ExportPDF";
+import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
 
 interface SimulationResults {
   serviceLevel: number;
@@ -120,6 +121,29 @@ const Simulation = () => {
     }
   ];
 
+  const walkthroughSteps: WalkthroughStep[] = [
+    {
+      title: "Build Your Supply Chain Network",
+      description: "Click on the map to add facility locations. Each node represents a warehouse or distribution center in your supply chain."
+    },
+    {
+      title: "Auto-Generate Routes",
+      description: "Routes between facilities are automatically created. These represent the transportation lanes in your supply chain network."
+    },
+    {
+      title: "Run Discrete Event Simulation",
+      description: "Click 'Run Simulation' to analyze network performance. This starts a time-based simulation that models inventory flows through your network."
+    },
+    {
+      title: "Analyze Performance Metrics",
+      description: "Review key performance indicators including service level, inventory turns, lead time, and total cost to evaluate your supply chain performance."
+    },
+    {
+      title: "Export Simulation Results",
+      description: "Use the 'Export as PDF' button to save your simulation results for sharing or documentation. The report will include the network visualization and all metrics."
+    }
+  ];
+
   const handleMapClick = (lat: number, lng: number) => {
     const newNode: Node = {
       id: crypto.randomUUID(),
@@ -192,6 +216,8 @@ const Simulation = () => {
           </Button>
         </div>
       </div>
+
+      <ModelWalkthrough steps={walkthroughSteps} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-4">
