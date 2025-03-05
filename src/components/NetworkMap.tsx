@@ -1,102 +1,105 @@
 
-import { useState, useRef, useEffect } from "react";
-import { MapContainer as LeafletMapContainer, TileLayer, AttributionControl } from "react-leaflet";
+import React from "react";
+import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import { useToast } from "@/components/ui/use-toast";
-import { Node, Route, NetworkMapProps } from "./map/MapTypes";
-import { MapController } from "./map/MapController";
-import { MapEventHandler } from "./map/MapEventHandler";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import "leaflet-defaulticon-compatibility";
 import { NodeMarker } from "./map/NodeMarker";
 import { RoutePolyline } from "./map/RoutePolyline";
+import { MapController } from "./map/MapController";
+import { MapEventHandler } from "./map/MapEventHandler";
+import { Node, Route } from "./map/MapTypes";
 
-// Create a wrapper for MapContainer to handle the TypeScript issues
-const MapContainer = LeafletMapContainer as any;
+export { type Node, type Route };
 
-export type { Node, Route };
+export interface NetworkMapProps {
+  nodes: Node[];
+  routes: Route[];
+  onNodeClick?: (node: Node) => void;
+  onMapClick?: (lat: number, lng: number) => void;
+  isOptimized?: boolean;
+}
 
-export const NetworkMap = ({
+export const NetworkMap: React.FC<NetworkMapProps> = ({
   nodes,
   routes,
   onNodeClick,
   onMapClick,
   isOptimized = false,
-}: NetworkMapProps) => {
-  const { toast } = useToast();
-  const [map, setMap] = useState<L.Map | null>(null);
-  const mapRef = useRef<L.Map | null>(null);
+}) => {
+  const mapRef = React.useRef<L.Map | null>(null);
 
-  // Function to set the map reference
-  const onMapReady = (map: L.Map) => {
-    setMap(map);
+  const handleMapReady = (map: L.Map) => {
     mapRef.current = map;
-  };
-
-  // Fit bounds to nodes when they change
-  useEffect(() => {
-    if (map && nodes.length > 0) {
-      const bounds = L.latLngBounds(nodes.map(node => [node.latitude, node.longitude]));
-      if (bounds.isValid()) {
-        map.fitBounds(bounds);
+    
+    // Default view if no nodes
+    if (nodes.length === 0) {
+      map.setView([39.8283, -98.5795], 4); // Center on US
+    } else {
+      // Calculate bounds from nodes
+      const latitudes = nodes.map(node => node.latitude);
+      const longitudes = nodes.map(node => node.longitude);
+      
+      const minLat = Math.min(...latitudes);
+      const maxLat = Math.max(...latitudes);
+      const minLng = Math.min(...longitudes);
+      const maxLng = Math.max(...longitudes);
+      
+      // Add padding
+      const padding = 0.5; // degrees
+      
+      if (minLat !== maxLat || minLng !== maxLng) {
+        map.fitBounds([
+          [minLat - padding, minLng - padding],
+          [maxLat + padding, maxLng + padding]
+        ]);
+      } else {
+        // Single point
+        map.setView([minLat, minLng], 10);
       }
     }
-  }, [map, nodes]);
-
-  // Set default position for the map
-  const defaultPosition: [number, number] = [40, -95]; // Center of US
-  const defaultZoom = 4;
-  
-  // Get initial position for the map
-  const initialPosition = nodes.length > 0 
-    ? [nodes[0].latitude, nodes[0].longitude] as [number, number]
-    : defaultPosition;
+  };
 
   return (
-    <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
+    <div className="w-full h-[600px] rounded-md overflow-hidden">
       <MapContainer
+        className="h-full w-full"
+        center={[39.8283, -98.5795]}
+        zoom={4}
         style={{ height: "100%", width: "100%" }}
-        center={initialPosition}
-        zoom={defaultZoom}
-        attributionControl={false}
       >
-        {/* Add MapController for map reference */}
-        <MapController onMapReady={onMapReady} />
-        
-        {/* Add map event handler component */}
-        {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
-        
         <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <MapController onMapReady={handleMapReady} />
+        {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
         
-        <AttributionControl position="bottomright" />
-        
-        {/* Render routes */}
-        {routes.map((route) => {
-          const fromNode = nodes.find((n) => n.id === route.from);
-          const toNode = nodes.find((n) => n.id === route.to);
-          
-          if (!fromNode || !toNode) return null;
-
-          return (
-            <RoutePolyline
-              key={route.id}
-              route={route}
-              fromNode={fromNode}
-              toNode={toNode}
-              isOptimized={isOptimized}
-            />
-          );
-        })}
-
-        {/* Render nodes */}
-        {nodes.map((node) => (
-          <NodeMarker
-            key={node.id}
-            node={node}
-            onNodeClick={onNodeClick}
+        {nodes.map(node => (
+          <NodeMarker 
+            key={node.id} 
+            node={node} 
+            onNodeClick={onNodeClick} 
           />
         ))}
+        
+        {routes.map(route => {
+          const fromNode = nodes.find(n => n.id === route.from);
+          const toNode = nodes.find(n => n.id === route.to);
+          
+          if (fromNode && toNode) {
+            return (
+              <RoutePolyline
+                key={route.id}
+                route={route}
+                fromNode={fromNode}
+                toNode={toNode}
+                isOptimized={isOptimized || !!route.isOptimized}
+              />
+            );
+          }
+          return null;
+        })}
       </MapContainer>
     </div>
   );
