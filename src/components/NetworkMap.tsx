@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MapContainer, TileLayer, AttributionControl } from "react-leaflet";
+import { MapContainer as LeafletMapContainer, TileLayer, AttributionControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,6 +9,9 @@ import { MapController } from "./map/MapController";
 import { MapEventHandler } from "./map/MapEventHandler";
 import { NodeMarker } from "./map/NodeMarker";
 import { RoutePolyline } from "./map/RoutePolyline";
+
+// Create a wrapper for MapContainer to handle the TypeScript issues
+const MapContainer = LeafletMapContainer as any;
 
 export type { Node, Route };
 
@@ -52,9 +55,9 @@ export const NetworkMap = ({
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        center={initialPosition as any}
-        zoom={defaultZoom as any}
-        attributionControl={false as any}
+        center={initialPosition}
+        zoom={defaultZoom}
+        attributionControl={false}
       >
         {/* Add MapController for map reference */}
         <MapController onMapReady={onMapReady} />
