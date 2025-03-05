@@ -1,6 +1,6 @@
 
 import React from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
@@ -9,6 +9,7 @@ import { RoutePolyline } from "./map/RoutePolyline";
 import { MapController } from "./map/MapController";
 import { MapEventHandler } from "./map/MapEventHandler";
 import { Node, Route } from "./map/MapTypes";
+import L from "leaflet";
 
 export { type Node, type Route };
 
@@ -64,13 +65,12 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
     <div className="w-full h-[600px] rounded-md overflow-hidden">
       <MapContainer
         className="h-full w-full"
-        center={[39.8283, -98.5795]}
         zoom={4}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         <MapController onMapReady={handleMapReady} />
         {onMapClick && <MapEventHandler onMapClick={onMapClick} />}
