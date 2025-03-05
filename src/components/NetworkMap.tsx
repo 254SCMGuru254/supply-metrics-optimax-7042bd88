@@ -52,9 +52,9 @@ export const NetworkMap = ({
     <div style={{ height: "600px", width: "100%" }} className="rounded-lg">
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        center={initialPosition}
-        zoom={defaultZoom}
-        attributionControl={false}
+        center={initialPosition as any}
+        zoom={defaultZoom as any}
+        attributionControl={false as any}
       >
         {/* Add MapController for map reference */}
         <MapController onMapReady={onMapReady} />
