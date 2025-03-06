@@ -62,7 +62,7 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
   };
 
   // Define initial center position for the map
-  const defaultCenter: [number, number] = [39.8283, -98.5795]; // USA center coordinates
+  const defaultCenter = [39.8283, -98.5795]; // USA center coordinates
 
   return (
     <div className="w-full h-[600px] rounded-md overflow-hidden">
