@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Frontend React application
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - NODE_ENV=development
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # FastAPI backend
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    environment:
+      - ENVIRONMENT=development
+      - PYTHONPATH=/app
+      - LOG_LEVEL=INFO
+      - DATA_RETENTION_HOURS=1
+    restart: unless-stopped
+
+  # Optional: Add PostgreSQL if you need a database
+  # db:
+  #   image: postgres:14-alpine
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=supplymetricsdb
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+
+# Volumes for persistent data (uncomment if using PostgreSQL)
+# volumes:
+#   postgres-data:

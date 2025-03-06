@@ -1,0 +1,35 @@
+# Use Node.js LTS as base image (slim version to reduce size)
+FROM node:18-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json* ./
+
+# Install dependencies
+RUN npm ci --production
+
+# Copy application files
+COPY ./public ./public
+COPY ./src ./src
+COPY ./index.html ./index.html
+COPY ./vite.config.ts ./vite.config.ts
+COPY ./tsconfig.json ./tsconfig.json
+COPY ./tailwind.config.js ./tailwind.config.js
+COPY ./postcss.config.js ./postcss.config.js
+
+# Set environment to production
+ENV NODE_ENV production
+
+# Build application
+RUN npm run build
+
+# Install serve for production static serving
+RUN npm install -g serve
+
+# Expose port
+EXPOSE 3000
+
+# Start application
+CMD ["serve", "-s", "dist", "-l", "3000"]

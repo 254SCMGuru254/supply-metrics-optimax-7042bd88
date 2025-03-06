@@ -10,10 +10,23 @@ Supply Metrics Optimax is a data-driven SaaS platform that helps businesses opti
 
 - **Facility Location Optimization**: Determine optimal facility locations based on demand, costs, and constraints
 - **Route Planning and Optimization**: Calculate efficient routes considering various transport modes and constraints
+- **Demand Forecasting**: Predict future demand patterns using time-series analysis
+- **Supply Chain Chatbot**: AI-powered assistant for supply chain inquiries using 100% free NLP models
+- **Data Auto-Deletion**: Automatic removal of inactive user data after 1 hour (free tier)
 - **Disruption Simulation**: Model and analyze the impact of supply chain disruptions
 - **Airport Integration**: Incorporate air transportation nodes into your supply chain network
 - **Supplier Diversity Analysis**: Optimize supplier selection for resilience and cost-effectiveness
 - **Resilience Metrics**: Measure and track the resilience of your supply chain network
+
+## 100% Free and Open-Source
+
+Supply Metrics Optimax is committed to providing completely free and open-source supply chain optimization tools:
+
+- **No Commercial Dependencies**: All optimization algorithms use free, open-source libraries
+- **Serverless Deployment**: Lightweight API design for minimal hosting costs
+- **Free NLP Implementation**: Local chatbot using NLTK without external API dependencies
+- **Data Auto-Deletion**: Automatically cleans up user data to reduce storage costs
+- **Containerized Deployment**: Easy deployment with Docker and Docker Compose
 
 ## Technology Stack
 
@@ -23,17 +36,22 @@ Supply Metrics Optimax is a data-driven SaaS platform that helps businesses opti
 - shadcn/ui component library
 - Tailwind CSS for styling
 - Recharts for data visualization
+- Leaflet for interactive maps
 
 ### Backend
-- Python optimization models using PuLP
-- Supabase for database, authentication, and serverless functions
+- Python 3.8+ with FastAPI
+- Google OR-Tools for routing optimization
+- PuLP for facility location optimization
+- NetworkX for graph algorithms
+- NLTK for natural language processing
+- Docker & Docker Compose for deployment
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
 - Python 3.8+
-- Supabase account
+- Docker (for containerized deployment)
 
 ### Installation
 
@@ -56,12 +74,7 @@ pip install -r requirements.txt
 4. Set up environment variables
 ```sh
 # Create a .env file in the root directory
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# For the Python backend
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_KEY=your_supabase_service_key
+VITE_API_URL=http://localhost:8000
 ```
 
 5. Start the development server
@@ -69,27 +82,41 @@ SUPABASE_SERVICE_KEY=your_supabase_service_key
 npm run dev
 ```
 
+### Using Docker (Recommended)
+
+For the easiest setup, use Docker Compose:
+
+```sh
+# Build and start all services
+docker-compose up -d
+
+# Access the application at http://localhost:3000
+# API is available at http://localhost:8000
+```
+
 ## Project Structure
 
 ```
 supply-metrics-optimax/
-├── backend/               # Python optimization models
+├── backend/               # Python backend application
+│   ├── api/               # FastAPI endpoints
+│   │   └── main.py        # Main API definition
 │   ├── models/            # Mathematical optimization algorithms
 │   │   ├── facility_location.py
 │   │   ├── routing.py
-│   │   └── ...
-│   └── supabase_connector.py  # Connector between Python models and Supabase
+│   │   ├── demand_forecasting.py
+│   │   └── chatbot.py     # NLP chatbot implementation
+│   └── services/          # Backend services
+│       └── data_cleaner.py # Data auto-deletion service
 ├── src/                   # Frontend React application
 │   ├── components/        # UI components
-│   │   ├── auth/          # Authentication components
-│   │   ├── disruption-simulation/
-│   │   ├── airport-integration/
-│   │   ├── resilience-metrics/
-│   │   └── ...
 │   ├── lib/               # Utility functions and types
 │   ├── pages/             # Main application pages
 │   └── ...
-├── supabase/              # Supabase configuration
+├── docker/                # Docker configuration files
+│   └── Dockerfile.frontend # Frontend container definition
+├── Dockerfile             # Backend container definition
+├── docker-compose.yml     # Multi-container deployment
 └── ...
 ```
 
@@ -104,12 +131,24 @@ Features:
 - Green facility location with environmental constraints
 
 ### Routing Optimizer
-Calculates optimal routes for product movement through the supply chain network.
+Finds optimal delivery routes using the Vehicle Routing Problem (VRP) solver from OR-Tools:
 
-Features:
-- Real-time route optimization
-- Multi-modal route planning
-- Vehicle routing with time window constraints
+- Multi-vehicle route planning
+- Haversine distance calculation for accurate Kenyan routing
+- Capacity constraints support
+- Time window constraints
+
+### Disruption Simulation
+Models and analyzes the impact of supply chain disruptions.
+
+### Airport Integration
+Incorporates air transportation nodes into your supply chain network.
+
+### Supplier Diversity Analysis
+Optimizes supplier selection for resilience and cost-effectiveness.
+
+### Resilience Metrics
+Measures and tracks the resilience of your supply chain network.
 
 ## Supabase Integration
 
