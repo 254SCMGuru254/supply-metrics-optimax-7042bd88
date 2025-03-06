@@ -65,7 +65,8 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
     <div className="w-full h-[600px] rounded-md overflow-hidden">
       <MapContainer
         className="h-full w-full"
-        zoom={4}
+        center={[39.8283, -98.5795]} // Default center (USA)
+        zoom={4} // Default zoom level
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
