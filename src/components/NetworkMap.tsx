@@ -1,4 +1,3 @@
-
 import React from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -62,10 +61,10 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
   };
 
   // Define initial center position for the map
-  const defaultCenter = [39.8283, -98.5795]; // USA center coordinates
+  const defaultCenter: [number, number] = [39.8283, -98.5795]; // USA center coordinates
 
   return (
-    <div className="w-full h-[600px] rounded-md overflow-hidden">
+    <div className="w-full h-[600px] rounded-md overflow-hidden border border-border">
       <MapContainer
         className="h-full w-full"
         center={defaultCenter}

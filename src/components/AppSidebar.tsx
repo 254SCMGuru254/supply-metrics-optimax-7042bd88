@@ -17,20 +17,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
-  { title: "Home", icon: Home, path: "/" },
+  { title: "Dashboard", icon: Home, path: "/dashboard" },
   { title: "Analytics Dashboard", icon: BarChart3, path: "/analytics" },
   { title: "Center of Gravity", icon: Warehouse, path: "/center-of-gravity" },
   { title: "Network Optimization", icon: Network, path: "/network-optimization" },
   { title: "Simulation", icon: Truck, path: "/simulation" },
   { title: "Heuristic Analysis", icon: BarChart3, path: "/heuristic" },
   { title: "Data Management", icon: Database, path: "/data-input" },
-  { title: "Settings", icon: Settings, path: "/settings" },
 ];
 
 export function AppSidebar() {
+  const location = useLocation();
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -44,7 +45,12 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link to={item.path} className="flex items-center gap-3">
+                    <Link 
+                      to={item.path} 
+                      className={`flex items-center gap-3 ${
+                        location.pathname === item.path ? "bg-accent text-accent-foreground" : ""
+                      }`}
+                    >
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </Link>
