@@ -61,12 +61,15 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
     }
   };
 
+  // Define initial center position for the map
+  const defaultCenter: [number, number] = [39.8283, -98.5795]; // USA center coordinates
+
   return (
     <div className="w-full h-[600px] rounded-md overflow-hidden">
       <MapContainer
         className="h-full w-full"
-        center={[39.8283, -98.5795]} // Default center (USA)
-        zoom={4} // Default zoom level
+        center={defaultCenter}
+        zoom={4}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
