@@ -1,125 +1,14 @@
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/components/ui/use-toast";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
 import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
-
-// Simulated annealing parameters
-interface SimulatedAnnealingParams {
-  initialTemperature: number;
-  coolingRate: number;
-  iterations: number;
-}
-
-// Utility functions for heuristic algorithm
-const createInitialRoutes = (nodes: Node[]): Route[] => {
-  const routes: Route[] = [];
-  
-  // Create a fully connected network
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      // Calculate distance
-      const dx = nodes[i].latitude - nodes[j].latitude;
-      const dy = nodes[i].longitude - nodes[j].longitude;
-      const distance = Math.sqrt(dx * dx + dy * dy) * 111; // Rough km conversion
-      
-      routes.push({
-        id: crypto.randomUUID(),
-        from: nodes[i].id,
-        to: nodes[j].id,
-        volume: Math.floor(Math.random() * 100) + 50,
-        cost: Math.round(distance * 10), // Cost based on distance
-      });
-    }
-  }
-  
-  return routes;
-};
-
-// Calculate total cost of a solution
-const calculateTotalCost = (routes: Route[]): number => {
-  return routes.reduce((sum, route) => {
-    return sum + ((route.volume || 0) * (route.cost || 0));
-  }, 0);
-};
-
-// Heuristic algorithm: Simulated Annealing
-const runSimulatedAnnealing = (
-  nodes: Node[], 
-  routes: Route[], 
-  params: SimulatedAnnealingParams
-): [Route[], number] => {
-  // Clone routes to avoid mutating the original
-  let currentSolution = routes.map(r => ({...r}));
-  let bestSolution = [...currentSolution];
-  
-  let currentCost = calculateTotalCost(currentSolution);
-  let bestCost = currentCost;
-  
-  let temperature = params.initialTemperature;
-  
-  // Iterations counter for progress tracking
-  let currentIteration = 0;
-  const totalIterations = params.iterations;
-  
-  // Run the simulated annealing algorithm
-  while (currentIteration < totalIterations) {
-    // Generate a neighbor solution by randomly modifying flows
-    const neighborSolution = currentSolution.map(route => {
-      // 30% chance to modify a route
-      if (Math.random() < 0.3) {
-        const currentVolume = route.volume || 0;
-        // Random adjustment between -30% and +30% of current volume
-        const adjustment = currentVolume * (Math.random() * 0.6 - 0.3);
-        const newVolume = Math.max(10, Math.round(currentVolume + adjustment));
-        
-        return {
-          ...route,
-          volume: newVolume,
-          isOptimized: true,
-        };
-      }
-      return {...route};
-    });
-    
-    // Calculate cost of neighbor solution
-    const neighborCost = calculateTotalCost(neighborSolution);
-    
-    // Determine if we should accept the neighbor solution
-    const costDifference = neighborCost - currentCost;
-    
-    if (
-      costDifference < 0 || // Better solution
-      Math.random() < Math.exp(-costDifference / temperature) // Accept worse solution with probability
-    ) {
-      currentSolution = neighborSolution;
-      currentCost = neighborCost;
-      
-      // Update best solution if current is better
-      if (currentCost < bestCost) {
-        bestSolution = [...currentSolution];
-        bestCost = currentCost;
-      }
-    }
-    
-    // Cool temperature
-    temperature *= params.coolingRate;
-    currentIteration++;
-  }
-  
-  // Calculate improvement percentage
-  const initialCost = calculateTotalCost(routes);
-  const improvementPercentage = ((initialCost - bestCost) / initialCost) * 100;
-  
-  // Set isOptimized flag for best solution routes
-  bestSolution = bestSolution.map(route => ({...route, isOptimized: true}));
-  
-  return [bestSolution, improvementPercentage];
-};
+import { HeuristicMetrics } from "@/components/heuristic/HeuristicMetrics";
+import { HeuristicParameters } from "@/components/heuristic/HeuristicParameters";
+import { HeuristicInstructions } from "@/components/heuristic/HeuristicInstructions";
+import { createInitialRoutes, runSimulatedAnnealing } from "@/components/heuristic/HeuristicUtils";
 
 const Heuristic = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -266,90 +155,31 @@ const Heuristic = () => {
         <div className="space-y-6">
           <Card className="p-4">
             <h2 className="text-xl font-semibold mb-4">Network Metrics</h2>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Nodes</p>
-                <p className="text-2xl font-semibold">{nodes.length}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Routes</p>
-                <p className="text-2xl font-semibold">{routes.length}</p>
-              </div>
-              {isOptimized && improvementPercentage !== null && (
-                <>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Cost Reduction</p>
-                    <p className="text-2xl font-semibold text-primary">{improvementPercentage.toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Algorithm</p>
-                    <p className="text-lg font-medium">Simulated Annealing</p>
-                  </div>
-                </>
-              )}
-            </div>
+            <HeuristicMetrics
+              nodes={nodes}
+              routes={routes}
+              isOptimized={isOptimized}
+              improvementPercentage={improvementPercentage}
+            />
           </Card>
 
           {!isOptimized && (
             <Card className="p-4">
               <h2 className="text-xl font-semibold mb-4">Algorithm Parameters</h2>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="iterations">Iterations: {iterations}</Label>
-                  </div>
-                  <Slider
-                    id="iterations"
-                    min={100}
-                    max={2000}
-                    step={100}
-                    value={[iterations]}
-                    onValueChange={(vals) => setIterations(vals[0])}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="temperature">Initial Temperature: {initialTemperature}</Label>
-                  </div>
-                  <Slider
-                    id="temperature"
-                    min={100}
-                    max={5000}
-                    step={100}
-                    value={[initialTemperature]}
-                    onValueChange={(vals) => setInitialTemperature(vals[0])}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="cooling-rate">Cooling Rate: {coolingRate.toFixed(2)}</Label>
-                  </div>
-                  <Slider
-                    id="cooling-rate"
-                    min={0.8}
-                    max={0.99}
-                    step={0.01}
-                    value={[coolingRate]}
-                    onValueChange={(vals) => setCoolingRate(vals[0])}
-                  />
-                </div>
-              </div>
+              <HeuristicParameters 
+                iterations={iterations}
+                initialTemperature={initialTemperature}
+                coolingRate={coolingRate}
+                onIterationsChange={setIterations}
+                onTemperatureChange={setInitialTemperature}
+                onCoolingRateChange={setCoolingRate}
+              />
             </Card>
           )}
         </div>
       </div>
 
-      <Card className="p-4">
-        <h2 className="text-xl font-semibold mb-4">How to Use</h2>
-        <div className="space-y-2">
-          <p>1. Click on the map to add facility locations</p>
-          <p>2. Adjust algorithm parameters if needed</p>
-          <p>3. Click "Run Optimization" to apply the simulated annealing algorithm</p>
-          <p>4. View the optimized routes and cost reduction in the metrics panel</p>
-        </div>
-      </Card>
+      <HeuristicInstructions />
     </div>
   );
 };

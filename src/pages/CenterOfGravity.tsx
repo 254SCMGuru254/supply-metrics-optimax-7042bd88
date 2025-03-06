@@ -2,47 +2,13 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/components/ui/use-toast";
 import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
-
-// Utility function to calculate distance between two points (haversine formula)
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return R * c; // Distance in km
-};
-
-const deg2rad = (deg: number): number => {
-  return deg * (Math.PI/180);
-};
-
-// Utility function to calculate the Center of Gravity
-const calculateCOG = (nodes: Node[]): [number, number] => {
-  let weightedSumLat = 0;
-  let weightedSumLng = 0;
-  let totalWeight = 0;
-
-  nodes.forEach(node => {
-    const weight = node.weight || 1;
-    weightedSumLat += node.latitude * weight;
-    weightedSumLng += node.longitude * weight;
-    totalWeight += weight;
-  });
-
-  return [
-    weightedSumLat / totalWeight,
-    weightedSumLng / totalWeight
-  ];
-};
+import { CogMetrics } from "@/components/cog/CogMetrics";
+import { CogDemandWeights } from "@/components/cog/CogDemandWeights";
+import { CogInstructions } from "@/components/cog/CogInstructions";
+import { calculateDistance, calculateCOG } from "@/components/cog/CogUtils";
 
 const CenterOfGravity = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -261,68 +227,25 @@ const CenterOfGravity = () => {
 
         <Card className="p-4">
           <h2 className="text-xl font-semibold mb-4">Network Metrics</h2>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Demand Points</p>
-              <p className="text-2xl font-semibold">{nodes.filter(n => n.type === "retail").length}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Demand Weight</p>
-              <p className="text-2xl font-semibold">{totalWeight}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Distance Calculation</p>
-              <p className="text-lg font-medium">{calculationType === 'haversine' ? 'Haversine (accounts for Earth curvature)' : 'Euclidean (straight-line)'}</p>
-            </div>
-            {isOptimized && optimalLocation && (
-              <>
-                <div>
-                  <p className="text-sm text-muted-foreground">Optimal Location</p>
-                  <p className="text-lg font-medium">[{optimalLocation.lat.toFixed(4)}, {optimalLocation.lng.toFixed(4)}]</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Distance Reduction</p>
-                  <p className="text-2xl font-semibold text-primary">{distanceReduction?.toFixed(1)}%</p>
-                </div>
-              </>
-            )}
-          </div>
+          <CogMetrics 
+            nodes={nodes}
+            totalWeight={totalWeight}
+            isOptimized={isOptimized}
+            optimalLocation={optimalLocation}
+            distanceReduction={distanceReduction}
+            calculationType={calculationType}
+          />
 
           {!isOptimized && nodes.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-3">Demand Weights</h3>
-              <div className="space-y-3 max-h-72 overflow-y-auto">
-                {nodes.map((node) => (
-                  <div key={node.id} className="flex gap-2 items-center">
-                    <div className="flex-1">
-                      <Label htmlFor={`weight-${node.id}`}>{node.name}</Label>
-                    </div>
-                    <Input
-                      id={`weight-${node.id}`}
-                      type="number"
-                      min="1"
-                      className="w-24"
-                      value={node.weight || 1}
-                      onChange={(e) => handleUpdateWeight(node.id, parseInt(e.target.value) || 1)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CogDemandWeights 
+              nodes={nodes}
+              onUpdateWeight={handleUpdateWeight}
+            />
           )}
         </Card>
       </div>
 
-      <Card className="p-4">
-        <h2 className="text-xl font-semibold mb-4">How to Use</h2>
-        <div className="space-y-2">
-          <p>1. Click on the map to add demand points</p>
-          <p>2. Adjust the weights to represent demand volumes</p>
-          <p>3. Toggle calculation method if needed (Euclidean vs. Haversine)</p>
-          <p>4. Click "Run Optimization" to calculate the center of gravity</p>
-          <p>5. View the results and metrics in the panel</p>
-        </div>
-      </Card>
+      <CogInstructions />
     </div>
   );
 };
