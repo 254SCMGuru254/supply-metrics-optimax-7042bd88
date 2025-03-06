@@ -10,6 +10,20 @@ import { MapEventHandler } from "./map/MapEventHandler";
 import { Node, Route } from "./map/MapTypes";
 import L from "leaflet";
 
+// Fix TypeScript errors by creating a module augmentation for react-leaflet
+declare module 'react-leaflet' {
+  export interface MapContainerProps {
+    zoom?: number;
+    center?: L.LatLngExpression;
+    className?: string;
+    style?: React.CSSProperties;
+  }
+  
+  export interface TileLayerProps {
+    attribution?: string;
+  }
+}
+
 export { type Node, type Route };
 
 export interface NetworkMapProps {

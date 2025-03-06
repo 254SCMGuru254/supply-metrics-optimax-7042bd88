@@ -1,69 +1,140 @@
-# Welcome to your Lovable project
+# Supply Metrics Optimax
 
-## Project info
+A comprehensive supply chain optimization platform tailored for the Kenyan logistics ecosystem.
 
-**URL**: https://lovable.dev/projects/3ccfdead-3576-4e25-9343-27ce86cb0e86
+## Overview
 
-## How can I edit this code?
+Supply Metrics Optimax is a data-driven SaaS platform that helps businesses optimize their supply chain operations. The platform integrates advanced mathematical optimization techniques with real-world logistics constraints to deliver actionable insights and recommendations.
 
-There are several ways of editing your application.
+## Key Features
 
-**Use Lovable**
+- **Facility Location Optimization**: Determine optimal facility locations based on demand, costs, and constraints
+- **Route Planning and Optimization**: Calculate efficient routes considering various transport modes and constraints
+- **Disruption Simulation**: Model and analyze the impact of supply chain disruptions
+- **Airport Integration**: Incorporate air transportation nodes into your supply chain network
+- **Supplier Diversity Analysis**: Optimize supplier selection for resilience and cost-effectiveness
+- **Resilience Metrics**: Measure and track the resilience of your supply chain network
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3ccfdead-3576-4e25-9343-27ce86cb0e86) and start prompting.
+## Technology Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+### Frontend
+- React + TypeScript
+- Vite for build tooling
+- shadcn/ui component library
+- Tailwind CSS for styling
+- Recharts for data visualization
 
-**Use your preferred IDE**
+### Backend
+- Python optimization models using PuLP
+- Supabase for database, authentication, and serverless functions
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js (v18+)
+- Python 3.8+
+- Supabase account
 
-Follow these steps:
+### Installation
 
+1. Clone the repository
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone https://github.com/254SCMGuru254/supply-metrics-optimax.git
+cd supply-metrics-optimax
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install frontend dependencies
+```sh
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Install Python dependencies
+```sh
+pip install -r requirements.txt
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Set up environment variables
+```sh
+# Create a .env file in the root directory
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# For the Python backend
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_KEY=your_supabase_service_key
+```
+
+5. Start the development server
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Project Structure
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+supply-metrics-optimax/
+├── backend/               # Python optimization models
+│   ├── models/            # Mathematical optimization algorithms
+│   │   ├── facility_location.py
+│   │   ├── routing.py
+│   │   └── ...
+│   └── supabase_connector.py  # Connector between Python models and Supabase
+├── src/                   # Frontend React application
+│   ├── components/        # UI components
+│   │   ├── auth/          # Authentication components
+│   │   ├── disruption-simulation/
+│   │   ├── airport-integration/
+│   │   ├── resilience-metrics/
+│   │   └── ...
+│   ├── lib/               # Utility functions and types
+│   ├── pages/             # Main application pages
+│   └── ...
+├── supabase/              # Supabase configuration
+└── ...
+```
 
-**Use GitHub Codespaces**
+## Optimization Models
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Facility Location Optimizer
+Helps determine the optimal locations for facilities based on demand patterns, transportation costs, and facility costs.
 
-## What technologies are used for this project?
+Features:
+- Basic facility location optimization
+- Multi-period facility location with demand growth
+- Green facility location with environmental constraints
 
-This project is built with .
+### Routing Optimizer
+Calculates optimal routes for product movement through the supply chain network.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Features:
+- Real-time route optimization
+- Multi-modal route planning
+- Vehicle routing with time window constraints
 
-## How can I deploy this project?
+## Supabase Integration
 
-Simply open [Lovable](https://lovable.dev/projects/3ccfdead-3576-4e25-9343-27ce86cb0e86) and click on Share -> Publish.
+This platform uses Supabase for:
+- User authentication and authorization
+- Data storage for supply chain networks
+- Serverless functions for computationally intensive operations
+- Real-time synchronization of optimization results
 
-## I want to use a custom domain - is that possible?
+## Deployment
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+The application can be deployed to any hosting platform that supports React applications. For the Python backend, consider deploying to a serverless platform or a containerized environment.
+
+## Contribution Guidelines
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a pull request
+
+## License
+
+[MIT License](LICENSE)
+
+## Contact
+
+For inquiries, please contact [Your Contact Information]
