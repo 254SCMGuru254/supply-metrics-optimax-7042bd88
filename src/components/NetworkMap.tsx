@@ -31,7 +31,7 @@ export { type Node, type Route };
 export interface NetworkMapProps {
   nodes?: Node[];
   routes?: Route[];
-  network?: Database; // Add support for network object
+  network?: Database; // Support for network object
   onNodeClick?: (node: Node) => void;
   onMapClick?: (lat: number, lng: number) => void;
   isOptimized?: boolean;

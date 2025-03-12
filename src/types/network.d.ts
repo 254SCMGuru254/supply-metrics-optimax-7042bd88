@@ -14,3 +14,19 @@ export interface Database {
   routes: Route[];
   [key: string]: any; // Allow for additional properties
 }
+
+// Add specific exports for components using the Database type
+export interface AirportIntegrationProps {
+  database?: Database;
+  airportNodes?: Database[];
+}
+
+export interface DisruptionSimulatorProps {
+  database?: Database;
+  disruptionPoints?: Database[];
+}
+
+export interface ResilienceMetricsProps {
+  network?: Database;
+  metrics?: any;
+}

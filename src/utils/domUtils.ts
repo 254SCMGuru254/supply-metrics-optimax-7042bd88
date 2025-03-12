@@ -27,3 +27,38 @@ export const safeClick = (element: Element | null): boolean => {
     return false;
   }
 };
+
+// Adding additional DOM utility functions to support the application
+export const findElementById = (id: string): HTMLElement | null => {
+  return document.getElementById(id);
+};
+
+export const findElementsByClassName = (className: string): HTMLCollectionOf<Element> => {
+  return document.getElementsByClassName(className);
+};
+
+export const findElementsByTagName = (tagName: string): HTMLCollectionOf<Element> => {
+  return document.getElementsByTagName(tagName);
+};
+
+export const createAndAppendElement = (
+  tagName: string,
+  parent: HTMLElement,
+  attributes?: Record<string, string>,
+  innerText?: string
+): HTMLElement => {
+  const element = document.createElement(tagName);
+  
+  if (attributes) {
+    Object.entries(attributes).forEach(([key, value]) => {
+      element.setAttribute(key, value);
+    });
+  }
+  
+  if (innerText) {
+    element.innerText = innerText;
+  }
+  
+  parent.appendChild(element);
+  return element;
+};

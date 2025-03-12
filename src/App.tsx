@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -19,7 +19,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<Layout><Outlet /></Layout>}>
           <Route index element={<Index />} />
           <Route path="onboarding" element={<Onboarding />} />
           <Route path="data-input" element={<DataInput />} />

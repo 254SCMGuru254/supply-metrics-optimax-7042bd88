@@ -29,4 +29,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   );
 };
 
+// Add this alias export to fix the import error
+export { TimePicker as TimePickerDemo };
+
 export default TimePicker;
