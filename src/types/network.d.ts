@@ -43,17 +43,17 @@ export interface AuthContextType {
   session: Session | null;
   user: User | null;
   signIn: (email: string, password: string) => Promise<{
-    error: AuthError | null;
     data: {
       user: User | null;
       session: Session | null;
     };
+    error: AuthError | null;
   }>;
   signUp: (email: string, password: string, metadata?: { full_name: string; company: string }) => Promise<{
-    error: AuthError | null;
     data: {
       user: User | null;
     };
+    error: AuthError | null;
   }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   loading: boolean;
