@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { useToast } from '@/components/ui/use-toast';
-import { NetworkMap } from '@/components/NetworkMap';
-import { Loader2, Play, Save } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { NetworkMap } from "@/components/NetworkMap";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { safeClick } from "@/utils/domUtils";
+import { Database, DisruptionSimulatorProps } from "@/types/network";
 
 type DisruptionScenario = Database['public']['Tables']['disruption_scenarios']['Row'];
 type SupplyChainNetwork = Database['public']['Tables']['supply_chain_networks']['Row'];
@@ -26,7 +28,6 @@ export function DisruptionSimulator() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationResults, setSimulationResults] = useState<any | null>(null);
   
-  // New scenario form state
   const [newScenario, setNewScenario] = useState({
     name: '',
     description: '',
@@ -37,7 +38,6 @@ export function DisruptionSimulator() {
     affected_nodes: []
   });
   
-  // Load user's networks and scenarios
   useEffect(() => {
     if (user) {
       loadNetworks();
@@ -120,7 +120,6 @@ export function DisruptionSimulator() {
         description: 'Disruption scenario created successfully.',
       });
       
-      // Reset form and reload scenarios
       setNewScenario({
         name: '',
         description: '',
@@ -158,7 +157,6 @@ export function DisruptionSimulator() {
     try {
       setIsSimulating(true);
       
-      // Call the Supabase function to run the simulation
       const { data, error } = await supabase.rpc(
         'generate_disruption_impact',
         { 
@@ -188,7 +186,6 @@ export function DisruptionSimulator() {
     }
   };
   
-  // Find the currently selected network for visualization
   const currentNetwork = networks.find(n => n.id === selectedNetwork);
   
   return (
@@ -202,7 +199,6 @@ export function DisruptionSimulator() {
           <TabsTrigger value="results">Results & Analysis</TabsTrigger>
         </TabsList>
         
-        {/* Create Scenario Tab */}
         <TabsContent value="create">
           <Card>
             <CardHeader>
@@ -342,7 +338,6 @@ export function DisruptionSimulator() {
           </Card>
         </TabsContent>
         
-        {/* Run Simulation Tab */}
         <TabsContent value="run">
           <Card>
             <CardHeader>
@@ -420,7 +415,6 @@ export function DisruptionSimulator() {
           </Card>
         </TabsContent>
         
-        {/* Results Tab */}
         <TabsContent value="results">
           <Card>
             <CardHeader>

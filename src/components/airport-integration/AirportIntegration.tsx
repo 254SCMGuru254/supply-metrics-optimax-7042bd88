@@ -1,546 +1,377 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/components/ui/use-toast';
-import { NetworkMap } from '@/components/NetworkMap';
-import { Loader2, Plus, Save, Search, Trash } from 'lucide-react';
-import { TimePickerDemo } from '@/components/ui/time-picker-demo';
+import React, { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { NetworkMap } from "@/components/NetworkMap";
+import { TimePicker } from "@/components/ui/time-picker-demo";
+import { safeClick } from "@/utils/domUtils";
+import { Database, AirportIntegrationProps } from "@/types/network";
 
-type AirportNode = Database['public']['Tables']['airport_nodes']['Row'];
-type SupplyChainNetwork = Database['public']['Tables']['supply_chain_networks']['Row'];
+interface AirportNode {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  hub_type: string;
+  capacity: number;
+  utilization: number;
+  delay_probability: number;
+}
 
-export function AirportIntegration() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [networks, setNetworks] = useState<SupplyChainNetwork[]>([]);
-  const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
-  const [airports, setAirports] = useState<AirportNode[]>([]);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  // New airport form state
-  const [newAirport, setNewAirport] = useState({
-    name: '',
-    iata_code: '',
-    location: { lat: 0, lng: 0 },
-    capacity: 1000,
-    operation_hours: { open: '06:00', close: '22:00' }
+interface Route {
+  id: string;
+  from: string;
+  to: string;
+  distance: number;
+  transit_time: number;
+  mode: string;
+  cost: number;
+}
+
+const initialAirports: AirportNode[] = [
+  {
+    id: "airport1",
+    name: "Jomo Kenyatta International Airport",
+    latitude: -1.3192,
+    longitude: 36.9277,
+    hub_type: "International",
+    capacity: 10000000,
+    utilization: 0.75,
+    delay_probability: 0.05,
+  },
+  {
+    id: "airport2",
+    name: "Moi International Airport",
+    latitude: -4.0343,
+    longitude: 39.5942,
+    hub_type: "Regional",
+    capacity: 5000000,
+    utilization: 0.60,
+    delay_probability: 0.03,
+  },
+];
+
+const initialRoutes: Route[] = [
+  {
+    id: "route1",
+    from: "airport1",
+    to: "airport2",
+    distance: 480,
+    transit_time: 1,
+    mode: "air",
+    cost: 5000,
+  },
+];
+
+export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database, airportNodes }) => {
+  const [airports, setAirports] = useState<AirportNode[]>(airportNodes || initialAirports);
+  const [routes, setRoutes] = useState<Route[]>(initialRoutes);
+  const [selectedAirport, setSelectedAirport] = useState<AirportNode | null>(null);
+  const [newAirport, setNewAirport] = useState<AirportNode>({
+    id: "",
+    name: "",
+    latitude: 0,
+    longitude: 0,
+    hub_type: "International",
+    capacity: 0,
+    utilization: 0,
+    delay_probability: 0,
   });
-  
-  // Load user's networks and airports
+  const [newRoute, setNewRoute] = useState<Route>({
+    id: "",
+    from: "",
+    to: "",
+    distance: 0,
+    transit_time: 0,
+    mode: "air",
+    cost: 0,
+  });
+  const [isOptimized, setIsOptimized] = useState(false);
+  const [highlightNodes, setHighlightNodes] = useState<string[]>([]);
+  const [selectable, setSelectable] = useState(false);
+  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+  const [disruptionData, setDisruptionData] = useState<any>(null);
+  const [resilienceMetrics, setResilienceMetrics] = useState<any>(null);
+
   useEffect(() => {
-    if (user) {
-      loadNetworks();
-      loadAirports();
+    if (airportNodes) {
+      setAirports(airportNodes);
     }
-  }, [user]);
-  
-  const loadNetworks = async () => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('supply_chain_networks')
-        .select('*')
-        .eq('user_id', user?.id);
-        
-      if (error) throw error;
-      setNetworks(data || []);
-      if (data && data.length > 0) {
-        setSelectedNetwork(data[0].id);
-      }
-    } catch (error) {
-      console.error('Error loading networks:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your supply chain networks.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  }, [airportNodes]);
+
+  const handleAirportClick = (airport: AirportNode) => {
+    setSelectedAirport(airport);
   };
-  
-  const loadAirports = async () => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('airport_nodes')
-        .select('*')
-        .eq('user_id', user?.id);
-        
-      if (error) throw error;
-      setAirports(data || []);
-    } catch (error) {
-      console.error('Error loading airports:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your airport nodes.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, setter: (value: any) => void) => {
+    setter({ ...newAirport, [e.target.name]: e.target.value });
   };
-  
-  const searchAirports = async () => {
-    if (!searchQuery) {
-      toast({
-        title: 'Error',
-        description: 'Please enter a search term.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    try {
-      setIsSearching(true);
-      
-      // In a real implementation, this would call an external API
-      // For now, we'll simulate a search result
-      setTimeout(() => {
-        const mockResults = [
-          { 
-            name: 'Jomo Kenyatta International Airport', 
-            iata: 'NBO', 
-            city: 'Nairobi',
-            country: 'Kenya',
-            location: { lat: -1.319167, lng: 36.9275 }
-          },
-          { 
-            name: 'Moi International Airport', 
-            iata: 'MBA', 
-            city: 'Mombasa',
-            country: 'Kenya',
-            location: { lat: -4.034833, lng: 39.594333 }
-          },
-          { 
-            name: 'Kisumu International Airport', 
-            iata: 'KIS', 
-            city: 'Kisumu',
-            country: 'Kenya',
-            location: { lat: -0.086139, lng: 34.728892 }
-          },
-          { 
-            name: 'Eldoret International Airport', 
-            iata: 'EDL', 
-            city: 'Eldoret',
-            country: 'Kenya',
-            location: { lat: 0.404458, lng: 35.238928 }
-          }
-        ].filter(airport => 
-          airport.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          airport.iata.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          airport.city.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        
-        setSearchResults(mockResults);
-        setIsSearching(false);
-        
-        if (mockResults.length === 0) {
-          toast({
-            title: 'No Results',
-            description: 'No airports found matching your search.',
-          });
-        }
-      }, 1500);
-      
-    } catch (error) {
-      console.error('Error searching airports:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to search for airports.',
-        variant: 'destructive',
-      });
-      setIsSearching(false);
-    }
-  };
-  
-  const createAirport = async () => {
-    if (!user) {
-      toast({
-        title: 'Error',
-        description: 'You must be logged in to add an airport.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      
-      const { data, error } = await supabase
-        .from('airport_nodes')
-        .insert({
-          name: newAirport.name,
-          iata_code: newAirport.iata_code,
-          location: newAirport.location,
-          capacity: newAirport.capacity,
-          operation_hours: newAirport.operation_hours,
-          user_id: user.id
-        })
-        .select();
-        
-      if (error) throw error;
-      
-      toast({
-        title: 'Success',
-        description: 'Airport node added successfully.',
-      });
-      
-      // Reset form and reload airports
-      setNewAirport({
-        name: '',
-        iata_code: '',
-        location: { lat: 0, lng: 0 },
-        capacity: 1000,
-        operation_hours: { open: '06:00', close: '22:00' }
-      });
-      
-      loadAirports();
-      
-    } catch (error) {
-      console.error('Error adding airport:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to add airport node.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const addFromSearch = (airport: any) => {
+
+  const handleAddAirport = () => {
+    setAirports([...airports, newAirport]);
     setNewAirport({
-      name: airport.name,
-      iata_code: airport.iata,
-      location: airport.location,
-      capacity: 1000,
-      operation_hours: { open: '06:00', close: '22:00' }
+      id: "",
+      name: "",
+      latitude: 0,
+      longitude: 0,
+      hub_type: "International",
+      capacity: 0,
+      utilization: 0,
+      delay_probability: 0,
     });
-    
-    // Switch to the add tab
-    document.querySelector('[data-value="add"]')?.click();
   };
-  
-  const deleteAirport = async (id: string) => {
-    try {
-      setIsLoading(true);
-      
-      const { error } = await supabase
-        .from('airport_nodes')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      toast({
-        title: 'Success',
-        description: 'Airport node deleted successfully.',
-      });
-      
-      // Reload airports
-      loadAirports();
-      
-    } catch (error) {
-      console.error('Error deleting airport:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to delete airport node.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+
+  const handleRouteInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, setter: (value: any) => void) => {
+    setter({ ...newRoute, [e.target.name]: e.target.value });
   };
-  
-  // Find the currently selected network for visualization
-  const currentNetwork = networks.find(n => n.id === selectedNetwork);
-  
+
+  const handleAddRoute = () => {
+    setRoutes([...routes, newRoute]);
+    setNewRoute({
+      id: "",
+      from: "",
+      to: "",
+      distance: 0,
+      transit_time: 0,
+      mode: "air",
+      cost: 0,
+    });
+  };
+
+  const handleOptimize = () => {
+    setIsOptimized(true);
+    setHighlightNodes(["airport1", "airport2"]);
+  };
+
+  const handleNodeSelect = (nodes: string[]) => {
+    setSelectedNodes(nodes);
+  };
+
+  const handleDisrupt = () => {
+    setDisruptionData({ airport1: 0.5, airport2: 0.3 });
+  };
+
+  const handleCalculateResilience = () => {
+    setResilienceMetrics({
+      robustness: 0.85,
+      recovery: 0.92,
+    });
+  };
+
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Airport Integration</h1>
-      
-      <Tabs defaultValue="search" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="search">Search Airports</TabsTrigger>
-          <TabsTrigger value="add">Add Airport</TabsTrigger>
-          <TabsTrigger value="manage">Manage Airports</TabsTrigger>
+    <Card className="overflow-hidden">
+      <Tabs defaultValue="airports" className="w-full">
+        <TabsList className="p-4 border-b">
+          <TabsTrigger value="airports">Airports</TabsTrigger>
+          <TabsTrigger value="routes">Routes</TabsTrigger>
+          <TabsTrigger value="map">Map</TabsTrigger>
+          <TabsTrigger value="simulation">Simulation</TabsTrigger>
+          <TabsTrigger value="resilience">Resilience</TabsTrigger>
         </TabsList>
-        
-        {/* Search Airports Tab */}
-        <TabsContent value="search">
-          <Card>
-            <CardHeader>
-              <CardTitle>Search Global Airports</CardTitle>
-              <CardDescription>
-                Search for airports to add to your supply chain network
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex space-x-2">
-                <Input
-                  placeholder="Search by airport name, IATA code, or city..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && searchAirports()}
-                  className="flex-1"
-                />
-                <Button onClick={searchAirports} disabled={isSearching}>
-                  {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                  {isSearching ? 'Searching...' : 'Search'}
-                </Button>
-              </div>
-              
-              {searchResults.length > 0 && (
-                <div className="border rounded-md overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Airport Name</TableHead>
-                        <TableHead>IATA Code</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {searchResults.map((airport, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{airport.name}</TableCell>
-                          <TableCell>{airport.iata}</TableCell>
-                          <TableCell>{airport.city}, {airport.country}</TableCell>
-                          <TableCell className="text-right">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => addFromSearch(airport)}
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Add
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+        <TabsContent value="airports" className="p-4">
+          <h2 className="text-xl font-semibold mb-4">Airport Management</h2>
+          <Table>
+            <TableCaption>A list of airports in the network.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Latitude</TableHead>
+                <TableHead>Longitude</TableHead>
+                <TableHead>Hub Type</TableHead>
+                <TableHead>Capacity</TableHead>
+                <TableHead>Utilization</TableHead>
+                <TableHead>Delay Probability</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {airports.map((airport) => (
+                <TableRow key={airport.id}>
+                  <TableCell className="font-medium">{airport.id}</TableCell>
+                  <TableCell>{airport.name}</TableCell>
+                  <TableCell>{airport.latitude}</TableCell>
+                  <TableCell>{airport.longitude}</TableCell>
+                  <TableCell>{airport.hub_type}</TableCell>
+                  <TableCell>{airport.capacity}</TableCell>
+                  <TableCell>{airport.utilization}</TableCell>
+                  <TableCell>{airport.delay_probability}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          <h3 className="text-lg font-semibold mt-4 mb-2">Add New Airport</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="id">ID</Label>
+              <Input type="text" name="id" value={newAirport.id} onChange={(e) => handleInputChange(e, setNewAirport)} />
+            </div>
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input type="text" name="name" value={newAirport.name} onChange={(e) => handleInputChange(e, setNewAirport)} />
+            </div>
+            <div>
+              <Label htmlFor="latitude">Latitude</Label>
+              <Input type="number" name="latitude" value={newAirport.latitude} onChange={(e) => handleInputChange(e, setNewAirport)} />
+            </div>
+            <div>
+              <Label htmlFor="longitude">Longitude</Label>
+              <Input type="number" name="longitude" value={newAirport.longitude} onChange={(e) => handleInputChange(e, setNewAirport)} />
+            </div>
+            <div>
+              <Label htmlFor="hub_type">Hub Type</Label>
+              <Select onValueChange={(value) => setNewAirport({ ...newAirport, hub_type: value })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={newAirport.hub_type} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="International">International</SelectItem>
+                  <SelectItem value="Regional">Regional</SelectItem>
+                  <SelectItem value="Domestic">Domestic</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="capacity">Capacity</Label>
+              <Input type="number" name="capacity" value={newAirport.capacity} onChange={(e) => handleInputChange(e, setNewAirport)} />
+            </div>
+            <div>
+              <Label htmlFor="utilization">Utilization</Label>
+              <Input type="number" name="utilization" value={newAirport.utilization} onChange={(e) => handleInputChange(e, setNewAirport)} />
+            </div>
+            <div>
+              <Label htmlFor="delay_probability">Delay Probability</Label>
+              <Input type="number" name="delay_probability" value={newAirport.delay_probability} onChange={(e) => handleInputChange(e, setNewAirport)} />
+            </div>
+          </div>
+          <Button className="mt-4" onClick={handleAddAirport}>
+            Add Airport
+          </Button>
         </TabsContent>
-        
-        {/* Add Airport Tab */}
-        <TabsContent value="add">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add Airport Node</CardTitle>
-              <CardDescription>
-                Add a new airport node to your supply chain network
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Airport Name</Label>
-                    <Input
-                      id="name"
-                      value={newAirport.name}
-                      onChange={(e) => setNewAirport({ ...newAirport, name: e.target.value })}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="iata_code">IATA Code</Label>
-                    <Input
-                      id="iata_code"
-                      value={newAirport.iata_code}
-                      onChange={(e) => setNewAirport({ ...newAirport, iata_code: e.target.value })}
-                      disabled={isLoading}
-                      maxLength={3}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="capacity">Capacity (Tons/Day)</Label>
-                    <Input
-                      id="capacity"
-                      type="number"
-                      value={newAirport.capacity}
-                      onChange={(e) => setNewAirport({ ...newAirport, capacity: parseInt(e.target.value) })}
-                      disabled={isLoading}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="lat">Latitude</Label>
-                    <Input
-                      id="lat"
-                      type="number"
-                      step="0.000001"
-                      value={newAirport.location.lat}
-                      onChange={(e) => setNewAirport({ 
-                        ...newAirport, 
-                        location: { 
-                          ...newAirport.location, 
-                          lat: parseFloat(e.target.value) 
-                        } 
-                      })}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="lng">Longitude</Label>
-                    <Input
-                      id="lng"
-                      type="number"
-                      step="0.000001"
-                      value={newAirport.location.lng}
-                      onChange={(e) => setNewAirport({ 
-                        ...newAirport, 
-                        location: { 
-                          ...newAirport.location, 
-                          lng: parseFloat(e.target.value) 
-                        } 
-                      })}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="open_time">Opening Time</Label>
-                      <Input
-                        id="open_time"
-                        type="time"
-                        value={newAirport.operation_hours.open}
-                        onChange={(e) => setNewAirport({ 
-                          ...newAirport, 
-                          operation_hours: { 
-                            ...newAirport.operation_hours, 
-                            open: e.target.value 
-                          } 
-                        })}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="close_time">Closing Time</Label>
-                      <Input
-                        id="close_time"
-                        type="time"
-                        value={newAirport.operation_hours.close}
-                        onChange={(e) => setNewAirport({ 
-                          ...newAirport, 
-                          operation_hours: { 
-                            ...newAirport.operation_hours, 
-                            close: e.target.value 
-                          } 
-                        })}
-                        disabled={isLoading}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                onClick={createAirport} 
-                disabled={isLoading || !newAirport.name || !newAirport.iata_code}
-                className="ml-auto"
-              >
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                Add Airport
-              </Button>
-            </CardFooter>
-          </Card>
+
+        <TabsContent value="routes" className="p-4">
+          <h2 className="text-xl font-semibold mb-4">Route Management</h2>
+          <Table>
+            <TableCaption>A list of routes between airports.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>To</TableHead>
+                <TableHead>Distance</TableHead>
+                <TableHead>Transit Time</TableHead>
+                <TableHead>Mode</TableHead>
+                <TableHead>Cost</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {routes.map((route) => (
+                <TableRow key={route.id}>
+                  <TableCell className="font-medium">{route.id}</TableCell>
+                  <TableCell>{route.from}</TableCell>
+                  <TableCell>{route.to}</TableCell>
+                  <TableCell>{route.distance}</TableCell>
+                  <TableCell>{route.transit_time}</TableCell>
+                  <TableCell>{route.mode}</TableCell>
+                  <TableCell>{route.cost}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          <h3 className="text-lg font-semibold mt-4 mb-2">Add New Route</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="id">ID</Label>
+              <Input type="text" name="id" value={newRoute.id} onChange={(e) => handleRouteInputChange(e, setNewRoute)} />
+            </div>
+            <div>
+              <Label htmlFor="from">From</Label>
+              <Input type="text" name="from" value={newRoute.from} onChange={(e) => handleRouteInputChange(e, setNewRoute)} />
+            </div>
+            <div>
+              <Label htmlFor="to">To</Label>
+              <Input type="text" name="to" value={newRoute.to} onChange={(e) => handleRouteInputChange(e, setNewRoute)} />
+            </div>
+            <div>
+              <Label htmlFor="distance">Distance</Label>
+              <Input type="number" name="distance" value={newRoute.distance} onChange={(e) => handleRouteInputChange(e, setNewRoute)} />
+            </div>
+            <div>
+              <Label htmlFor="transit_time">Transit Time</Label>
+              <Input type="number" name="transit_time" value={newRoute.transit_time} onChange={(e) => handleRouteInputChange(e, setNewRoute)} />
+            </div>
+            <div>
+              <Label htmlFor="mode">Mode</Label>
+              <Select onValueChange={(value) => setNewRoute({ ...newRoute, mode: value })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={newRoute.mode} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="air">Air</SelectItem>
+                  <SelectItem value="road">Road</SelectItem>
+                  <SelectItem value="rail">Rail</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="cost">Cost</Label>
+              <Input type="number" name="cost" value={newRoute.cost} onChange={(e) => handleRouteInputChange(e, setNewRoute)} />
+            </div>
+          </div>
+          <Button className="mt-4" onClick={handleAddRoute}>
+            Add Route
+          </Button>
         </TabsContent>
-        
-        {/* Manage Airports Tab */}
-        <TabsContent value="manage">
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage Airport Nodes</CardTitle>
-              <CardDescription>
-                View and manage your airport nodes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {airports.length > 0 ? (
-                <div className="border rounded-md overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Airport Name</TableHead>
-                        <TableHead>IATA Code</TableHead>
-                        <TableHead>Capacity</TableHead>
-                        <TableHead>Operation Hours</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {airports.map((airport) => (
-                        <TableRow key={airport.id}>
-                          <TableCell className="font-medium">{airport.name}</TableCell>
-                          <TableCell>{airport.iata_code}</TableCell>
-                          <TableCell>{airport.capacity} tons/day</TableCell>
-                          <TableCell>
-                            {airport.operation_hours.open} - {airport.operation_hours.close}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button 
-                              variant="destructive" 
-                              size="sm"
-                              onClick={() => deleteAirport(airport.id)}
-                              disabled={isLoading}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">No airport nodes added yet.</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => document.querySelector('[data-value="search"]')?.click()}
-                  >
-                    Search for Airports
-                  </Button>
-                </div>
-              )}
-              
-              {currentNetwork && airports.length > 0 && (
-                <div className="border rounded-md mt-6 h-[300px] overflow-hidden">
-                  <NetworkMap 
-                    network={currentNetwork}
-                    airportNodes={airports}
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+        <TabsContent value="map" className="p-4">
+          <h2 className="text-xl font-semibold mb-4">Network Map</h2>
+          <NetworkMap
+            nodes={airports}
+            routes={routes}
+            onNodeClick={handleAirportClick}
+            isOptimized={isOptimized}
+            highlightNodes={highlightNodes}
+            selectable={selectable}
+            onNodeSelect={handleNodeSelect}
+            disruptionData={disruptionData}
+            resilienceMetrics={resilienceMetrics}
+            airportNodes={airports}
+          />
+          <div className="mt-4">
+            <Button onClick={handleOptimize}>Optimize Network</Button>
+            <Button className="ml-2" onClick={() => setSelectable(!selectable)}>
+              {selectable ? "Disable Selection" : "Enable Selection"}
+            </Button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="simulation" className="p-4">
+          <h2 className="text-xl font-semibold mb-4">Simulation</h2>
+          <p>Configure simulation parameters and run simulations to test network resilience.</p>
+          <Button onClick={handleDisrupt}>Simulate Disruption</Button>
+        </TabsContent>
+
+        <TabsContent value="resilience" className="p-4">
+          <h2 className="text-xl font-semibold mb-4">Resilience Metrics</h2>
+          <p>Calculate resilience metrics based on simulation results.</p>
+          <Button onClick={handleCalculateResilience}>Calculate Resilience Metrics</Button>
+          {resilienceMetrics && (
+            <div className="mt-4">
+              <p>Robustness: {resilienceMetrics.robustness}</p>
+              <p>Recovery: {resilienceMetrics.recovery}</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
-    </div>
+    </Card>
   );
-}
+};

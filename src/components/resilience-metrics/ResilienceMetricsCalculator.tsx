@@ -1,410 +1,355 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
-import { NetworkMap } from '@/components/NetworkMap';
-import { Loader2, RefreshCw } from 'lucide-react';
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  ResponsiveContainer,
-  Legend
-} from 'recharts';
+import React, { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
+import { NetworkMap } from "@/components/NetworkMap";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Database, ResilienceMetricsProps } from "@/types/network";
 
-type SupplyChainNetwork = Database['public']['Tables']['supply_chain_networks']['Row'];
-type ResilienceMetric = Database['public']['Tables']['resilience_metrics']['Row'];
-
-export function ResilienceMetricsCalculator() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [networks, setNetworks] = useState<SupplyChainNetwork[]>([]);
-  const [selectedNetwork, setSelectedNetwork] = useState<string | null>(null);
-  const [metrics, setMetrics] = useState<ResilienceMetric | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+export const ResilienceMetricsCalculator: React.FC<ResilienceMetricsProps> = ({
+  network,
+  metrics
+}) => {
+  const [activeTab, setActiveTab] = useState("robustness");
+  const [selectedMetric, setSelectedMetric] = useState("node_connectivity");
+  const [calculationProgress, setCalculationProgress] = useState(0);
   const [isCalculating, setIsCalculating] = useState(false);
-  
-  // Load user's networks and metrics
-  useEffect(() => {
-    if (user) {
-      loadNetworks();
-    }
-  }, [user]);
-  
-  useEffect(() => {
-    if (selectedNetwork) {
-      loadMetrics(selectedNetwork);
-    }
-  }, [selectedNetwork]);
-  
-  const loadNetworks = async () => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('supply_chain_networks')
-        .select('*')
-        .eq('user_id', user?.id);
-        
-      if (error) throw error;
-      setNetworks(data || []);
-      if (data && data.length > 0) {
-        setSelectedNetwork(data[0].id);
-      }
-    } catch (error) {
-      console.error('Error loading networks:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your supply chain networks.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
+  const [results, setResults] = useState<any>(null);
+  const [thresholdValue, setThresholdValue] = useState([0.75]);
+  const [includeWeights, setIncludeWeights] = useState(true);
+  const [normalizeResults, setNormalizeResults] = useState(true);
+  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+  const [calculationMethod, setCalculationMethod] = useState("exact");
+
+  // Sample metrics data for demonstration
+  const sampleMetrics = {
+    robustness: {
+      node_connectivity: 0.78,
+      edge_connectivity: 0.65,
+      algebraic_connectivity: 0.42,
+      natural_connectivity: 0.81,
+      average_path_length: 2.34,
+      clustering_coefficient: 0.56
+    },
+    reliability: {
+      network_reliability: 0.92,
+      all_terminal_reliability: 0.87,
+      two_terminal_reliability: 0.94,
+      expected_demand_satisfaction: 0.89,
+      service_availability: 0.95
+    },
+    resilience: {
+      recovery_time: 3.2,
+      adaptation_capacity: 0.76,
+      vulnerability_index: 0.34,
+      critical_node_percentage: 0.12,
+      resilience_index: 0.82
     }
   };
-  
-  const loadMetrics = async (networkId: string) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('resilience_metrics')
-        .select('*')
-        .eq('network_id', networkId)
-        .order('created_at', { ascending: false })
-        .limit(1);
-        
-      if (error) throw error;
-      setMetrics(data && data.length > 0 ? data[0] : null);
-    } catch (error) {
-      console.error('Error loading metrics:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load resilience metrics.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const calculateMetrics = async () => {
-    if (!selectedNetwork) {
-      toast({
-        title: 'Error',
-        description: 'Please select a network first.',
-        variant: 'destructive',
-      });
-      return;
-    }
+
+  // Simulate calculation process
+  const calculateMetrics = () => {
+    setIsCalculating(true);
+    setCalculationProgress(0);
     
-    try {
-      setIsCalculating(true);
-      
-      // Call the Supabase function to calculate metrics
-      const { data, error } = await supabase.rpc(
-        'calculate_network_resilience',
-        { 
-          network_id: selectedNetwork
+    const interval = setInterval(() => {
+      setCalculationProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsCalculating(false);
+          
+          // Set sample results based on the selected metric
+          const category = activeTab;
+          const metric = selectedMetric;
+          
+          setResults({
+            value: sampleMetrics[category as keyof typeof sampleMetrics][metric as any],
+            threshold: thresholdValue[0],
+            status: sampleMetrics[category as keyof typeof sampleMetrics][metric as any] > thresholdValue[0] ? "pass" : "fail",
+            details: {
+              nodes: network?.nodes?.length || 0,
+              routes: network?.routes?.length || 0,
+              method: calculationMethod,
+              weighted: includeWeights,
+              normalized: normalizeResults
+            }
+          });
+          
+          return 100;
         }
-      );
-      
-      if (error) throw error;
-      
-      toast({
-        title: 'Calculation Complete',
-        description: 'Network resilience metrics have been calculated.',
+        return prev + 5;
       });
-      
-      // Reload metrics to get the latest calculation
-      loadMetrics(selectedNetwork);
-      
-    } catch (error) {
-      console.error('Error calculating metrics:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to calculate resilience metrics.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsCalculating(false);
+    }, 100);
+  };
+
+  // Reset calculation
+  const resetCalculation = () => {
+    setResults(null);
+    setCalculationProgress(0);
+    setIsCalculating(false);
+  };
+
+  // Get metric options based on active tab
+  const getMetricOptions = () => {
+    switch (activeTab) {
+      case "robustness":
+        return [
+          { value: "node_connectivity", label: "Node Connectivity" },
+          { value: "edge_connectivity", label: "Edge Connectivity" },
+          { value: "algebraic_connectivity", label: "Algebraic Connectivity" },
+          { value: "natural_connectivity", label: "Natural Connectivity" },
+          { value: "average_path_length", label: "Average Path Length" },
+          { value: "clustering_coefficient", label: "Clustering Coefficient" }
+        ];
+      case "reliability":
+        return [
+          { value: "network_reliability", label: "Network Reliability" },
+          { value: "all_terminal_reliability", label: "All-Terminal Reliability" },
+          { value: "two_terminal_reliability", label: "Two-Terminal Reliability" },
+          { value: "expected_demand_satisfaction", label: "Expected Demand Satisfaction" },
+          { value: "service_availability", label: "Service Availability" }
+        ];
+      case "resilience":
+        return [
+          { value: "recovery_time", label: "Recovery Time" },
+          { value: "adaptation_capacity", label: "Adaptation Capacity" },
+          { value: "vulnerability_index", label: "Vulnerability Index" },
+          { value: "critical_node_percentage", label: "Critical Node Percentage" },
+          { value: "resilience_index", label: "Resilience Index" }
+        ];
+      default:
+        return [];
     }
   };
-  
-  // Find the currently selected network for visualization
-  const currentNetwork = networks.find(n => n.id === selectedNetwork);
-  
-  // Format metrics for radar chart
-  const radarData = metrics ? [
-    {
-      metric: "Connectivity",
-      value: metrics.connectivity_score,
-      fullMark: 100,
-    },
-    {
-      metric: "Redundancy",
-      value: metrics.redundancy_score,
-      fullMark: 100,
-    },
-    {
-      metric: "Adaptability",
-      value: metrics.adaptability_score,
-      fullMark: 100,
-    },
-    {
-      metric: "Recovery Speed",
-      value: 100 - (metrics.recovery_time / 30) * 100, // Convert days to a score
-      fullMark: 100,
-    },
-    {
-      metric: "Robustness",
-      value: 100 - metrics.vulnerability_index,
-      fullMark: 100,
-    },
-  ] : [];
-  
+
+  // Handle tab change
+  useEffect(() => {
+    // Reset selected metric when tab changes
+    const options = getMetricOptions();
+    if (options.length > 0) {
+      setSelectedMetric(options[0].value);
+    }
+    resetCalculation();
+  }, [activeTab]);
+
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Resilience Metrics Calculator</h1>
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Network Resilience Metrics</h2>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Network Selection */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Network Selection</CardTitle>
-            <CardDescription>
-              Select a network to calculate resilience metrics
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Select
-                value={selectedNetwork || ''}
-                onValueChange={setSelectedNetwork}
-                disabled={isLoading || isCalculating}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a network" />
-                </SelectTrigger>
-                <SelectContent>
-                  {networks.map((network) => (
-                    <SelectItem key={network.id} value={network.id}>
-                      {network.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Button 
-                onClick={calculateMetrics} 
-                disabled={isCalculating || !selectedNetwork}
-                className="w-full"
-              >
-                {isCalculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                {isCalculating ? 'Calculating...' : 'Calculate Metrics'}
-              </Button>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="robustness">Robustness</TabsTrigger>
+          <TabsTrigger value="reliability">Reliability</TabsTrigger>
+          <TabsTrigger value="resilience">Resilience</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="robustness" className="space-y-4 mt-4">
+          <p className="text-muted-foreground">
+            Robustness metrics measure the network's ability to maintain functionality when subjected to failures or attacks.
+          </p>
+        </TabsContent>
+        
+        <TabsContent value="reliability" className="space-y-4 mt-4">
+          <p className="text-muted-foreground">
+            Reliability metrics quantify the probability that the network will perform its intended function under specified conditions.
+          </p>
+        </TabsContent>
+        
+        <TabsContent value="resilience" className="space-y-4 mt-4">
+          <p className="text-muted-foreground">
+            Resilience metrics evaluate the network's ability to recover from disruptions and adapt to changing conditions.
+          </p>
+        </TabsContent>
+      </Tabs>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label>Select Metric</Label>
+            <Select value={selectedMetric} onValueChange={setSelectedMetric}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select metric" />
+              </SelectTrigger>
+              <SelectContent>
+                {getMetricOptions().map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Calculation Method</Label>
+            <RadioGroup value={calculationMethod} onValueChange={setCalculationMethod}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="exact" id="exact" />
+                <Label htmlFor="exact">Exact</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="approximate" id="approximate" />
+                <Label htmlFor="approximate">Approximate</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="monte_carlo" id="monte_carlo" />
+                <Label htmlFor="monte_carlo">Monte Carlo</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Threshold Value: {thresholdValue[0]}</Label>
+            <Slider
+              value={thresholdValue}
+              onValueChange={setThresholdValue}
+              min={0}
+              max={1}
+              step={0.01}
+            />
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="include-weights" 
+                checked={includeWeights} 
+                onCheckedChange={(checked) => setIncludeWeights(checked as boolean)} 
+              />
+              <Label htmlFor="include-weights">Include Edge Weights</Label>
             </div>
-          </CardContent>
-        </Card>
-        
-        {/* Resilience Summary */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Resilience Summary</CardTitle>
-            <CardDescription>
-              {metrics ? 'Overview of network resilience metrics' : 'Select a network and calculate metrics to see results'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {metrics ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Card>
-                    <CardHeader className="py-2">
-                      <CardTitle className="text-sm font-medium">Resilience Score</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {metrics ? Math.round((metrics.connectivity_score + metrics.redundancy_score + metrics.adaptability_score) / 3) : '-'}%
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="py-2">
-                      <CardTitle className="text-sm font-medium">Recovery Time</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {metrics ? Math.round(metrics.recovery_time) : '-'} days
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="py-2">
-                      <CardTitle className="text-sm font-medium">Vulnerability</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {metrics ? Math.round(metrics.vulnerability_index) : '-'}%
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="py-2">
-                      <CardTitle className="text-sm font-medium">Nodes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {metrics?.metrics_data?.node_count || '-'}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                {/* Radar Chart */}
-                <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                      <PolarGrid />
-                      <PolarAngleAxis dataKey="metric" />
-                      <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                      <Radar
-                        name="Resilience"
-                        dataKey="value"
-                        stroke="#2563eb"
-                        fill="#3b82f6"
-                        fillOpacity={0.6}
-                      />
-                      <Legend />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="normalize-results" 
+                checked={normalizeResults} 
+                onCheckedChange={(checked) => setNormalizeResults(checked as boolean)} 
+              />
+              <Label htmlFor="normalize-results">Normalize Results</Label>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            {isCalculating ? (
+              <div className="space-y-2">
+                <Label>Calculating...</Label>
+                <Progress value={calculationProgress} />
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[400px] text-center">
-                <p className="text-muted-foreground mb-4">No resilience metrics to display.</p>
-                <Button 
-                  variant="outline" 
-                  onClick={calculateMetrics}
-                  disabled={!selectedNetwork}
-                >
-                  Calculate Metrics
-                </Button>
+              <div className="flex space-x-2">
+                <Button onClick={calculateMetrics}>Calculate</Button>
+                {results && <Button variant="outline" onClick={resetCalculation}>Reset</Button>}
               </div>
             )}
-          </CardContent>
-        </Card>
-        
-        {/* Network Visualization */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Network Visualization</CardTitle>
-            <CardDescription>
-              Visual representation of your supply chain network
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {currentNetwork ? (
-              <div className="h-[400px] border rounded-md overflow-hidden">
-                <NetworkMap 
-                  network={currentNetwork}
-                  resilienceMetrics={metrics}
-                />
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-[400px] text-center">
-                <p className="text-muted-foreground">Select a network to visualize</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        {/* Detailed Metrics */}
-        {metrics && (
-          <Card className="lg:col-span-3">
-            <CardHeader>
-              <CardTitle>Detailed Metrics</CardTitle>
-              <CardDescription>
-                Detailed breakdown of resilience metrics
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Network Structure</h3>
-                    <ul className="space-y-2">
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Nodes:</span>
-                        <span className="font-medium">{metrics.metrics_data.node_count}</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Connections:</span>
-                        <span className="font-medium">{metrics.metrics_data.edge_count}</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Avg. Connections per Node:</span>
-                        <span className="font-medium">{metrics.metrics_data.avg_degree.toFixed(1)}</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Network Density:</span>
-                        <span className="font-medium">{metrics.metrics_data.network_density.toFixed(2)}</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Resilience Scores</h3>
-                    <ul className="space-y-2">
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Connectivity Score:</span>
-                        <span className="font-medium">{metrics.connectivity_score.toFixed(1)}%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Redundancy Score:</span>
-                        <span className="font-medium">{metrics.redundancy_score.toFixed(1)}%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Adaptability Score:</span>
-                        <span className="font-medium">{metrics.adaptability_score.toFixed(1)}%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Vulnerability Index:</span>
-                        <span className="font-medium">{metrics.vulnerability_index.toFixed(1)}%</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Recommendations</h3>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {metrics.connectivity_score < 60 && (
-                        <li>Increase connections between nodes to improve network connectivity</li>
-                      )}
-                      {metrics.redundancy_score < 60 && (
-                        <li>Add redundant supply paths for critical product flows</li>
-                      )}
-                      {metrics.recovery_time > 15 && (
-                        <li>Implement strategies to reduce recovery time after disruptions</li>
-                      )}
-                      {metrics.vulnerability_index > 40 && (
-                        <li>Diversify supplier base to reduce vulnerability</li>
-                      )}
-                      <li>Regularly test network resilience with simulated disruptions</li>
-                    </ul>
-                  </div>
+          </div>
+          
+          {results && (
+            <div className="border p-4 rounded-md bg-muted/50">
+              <h3 className="font-semibold text-lg mb-2">Results</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Value:</span>
+                  <span className="font-medium">{results.value.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Threshold:</span>
+                  <span>{results.threshold.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Status:</span>
+                  <span className={results.status === "pass" ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                    {results.status.toUpperCase()}
+                  </span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              
+              <h4 className="font-medium mt-4 mb-2">Calculation Details</h4>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Nodes</TableCell>
+                    <TableCell>{results.details.nodes}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Routes</TableCell>
+                    <TableCell>{results.details.routes}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Method</TableCell>
+                    <TableCell className="capitalize">{results.details.method}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Weighted</TableCell>
+                    <TableCell>{results.details.weighted ? "Yes" : "No"}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Normalized</TableCell>
+                    <TableCell>{results.details.normalized ? "Yes" : "No"}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+        
+        <div>
+          <div className="h-[400px] border rounded-md overflow-hidden">
+            {network && (
+              <NetworkMap 
+                network={network}
+                highlightNodes={selectedNodes}
+                resilienceMetrics={results}
+              />
+            )}
+          </div>
+          
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2">Interpretation</h3>
+            <p className="text-sm text-muted-foreground">
+              {activeTab === "robustness" && (
+                "Robustness metrics indicate how well the network maintains functionality when components fail. Higher values generally indicate better performance."
+              )}
+              {activeTab === "reliability" && (
+                "Reliability metrics show the probability of successful operation. Values closer to 1.0 indicate higher reliability."
+              )}
+              {activeTab === "resilience" && (
+                "Resilience metrics measure the network's ability to recover from disruptions. Lower recovery times and higher adaptation capacities are desirable."
+              )}
+            </p>
+            
+            <h3 className="font-semibold mt-4 mb-2">Recommendations</h3>
+            {results ? (
+              <ul className="text-sm space-y-1 list-disc pl-5">
+                {results.status === "pass" ? (
+                  <>
+                    <li>Network shows good performance for this metric</li>
+                    <li>Consider testing with more stringent thresholds</li>
+                    <li>Evaluate performance under different disruption scenarios</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Consider adding redundant connections to critical nodes</li>
+                    <li>Identify and strengthen vulnerable network components</li>
+                    <li>Implement backup systems for critical paths</li>
+                  </>
+                )}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Calculate metrics to see recommendations.
+              </p>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </Card>
   );
-}
+};
+
+export default ResilienceMetricsCalculator;

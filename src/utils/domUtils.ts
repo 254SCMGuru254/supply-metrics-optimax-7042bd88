@@ -1,64 +1,66 @@
+/**
+ * Safely finds an element by its ID
+ * This utility helps avoid TypeScript errors when the element might not exist
+ */
+export const findElementById = (id: string): HTMLElement | null => {
+  if (typeof document !== 'undefined') {
+    return document.getElementById(id);
+  }
+  return null;
+};
 
 /**
- * Safely triggers a click event on an element
- * @param element The element to click
- * @returns true if the click was triggered, false otherwise
+ * Safely finds elements by their class name
+ * This utility helps avoid TypeScript errors when the elements might not exist
  */
-export const safeClick = (element: Element | null): boolean => {
-  if (!element) return false;
-  
-  // Modern approach using the click() method if available
-  if (typeof (element as HTMLElement).click === 'function') {
-    (element as HTMLElement).click();
-    return true;
+export const findElementsByClassName = (className: string): HTMLCollectionOf<Element> | null => {
+  if (typeof document !== 'undefined') {
+    return document.getElementsByClassName(className);
   }
-  
-  // Fallback: Create and dispatch a click event
-  try {
-    const clickEvent = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window
-    });
-    element.dispatchEvent(clickEvent);
-    return true;
-  } catch (error) {
-    console.error('Failed to trigger click event:', error);
-    return false;
+  return null;
+};
+
+/**
+ * Safely finds elements by their tag name
+ * This utility helps avoid TypeScript errors when the elements might not exist
+ */
+export const findElementsByTagName = (tagName: string): HTMLCollectionOf<Element> | null => {
+  if (typeof document !== 'undefined') {
+    return document.getElementsByTagName(tagName);
   }
+  return null;
 };
 
-// Adding additional DOM utility functions to support the application
-export const findElementById = (id: string): HTMLElement | null => {
-  return document.getElementById(id);
-};
-
-export const findElementsByClassName = (className: string): HTMLCollectionOf<Element> => {
-  return document.getElementsByClassName(className);
-};
-
-export const findElementsByTagName = (tagName: string): HTMLCollectionOf<Element> => {
-  return document.getElementsByTagName(tagName);
-};
-
+/**
+ * Safely creates and appends a new element to a parent element
+ * This utility helps avoid TypeScript errors when the parent element might not exist
+ */
 export const createAndAppendElement = (
+  parentElement: HTMLElement | null,
   tagName: string,
-  parent: HTMLElement,
-  attributes?: Record<string, string>,
-  innerText?: string
-): HTMLElement => {
-  const element = document.createElement(tagName);
-  
-  if (attributes) {
-    Object.entries(attributes).forEach(([key, value]) => {
-      element.setAttribute(key, value);
-    });
+  attributes?: { [key: string]: string }
+): HTMLElement | null => {
+  if (parentElement && typeof document !== 'undefined') {
+    const newElement = document.createElement(tagName);
+    
+    if (attributes) {
+      for (const key in attributes) {
+        newElement.setAttribute(key, attributes[key]);
+      }
+    }
+
+    parentElement.appendChild(newElement);
+    return newElement;
   }
-  
-  if (innerText) {
-    element.innerText = innerText;
+  return null;
+};
+
+/**
+ * Safely triggers a click event on an element if it exists
+ * This utility helps avoid TypeScript errors when trying to click on elements
+ */
+export const safeClick = (element: Element | null): void => {
+  if (element && 'click' in element) {
+    (element as HTMLElement).click();
   }
-  
-  parent.appendChild(element);
-  return element;
 };
