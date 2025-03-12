@@ -1,10 +1,15 @@
 
 /**
- * Safely handles click events on DOM elements by checking if the element exists and has a click method
+ * Safely triggers a click event on a DOM element
+ * This utility helps avoid TypeScript errors when clicking DOM elements
+ * 
+ * @param element The element to click on
+ * @returns void
  */
 export const safeClick = (element: Element | null) => {
-  if (element && 'click' in element) {
-    (element as HTMLElement).click();
+  if (element && 'click' in element && typeof element.click === 'function') {
+    element.click();
+  } else {
+    console.warn('Element does not have a click method');
   }
 };
-

@@ -1,3 +1,4 @@
+
 export type KenyaLocation = {
   id: string;
   name: string;
@@ -21,7 +22,7 @@ export type SupplyChainRoute = {
 export type AirportNode = {
   id: string;
   name: string;
-  type: "warehouse" | "distribution" | "retail" | "airport"; // Added required type field
+  type: "warehouse" | "distribution" | "retail" | "airport";
   latitude: number;
   longitude: number;
   hub_type: string;

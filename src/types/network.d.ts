@@ -1,4 +1,6 @@
+
 import { Node, Route } from "@/components/map/MapTypes";
+import { User, Session } from "@supabase/supabase-js";
 
 export interface NetworkData {
   nodes: Node[];
@@ -17,7 +19,7 @@ export interface Database {
 // Add specific exports for components using the Database type
 export interface AirportIntegrationProps {
   database?: Database;
-  airportNodes?: Database[];
+  airportNodes?: Node[];
 }
 
 export interface DisruptionSimulatorProps {

@@ -1,30 +1,8 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { AuthContextType, AuthError } from '@/types/network';
-
-type AuthContextType = {
-  session: Session | null;
-  user: User | null;
-  signIn: (email: string, password: string) => Promise<{
-    error: AuthError;
-    data: {
-      user: User | null;
-      session: Session | null;
-    };
-  }>;
-  signUp: (email: string, password: string, metadata?: { full_name: string; company: string }) => 
-    Promise<{
-      error: AuthError;
-      data: {
-        user: User | null;
-      };
-    }>;
-  signOut: () => Promise<{
-    error: AuthError;
-  }>;
-  loading: boolean;
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -80,18 +58,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Handle profile creation
     if (result.data.user && metadata) {
-      await supabase.from('user_profiles').insert({
-        user_id: result.data.user.id,
-        full_name: metadata.full_name,
-        company: metadata.company,
-        plan_tier: 'basic',
-        usage_quota: { 
-          scenarios_used: 0,
-          optimizations_used: 0,
-          max_scenarios: 10,
-          max_optimizations: 5
-        }
-      });
+      try {
+        await supabase.from('user_profiles').insert({
+          user_id: result.data.user.id,
+          full_name: metadata.full_name,
+          company: metadata.company,
+          plan_tier: 'basic',
+          usage_quota: { 
+            scenarios_used: 0,
+            optimizations_used: 0,
+            max_scenarios: 10,
+            max_optimizations: 5
+          }
+        });
+      } catch (error) {
+        console.error("Error creating user profile:", error);
+      }
     }
     
     setLoading(false);

@@ -63,6 +63,7 @@ export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database
   const [newAirport, setNewAirport] = useState<AirportNode>({
     id: "",
     name: "",
+    type: "airport",
     latitude: 0,
     longitude: 0,
     hub_type: "International",
@@ -107,6 +108,7 @@ export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database
     setNewAirport({
       id: "",
       name: "",
+      type: "airport",
       latitude: 0,
       longitude: 0,
       hub_type: "International",
@@ -325,15 +327,9 @@ export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database
         <TabsContent value="map" className="p-4">
           <h2 className="text-xl font-semibold mb-4">Network Map</h2>
           <NetworkMap
-            nodes={airports.map(airport => ({
-              ...airport,
-              type: airport.type || "airport"
-            }))}
-            routes={routes.map(route => ({
-              ...route,
-              volume: route.volume || 0
-            }))}
-            onNodeClick={(node) => handleAirportClick(node as AirportNode)}
+            nodes={airports as any}
+            routes={routes as any}
+            onNodeClick={(node) => handleAirportClick(node as any)}
             isOptimized={isOptimized}
             highlightNodes={highlightNodes}
             selectable={selectable}

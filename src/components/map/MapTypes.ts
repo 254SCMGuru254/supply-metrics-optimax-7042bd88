@@ -1,7 +1,7 @@
 
 export type Node = {
   id: string;
-  type: "warehouse" | "distribution" | "retail";
+  type: "warehouse" | "distribution" | "retail" | "airport";
   name: string;
   latitude: number;
   longitude: number;
