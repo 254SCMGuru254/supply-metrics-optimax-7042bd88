@@ -21,7 +21,7 @@ export type SupplyChainRoute = {
 export type AirportNode = {
   id: string;
   name: string;
-  type: string;
+  type: "warehouse" | "distribution" | "retail" | "airport"; // Added required type field
   latitude: number;
   longitude: number;
   hub_type: string;

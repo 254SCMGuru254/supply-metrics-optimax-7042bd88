@@ -1,17 +1,28 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { AuthContextType, AuthError } from '@/types/network';
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   signIn: (email: string, password: string) => Promise<{
-    error: Error | null;
-    data: Session | null;
+    error: AuthError;
+    data: {
+      user: User | null;
+      session: Session | null;
+    };
   }>;
   signUp: (email: string, password: string, metadata?: { full_name: string; company: string }) => 
-    Promise<{ error: Error | null; data: { user: User | null } }>;
-  signOut: () => Promise<{ error: Error | null }>;
+    Promise<{
+      error: AuthError;
+      data: {
+        user: User | null;
+      };
+    }>;
+  signOut: () => Promise<{
+    error: AuthError;
+  }>;
   loading: boolean;
 };
 
@@ -46,7 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     const result = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    return result;
+    return {
+      error: result.error as AuthError,
+      data: {
+        user: result.data.user,
+        session: result.data.session
+      }
+    };
   };
 
   const signUp = async (
@@ -58,12 +75,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const result = await supabase.auth.signUp({ 
       email, 
       password,
-      options: { 
-        data: metadata
-      }
+      options: { data: metadata }
     });
     
-    // If signup successful and we have metadata, create a user profile
+    // Handle profile creation
     if (result.data.user && metadata) {
       await supabase.from('user_profiles').insert({
         user_id: result.data.user.id,
@@ -80,14 +95,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     setLoading(false);
-    return result;
+    return {
+      error: result.error as AuthError,
+      data: {
+        user: result.data.user
+      }
+    };
   };
 
   const signOut = async () => {
-    setLoading(true);
     const result = await supabase.auth.signOut();
-    setLoading(false);
-    return result;
+    return {
+      error: result.error as AuthError
+    };
   };
 
   const value = {
