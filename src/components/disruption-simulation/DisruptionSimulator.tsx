@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-import { Database } from '@/types/database';
 import { supabase } from '@/integrations/supabase/client';
 import { Node, Route } from '@/components/map/MapTypes';
 import {
@@ -13,9 +13,20 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { safeClick } from '@/utils/domUtils';
+
+type NetworkType = {
+  id: string;
+  user_id: string;
+  name: string;
+  nodes: Node[];
+  routes: Route[];
+  created_at: string | null;
+  updated_at: string | null;
+}
 
 export const DisruptionSimulator = () => {
-  const [networks, setNetworks] = useState<Database['public']['Tables']['supply_chain_networks']['Row'][]>([]);
+  const [networks, setNetworks] = useState<NetworkType[]>([]);
   const [selectedNetwork, setSelectedNetwork] = useState<string | undefined>(undefined);
   const [disruptionType, setDisruptionType] = useState<string>('earthquake');
   const [impactNodes, setImpactNodes] = useState<string[]>([]);
@@ -23,6 +34,7 @@ export const DisruptionSimulator = () => {
   const [duration, setDuration] = useState<number>(24);
 
   const fetchNetworks = async () => {
+    // Type-safe query with the correct path to supply_chain_networks
     const { data, error } = await supabase
       .from('supply_chain_networks')
       .select('*');
@@ -32,7 +44,8 @@ export const DisruptionSimulator = () => {
       return;
     }
     
-    setNetworks(data || []);
+    // Cast the data to the correct type
+    setNetworks(data as unknown as NetworkType[] || []);
   };
 
   useEffect(() => {
@@ -52,14 +65,17 @@ export const DisruptionSimulator = () => {
       return;
     }
 
-    const { error } = await supabase.from('disruption_scenarios').insert({
-      user_id: user.user.id,
-      name: `Disruption on ${new Date().toLocaleDateString()}`,
-      type: disruptionType,
-      impact_nodes: impactNodes,
-      impact_severity: impactSeverity,
-      duration: duration,
-    });
+    // Type-safe insert into disruption_scenarios
+    const { error } = await supabase
+      .from('disruption_scenarios')
+      .insert({
+        user_id: user.user.id,
+        name: `Disruption on ${new Date().toLocaleDateString()}`,
+        type: disruptionType,
+        impact_nodes: impactNodes,
+        impact_severity: impactSeverity,
+        duration: duration,
+      });
 
     if (error) {
       console.error('Error creating disruption scenario:', error);

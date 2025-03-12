@@ -59,18 +59,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Handle profile creation
     if (result.data.user && metadata) {
       try {
-        await supabase.from('user_profiles').insert({
-          user_id: result.data.user.id,
-          full_name: metadata.full_name,
-          company: metadata.company,
-          plan_tier: 'basic',
-          usage_quota: { 
-            scenarios_used: 0,
-            optimizations_used: 0,
-            max_scenarios: 10,
-            max_optimizations: 5
-          }
-        });
+        // Using the correct typing for the supabase client
+        await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: result.data.user.id,
+            full_name: metadata.full_name,
+            company: metadata.company,
+            plan_tier: 'basic',
+            usage_quota: { 
+              scenarios_used: 0,
+              optimizations_used: 0,
+              max_scenarios: 10,
+              max_optimizations: 5
+            }
+          });
       } catch (error) {
         console.error("Error creating user profile:", error);
       }

@@ -1,25 +1,59 @@
 
 /**
- * Safely clicks a DOM element if it exists and has a click method
- * @param element The DOM element to click
- * @returns true if the click was successful, false otherwise
+ * Safely clicks on a DOM element
+ * @param element The element to click
+ * @returns void
  */
-export const safeClick = (element: Element | null): boolean => {
-  if (element && 'click' in element && typeof (element as HTMLElement).click === 'function') {
-    (element as HTMLElement).click();
-    return true;
+export const safeClick = (element: Element | null): void => {
+  if (!element) {
+    console.warn('Element is null or undefined');
+    return;
   }
-  return false;
+  
+  if (element instanceof HTMLElement) {
+    element.click();
+  } else {
+    console.warn('Element is not an HTMLElement and cannot be clicked directly');
+  }
 };
 
 /**
- * Creates a safe wrapper for click events on DOM elements
- * @param callback Function to execute when element is safely clicked
+ * Adds a CSS class to an element
+ * @param element The element to add the class to
+ * @param className The class name to add
  */
-export const createSafeClickHandler = (callback: () => void) => {
-  return (element: Element | null) => {
-    if (safeClick(element)) {
-      callback();
-    }
-  };
+export const addClass = (element: Element | null, className: string): void => {
+  if (!element) return;
+  element.classList.add(className);
+};
+
+/**
+ * Removes a CSS class from an element
+ * @param element The element to remove the class from
+ * @param className The class name to remove
+ */
+export const removeClass = (element: Element | null, className: string): void => {
+  if (!element) return;
+  element.classList.remove(className);
+};
+
+/**
+ * Toggles a CSS class on an element
+ * @param element The element to toggle the class on
+ * @param className The class name to toggle
+ */
+export const toggleClass = (element: Element | null, className: string): void => {
+  if (!element) return;
+  element.classList.toggle(className);
+};
+
+/**
+ * Checks if an element has a specific CSS class
+ * @param element The element to check
+ * @param className The class name to check for
+ * @returns boolean
+ */
+export const hasClass = (element: Element | null, className: string): boolean => {
+  if (!element) return false;
+  return element.classList.contains(className);
 };
