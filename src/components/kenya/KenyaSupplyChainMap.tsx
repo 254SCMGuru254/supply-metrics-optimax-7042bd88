@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import L from "leaflet"; // Fixed import for L
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

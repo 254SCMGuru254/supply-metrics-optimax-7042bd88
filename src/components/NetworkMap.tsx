@@ -1,3 +1,4 @@
+
 import React from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -8,6 +9,7 @@ import { RoutePolyline } from "./map/RoutePolyline";
 import { MapController } from "./map/MapController";
 import { MapEventHandler } from "./map/MapEventHandler";
 import { Node, Route } from "./map/MapTypes";
+import { Database } from "@/types/network";
 import L from "leaflet";
 
 // Fix TypeScript errors by creating a module augmentation for react-leaflet
@@ -27,20 +29,38 @@ declare module 'react-leaflet' {
 export { type Node, type Route };
 
 export interface NetworkMapProps {
-  nodes: Node[];
-  routes: Route[];
+  nodes?: Node[];
+  routes?: Route[];
+  network?: Database; // Add support for network object
   onNodeClick?: (node: Node) => void;
   onMapClick?: (lat: number, lng: number) => void;
   isOptimized?: boolean;
+  highlightNodes?: any; // Support for highlighting nodes
+  selectable?: boolean;
+  onNodeSelect?: (nodes: any) => void;
+  disruptionData?: any; // Support for disruption data
+  resilienceMetrics?: any; // Support for resilience metrics
+  airportNodes?: any[]; // Support for airport nodes
 }
 
 export const NetworkMap: React.FC<NetworkMapProps> = ({
-  nodes,
-  routes,
+  nodes: propNodes,
+  routes: propRoutes,
+  network,
   onNodeClick,
   onMapClick,
   isOptimized = false,
+  highlightNodes,
+  selectable,
+  onNodeSelect,
+  disruptionData,
+  resilienceMetrics,
+  airportNodes,
 }) => {
+  // Use nodes and routes from network object if provided, otherwise use prop values
+  const nodes = network?.nodes || propNodes || [];
+  const routes = network?.routes || propRoutes || [];
+
   const mapRef = React.useRef<L.Map | null>(null);
 
   const handleMapReady = (map: L.Map) => {
