@@ -1,18 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { NetworkMap } from "@/components/NetworkMap";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
-import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/lib/supabase";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Loader2, Play, Save } from "lucide-react";
 import { safeClick } from "@/utils/domUtils";
-import { Database, DisruptionSimulatorProps } from "@/types/network";
+import { Database } from "@/types/network";
 
 type DisruptionScenario = Database['public']['Tables']['disruption_scenarios']['Row'];
 type SupplyChainNetwork = Database['public']['Tables']['supply_chain_networks']['Row'];

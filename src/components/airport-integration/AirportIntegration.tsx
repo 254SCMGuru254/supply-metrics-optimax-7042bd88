@@ -6,39 +6,17 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { NetworkMap } from "@/components/NetworkMap";
 import { TimePicker } from "@/components/ui/time-picker-demo";
 import { safeClick } from "@/utils/domUtils";
-import { Database, AirportIntegrationProps } from "@/types/network";
-
-interface AirportNode {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  hub_type: string;
-  capacity: number;
-  utilization: number;
-  delay_probability: number;
-}
-
-interface Route {
-  id: string;
-  from: string;
-  to: string;
-  distance: number;
-  transit_time: number;
-  mode: string;
-  cost: number;
-}
+import { Database } from "@/types/network";
+import { AirportNode, AirportRoute } from "@/components/kenya/types/kenyaTypes";
 
 const initialAirports: AirportNode[] = [
   {
     id: "airport1",
     name: "Jomo Kenyatta International Airport",
+    type: "airport",
     latitude: -1.3192,
     longitude: 36.9277,
     hub_type: "International",
@@ -49,6 +27,7 @@ const initialAirports: AirportNode[] = [
   {
     id: "airport2",
     name: "Moi International Airport",
+    type: "airport",
     latitude: -4.0343,
     longitude: 39.5942,
     hub_type: "Regional",
@@ -58,11 +37,13 @@ const initialAirports: AirportNode[] = [
   },
 ];
 
-const initialRoutes: Route[] = [
+const initialRoutes: AirportRoute[] = [
   {
     id: "route1",
     from: "airport1",
     to: "airport2",
+    type: "air",
+    volume: 1000,
     distance: 480,
     transit_time: 1,
     mode: "air",
@@ -70,9 +51,14 @@ const initialRoutes: Route[] = [
   },
 ];
 
+interface AirportIntegrationProps {
+  database?: Database;
+  airportNodes?: AirportNode[];
+}
+
 export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database, airportNodes }) => {
-  const [airports, setAirports] = useState<AirportNode[]>(airportNodes || initialAirports);
-  const [routes, setRoutes] = useState<Route[]>(initialRoutes);
+  const [airports, setAirports] = useState<AirportNode[]>(initialAirports);
+  const [routes, setRoutes] = useState<AirportRoute[]>(initialRoutes);
   const [selectedAirport, setSelectedAirport] = useState<AirportNode | null>(null);
   const [newAirport, setNewAirport] = useState<AirportNode>({
     id: "",
@@ -84,10 +70,12 @@ export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database
     utilization: 0,
     delay_probability: 0,
   });
-  const [newRoute, setNewRoute] = useState<Route>({
+  const [newRoute, setNewRoute] = useState<AirportRoute>({
     id: "",
     from: "",
     to: "",
+    type: "air",
+    volume: 0,
     distance: 0,
     transit_time: 0,
     mode: "air",
@@ -138,6 +126,8 @@ export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database
       id: "",
       from: "",
       to: "",
+      type: "air",
+      volume: 0,
       distance: 0,
       transit_time: 0,
       mode: "air",
@@ -335,9 +325,15 @@ export const AirportIntegration: React.FC<AirportIntegrationProps> = ({ database
         <TabsContent value="map" className="p-4">
           <h2 className="text-xl font-semibold mb-4">Network Map</h2>
           <NetworkMap
-            nodes={airports}
-            routes={routes}
-            onNodeClick={handleAirportClick}
+            nodes={airports.map(airport => ({
+              ...airport,
+              type: airport.type || "airport"
+            }))}
+            routes={routes.map(route => ({
+              ...route,
+              volume: route.volume || 0
+            }))}
+            onNodeClick={(node) => handleAirportClick(node as AirportNode)}
             isOptimized={isOptimized}
             highlightNodes={highlightNodes}
             selectable={selectable}
