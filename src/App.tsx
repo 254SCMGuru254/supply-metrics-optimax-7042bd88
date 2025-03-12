@@ -1,45 +1,41 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Layout } from "./components/Layout";
-import Onboarding from "./pages/Onboarding";
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
 import Index from "./pages/Index";
-import Analytics from "./pages/Analytics";
+import NotFound from "./pages/NotFound";
+import Onboarding from "./pages/Onboarding";
+import DataInput from "./pages/DataInput";
 import CenterOfGravity from "./pages/CenterOfGravity";
 import NetworkOptimization from "./pages/NetworkOptimization";
-import Simulation from "./pages/Simulation";
 import Heuristic from "./pages/Heuristic";
 import Isohedron from "./pages/Isohedron";
-import DataInput from "./pages/DataInput";
-import NotFound from "./pages/NotFound";
+import Simulation from "./pages/Simulation";
+import Analytics from "./pages/Analytics";
+import ChatAssistant from "./pages/ChatAssistant";
+import KenyaSupplyChain from "./pages/KenyaSupplyChain";
+import "./App.css";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Index />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/center-of-gravity" element={<CenterOfGravity />} />
-            <Route path="/network-optimization" element={<NetworkOptimization />} />
-            <Route path="/simulation" element={<Simulation />} />
-            <Route path="/heuristic" element={<Heuristic />} />
-            <Route path="/isohedron" element={<Isohedron />} />
-            <Route path="/data-input" element={<DataInput />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Index />} />
+          <Route path="onboarding" element={<Onboarding />} />
+          <Route path="data-input" element={<DataInput />} />
+          <Route path="center-of-gravity" element={<CenterOfGravity />} />
+          <Route path="network-optimization" element={<NetworkOptimization />} />
+          <Route path="heuristic" element={<Heuristic />} />
+          <Route path="isohedron" element={<Isohedron />} />
+          <Route path="simulation" element={<Simulation />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="chat-assistant" element={<ChatAssistant />} />
+          <Route path="kenya-supply-chain" element={<KenyaSupplyChain />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
+}
 
 export default App;
