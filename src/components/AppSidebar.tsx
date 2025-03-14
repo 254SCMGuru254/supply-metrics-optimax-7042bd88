@@ -1,3 +1,4 @@
+
 import {
   BarChart3,
   Home,
@@ -6,6 +7,8 @@ import {
   Truck,
   Database,
   Warehouse,
+  Target,
+  LineChart,
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,9 +25,10 @@ import { Link, useLocation } from "react-router-dom";
 const menuItems = [
   { title: "Dashboard", icon: Home, path: "/dashboard" },
   { title: "Analytics Dashboard", icon: BarChart3, path: "/analytics" },
-  { title: "Center of Gravity", icon: Warehouse, path: "/center-of-gravity" },
+  { title: "Center of Gravity", icon: Target, path: "/center-of-gravity" },
   { title: "Network Optimization", icon: Network, path: "/network-optimization" },
-  { title: "Simulation", icon: Truck, path: "/simulation" },
+  { title: "Route Optimization", icon: Truck, path: "/route-optimization" },
+  { title: "Simulation", icon: LineChart, path: "/simulation" },
   { title: "Heuristic Analysis", icon: BarChart3, path: "/heuristic" },
   { title: "Data Management", icon: Database, path: "/data-input" },
 ];

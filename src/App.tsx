@@ -13,6 +13,8 @@ import Simulation from "./pages/Simulation";
 import Analytics from "./pages/Analytics";
 import ChatAssistant from "./pages/ChatAssistant";
 import KenyaSupplyChain from "./pages/KenyaSupplyChain";
+import RouteOptimization from "./pages/RouteOptimization";
+import Dashboard from "./pages/Dashboard";
 import "./App.css";
 
 function App() {
@@ -21,10 +23,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><Outlet /></Layout>}>
           <Route index element={<Index />} />
-          <Route path="onboarding" element={<Onboarding />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="onboarding/*" element={<Onboarding />} />
           <Route path="data-input" element={<DataInput />} />
           <Route path="center-of-gravity" element={<CenterOfGravity />} />
           <Route path="network-optimization" element={<NetworkOptimization />} />
+          <Route path="route-optimization" element={<RouteOptimization />} />
           <Route path="heuristic" element={<Heuristic />} />
           <Route path="isohedron" element={<Isohedron />} />
           <Route path="simulation" element={<Simulation />} />
