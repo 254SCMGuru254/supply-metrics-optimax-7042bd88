@@ -9,13 +9,16 @@ import { NetworkFlowContent } from "@/components/data-input/NetworkFlowContent";
 import { SimulationContent } from "@/components/data-input/SimulationContent";
 import { HeuristicContent } from "@/components/data-input/HeuristicContent";
 import { IsohedronContent } from "@/components/data-input/IsohedronContent";
+import { ComprehensiveDataContent } from "@/components/data-input/ComprehensiveDataContent";
 
 const DataInput = () => {
   const navigate = useNavigate();
-  const [activeModel, setActiveModel] = useState<string>("general");
+  const [activeModel, setActiveModel] = useState<string>("comprehensive");
 
   const renderModelContent = () => {
     switch (activeModel) {
+      case "comprehensive":
+        return <ComprehensiveDataContent />;
       case "general":
         return <GeneralDataContent />;
       case "cog":
@@ -29,7 +32,7 @@ const DataInput = () => {
       case "isohedron":
         return <IsohedronContent />;
       default:
-        return <GeneralDataContent />;
+        return <ComprehensiveDataContent />;
     }
   };
 
