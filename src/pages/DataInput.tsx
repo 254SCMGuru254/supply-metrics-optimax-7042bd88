@@ -11,6 +11,7 @@ import { HeuristicContent } from "@/components/data-input/HeuristicContent";
 import { IsohedronContent } from "@/components/data-input/IsohedronContent";
 import { ComprehensiveDataContent } from "@/components/data-input/ComprehensiveDataContent";
 import { ModelSelectionGuide } from "@/components/data-input/ModelSelectionGuide";
+import { MILPDataContent } from "@/components/data-input/MILPDataContent";
 import { HelpCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -36,8 +37,7 @@ const DataInput = () => {
       case "isohedron":
         return <IsohedronContent />;
       case "milp":
-        // For MILP we'll use the comprehensive data content for now
-        return <ComprehensiveDataContent />;
+        return <MILPDataContent />;
       default:
         return null;
     }
@@ -57,6 +57,9 @@ const DataInput = () => {
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate("/dashboard")}>
             Back to Dashboard
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/onboarding")}>
+            Go to Onboarding
           </Button>
         </div>
       </div>

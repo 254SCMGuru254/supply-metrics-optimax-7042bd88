@@ -70,6 +70,13 @@ export const ModelSelection = ({
         onClick={() => setActiveModel("isohedron")}
         icon={Hexagon}
       />
+      <ModelSelectionButton
+        title="MILP"
+        description="Mixed-Integer Linear Programming"
+        isActive={activeModel === "milp"}
+        onClick={() => setActiveModel("milp")}
+        icon={Calculator}
+      />
     </div>
   );
 };
