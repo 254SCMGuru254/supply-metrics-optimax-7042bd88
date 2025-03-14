@@ -15,6 +15,7 @@ import ChatAssistant from "./pages/ChatAssistant";
 import KenyaSupplyChain from "./pages/KenyaSupplyChain";
 import RouteOptimization from "./pages/RouteOptimization";
 import Dashboard from "./pages/Dashboard";
+import Introduction from "./pages/Introduction";
 import "./App.css";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><Outlet /></Layout>}>
           <Route index element={<Index />} />
+          <Route path="introduction" element={<Introduction />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="onboarding/*" element={<Onboarding />} />
           <Route path="data-input" element={<DataInput />} />

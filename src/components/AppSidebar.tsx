@@ -9,6 +9,7 @@ import {
   Warehouse,
   Target,
   LineChart,
+  Info,
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,6 +25,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, path: "/dashboard" },
+  { title: "Introduction", icon: Info, path: "/introduction" },
   { title: "Analytics Dashboard", icon: BarChart3, path: "/analytics" },
   { title: "Center of Gravity", icon: Target, path: "/center-of-gravity" },
   { title: "Network Optimization", icon: Network, path: "/network-optimization" },
