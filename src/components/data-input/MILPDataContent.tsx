@@ -250,7 +250,7 @@ export const MILPDataContent = () => {
             
             <TabsContent value="facilities" className="pt-6">
               <div className="space-y-6">
-                <Alert variant="outline" className="bg-primary/5 border-primary/50">
+                <Alert className="bg-primary/5 border-primary/50">
                   <AlertTitle>About Facilities</AlertTitle>
                   <AlertDescription>
                     Define potential facility locations, capacity, and costs. These can be warehouses, 
@@ -355,7 +355,7 @@ export const MILPDataContent = () => {
             
             <TabsContent value="customers" className="pt-6">
               <div className="space-y-6">
-                <Alert variant="outline" className="bg-primary/5 border-primary/50">
+                <Alert className="bg-primary/5 border-primary/50">
                   <AlertTitle>About Customers</AlertTitle>
                   <AlertDescription>
                     Define customer locations, demand, and priority levels. These represent the demand points in your network.
@@ -442,7 +442,7 @@ export const MILPDataContent = () => {
             
             <TabsContent value="transport" className="pt-6">
               <div className="space-y-6">
-                <Alert variant="outline" className="bg-primary/5 border-primary/50">
+                <Alert className="bg-primary/5 border-primary/50">
                   <AlertTitle>About Transport Routes</AlertTitle>
                   <AlertDescription>
                     Define the transportation options between facilities and customers, including costs, 
@@ -561,7 +561,7 @@ export const MILPDataContent = () => {
             
             <TabsContent value="constraints" className="pt-6">
               <div className="space-y-6">
-                <Alert variant="outline" className="bg-primary/5 border-primary/50">
+                <Alert className="bg-primary/5 border-primary/50">
                   <AlertTitle>About Constraints</AlertTitle>
                   <AlertDescription>
                     Define global constraints and objectives for the optimization model. These parameters 
