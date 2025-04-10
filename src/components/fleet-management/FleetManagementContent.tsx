@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { ExclamationTriangleIcon, TruckIcon, CoinsIcon, GaugeIcon, ScaleIcon } from "lucide-react";
+import { AlertTriangle, Truck, Coins, Gauge, Scale } from "lucide-react";
 
 export type FleetManagementProps = {
   onSubmit?: (data: FleetData) => void;
@@ -140,7 +140,7 @@ export const FleetManagementContent = ({ onSubmit }: FleetManagementProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TruckIcon className="h-5 w-5" />
+                <Truck className="h-5 w-5" />
                 Ownership Model
               </CardTitle>
               <CardDescription>
@@ -198,7 +198,7 @@ export const FleetManagementContent = ({ onSubmit }: FleetManagementProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CoinsIcon className="h-5 w-5" />
+                <Coins className="h-5 w-5" />
                 Cost Calculator
               </CardTitle>
               <CardDescription>
@@ -299,7 +299,7 @@ export const FleetManagementContent = ({ onSubmit }: FleetManagementProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ScaleIcon className="h-5 w-5" />
+                <Scale className="h-5 w-5" />
                 Capacity Constraints
               </CardTitle>
               <CardDescription>
@@ -382,7 +382,7 @@ export const FleetManagementContent = ({ onSubmit }: FleetManagementProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ExclamationTriangleIcon className="h-5 w-5" />
+                <AlertTriangle className="h-5 w-5" />
                 Compliance Alerts
               </CardTitle>
               <CardDescription>
@@ -428,7 +428,7 @@ export const FleetManagementContent = ({ onSubmit }: FleetManagementProps) => {
 
               {fleetData.complianceAlerts.tonnageRestrictions && (
                 <Alert>
-                  <ExclamationTriangleIcon className="h-4 w-4" />
+                  <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Tonnage Restriction Alert</AlertTitle>
                   <AlertDescription>
                     Your fleet's tonnage capacity of {fleetData.tonnageCapacity} tons may exceed limits on certain corridors.
