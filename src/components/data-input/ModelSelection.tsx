@@ -6,7 +6,9 @@ import {
   Network, 
   BarChart4, 
   Calculator, 
-  Hexagon 
+  Hexagon,
+  Truck,
+  Warehouse
 } from "lucide-react";
 import { ModelSelectionButton } from "./ModelSelectionButton";
 
@@ -76,6 +78,20 @@ export const ModelSelection = ({
         isActive={activeModel === "milp"}
         onClick={() => setActiveModel("milp")}
         icon={Calculator}
+      />
+      <ModelSelectionButton
+        title="Fleet Management"
+        description="Vehicle fleet optimization"
+        isActive={activeModel === "fleet"}
+        onClick={() => setActiveModel("fleet")}
+        icon={Truck}
+      />
+      <ModelSelectionButton
+        title="Warehouse Network"
+        description="Warehouse location & configuration"
+        isActive={activeModel === "warehouse"}
+        onClick={() => setActiveModel("warehouse")}
+        icon={Warehouse}
       />
     </div>
   );

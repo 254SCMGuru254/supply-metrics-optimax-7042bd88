@@ -12,7 +12,9 @@ import { IsohedronContent } from "@/components/data-input/IsohedronContent";
 import { ComprehensiveDataContent } from "@/components/data-input/ComprehensiveDataContent";
 import { ModelSelectionGuide } from "@/components/data-input/ModelSelectionGuide";
 import { MILPDataContent } from "@/components/data-input/MILPDataContent";
-import { HelpCircle } from "lucide-react";
+import { FleetManagementContent } from "@/components/fleet-management/FleetManagementContent";
+import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigContent";
+import { HelpCircle, Truck, Warehouse } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DataInput = () => {
@@ -38,6 +40,10 @@ const DataInput = () => {
         return <IsohedronContent />;
       case "milp":
         return <MILPDataContent />;
+      case "fleet":
+        return <FleetManagementContent />;
+      case "warehouse":
+        return <WarehouseConfigContent />;
       default:
         return null;
     }
