@@ -16,7 +16,7 @@ import { FleetManagementContent } from "@/components/fleet-management/FleetManag
 import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigContent";
 import { RouteOptimizationContent } from "@/components/route-optimization/RouteOptimizationContent";
 import { CostModelingContent } from "@/components/cost-modeling/CostModelingContent";
-import { HelpCircle, Truck, Warehouse } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DataInput = () => {
