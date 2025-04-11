@@ -1,945 +1,914 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { 
-  BarChart4, 
-  DollarSign, 
-  Package, 
-  Truck, 
-  Warehouse, 
-  AlertTriangle
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  BarChart3,
+  TrendingUp,
+  Store,
+  Truck,
+  BarChart4,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 export const CostModelingContent = () => {
-  const [activeTab, setActiveTab] = useState("tco");
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [costType, setCostType] = useState<"own" | "outsource">("own");
-  const [assetType, setAssetType] = useState<"fleet" | "warehouse">("fleet");
   const { toast } = useToast();
-  
-  // TCO Inputs
+  const [activeTab, setActiveTab] = useState("tco");
+  const [fleetModel, setFleetModel] = useState("owned");
+  const [calculateLoading, setCalculateLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [showSecondaryResults, setShowSecondaryResults] = useState(false);
+
+  // TCO inputs
   const [tcoInputs, setTcoInputs] = useState({
-    assetCost: 100000,
-    lifespan: 5,
-    maintenanceCost: 8000,
-    operatingCost: 25000,
-    insuranceCost: 5000,
-    taxesAndFees: 2000,
-    disposalValue: 30000,
-    outsourcingCost: 45000
+    fleetSize: 10,
+    vehicleLifespan: 5,
+    vehicleCost: 50000,
+    maintenanceCost: 5000,
+    fuelCost: 1.2,
+    driverSalary: 30000,
+    annualDistance: 50000,
+    insuranceCost: 3000,
+    depreciation: 20,
+    outsourceCostPerKm: 1.8,
   });
-  
-  // Per-Tonne Inputs
-  const [perTonneInputs, setPerTonneInputs] = useState({
-    tonnage: 500,
-    fuelCostPerLiter: 1.2,
-    fuelConsumption: 0.35, // liters per tonne-km
-    distanceKm: 1000,
+
+  // Per-tonne costing inputs
+  const [tonneInputs, setTonneInputs] = useState({
+    averageTonnage: 15,
+    fuelConsumption: 0.35, // liters per km
     laborCostPerHour: 15,
-    avgSpeedKmh: 60,
-    tollsPerTrip: 50,
-    loadingUnloadingCost: 5 // per tonne
-  });
-  
-  // Scenario Analysis Inputs
-  const [scenarioInputs, setScenarioInputs] = useState({
-    baselineFuelPrice: 1.2,
-    scenarioFuelPrice: 1.8,
-    baselineLaborRate: 15,
-    scenarioLaborRate: 20,
-    baselineVolume: 500,
-    scenarioVolume: 400
+    tollsPerTrip: 25,
+    maintenancePerKm: 0.15,
+    averageTripDistance: 350,
+    averageTripTime: 8,
   });
 
-  // Results states
-  const [tcoResults, setTcoResults] = useState<any>(null);
-  const [perTonneResults, setPerTonneResults] = useState<any>(null);
-  const [scenarioResults, setScenarioResults] = useState<any>(null);
+  // Scenario analysis inputs
+  const [baseScenario, setBaseScenario] = useState({
+    fuelPrice: 1.2,
+    driverWage: 15,
+    maintenanceCost: 0.15,
+    tonnage: 15,
+    distance: 350,
+  });
 
-  const handleTcoInputChange = (field: string, value: string | number) => {
-    setTcoInputs({
-      ...tcoInputs,
-      [field]: typeof value === 'string' ? parseFloat(value) || 0 : value
-    });
-  };
-
-  const handlePerTonneInputChange = (field: string, value: string | number) => {
-    setPerTonneInputs({
-      ...perTonneInputs,
-      [field]: typeof value === 'string' ? parseFloat(value) || 0 : value
-    });
-  };
-
-  const handleScenarioInputChange = (field: string, value: string | number) => {
-    setScenarioInputs({
-      ...scenarioInputs,
-      [field]: typeof value === 'string' ? parseFloat(value) || 0 : value
-    });
-  };
+  const [scenarios, setScenarios] = useState([
+    { name: "Fuel Price +50%", fuelPrice: 1.8, costImpact: 0 },
+    { name: "Driver Wages +20%", driverWage: 18, costImpact: 0 },
+    { name: "Maintenance +30%", maintenanceCost: 0.195, costImpact: 0 },
+    { name: "Combined Impact", combined: true, costImpact: 0 },
+  ]);
 
   const calculateTCO = () => {
-    setIsCalculating(true);
-    
-    // Simulate calculation delay
+    setCalculateLoading(true);
+
+    // Simulate calculation time
     setTimeout(() => {
-      const {
-        assetCost,
-        lifespan,
-        maintenanceCost,
-        operatingCost,
-        insuranceCost,
-        taxesAndFees,
-        disposalValue,
-        outsourcingCost
-      } = tcoInputs;
-      
-      // Calculate ownership costs
-      const totalOwnershipCost = assetCost + 
-        (maintenanceCost * lifespan) +
-        (operatingCost * lifespan) +
-        (insuranceCost * lifespan) +
-        (taxesAndFees * lifespan) -
-        disposalValue;
-      
-      const annualOwnershipCost = totalOwnershipCost / lifespan;
-      
-      // Calculate outsourcing costs
-      const totalOutsourcingCost = outsourcingCost * lifespan;
-      const annualOutsourcingCost = outsourcingCost;
-      
-      // Comparison
-      const difference = totalOutsourcingCost - totalOwnershipCost;
-      const annualDifference = annualOutsourcingCost - annualOwnershipCost;
-      const betterOption = difference > 0 ? "own" : "outsource";
-      const savingsPercentage = Math.abs((difference / Math.max(totalOwnershipCost, totalOutsourcingCost)) * 100);
-      
-      setTcoResults({
-        totalOwnershipCost,
-        annualOwnershipCost,
-        totalOutsourcingCost,
-        annualOutsourcingCost,
-        difference,
-        annualDifference,
-        betterOption,
-        savingsPercentage
-      });
-      
-      setIsCalculating(false);
+      setShowResults(true);
+      setCalculateLoading(false);
       
       toast({
         title: "TCO Analysis Complete",
-        description: `${betterOption === 'own' ? 'Owning' : 'Outsourcing'} is more cost-effective by ${savingsPercentage.toFixed(1)}%`
+        description: "Total cost of ownership calculation finished successfully.",
       });
-      
     }, 1500);
   };
 
-  const calculatePerTonne = () => {
-    setIsCalculating(true);
-    
-    // Simulate calculation delay
+  const calculatePerTonneCost = () => {
+    setCalculateLoading(true);
+
+    // Simulate calculation time
     setTimeout(() => {
-      const {
-        tonnage,
-        fuelCostPerLiter,
-        fuelConsumption,
-        distanceKm,
-        laborCostPerHour,
-        avgSpeedKmh,
-        tollsPerTrip,
-        loadingUnloadingCost
-      } = perTonneInputs;
-      
-      // Calculate fuel cost
-      const totalFuelConsumption = fuelConsumption * tonnage * distanceKm;
-      const totalFuelCost = totalFuelConsumption * fuelCostPerLiter;
-      const fuelCostPerTonne = totalFuelCost / tonnage;
-      
-      // Calculate labor cost
-      const tripTimeHours = distanceKm / avgSpeedKmh;
-      const totalLaborCost = tripTimeHours * laborCostPerHour;
-      const laborCostPerTonne = totalLaborCost / tonnage;
-      
-      // Calculate tolls cost
-      const tollsCostPerTonne = tollsPerTrip / tonnage;
-      
-      // Calculate loading/unloading cost
-      // Already per tonne
-      
-      // Total costs
-      const totalCostPerTonne = fuelCostPerTonne + laborCostPerTonne + tollsCostPerTonne + loadingUnloadingCost;
-      const totalTripCost = totalCostPerTonne * tonnage;
-      
-      setPerTonneResults({
-        fuelCostPerTonne,
-        laborCostPerTonne,
-        tollsCostPerTonne,
-        loadingUnloadingCost,
-        totalCostPerTonne,
-        totalTripCost
-      });
-      
-      setIsCalculating(false);
+      setShowResults(true);
+      setCalculateLoading(false);
       
       toast({
         title: "Per-Tonne Analysis Complete",
-        description: `Total cost per tonne: $${totalCostPerTonne.toFixed(2)}`
+        description: "Cost per tonne calculation finished successfully.",
       });
-      
     }, 1500);
   };
 
-  const calculateScenarioAnalysis = () => {
-    setIsCalculating(true);
-    
-    // Simulate calculation delay
+  const runScenarioAnalysis = () => {
+    setCalculateLoading(true);
+
+    // Simulate calculation time
     setTimeout(() => {
-      const {
-        baselineFuelPrice,
-        scenarioFuelPrice,
-        baselineLaborRate,
-        scenarioLaborRate,
-        baselineVolume,
-        scenarioVolume
-      } = scenarioInputs;
+      const updatedScenarios = [...scenarios];
       
-      // Simplified model for demonstration
-      const calculateCost = (fuelPrice: number, laborRate: number, volume: number) => {
-        // Assume 100km distance, 0.3L fuel per tonne-km, 2 hours labor per trip
-        const fuelCost = fuelPrice * 0.3 * 100 * volume;
-        const laborCost = laborRate * 2;
-        const fixedCost = 500; // Arbitrary fixed costs
-        
-        return {
-          fuelCost,
-          laborCost,
-          fixedCost,
-          totalCost: fuelCost + laborCost + fixedCost,
-          perTonneCost: (fuelCost + laborCost + fixedCost) / volume
-        };
-      };
+      // Calculate impact (simplified demo calculations)
+      updatedScenarios[0].costImpact = 18.2; // Fuel impact
+      updatedScenarios[1].costImpact = 8.7;  // Driver wage impact
+      updatedScenarios[2].costImpact = 6.5;  // Maintenance impact
+      updatedScenarios[3].costImpact = 33.4; // Combined impact
       
-      const baselineCost = calculateCost(baselineFuelPrice, baselineLaborRate, baselineVolume);
-      const scenarioCost = calculateCost(scenarioFuelPrice, scenarioLaborRate, scenarioVolume);
-      
-      // Calculate impacts
-      const costIncrease = scenarioCost.totalCost - baselineCost.totalCost;
-      const percentageIncrease = (costIncrease / baselineCost.totalCost) * 100;
-      const perTonneIncrease = scenarioCost.perTonneCost - baselineCost.perTonneCost;
-      
-      setScenarioResults({
-        baseline: baselineCost,
-        scenario: scenarioCost,
-        costIncrease,
-        percentageIncrease,
-        perTonneIncrease
-      });
-      
-      setIsCalculating(false);
+      setScenarios(updatedScenarios);
+      setShowResults(true);
+      setCalculateLoading(false);
       
       toast({
         title: "Scenario Analysis Complete",
-        description: `Cost impact: ${percentageIncrease >= 0 ? '+' : ''}${percentageIncrease.toFixed(1)}%`
+        description: "What-if scenario analysis finished successfully.",
       });
-      
-    }, 1500);
+    }, 2000);
   };
+
+  // Cost calculations
+  const ownedFleetAnnualCost =
+    tcoInputs.fleetSize * tcoInputs.vehicleCost * (tcoInputs.depreciation / 100) +
+    tcoInputs.fleetSize * tcoInputs.maintenanceCost +
+    tcoInputs.fleetSize * tcoInputs.annualDistance * tcoInputs.fuelCost * 0.35 / 100 +
+    tcoInputs.fleetSize * tcoInputs.driverSalary +
+    tcoInputs.fleetSize * tcoInputs.insuranceCost;
+  
+  const outsourcedFleetAnnualCost =
+    tcoInputs.fleetSize * tcoInputs.annualDistance * tcoInputs.outsourceCostPerKm;
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <Card className="p-4 col-span-1 md:col-span-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full">
-              <TabsTrigger value="tco" className="flex-1">TCO</TabsTrigger>
-              <TabsTrigger value="tonne" className="flex-1">Per-Tonne</TabsTrigger>
-              <TabsTrigger value="scenario" className="flex-1">Scenarios</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="tco" className="pt-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Total Cost of Ownership</h3>
-                <Select 
-                  value={assetType} 
-                  onValueChange={(value) => setAssetType(value as "fleet" | "warehouse")}
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Asset Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fleet">
-                      <div className="flex items-center">
-                        <Truck size={14} className="mr-2" />
-                        <span>Fleet</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="warehouse">
-                      <div className="flex items-center">
-                        <Warehouse size={14} className="mr-2" />
-                        <span>Warehouse</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="assetCost">
-                    {assetType === "fleet" ? "Vehicle Purchase Cost" : "Facility Construction Cost"} ($)
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Cost Modeling</h1>
+          <p className="text-muted-foreground mb-6">
+            Analyze transportation costs across different scenarios and models.
+          </p>
+        </div>
+        <div className="flex justify-end items-center">
+          <Select value={fleetModel} onValueChange={setFleetModel}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Fleet Model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="owned">Owned Fleet</SelectItem>
+              <SelectItem value="outsourced">Outsourced Fleet</SelectItem>
+              <SelectItem value="hybrid">Hybrid Model</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3">
+          <TabsTrigger value="tco" className="flex items-center">
+            <Store className="h-4 w-4 mr-2" />
+            <span>TCO Analysis</span>
+          </TabsTrigger>
+          <TabsTrigger value="pertonne" className="flex items-center">
+            <Truck className="h-4 w-4 mr-2" />
+            <span>Per-Tonne Costing</span>
+          </TabsTrigger>
+          <TabsTrigger value="scenario" className="flex items-center">
+            <BarChart4 className="h-4 w-4 mr-2" />
+            <span>Scenario Analysis</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tco">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Total Cost of Ownership Analysis
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Compare the costs of owning versus outsourcing your transportation fleet.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fleetSize">Fleet Size (vehicles)</Label>
+                  <Input
+                    id="fleetSize"
+                    type="number"
+                    value={tcoInputs.fleetSize}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        fleetSize: parseInt(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="vehicleCost">Vehicle Cost (USD)</Label>
+                  <Input
+                    id="vehicleCost"
+                    type="number"
+                    value={tcoInputs.vehicleCost}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        vehicleCost: parseInt(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="vehicleLifespan">
+                    Vehicle Lifespan (years)
                   </Label>
                   <Input
-                    id="assetCost"
+                    id="vehicleLifespan"
                     type="number"
-                    value={tcoInputs.assetCost}
-                    onChange={(e) => handleTcoInputChange("assetCost", e.target.value)}
+                    value={tcoInputs.vehicleLifespan}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        vehicleLifespan: parseInt(e.target.value) || 0,
+                      })
+                    }
                   />
                 </div>
-                
-                <div>
-                  <Label htmlFor="lifespan">Asset Lifespan (years)</Label>
-                  <Input
-                    id="lifespan"
-                    type="number"
-                    value={tcoInputs.lifespan}
-                    onChange={(e) => handleTcoInputChange("lifespan", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="maintenanceCost">Annual Maintenance Cost ($)</Label>
+
+                <div className="space-y-2">
+                  <Label htmlFor="maintenanceCost">
+                    Annual Maintenance per Vehicle (USD)
+                  </Label>
                   <Input
                     id="maintenanceCost"
                     type="number"
                     value={tcoInputs.maintenanceCost}
-                    onChange={(e) => handleTcoInputChange("maintenanceCost", e.target.value)}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        maintenanceCost: parseInt(e.target.value) || 0,
+                      })
+                    }
                   />
                 </div>
-                
-                <div>
-                  <Label htmlFor="operatingCost">Annual Operating Cost ($)</Label>
+
+                <div className="space-y-2">
+                  <Label htmlFor="annualDistance">
+                    Annual Distance per Vehicle (km)
+                  </Label>
                   <Input
-                    id="operatingCost"
+                    id="annualDistance"
                     type="number"
-                    value={tcoInputs.operatingCost}
-                    onChange={(e) => handleTcoInputChange("operatingCost", e.target.value)}
+                    value={tcoInputs.annualDistance}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        annualDistance: parseInt(e.target.value) || 0,
+                      })
+                    }
                   />
                 </div>
-                
-                <div>
-                  <Label htmlFor="insuranceCost">Annual Insurance Cost ($)</Label>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fuelCost">Fuel Cost (USD per liter)</Label>
+                  <Input
+                    id="fuelCost"
+                    type="number"
+                    step="0.01"
+                    value={tcoInputs.fuelCost}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        fuelCost: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="driverSalary">
+                    Annual Driver Salary (USD)
+                  </Label>
+                  <Input
+                    id="driverSalary"
+                    type="number"
+                    value={tcoInputs.driverSalary}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        driverSalary: parseInt(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="insuranceCost">
+                    Annual Insurance per Vehicle (USD)
+                  </Label>
                   <Input
                     id="insuranceCost"
                     type="number"
                     value={tcoInputs.insuranceCost}
-                    onChange={(e) => handleTcoInputChange("insuranceCost", e.target.value)}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        insuranceCost: parseInt(e.target.value) || 0,
+                      })
+                    }
                   />
                 </div>
-                
-                <div>
-                  <Label htmlFor="taxesAndFees">Annual Taxes and Fees ($)</Label>
-                  <Input
-                    id="taxesAndFees"
-                    type="number"
-                    value={tcoInputs.taxesAndFees}
-                    onChange={(e) => handleTcoInputChange("taxesAndFees", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="disposalValue">End-of-Life Disposal/Resale Value ($)</Label>
-                  <Input
-                    id="disposalValue"
-                    type="number"
-                    value={tcoInputs.disposalValue}
-                    onChange={(e) => handleTcoInputChange("disposalValue", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="outsourcingCost">
-                    Annual {assetType === "fleet" ? "3PL/Carrier" : "3PL/Warehouse"} Cost ($)
+
+                <div className="space-y-2">
+                  <Label htmlFor="depreciation">
+                    Annual Depreciation Rate (%)
                   </Label>
                   <Input
-                    id="outsourcingCost"
+                    id="depreciation"
                     type="number"
-                    value={tcoInputs.outsourcingCost}
-                    onChange={(e) => handleTcoInputChange("outsourcingCost", e.target.value)}
+                    value={tcoInputs.depreciation}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        depreciation: parseInt(e.target.value) || 0,
+                      })
+                    }
                   />
                 </div>
-                
-                <Button 
-                  onClick={calculateTCO} 
-                  className="w-full mt-2"
-                  disabled={isCalculating}
-                >
-                  {isCalculating ? "Calculating..." : "Calculate TCO"}
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="tonne" className="pt-4 space-y-4">
-              <h3 className="font-medium">Per-Tonne Cost Breakdown</h3>
-              
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="tonnage">Cargo Weight (tonnes)</Label>
+
+                <div className="space-y-2">
+                  <Label htmlFor="outsourceCostPerKm">
+                    Outsourced Cost per km (USD)
+                  </Label>
                   <Input
-                    id="tonnage"
-                    type="number"
-                    value={perTonneInputs.tonnage}
-                    onChange={(e) => handlePerTonneInputChange("tonnage", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="distanceKm">Transport Distance (km)</Label>
-                  <Input
-                    id="distanceKm"
-                    type="number"
-                    value={perTonneInputs.distanceKm}
-                    onChange={(e) => handlePerTonneInputChange("distanceKm", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="fuelCostPerLiter">Fuel Cost ($ per liter)</Label>
-                  <Input
-                    id="fuelCostPerLiter"
+                    id="outsourceCostPerKm"
                     type="number"
                     step="0.01"
-                    value={perTonneInputs.fuelCostPerLiter}
-                    onChange={(e) => handlePerTonneInputChange("fuelCostPerLiter", e.target.value)}
+                    value={tcoInputs.outsourceCostPerKm}
+                    onChange={(e) =>
+                      setTcoInputs({
+                        ...tcoInputs,
+                        outsourceCostPerKm: parseFloat(e.target.value) || 0,
+                      })
+                    }
                   />
-                </div>
-                
-                <div>
-                  <Label htmlFor="fuelConsumption">Fuel Consumption (liters per tonne-km)</Label>
-                  <Input
-                    id="fuelConsumption"
-                    type="number"
-                    step="0.01"
-                    value={perTonneInputs.fuelConsumption}
-                    onChange={(e) => handlePerTonneInputChange("fuelConsumption", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="laborCostPerHour">Labor Cost ($ per hour)</Label>
-                  <Input
-                    id="laborCostPerHour"
-                    type="number"
-                    step="0.01"
-                    value={perTonneInputs.laborCostPerHour}
-                    onChange={(e) => handlePerTonneInputChange("laborCostPerHour", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="avgSpeedKmh">Average Speed (km/h)</Label>
-                  <Input
-                    id="avgSpeedKmh"
-                    type="number"
-                    value={perTonneInputs.avgSpeedKmh}
-                    onChange={(e) => handlePerTonneInputChange("avgSpeedKmh", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="tollsPerTrip">Tolls Cost ($ per trip)</Label>
-                  <Input
-                    id="tollsPerTrip"
-                    type="number"
-                    step="0.01"
-                    value={perTonneInputs.tollsPerTrip}
-                    onChange={(e) => handlePerTonneInputChange("tollsPerTrip", e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="loadingUnloadingCost">Loading/Unloading Cost ($ per tonne)</Label>
-                  <Input
-                    id="loadingUnloadingCost"
-                    type="number"
-                    step="0.01"
-                    value={perTonneInputs.loadingUnloadingCost}
-                    onChange={(e) => handlePerTonneInputChange("loadingUnloadingCost", e.target.value)}
-                  />
-                </div>
-                
-                <Button 
-                  onClick={calculatePerTonne} 
-                  className="w-full mt-2"
-                  disabled={isCalculating}
-                >
-                  {isCalculating ? "Calculating..." : "Calculate Per-Tonne Cost"}
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="scenario" className="pt-4 space-y-4">
-              <h3 className="font-medium">What-If Scenario Analysis</h3>
-              
-              <div className="space-y-4">
-                <div className="bg-muted/50 p-3 rounded-md">
-                  <h4 className="text-sm font-medium mb-2">Baseline Scenario</h4>
-                  
-                  <div className="space-y-2">
-                    <div>
-                      <Label htmlFor="baselineFuelPrice">Fuel Price ($ per liter)</Label>
-                      <Input
-                        id="baselineFuelPrice"
-                        type="number"
-                        step="0.01"
-                        value={scenarioInputs.baselineFuelPrice}
-                        onChange={(e) => handleScenarioInputChange("baselineFuelPrice", e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="baselineLaborRate">Labor Rate ($ per hour)</Label>
-                      <Input
-                        id="baselineLaborRate"
-                        type="number"
-                        step="0.01"
-                        value={scenarioInputs.baselineLaborRate}
-                        onChange={(e) => handleScenarioInputChange("baselineLaborRate", e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="baselineVolume">Cargo Volume (tonnes)</Label>
-                      <Input
-                        id="baselineVolume"
-                        type="number"
-                        value={scenarioInputs.baselineVolume}
-                        onChange={(e) => handleScenarioInputChange("baselineVolume", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-secondary/30 p-3 rounded-md">
-                  <h4 className="text-sm font-medium mb-2">Alternative Scenario</h4>
-                  
-                  <div className="space-y-2">
-                    <div>
-                      <Label htmlFor="scenarioFuelPrice">
-                        Fuel Price ($ per liter)
-                      </Label>
-                      <Input
-                        id="scenarioFuelPrice"
-                        type="number"
-                        step="0.01"
-                        value={scenarioInputs.scenarioFuelPrice}
-                        onChange={(e) => handleScenarioInputChange("scenarioFuelPrice", e.target.value)}
-                      />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Change: {(((scenarioInputs.scenarioFuelPrice - scenarioInputs.baselineFuelPrice) / scenarioInputs.baselineFuelPrice) * 100).toFixed(1)}%
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="scenarioLaborRate">
-                        Labor Rate ($ per hour)
-                      </Label>
-                      <Input
-                        id="scenarioLaborRate"
-                        type="number"
-                        step="0.01"
-                        value={scenarioInputs.scenarioLaborRate}
-                        onChange={(e) => handleScenarioInputChange("scenarioLaborRate", e.target.value)}
-                      />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Change: {(((scenarioInputs.scenarioLaborRate - scenarioInputs.baselineLaborRate) / scenarioInputs.baselineLaborRate) * 100).toFixed(1)}%
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="scenarioVolume">
-                        Cargo Volume (tonnes)
-                      </Label>
-                      <Input
-                        id="scenarioVolume"
-                        type="number"
-                        value={scenarioInputs.scenarioVolume}
-                        onChange={(e) => handleScenarioInputChange("scenarioVolume", e.target.value)}
-                      />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Change: {(((scenarioInputs.scenarioVolume - scenarioInputs.baselineVolume) / scenarioInputs.baselineVolume) * 100).toFixed(1)}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <Button 
-                  onClick={calculateScenarioAnalysis} 
-                  className="w-full mt-2"
-                  disabled={isCalculating}
-                >
-                  {isCalculating ? "Analyzing..." : "Run Scenario Analysis"}
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </Card>
-        
-        <Card className="p-4 col-span-1 md:col-span-3">
-          <h3 className="font-medium mb-4">Results & Visualization</h3>
-          
-          {activeTab === "tco" && tcoResults && (
-            <div className="space-y-6">
-              <div className="flex justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold">
-                    {tcoResults.betterOption === "own" ? "Ownership" : "Outsourcing"}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Recommended Option</div>
-                  <div className="mt-2 text-xl">
-                    {tcoResults.savingsPercentage.toFixed(1)}% cost advantage
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Total Ownership Cost:</div>
-                    <div>${tcoResults.totalOwnershipCost.toLocaleString()}</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Annual Ownership Cost:</div>
-                    <div>${tcoResults.annualOwnershipCost.toLocaleString()}</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Major Costs:</div>
-                    <div>Asset + Maintenance</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Advantages:</div>
-                    <div>Asset control, No markups</div>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Total Outsourcing Cost:</div>
-                    <div>${tcoResults.totalOutsourcingCost.toLocaleString()}</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Annual Outsourcing Cost:</div>
-                    <div>${tcoResults.annualOutsourcingCost.toLocaleString()}</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Major Costs:</div>
-                    <div>Service fees, Contract costs</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">Advantages:</div>
-                    <div>Flexibility, Lower upfront cost</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-3 bg-muted rounded-md">
-                <h4 className="font-medium mb-2">Annual Cost Comparison</h4>
-                <div className="h-10 bg-secondary/30 rounded-md overflow-hidden relative">
-                  {tcoResults.annualOwnershipCost < tcoResults.annualOutsourcingCost ? (
-                    <>
-                      <div 
-                        className="h-full bg-green-500 absolute left-0 top-0"
-                        style={{ 
-                          width: `${(tcoResults.annualOwnershipCost / tcoResults.annualOutsourcingCost) * 100}%` 
-                        }}
-                      ></div>
-                      <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white text-sm font-medium">
-                        Own: ${tcoResults.annualOwnershipCost.toLocaleString()}
-                      </div>
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm font-medium">
-                        Outsource: ${tcoResults.annualOutsourcingCost.toLocaleString()}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div 
-                        className="h-full bg-green-500 absolute right-0 top-0"
-                        style={{ 
-                          width: `${(tcoResults.annualOutsourcingCost / tcoResults.annualOwnershipCost) * 100}%` 
-                        }}
-                      ></div>
-                      <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-sm font-medium">
-                        Own: ${tcoResults.annualOwnershipCost.toLocaleString()}
-                      </div>
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white text-sm font-medium">
-                        Outsource: ${tcoResults.annualOutsourcingCost.toLocaleString()}
-                      </div>
-                    </>
-                  )}
                 </div>
               </div>
             </div>
-          )}
-          
-          {activeTab === "tonne" && perTonneResults && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 border rounded-md text-center">
-                  <div className="text-2xl font-bold">${perTonneResults.totalCostPerTonne.toFixed(2)}</div>
-                  <div className="text-sm text-muted-foreground">Cost per Tonne</div>
-                </div>
-                
-                <div className="p-4 border rounded-md text-center">
-                  <div className="text-2xl font-bold">${perTonneResults.totalTripCost.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground">Total Trip Cost</div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-3">Cost Breakdown (per tonne)</h4>
-                
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Fuel Cost</span>
-                      <span className="text-sm">${perTonneResults.fuelCostPerTonne.toFixed(2)}</span>
-                    </div>
-                    <div className="h-2 bg-secondary/30 rounded-full">
-                      <div 
-                        className="h-full bg-blue-500 rounded-full" 
-                        style={{ width: `${(perTonneResults.fuelCostPerTonne / perTonneResults.totalCostPerTonne) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Labor Cost</span>
-                      <span className="text-sm">${perTonneResults.laborCostPerTonne.toFixed(2)}</span>
-                    </div>
-                    <div className="h-2 bg-secondary/30 rounded-full">
-                      <div 
-                        className="h-full bg-green-500 rounded-full" 
-                        style={{ width: `${(perTonneResults.laborCostPerTonne / perTonneResults.totalCostPerTonne) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Tolls</span>
-                      <span className="text-sm">${perTonneResults.tollsCostPerTonne.toFixed(2)}</span>
-                    </div>
-                    <div className="h-2 bg-secondary/30 rounded-full">
-                      <div 
-                        className="h-full bg-yellow-500 rounded-full" 
-                        style={{ width: `${(perTonneResults.tollsCostPerTonne / perTonneResults.totalCostPerTonne) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Loading/Unloading</span>
-                      <span className="text-sm">${perTonneResults.loadingUnloadingCost.toFixed(2)}</span>
-                    </div>
-                    <div className="h-2 bg-secondary/30 rounded-full">
-                      <div 
-                        className="h-full bg-purple-500 rounded-full" 
-                        style={{ width: `${(perTonneResults.loadingUnloadingCost / perTonneResults.totalCostPerTonne) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-3 bg-muted rounded-md">
-                <h4 className="font-medium mb-2">Key Metrics</h4>
-                <ul className="space-y-1">
-                  <li className="flex justify-between">
-                    <span className="text-sm">Cost per kilometer:</span>
-                    <span>${(perTonneResults.totalTripCost / perTonneInputs.distanceKm).toFixed(2)}/km</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-sm">Cost per tonne-kilometer:</span>
-                    <span>${(perTonneResults.totalCostPerTonne / perTonneInputs.distanceKm).toFixed(4)}/tonne-km</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-sm">Fuel efficiency:</span>
-                    <span>{perTonneInputs.fuelConsumption.toFixed(2)} L/tonne-km</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-sm">Average speed:</span>
-                    <span>{perTonneInputs.avgSpeedKmh} km/h</span>
-                  </li>
-                </ul>
-              </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={calculateTCO}
+                disabled={calculateLoading}
+              >
+                {calculateLoading ? "Calculating..." : "Calculate TCO"}
+              </Button>
             </div>
-          )}
-          
-          {activeTab === "scenario" && scenarioResults && (
-            <div className="space-y-6">
-              <div className="p-4 border rounded-md">
-                <div className="flex items-center mb-2">
-                  {scenarioResults.percentageIncrease > 10 ? (
-                    <AlertTriangle size={18} className="text-red-500 mr-2" />
-                  ) : scenarioResults.percentageIncrease < 0 ? (
-                    <DollarSign size={18} className="text-green-500 mr-2" />
-                  ) : (
-                    <BarChart4 size={18} className="text-yellow-500 mr-2" />
-                  )}
-                  <h4 className="font-medium">Scenario Impact Analysis</h4>
+
+            {showResults && (
+              <div className="mt-6 space-y-6">
+                <h3 className="text-lg font-semibold">TCO Results</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">Owned Fleet</h4>
+                    <div className="text-2xl font-bold">${ownedFleetAnnualCost.toLocaleString()}</div>
+                    <div className="text-sm text-muted-foreground">
+                      Annual cost
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                      <div>Cost per vehicle:</div>
+                      <div>${(ownedFleetAnnualCost / tcoInputs.fleetSize).toLocaleString()}</div>
+                      <div>Cost per km:</div>
+                      <div>
+                        ${(ownedFleetAnnualCost / (tcoInputs.fleetSize * tcoInputs.annualDistance)).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">Outsourced Fleet</h4>
+                    <div className="text-2xl font-bold">${outsourcedFleetAnnualCost.toLocaleString()}</div>
+                    <div className="text-sm text-muted-foreground">
+                      Annual cost
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                      <div>Cost per vehicle:</div>
+                      <div>
+                        ${(outsourcedFleetAnnualCost / tcoInputs.fleetSize).toLocaleString()}
+                      </div>
+                      <div>Cost per km:</div>
+                      <div>${tcoInputs.outsourceCostPerKm.toFixed(2)}</div>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">
-                      {scenarioResults.percentageIncrease >= 0 ? '+' : ''}
-                      {scenarioResults.percentageIncrease.toFixed(1)}%
+
+                <div className="bg-muted p-4 rounded-lg mt-6">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium">Recommendation</h4>
+                    <div className="text-sm font-medium">
+                      {ownedFleetAnnualCost < outsourcedFleetAnnualCost ? "Own" : "Outsource"}
                     </div>
-                    <div className="text-sm text-muted-foreground">Cost Impact</div>
                   </div>
-                  
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">
-                      ${scenarioResults.baseline.totalCost.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Baseline Cost</div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">
-                      ${scenarioResults.scenario.totalCost.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Scenario Cost</div>
-                  </div>
-                </div>
-                
-                <div className="mt-6">
-                  <h5 className="text-sm font-medium mb-2">Cost Change Visualization</h5>
-                  <div className="h-10 bg-secondary/30 rounded-md overflow-hidden relative">
-                    {scenarioResults.baseline.totalCost <= scenarioResults.scenario.totalCost ? (
+
+                  <div className="mt-2 text-sm">
+                    {ownedFleetAnnualCost < outsourcedFleetAnnualCost ? (
                       <>
-                        <div 
-                          className="h-full bg-blue-500 absolute left-0 top-0"
-                          style={{ 
-                            width: `${(scenarioResults.baseline.totalCost / scenarioResults.scenario.totalCost) * 100}%` 
-                          }}
-                        ></div>
-                        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white text-sm font-medium">
-                          Baseline
-                        </div>
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm font-medium">
-                          Scenario
-                        </div>
+                        Owning your fleet could save approximately $
+                        {(outsourcedFleetAnnualCost - ownedFleetAnnualCost).toLocaleString()}{" "}
+                        annually compared to outsourcing.
                       </>
                     ) : (
                       <>
-                        <div 
-                          className="h-full bg-green-500 absolute right-0 top-0"
-                          style={{ 
-                            width: `${(scenarioResults.scenario.totalCost / scenarioResults.baseline.totalCost) * 100}%` 
-                          }}
-                        ></div>
-                        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-sm font-medium">
-                          Baseline
-                        </div>
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white text-sm font-medium">
-                          Scenario
-                        </div>
+                        Outsourcing your fleet could save approximately $
+                        {(ownedFleetAnnualCost - outsourcedFleetAnnualCost).toLocaleString()}{" "}
+                        annually compared to ownership.
                       </>
                     )}
                   </div>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <h4 className="font-medium">Baseline Breakdown</h4>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Fuel Cost:</span>
-                    <span>${scenarioResults.baseline.fuelCost.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Labor Cost:</span>
-                    <span>${scenarioResults.baseline.laborCost.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Fixed Cost:</span>
-                    <span>${scenarioResults.baseline.fixedCost.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Per-Tonne Cost:</span>
-                    <span>${scenarioResults.baseline.perTonneCost.toFixed(2)}</span>
-                  </div>
+            )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="pertonne">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Per-Tonne Cost Analysis
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Break down transportation costs by tonne for detailed analysis.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="averageTonnage">Average Load (tonnes)</Label>
+                  <Input
+                    id="averageTonnage"
+                    type="number"
+                    value={tonneInputs.averageTonnage}
+                    onChange={(e) =>
+                      setTonneInputs({
+                        ...tonneInputs,
+                        averageTonnage: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
                 </div>
-                
-                <div className="space-y-3">
-                  <h4 className="font-medium">Scenario Breakdown</h4>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Fuel Cost:</span>
-                    <span>${scenarioResults.scenario.fuelCost.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Labor Cost:</span>
-                    <span>${scenarioResults.scenario.laborCost.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Fixed Cost:</span>
-                    <span>${scenarioResults.scenario.fixedCost.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm">Per-Tonne Cost:</span>
-                    <span>${scenarioResults.scenario.perTonneCost.toFixed(2)}</span>
-                  </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="fuelConsumption">
+                    Fuel Consumption (liters/km)
+                  </Label>
+                  <Input
+                    id="fuelConsumption"
+                    type="number"
+                    step="0.01"
+                    value={tonneInputs.fuelConsumption}
+                    onChange={(e) =>
+                      setTonneInputs({
+                        ...tonneInputs,
+                        fuelConsumption: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="averageTripDistance">
+                    Average Trip Distance (km)
+                  </Label>
+                  <Input
+                    id="averageTripDistance"
+                    type="number"
+                    value={tonneInputs.averageTripDistance}
+                    onChange={(e) =>
+                      setTonneInputs({
+                        ...tonneInputs,
+                        averageTripDistance: parseInt(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="maintenancePerKm">
+                    Maintenance Cost per km (USD)
+                  </Label>
+                  <Input
+                    id="maintenancePerKm"
+                    type="number"
+                    step="0.01"
+                    value={tonneInputs.maintenancePerKm}
+                    onChange={(e) =>
+                      setTonneInputs({
+                        ...tonneInputs,
+                        maintenancePerKm: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
                 </div>
               </div>
-              
-              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
-                <div className="flex items-start">
-                  <AlertTriangle size={18} className="text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-yellow-600 dark:text-yellow-400">Scenario Analysis Insights</h4>
-                    <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-1">
-                      {scenarioResults.percentageIncrease > 10
-                        ? "This scenario significantly increases costs. Consider mitigation strategies or alternative suppliers."
-                        : scenarioResults.percentageIncrease > 0
-                        ? "This scenario has a moderate impact on costs. Review budget allocations to accommodate the changes."
-                        : "This scenario reduces costs. Consider implementing these changes to improve financial performance."}
-                    </p>
-                  </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="laborCostPerHour">
+                    Labor Cost per Hour (USD)
+                  </Label>
+                  <Input
+                    id="laborCostPerHour"
+                    type="number"
+                    step="0.01"
+                    value={tonneInputs.laborCostPerHour}
+                    onChange={(e) =>
+                      setTonneInputs({
+                        ...tonneInputs,
+                        laborCostPerHour: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="averageTripTime">
+                    Average Trip Time (hours)
+                  </Label>
+                  <Input
+                    id="averageTripTime"
+                    type="number"
+                    step="0.5"
+                    value={tonneInputs.averageTripTime}
+                    onChange={(e) =>
+                      setTonneInputs({
+                        ...tonneInputs,
+                        averageTripTime: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tollsPerTrip">Tolls per Trip (USD)</Label>
+                  <Input
+                    id="tollsPerTrip"
+                    type="number"
+                    step="0.01"
+                    value={tonneInputs.tollsPerTrip}
+                    onChange={(e) =>
+                      setTonneInputs({
+                        ...tonneInputs,
+                        tollsPerTrip: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
                 </div>
               </div>
             </div>
-          )}
-          
-          {/* Show placeholder when no results available */}
-          {((activeTab === "tco" && !tcoResults) || 
-            (activeTab === "tonne" && !perTonneResults) || 
-            (activeTab === "scenario" && !scenarioResults)) && (
-            <div className="flex flex-col items-center justify-center h-64">
-              <Package size={48} className="text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-center">
-                Enter your parameters and calculate to see results
-              </p>
+
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={calculatePerTonneCost}
+                disabled={calculateLoading}
+              >
+                {calculateLoading ? "Calculating..." : "Calculate Per-Tonne Cost"}
+              </Button>
             </div>
-          )}
-        </Card>
-      </div>
+
+            {showResults && (
+              <div className="mt-6 space-y-6">
+                <h3 className="text-lg font-semibold">Per-Tonne Cost Results</h3>
+
+                <div className="bg-card border rounded-lg overflow-hidden">
+                  <div className="bg-muted p-4">
+                    <div className="text-2xl font-bold">
+                      ${((
+                        (tonneInputs.fuelConsumption *
+                          tcoInputs.fuelCost *
+                          tonneInputs.averageTripDistance +
+                          tonneInputs.laborCostPerHour * tonneInputs.averageTripTime +
+                          tonneInputs.tollsPerTrip +
+                          tonneInputs.averageTripDistance * tonneInputs.maintenancePerKm) /
+                        tonneInputs.averageTonnage
+                      ).toFixed(2))}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Cost per tonne
+                    </div>
+                  </div>
+
+                  <div 
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setShowSecondaryResults(!showSecondaryResults)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Cost Breakdown</h4>
+                      {showSecondaryResults ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </div>
+
+                  {showSecondaryResults && (
+                    <div className="p-4 border-t">
+                      <div className="space-y-4">
+                        <div>
+                          <h5 className="text-sm font-medium mb-2">
+                            Cost Distribution
+                          </h5>
+                          <div className="h-8 bg-muted rounded-lg flex overflow-hidden">
+                            <div
+                              className="bg-blue-500 h-full"
+                              style={{
+                                width: "45%",
+                              }}
+                            ></div>
+                            <div
+                              className="bg-green-500 h-full"
+                              style={{
+                                width: "25%",
+                              }}
+                            ></div>
+                            <div
+                              className="bg-amber-500 h-full"
+                              style={{
+                                width: "20%",
+                              }}
+                            ></div>
+                            <div
+                              className="bg-red-500 h-full"
+                              style={{
+                                width: "10%",
+                              }}
+                            ></div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                              <span>Fuel: 45%</span>
+                            </div>
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                              <span>Labor: 25%</span>
+                            </div>
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-amber-500 rounded-full mr-2"></div>
+                              <span>Maintenance: 20%</span>
+                            </div>
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                              <span>Tolls: 10%</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <h5 className="text-sm font-medium mb-2">
+                              Cost per km
+                            </h5>
+                            <div className="text-xl font-semibold">
+                              $
+                              {(
+                                (tonneInputs.fuelConsumption * tcoInputs.fuelCost +
+                                  tonneInputs.maintenancePerKm +
+                                  tonneInputs.laborCostPerHour / 60) *
+                                tonneInputs.averageTonnage
+                              ).toFixed(2)}
+                            </div>
+                          </div>
+                          <div>
+                            <h5 className="text-sm font-medium mb-2">
+                              Cost per hour
+                            </h5>
+                            <div className="text-xl font-semibold">
+                              $
+                              {(
+                                tonneInputs.laborCostPerHour +
+                                ((tonneInputs.fuelConsumption * tcoInputs.fuelCost +
+                                  tonneInputs.maintenancePerKm) *
+                                  60)
+                              ).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium">Efficiency Metrics</h4>
+                    <div className="text-sm font-medium">
+                      {tonneInputs.averageTonnage > 10 ? "Good" : "Needs Improvement"}
+                    </div>
+                  </div>
+
+                  <div className="mt-2 text-sm">
+                    {tonneInputs.averageTonnage > 10 ? (
+                      <>
+                        Your per-tonne costs are optimized. Consider increasing
+                        fleet utilization to further reduce costs.
+                      </>
+                    ) : (
+                      <>
+                        Your per-tonne costs are high. Consider increasing load
+                        factor or optimizing routes to improve efficiency.
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="scenario">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              "What-if" Scenario Analysis
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Model cost impacts from changes in fuel prices, wages, and other
+              variables.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Base Scenario</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="baseFuelPrice">
+                      Fuel Price (USD/liter)
+                    </Label>
+                    <Input
+                      id="baseFuelPrice"
+                      type="number"
+                      step="0.01"
+                      value={baseScenario.fuelPrice}
+                      onChange={(e) =>
+                        setBaseScenario({
+                          ...baseScenario,
+                          fuelPrice: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="baseDriverWage">
+                      Driver Wage (USD/hour)
+                    </Label>
+                    <Input
+                      id="baseDriverWage"
+                      type="number"
+                      step="0.01"
+                      value={baseScenario.driverWage}
+                      onChange={(e) =>
+                        setBaseScenario({
+                          ...baseScenario,
+                          driverWage: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="baseMaintenanceCost">
+                      Maintenance (USD/km)
+                    </Label>
+                    <Input
+                      id="baseMaintenanceCost"
+                      type="number"
+                      step="0.01"
+                      value={baseScenario.maintenanceCost}
+                      onChange={(e) =>
+                        setBaseScenario({
+                          ...baseScenario,
+                          maintenanceCost: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="baseTonnage">Load (tonnes)</Label>
+                    <Input
+                      id="baseTonnage"
+                      type="number"
+                      value={baseScenario.tonnage}
+                      onChange={(e) =>
+                        setBaseScenario({
+                          ...baseScenario,
+                          tonnage: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="baseDistance">Trip Distance (km)</Label>
+                    <Input
+                      id="baseDistance"
+                      type="number"
+                      value={baseScenario.distance}
+                      onChange={(e) =>
+                        setBaseScenario({
+                          ...baseScenario,
+                          distance: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-medium mb-4">Scenario Comparison</h3>
+                <p className="text-muted-foreground mb-6">
+                  See how different scenarios affect your transportation costs.
+                </p>
+
+                <div className="flex justify-end mb-4">
+                  <Button
+                    onClick={runScenarioAnalysis}
+                    disabled={calculateLoading}
+                  >
+                    {calculateLoading ? "Analyzing..." : "Run Analysis"}
+                  </Button>
+                </div>
+
+                {showResults && (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-2">
+                      {scenarios.map((scenario, index) => (
+                        <div 
+                          key={index}
+                          className="border rounded-lg p-4 bg-card"
+                        >
+                          <div className="flex justify-between">
+                            <h4 className="font-medium">{scenario.name}</h4>
+                            <span 
+                              className={
+                                scenario.costImpact <= 10
+                                  ? "text-green-600 dark:text-green-400 font-medium"
+                                  : scenario.costImpact <= 20
+                                  ? "text-amber-600 dark:text-amber-400 font-medium"
+                                  : "text-red-600 dark:text-red-400 font-medium"
+                              }
+                            >
+                              +{scenario.costImpact}%
+                            </span>
+                          </div>
+                          <div className="mt-2">
+                            <div className="w-full bg-muted rounded-full h-2.5">
+                              <div
+                                className={
+                                  scenario.costImpact <= 10
+                                    ? "bg-green-600 h-2.5 rounded-full"
+                                    : scenario.costImpact <= 20
+                                    ? "bg-amber-600 h-2.5 rounded-full"
+                                    : "bg-red-600 h-2.5 rounded-full"
+                                }
+                                style={{
+                                  width: `${Math.min(
+                                    Math.max(scenario.costImpact * 2, 5),
+                                    100
+                                  )}%`,
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 bg-muted p-4 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
+                        <h4 className="font-medium">Risk Assessment</h4>
+                      </div>
+
+                      <p className="text-sm">
+                        Combined scenario presents the highest cost risk (33.4%
+                        increase). Consider implementing cost mitigation
+                        strategies such as fuel hedging and driver efficiency
+                        programs.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

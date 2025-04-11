@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { NetworkMap, Node, Route } from "@/components/NetworkMap";
-import { MapPin, Truck, Train, Ship, Plane, AlertTriangle, BarChart, Clock } from "lucide-react";
+import { NetworkMap } from "@/components/NetworkMap";
+import { Node, Route } from "@/components/map/MapTypes";
+import { MapPin, Truck, Train, Ship, Plane, AlertTriangle, BarChart, Clock, DollarSign } from "lucide-react";
 import { kenyaLocationsWithRestrictions } from "@/data/kenya-route-data";
 
 export const RouteOptimizationContent = () => {
@@ -21,13 +22,14 @@ export const RouteOptimizationContent = () => {
   const [routeNodes, setRouteNodes] = useState<Node[]>(kenyaLocationsWithRestrictions.map(loc => ({
     id: loc.id,
     name: loc.name,
-    type: loc.type,
+    type: loc.type as Node["type"],
     latitude: loc.latitude,
     longitude: loc.longitude,
     metadata: {
       restrictions: loc.restrictions,
       trafficFactor: loc.trafficFactor || 1.0,
-      tollCost: loc.tollCost || 0
+      tollCost: loc.tollCost || 0,
+      checkpointWaitTime: loc.checkpointWaitTime
     }
   })));
   const [routePaths, setRoutePaths] = useState<Route[]>([]);
@@ -85,7 +87,7 @@ export const RouteOptimizationContent = () => {
       });
       
       // Add multi-modal options if enabled
-      if (transportModes.rail && routeNodes.some(n => n.type === "railhub")) {
+      if (transportModes.rail) {
         const railHub = routeNodes.find(n => n.type === "railhub");
         if (railHub) {
           newRoutes.push({
@@ -111,7 +113,7 @@ export const RouteOptimizationContent = () => {
       }
       
       // Add sea routes if enabled
-      if (transportModes.sea && routeNodes.some(n => n.type === "port")) {
+      if (transportModes.sea) {
         const port = routeNodes.find(n => n.type === "port");
         if (port) {
           newRoutes.push({
@@ -127,7 +129,7 @@ export const RouteOptimizationContent = () => {
       }
       
       // Add air routes if enabled
-      if (transportModes.air && routeNodes.some(n => n.type === "airport")) {
+      if (transportModes.air) {
         const airport = routeNodes.find(n => n.type === "airport");
         if (airport) {
           newRoutes.push({
@@ -228,13 +230,14 @@ export const RouteOptimizationContent = () => {
       setRouteNodes(kenyaLocationsWithRestrictions.map(loc => ({
         id: loc.id,
         name: loc.name,
-        type: loc.type,
+        type: loc.type as Node["type"],
         latitude: loc.latitude,
         longitude: loc.longitude,
         metadata: {
           restrictions: loc.restrictions,
           trafficFactor: loc.trafficFactor || 1.0,
-          tollCost: loc.tollCost || 0
+          tollCost: loc.tollCost || 0,
+          checkpointWaitTime: loc.checkpointWaitTime
         }
       })));
     } else {

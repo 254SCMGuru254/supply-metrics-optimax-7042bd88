@@ -14,6 +14,8 @@ import { ModelSelectionGuide } from "@/components/data-input/ModelSelectionGuide
 import { MILPDataContent } from "@/components/data-input/MILPDataContent";
 import { FleetManagementContent } from "@/components/fleet-management/FleetManagementContent";
 import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigContent";
+import { RouteOptimizationContent } from "@/components/route-optimization/RouteOptimizationContent";
+import { CostModelingContent } from "@/components/cost-modeling/CostModelingContent";
 import { HelpCircle, Truck, Warehouse } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -44,6 +46,10 @@ const DataInput = () => {
         return <FleetManagementContent />;
       case "warehouse":
         return <WarehouseConfigContent />;
+      case "route":
+        return <RouteOptimizationContent />;
+      case "cost":
+        return <CostModelingContent />;
       default:
         return null;
     }
