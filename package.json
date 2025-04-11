@@ -50,7 +50,7 @@
     "framer-motion": "^11.0.5",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.1.0",
-    "jspdf": "^2.5.1",
+    "jspdf": "^3.0.1",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "lucide-react": "^0.331.0",
