@@ -6,6 +6,7 @@ export interface Node {
   latitude: number;
   longitude: number;
   weight?: number;
+  capacity?: number;
   isOptimal?: boolean;
   metadata?: {
     restrictions?: {
@@ -83,6 +84,7 @@ export interface InventoryItem {
   leadTime: number; // In days
   serviceLevel: number; // As percentage (e.g., 95%)
   abcClass?: "A" | "B" | "C";
+  annualValue?: number; // Added this property to fix errors
 }
 
 export interface EOQResult {
@@ -157,10 +159,16 @@ export interface VRPResult {
 export interface SuitabilityQuestion {
   id: string;
   text: string;
-  category: "route" | "inventory" | "network" | "general" | "technical";
+  category: "route" | "inventory" | "network" | "general" | "technical" | "cog" | "simulation";
   options: {
     text: string;
-    score: number;
+    score: number | { 
+      route: number;
+      inventory: number;
+      network: number;
+      cog: number;
+      simulation: number;
+    };
     explanation?: string;
   }[];
 }

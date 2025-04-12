@@ -1,3 +1,4 @@
+
 import { Node, Route } from "@/components/map/MapTypes";
 
 // Enhanced simulated annealing parameters with cooling schedule options
@@ -146,9 +147,9 @@ export const runEnhancedSimulatedAnnealing = (
       : { "cost": calculateTotalCost(neighborSolution) };
     
     // Calculate the change in fitness (if multi-objective, use weighted sum)
-    const fitnessKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
-    const currentFitnessValue = currentFitness[fitnessKey];
-    const neighborFitnessValue = neighborFitness[fitnessKey];
+    const saFitnessKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
+    const currentFitnessValue = currentFitness[saFitnessKey];
+    const neighborFitnessValue = neighborFitness[saFitnessKey];
     
     // Adjust for minimization/maximization
     const fitnessDifference = objectives && objectives.objectives.length > 0
@@ -174,7 +175,7 @@ export const runEnhancedSimulatedAnnealing = (
       
       // Update best solution if current is better
       if (
-        (objectives && objectives.objectives.length > 0 && neighborFitnessValue > bestFitness[fitnessKey]) ||
+        (objectives && objectives.objectives.length > 0 && neighborFitnessValue > bestFitness[saFitnessKey]) ||
         (!objectives && neighborFitness["cost"] < bestFitness["cost"])
       ) {
         bestSolution = [...currentSolution];
@@ -205,15 +206,15 @@ export const runEnhancedSimulatedAnnealing = (
     ? calculateMultiObjectiveFitness(routes, objectives.objectives)
     : { "cost": calculateTotalCost(routes) };
     
-  const fitnessKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
+  const saImproveKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
   
   let improvementPercentage: number;
   if (objectives && objectives.objectives.length > 0) {
     // For weighted sum, higher is better
-    improvementPercentage = ((bestFitness[fitnessKey] - initialFitness[fitnessKey]) / initialFitness[fitnessKey]) * 100;
+    improvementPercentage = ((bestFitness[saImproveKey] - initialFitness[saImproveKey]) / initialFitness[saImproveKey]) * 100;
   } else {
     // For cost, lower is better
-    improvementPercentage = ((initialFitness[fitnessKey] - bestFitness[fitnessKey]) / initialFitness[fitnessKey]) * 100;
+    improvementPercentage = ((initialFitness[saImproveKey] - bestFitness[saImproveKey]) / initialFitness[saImproveKey]) * 100;
   }
   
   // Set isOptimized flag for best solution routes
@@ -297,21 +298,21 @@ export const runGeneticAlgorithm = (
     });
     
     // Sort solutions by fitness (weighted sum for multi-objective, cost for single objective)
-    const fitnessKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
+    const gaFitnessKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
     fitnessValues.sort((a, b) => {
       if (objectives && objectives.objectives.length > 0) {
         // For weighted sum, higher is better
-        return b.fitness[fitnessKey] - a.fitness[fitnessKey];
+        return b.fitness[gaFitnessKey] - a.fitness[gaFitnessKey];
       } else {
         // For cost, lower is better
-        return a.fitness[fitnessKey] - b.fitness[fitnessKey];
+        return a.fitness[gaFitnessKey] - b.fitness[gaFitnessKey];
       }
     });
     
     // Update best solution if needed
     const currentBest = fitnessValues[0];
-    if ((objectives && objectives.objectives.length > 0 && currentBest.fitness[fitnessKey] > bestFitness[fitnessKey]) ||
-        (!objectives && currentBest.fitness[fitnessKey] < bestFitness[fitnessKey])) {
+    if ((objectives && objectives.objectives.length > 0 && currentBest.fitness[gaFitnessKey] > bestFitness[gaFitnessKey]) ||
+        (!objectives && currentBest.fitness[gaFitnessKey] < bestFitness[gaFitnessKey])) {
       bestSolution = currentBest.solution.map(r => ({...r}));
       bestFitness = {...currentBest.fitness};
     }
@@ -360,15 +361,15 @@ export const runGeneticAlgorithm = (
     ? calculateMultiObjectiveFitness(routes, objectives.objectives)
     : { "cost": calculateTotalCost(routes) };
     
-  const fitnessKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
+  const gaImproveKey = objectives && objectives.objectives.length > 0 ? "weightedSum" : "cost";
   
   let improvementPercentage: number;
   if (objectives && objectives.objectives.length > 0) {
     // For weighted sum, higher is better
-    improvementPercentage = ((bestFitness[fitnessKey] - initialFitness[fitnessKey]) / initialFitness[fitnessKey]) * 100;
+    improvementPercentage = ((bestFitness[gaImproveKey] - initialFitness[gaImproveKey]) / initialFitness[gaImproveKey]) * 100;
   } else {
     // For cost, lower is better
-    improvementPercentage = ((initialFitness[fitnessKey] - bestFitness[fitnessKey]) / initialFitness[fitnessKey]) * 100;
+    improvementPercentage = ((initialFitness[gaImproveKey] - bestFitness[gaImproveKey]) / initialFitness[gaImproveKey]) * 100;
   }
   
   // Set isOptimized flag for best solution routes
@@ -409,18 +410,18 @@ function selectParent(fitnessValues: { solution: Route[], fitness: { [key: strin
       
     case "roulette":
       // Roulette wheel selection
-      const fitnessKey = fitnessValues[0].fitness["weightedSum"] !== undefined ? "weightedSum" : "cost";
+      const rouletteKey = fitnessValues[0].fitness["weightedSum"] !== undefined ? "weightedSum" : "cost";
       let totalFitness = 0;
       
       // Adjust fitness for minimization problems
       const adjustedFitness = fitnessValues.map(entry => {
-        if (fitnessKey === "cost") {
+        if (rouletteKey === "cost") {
           // For cost (minimization), invert fitness
-          const max = Math.max(...fitnessValues.map(f => f.fitness[fitnessKey]));
-          return { solution: entry.solution, adjustedValue: max - entry.fitness[fitnessKey] + 1 };
+          const max = Math.max(...fitnessValues.map(f => f.fitness[rouletteKey]));
+          return { solution: entry.solution, adjustedValue: max - entry.fitness[rouletteKey] + 1 };
         } else {
           // For weighted sum (maximization), use as-is
-          return { solution: entry.solution, adjustedValue: entry.fitness[fitnessKey] };
+          return { solution: entry.solution, adjustedValue: entry.fitness[rouletteKey] };
         }
       });
       
