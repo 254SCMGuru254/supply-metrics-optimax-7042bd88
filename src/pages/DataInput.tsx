@@ -16,7 +16,9 @@ import { FleetManagementContent } from "@/components/fleet-management/FleetManag
 import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigContent";
 import { RouteOptimizationContent } from "@/components/route-optimization/RouteOptimizationContent";
 import { CostModelingContent } from "@/components/cost-modeling/CostModelingContent";
-import { HelpCircle } from "lucide-react";
+import { InventoryOptimizationContent } from "@/components/inventory-optimization/InventoryOptimizationContent";
+import { SuitabilityQuestionnaire } from "@/components/suitability/SuitabilityQuestionnaire";
+import { HelpCircle, FileQuestion } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DataInput = () => {
@@ -50,6 +52,10 @@ const DataInput = () => {
         return <RouteOptimizationContent />;
       case "cost":
         return <CostModelingContent />;
+      case "inventory":
+        return <InventoryOptimizationContent />;
+      case "suitability":
+        return <SuitabilityQuestionnaire />;
       default:
         return null;
     }
@@ -77,13 +83,17 @@ const DataInput = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="guide">
             <HelpCircle className="h-4 w-4 mr-2" />
             Model Selection Guide
           </TabsTrigger>
           <TabsTrigger value="input" disabled={!activeModel}>
             Data Input
+          </TabsTrigger>
+          <TabsTrigger value="suitability" onClick={() => setActiveModel("suitability")}>
+            <FileQuestion className="h-4 w-4 mr-2" />
+            Suitability Questionnaire
           </TabsTrigger>
         </TabsList>
         
@@ -116,6 +126,10 @@ const DataInput = () => {
           </div>
           
           {renderModelContent()}
+        </TabsContent>
+        
+        <TabsContent value="suitability" className="pt-6">
+          <SuitabilityQuestionnaire />
         </TabsContent>
       </Tabs>
     </div>

@@ -10,7 +10,9 @@ import {
   Truck,
   Warehouse,
   Route,
-  DollarSign
+  DollarSign,
+  Package,
+  FileQuestion
 } from "lucide-react";
 import { ModelSelectionButton } from "./ModelSelectionButton";
 
@@ -108,6 +110,20 @@ export const ModelSelection = ({
         isActive={activeModel === "cost"}
         onClick={() => setActiveModel("cost")}
         icon={DollarSign}
+      />
+      <ModelSelectionButton
+        title="Inventory Optimization"
+        description="EOQ & ABC Analysis"
+        isActive={activeModel === "inventory"}
+        onClick={() => setActiveModel("inventory")}
+        icon={Package}
+      />
+      <ModelSelectionButton
+        title="Suitability Questionnaire"
+        description="Find the right optimization model"
+        isActive={activeModel === "suitability"}
+        onClick={() => setActiveModel("suitability")}
+        icon={FileQuestion}
       />
     </div>
   );
