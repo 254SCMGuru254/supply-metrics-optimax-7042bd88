@@ -1,6 +1,6 @@
 
 import { Card } from "@/components/ui/card";
-import { BarChart3, Network, Truck, LineChart, Target, Building2, Map, Warehouse } from "lucide-react";
+import { BarChart3, Network, Truck, LineChart, Target, Building2, Map, Warehouse, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -48,6 +48,20 @@ const Dashboard = () => {
       status: "Active" 
     },
     { 
+      title: "Demand Forecasting", 
+      icon: TrendingUp, 
+      description: "Predict future demand using time-series analysis", 
+      path: "/demand-forecasting", 
+      status: "Active" 
+    },
+    { 
+      title: "Data Management", 
+      icon: BarChart3, 
+      description: "Import, manage and analyze supply chain data", 
+      path: "/data-input", 
+      status: "Active" 
+    },
+    { 
       title: "Kenya Supply Chain", 
       icon: Map, 
       description: "Explore Kenya's supply chain network and data", 
@@ -82,7 +96,7 @@ const Dashboard = () => {
 
       <div>
         <h2 className="text-xl font-bold mb-4">Optimization Modules</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {modules.map((module, index) => (
             <Link key={index} to={module.path}>
               <Card className="p-6 h-full hover:border-primary transition-all">

@@ -12,6 +12,7 @@ import {
   Info,
   HelpCircle,
   BookOpen,
+  TrendingUp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,6 +39,7 @@ const menuItems = [
   { title: "Center of Gravity", icon: Target, path: "/center-of-gravity" },
   { title: "Network Optimization", icon: Network, path: "/network-optimization" },
   { title: "Route Optimization", icon: Truck, path: "/route-optimization" },
+  { title: "Demand Forecasting", icon: TrendingUp, path: "/demand-forecasting" },
   { title: "Simulation", icon: LineChart, path: "/simulation" },
   { title: "Heuristic Analysis", icon: BarChart3, path: "/heuristic" },
 ];

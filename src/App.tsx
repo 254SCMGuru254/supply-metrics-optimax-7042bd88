@@ -16,6 +16,7 @@ import KenyaSupplyChain from "./pages/KenyaSupplyChain";
 import RouteOptimization from "./pages/RouteOptimization";
 import Dashboard from "./pages/Dashboard";
 import Introduction from "./pages/Introduction";
+import DemandForecasting from "./pages/DemandForecasting";
 import "./App.css";
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
           <Route path="center-of-gravity" element={<CenterOfGravity />} />
           <Route path="network-optimization" element={<NetworkOptimization />} />
           <Route path="route-optimization" element={<RouteOptimization />} />
+          <Route path="demand-forecasting" element={<DemandForecasting />} />
           <Route path="heuristic" element={<Heuristic />} />
           <Route path="isohedron" element={<Isohedron />} />
           <Route path="simulation" element={<Simulation />} />

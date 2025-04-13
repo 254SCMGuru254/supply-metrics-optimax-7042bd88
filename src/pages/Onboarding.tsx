@@ -13,7 +13,8 @@ import {
   Truck,
   Target,
   LineChart,
-  Map
+  Map,
+  TrendingUp
 } from "lucide-react";
 
 // Step components
@@ -213,6 +214,44 @@ const SimulationIntro = ({ onNext }: { onNext: () => void }) => (
   </Card>
 );
 
+const DemandForecastingIntro = ({ onNext }: { onNext: () => void }) => (
+  <Card className="max-w-4xl mx-auto p-8">
+    <div className="flex items-center gap-4 mb-6">
+      <div className="p-3 bg-primary/10 rounded-lg">
+        <TrendingUp className="h-8 w-8 text-primary" />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold">Demand Forecasting</h2>
+        <p className="text-muted-foreground">Predict future demand with time-series analysis</p>
+      </div>
+    </div>
+
+    <div className="space-y-6 mb-8">
+      <div>
+        <h3 className="font-semibold mb-2">Key Features</h3>
+        <ul className="space-y-2">
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            <span>Advanced time-series forecasting algorithms</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            <span>Seasonal pattern detection and decomposition</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            <span>Machine learning-based demand prediction</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <Button onClick={onNext} size="lg">
+      Continue <ChevronRight className="ml-2 h-4 w-4" />
+    </Button>
+  </Card>
+);
+
 const CompletionStep = () => {
   const navigate = useNavigate();
   
@@ -250,6 +289,7 @@ const Onboarding = () => {
     { component: RouteOptimizationIntro },
     { component: CenterOfGravityIntro },
     { component: SimulationIntro },
+    { component: DemandForecastingIntro },
     { component: CompletionStep }
   ];
 
