@@ -17,6 +17,8 @@ import RouteOptimization from "./pages/RouteOptimization";
 import Dashboard from "./pages/Dashboard";
 import Introduction from "./pages/Introduction";
 import DemandForecasting from "./pages/DemandForecasting";
+import InventoryManagement from "./pages/InventoryManagement";
+import FleetManagement from "./pages/FleetManagement";
 import "./App.css";
 
 function App() {
@@ -33,6 +35,8 @@ function App() {
           <Route path="network-optimization" element={<NetworkOptimization />} />
           <Route path="route-optimization" element={<RouteOptimization />} />
           <Route path="demand-forecasting" element={<DemandForecasting />} />
+          <Route path="inventory-management" element={<InventoryManagement />} />
+          <Route path="fleet-management" element={<FleetManagement />} />
           <Route path="heuristic" element={<Heuristic />} />
           <Route path="isohedron" element={<Isohedron />} />
           <Route path="simulation" element={<Simulation />} />

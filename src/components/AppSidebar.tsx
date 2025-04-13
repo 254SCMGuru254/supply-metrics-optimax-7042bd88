@@ -13,6 +13,7 @@ import {
   HelpCircle,
   BookOpen,
   TrendingUp,
+  Package,
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,6 +41,8 @@ const menuItems = [
   { title: "Network Optimization", icon: Network, path: "/network-optimization" },
   { title: "Route Optimization", icon: Truck, path: "/route-optimization" },
   { title: "Demand Forecasting", icon: TrendingUp, path: "/demand-forecasting" },
+  { title: "Inventory Management", icon: Package, path: "/inventory-management" },
+  { title: "Fleet Management", icon: Truck, path: "/fleet-management" },
   { title: "Simulation", icon: LineChart, path: "/simulation" },
   { title: "Heuristic Analysis", icon: BarChart3, path: "/heuristic" },
 ];
