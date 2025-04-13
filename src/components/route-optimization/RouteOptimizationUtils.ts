@@ -58,12 +58,20 @@ export interface RouteOptimizationResult {
   unservedStops: RouteStop[];
 }
 
+// Helper function to safely extract lat and lng values from LatLngExpression
+function getLatLng(point: LatLngExpression): { lat: number, lng: number } {
+  if (Array.isArray(point)) {
+    return { lat: point[0], lng: point[1] };
+  } else if (typeof point === 'object' && 'lat' in point && 'lng' in point) {
+    return { lat: point.lat, lng: point.lng };
+  }
+  throw new Error('Invalid LatLngExpression format');
+}
+
 // Calculate distance between two points using Haversine formula
 export function calculateDistance(point1: LatLngExpression, point2: LatLngExpression): number {
-  const lat1 = typeof point1 === 'object' ? point1.lat : point1[0];
-  const lng1 = typeof point1 === 'object' ? point1.lng : point1[1];
-  const lat2 = typeof point2 === 'object' ? point2.lat : point2[0];
-  const lng2 = typeof point2 === 'object' ? point2.lng : point2[1];
+  const { lat: lat1, lng: lng1 } = getLatLng(point1);
+  const { lat: lat2, lng: lng2 } = getLatLng(point2);
   
   // Earth's radius in kilometers
   const R = 6371;
@@ -146,17 +154,19 @@ export function checkTonnageCompliance(
 
 // Check if a point is inside a polygon using the ray casting algorithm
 function isPointInPolygon(point: LatLngExpression, polygon: LatLngExpression[]): boolean {
-  const lat = typeof point === 'object' ? point.lat : point[0];
-  const lng = typeof point === 'object' ? point.lng : point[1];
+  const { lat, lng } = getLatLng(point);
   
   let inside = false;
   let j = polygon.length - 1;
   
   for (let i = 0; i < polygon.length; i++) {
-    const xi = typeof polygon[i] === 'object' ? polygon[i].lat : polygon[i][0];
-    const yi = typeof polygon[i] === 'object' ? polygon[i].lng : polygon[i][1];
-    const xj = typeof polygon[j] === 'object' ? polygon[j].lat : polygon[j][0];
-    const yj = typeof polygon[j] === 'object' ? polygon[j].lng : polygon[j][1];
+    const p1 = getLatLng(polygon[i]);
+    const p2 = getLatLng(polygon[j]);
+    
+    const xi = p1.lat;
+    const yi = p1.lng;
+    const xj = p2.lat;
+    const yj = p2.lng;
     
     const intersect = ((yi > lng) !== (yj > lng)) &&
         (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
