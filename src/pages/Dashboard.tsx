@@ -1,6 +1,6 @@
 
 import { Card } from "@/components/ui/card";
-import { BarChart3, Network, Truck, LineChart, Target, Building2, Map, Warehouse, TrendingUp } from "lucide-react";
+import { BarChart3, Network, Truck, LineChart, Target, Building2, Map, Warehouse, TrendingUp, Package, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -41,10 +41,17 @@ const Dashboard = () => {
       status: "Active" 
     },
     { 
-      title: "Warehouse Analysis", 
-      icon: Warehouse, 
-      description: "Analyze warehouse capacities and throughput", 
-      path: "/heuristic", 
+      title: "Inventory Management", 
+      icon: Package, 
+      description: "Optimize inventory levels and safety stock", 
+      path: "/inventory-management", 
+      status: "Active" 
+    },
+    { 
+      title: "Fleet Management", 
+      icon: Truck, 
+      description: "Manage and optimize transportation fleet", 
+      path: "/fleet-management", 
       status: "Active" 
     },
     { 
@@ -52,6 +59,27 @@ const Dashboard = () => {
       icon: TrendingUp, 
       description: "Predict future demand using time-series analysis", 
       path: "/demand-forecasting", 
+      status: "Active" 
+    },
+    { 
+      title: "Heuristic Analysis", 
+      icon: BarChart3, 
+      description: "Apply heuristic algorithms for complex problems", 
+      path: "/heuristic", 
+      status: "Active" 
+    },
+    { 
+      title: "Warehouse Analysis", 
+      icon: Warehouse, 
+      description: "Analyze warehouse capacities and throughput", 
+      path: "/warehouse", 
+      status: "Active" 
+    },
+    { 
+      title: "Cost Modeling", 
+      icon: DollarSign, 
+      description: "Model and analyze supply chain costs", 
+      path: "/cost-modeling", 
       status: "Active" 
     },
     { 
