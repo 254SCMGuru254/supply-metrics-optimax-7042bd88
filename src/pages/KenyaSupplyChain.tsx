@@ -1,4 +1,3 @@
-
 import { KenyaSupplyChainMap } from "@/components/kenya/KenyaSupplyChainMap";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,8 +16,12 @@ import {
   Warehouse,
   DollarSign,
   AlertCircle,
+  Clock,
+  CalendarDays
 } from "lucide-react";
+import { Market } from "@/components/icons/market";
 import { Link } from "react-router-dom";
+import { InformalMarketManager } from "@/components/kenya/informal-markets/InformalMarketManager";
 
 const KenyaSupplyChain = () => {
   return (
@@ -43,13 +46,14 @@ const KenyaSupplyChain = () => {
       </div>
 
       <Tabs defaultValue="overview" className="mb-8">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 mb-6">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="infrastructure">Infrastructure</TabsTrigger>
           <TabsTrigger value="logistics">Logistics</TabsTrigger>
           <TabsTrigger value="regulations">Regulations</TabsTrigger>
           <TabsTrigger value="costs">Costs</TabsTrigger>
           <TabsTrigger value="challenges">Challenges</TabsTrigger>
+          <TabsTrigger value="informal-markets">Informal Markets</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -558,6 +562,51 @@ const KenyaSupplyChain = () => {
               </table>
             </div>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="informal-markets" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Market className="h-5 w-5 text-primary" />
+                Market Statistics
+              </h3>
+              <ul className="mt-2 text-sm list-disc pl-5 space-y-1">
+                <li>65% of retail through informal markets</li>
+                <li>Over 2.5 million informal traders</li>
+                <li>Annual informal trade value: KES 3.1 trillion</li>
+                <li>Average daily market traffic: 15,000 people</li>
+              </ul>
+            </Card>
+
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                Peak Trading Hours
+              </h3>
+              <ul className="mt-2 text-sm list-disc pl-5 space-y-1">
+                <li>Early Morning: 5:00 - 8:00</li>
+                <li>Mid-Morning: 9:00 - 11:00</li>
+                <li>Late Afternoon: 15:00 - 17:00</li>
+                <li>Evening Markets: 18:00 - 21:00</li>
+              </ul>
+            </Card>
+
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-primary" />
+                Market Days
+              </h3>
+              <ul className="mt-2 text-sm list-disc pl-5 space-y-1">
+                <li>Urban markets: Daily operations</li>
+                <li>Rural markets: 2-3 days per week</li>
+                <li>Seasonal variations during harvest</li>
+                <li>Special weekend markets in suburbs</li>
+              </ul>
+            </Card>
+          </div>
+
+          <InformalMarketManager />
         </TabsContent>
       </Tabs>
 

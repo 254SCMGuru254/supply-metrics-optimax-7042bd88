@@ -1,7 +1,7 @@
-
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import './index.css'
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
 import "leaflet-defaulticon-compatibility";
@@ -13,4 +13,22 @@ if (!rootElement) {
 }
 
 // Create and render the app
-createRoot(rootElement).render(<App />);
+ReactDOM.createRoot(rootElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+
+// Register service worker for offline functionality
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.ts', { 
+      scope: '/',
+      type: 'module'
+    }).then(registration => {
+      console.log('SW registered:', registration)
+    }).catch(error => {
+      console.log('SW registration failed:', error)
+    })
+  })
+}
