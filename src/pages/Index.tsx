@@ -12,6 +12,13 @@ import {
   Map,
   MessageSquare,
   MapPin,
+  Code,
+  Lock,
+  Server,
+  Database,
+  Zap,
+  Hand,
+  Globe,
 } from "lucide-react";
 
 const Index = () => {
@@ -20,7 +27,7 @@ const Index = () => {
       <div className="flex flex-col items-center text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Supply Metrics Optimax</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mb-6">
-          Comprehensive supply chain optimization tailored for the Kenyan logistics ecosystem
+          Empowering Kenyan Businesses with Free, Open-Source Supply Chain Optimization
         </p>
         <div className="flex gap-4">
           <Link to="/kenya-supply-chain">
@@ -158,62 +165,77 @@ const Index = () => {
       </div>
 
       <Card className="p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Kenya-Optimized Supply Chain Solutions</h2>
-        <p className="mb-4">
-          Purpose-built optimization tools designed for Kenya's unique logistics landscape:
-        </p>
+        <h2 className="text-xl font-semibold mb-4">100% Free & Open-Source</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>First comprehensive supply chain platform tailored for Kenya's infrastructure</p>
+          <div className="flex items-center gap-3">
+            <Code className="h-6 w-6 text-primary" />
+            <p>All optimization algorithms use free, open-source libraries</p>
           </div>
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>Integration with local transportation networks and real-time traffic data</p>
+          <div className="flex items-center gap-3">
+            <Server className="h-6 w-6 text-primary" />
+            <p>Lightweight API design for minimal hosting costs</p>
           </div>
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>Advanced AI analysis customized for Kenyan market conditions</p>
+          <div className="flex items-center gap-3">
+            <Database className="h-6 w-6 text-primary" />
+            <p>Free NLP implementation without external API dependencies</p>
           </div>
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>Mobile-first design optimized for Kenya's high mobile usage</p>
+          <div className="flex items-center gap-3">
+            <Zap className="h-6 w-6 text-primary" />
+            <p>Automatic data pruning to reduce storage overhead</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Lock className="h-6 w-6 text-primary" />
+            <p>Community-driven development with transparent, auditable code</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Hand className="h-6 w-6 text-primary" />
+            <p>No hidden fees or commercial usage restrictions</p>
           </div>
         </div>
       </Card>
 
-      <Card className="p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Proven Business Impact</h2>
-        <p className="mb-4">
-          Delivering measurable results for Kenyan businesses:
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>15-25% reduction in operational costs through optimized routing</p>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>Enhanced inventory management reducing storage costs and wastage</p>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>Improved last-mile delivery efficiency in both urban and rural areas</p>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary mt-2" />
-            <p>Optimized resource allocation for SMEs and enterprises</p>
-          </div>
-        </div>
-      </Card>
-
-      <div className="flex justify-center">
+      <div className="flex justify-center mb-8">
         <Link to="/kenya-supply-chain">
           <Button size="lg">
             Start Optimizing Your Kenyan Supply Chain
           </Button>
         </Link>
       </div>
+
+      <footer className="bg-muted/50 py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">About Us</h3>
+              <p className="text-muted-foreground">
+                Supply Metrics Optimax is an open-source platform dedicated to empowering 
+                Kenyan businesses with advanced supply chain optimization tools.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                <li><Link to="/introduction" className="text-muted-foreground hover:text-primary">Introduction</Link></li>
+                <li><Link to="/data-input" className="text-muted-foreground hover:text-primary">Data Input</Link></li>
+                <li><Link to="/analytics" className="text-muted-foreground hover:text-primary">Analytics</Link></li>
+                <li><Link to="/onboarding" className="text-muted-foreground hover:text-primary">Onboarding</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Connect</h3>
+              <div className="flex space-x-4">
+                <a href="https://github.com/254SCMGuru254/supply-metrics-optimax" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                  <Globe className="h-6 w-6" />
+                </a>
+                {/* Add more social links as needed */}
+              </div>
+              <p className="mt-4 text-muted-foreground text-sm">
+                © {new Date().getFullYear()} Supply Metrics Optimax. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
