@@ -1,3 +1,4 @@
+
 import localforage from 'localforage';
 import { get } from 'idb-keyval';
 
@@ -10,7 +11,7 @@ localforage.config({
 interface SyncQueue {
   id: string;
   action: 'create' | 'update' | 'delete';
-  entityType: 'route' | 'inventory' | 'location' | 'data_collection';
+  entityType: 'route' | 'inventory' | 'location' | 'data_collection' | 'market';
   data: any;
   timestamp: number;
 }
@@ -96,6 +97,8 @@ export class OfflineSync {
         return `${baseUrl}/locations`;
       case 'data_collection':
         return `${baseUrl}/data-collection`;
+      case 'market':
+        return `${baseUrl}/markets`;
       default:
         throw new Error(`Unknown entity type: ${entityType}`);
     }

@@ -1,3 +1,4 @@
+
 /// <reference lib="webworker" />
 
 import { precacheAndRoute } from 'workbox-precaching'
@@ -5,6 +6,7 @@ import { registerRoute } from 'workbox-routing'
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { BackgroundSyncPlugin } from 'workbox-background-sync'
 
 declare const self: ServiceWorkerGlobalScope
 
@@ -62,6 +64,23 @@ registerRoute(
   })
 )
 
+// Cache informal market data
+registerRoute(
+  ({ url }) => url.pathname.includes('/api/markets'),
+  new NetworkFirst({
+    cacheName: 'informal-markets-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxEntries: 30,
+        maxAgeSeconds: 3 * 24 * 60 * 60, // 3 days
+      }),
+    ],
+  })
+)
+
 // Handle offline fallback
 self.addEventListener('fetch', (event) => {
   if (!navigator.onLine) {
@@ -89,5 +108,18 @@ registerRoute(
   new NetworkFirst({
     cacheName: 'offline-data-collection',
     plugins: [bgSyncPlugin],
+  })
+)
+
+// Specific sync for market data submissions
+const marketSyncPlugin = new BackgroundSyncPlugin('marketDataQueue', {
+  maxRetentionTime: 48 * 60 // Retry for up to 48 hours for critical market data
+})
+
+registerRoute(
+  ({ url }) => url.pathname.includes('/api/markets/submit'),
+  new NetworkFirst({
+    cacheName: 'market-data-submissions',
+    plugins: [marketSyncPlugin],
   })
 )

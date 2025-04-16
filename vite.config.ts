@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -58,6 +59,17 @@ export default defineConfig(({ mode }) => ({
               expiration: {
                 maxEntries: 1000,
                 maxAgeSeconds: 60 * 60 * 24 * 30
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/api\..*\/markets\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'market-data-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 6 // 6 hours
               }
             }
           }

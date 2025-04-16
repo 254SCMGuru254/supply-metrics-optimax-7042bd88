@@ -1,3 +1,4 @@
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
@@ -22,13 +23,13 @@ ReactDOM.createRoot(rootElement).render(
 // Register service worker for offline functionality
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.ts', { 
+    navigator.serviceWorker.register('/service-worker.js', { 
       scope: '/',
       type: 'module'
     }).then(registration => {
-      console.log('SW registered:', registration)
+      console.log('Service worker registered:', registration)
     }).catch(error => {
-      console.log('SW registration failed:', error)
+      console.log('Service worker registration failed:', error)
     })
   })
 }
