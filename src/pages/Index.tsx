@@ -169,27 +169,27 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
             <Code className="h-6 w-6 text-primary" />
-            <p>All optimization algorithms use free, open-source libraries</p>
+            <p>Cutting-edge optimization algorithms using community-developed open-source libraries</p>
           </div>
           <div className="flex items-center gap-3">
             <Server className="h-6 w-6 text-primary" />
-            <p>Lightweight API design for minimal hosting costs</p>
+            <p>Serverless architecture for efficient, cost-effective API design</p>
           </div>
           <div className="flex items-center gap-3">
             <Database className="h-6 w-6 text-primary" />
-            <p>Free NLP implementation without external API dependencies</p>
+            <p>Native NLP processing with local machine learning models, zero external dependencies</p>
           </div>
           <div className="flex items-center gap-3">
             <Zap className="h-6 w-6 text-primary" />
-            <p>Automatic data pruning to reduce storage overhead</p>
+            <p>Intelligent data management with automated archiving and pruning</p>
           </div>
           <div className="flex items-center gap-3">
             <Lock className="h-6 w-6 text-primary" />
-            <p>Community-driven development with transparent, auditable code</p>
+            <p>Fully transparent, community-reviewed codebase with open governance</p>
           </div>
           <div className="flex items-center gap-3">
             <Hand className="h-6 w-6 text-primary" />
-            <p>No hidden fees or commercial usage restrictions</p>
+            <p>Completely free platform with unrestricted commercial usage rights</p>
           </div>
         </div>
       </Card>
