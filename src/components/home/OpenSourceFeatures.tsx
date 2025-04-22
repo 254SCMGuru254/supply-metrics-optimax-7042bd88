@@ -8,6 +8,7 @@ import {
   Lock, 
   Hand 
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -36,19 +37,52 @@ const features = [
   }
 ];
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
 const OpenSourceFeatures = () => {
   return (
-    <Card className="p-6 mb-8">
-      <h2 className="text-xl font-semibold mb-4">100% Free & Open-Source</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {features.map((feature, index) => (
-          <div key={index} className="flex items-center gap-3">
-            <feature.icon className="h-6 w-6 text-primary" />
-            <p>{feature.description}</p>
-          </div>
-        ))}
-      </div>
-    </Card>
+    <motion.div
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-100px" }}
+    >
+      <Card className="p-6 mb-8">
+        <motion.h2 
+          className="text-xl font-semibold mb-4"
+          variants={item}
+        >
+          100% Free & Open-Source
+        </motion.h2>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          variants={container}
+        >
+          {features.map((feature, index) => (
+            <motion.div 
+              key={index} 
+              className="flex items-center gap-3"
+              variants={item}
+            >
+              <feature.icon className="h-6 w-6 text-primary" />
+              <p>{feature.description}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </Card>
+    </motion.div>
   );
 };
 
