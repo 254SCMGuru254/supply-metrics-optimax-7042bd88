@@ -43,6 +43,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.24.1",
     "@tensorflow/tfjs": "^4.22.0",
+    "@types/jspdf": "^2.0.0",
     "@types/pako": "^2.0.3",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.6.7",
@@ -85,8 +86,8 @@
   "devDependencies": {
     "@types/leaflet": "^1.9.17",
     "@types/node": "^20.17.30",
-    "@types/react": "^18.3.20",
-    "@types/react-dom": "^18.3.6",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react-swc": "^3.8.1",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
