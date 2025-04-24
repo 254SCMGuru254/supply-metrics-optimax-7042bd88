@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
@@ -19,6 +18,7 @@ import Introduction from "./pages/Introduction";
 import DemandForecasting from "./pages/DemandForecasting";
 import InventoryManagement from "./pages/InventoryManagement";
 import FleetManagement from "./pages/FleetManagement";
+import Pricing from "./pages/Pricing";
 import "./App.css";
 
 function App() {
@@ -27,6 +27,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><Outlet /></Layout>}>
           <Route index element={<Index />} />
+          <Route path="pricing" element={<Pricing />} />
           <Route path="introduction" element={<Introduction />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="onboarding/*" element={<Onboarding />} />

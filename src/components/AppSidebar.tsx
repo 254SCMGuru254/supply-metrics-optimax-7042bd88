@@ -1,4 +1,3 @@
-
 import {
   BarChart3,
   Home,
@@ -14,6 +13,7 @@ import {
   BookOpen,
   TrendingUp,
   Package,
+  DollarSign
 } from "lucide-react";
 import {
   Sidebar,
@@ -31,6 +31,7 @@ const menuItems = [
   { title: "Introduction", icon: Info, path: "/introduction" },
   { title: "Onboarding", icon: BookOpen, path: "/onboarding" },
   { title: "Dashboard", icon: Home, path: "/dashboard" },
+  { title: "Pricing", icon: DollarSign, path: "/pricing" },
   
   // Analysis Tools
   { title: "Data Management", icon: Database, path: "/data-input" },
