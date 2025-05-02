@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { OfflineSync } from '@/utils/offlineSync';
 import localforage from 'localforage';
@@ -24,6 +25,11 @@ interface ValidationResult {
   warnings: string[];
 }
 
+interface CachedData<T> {
+  data: T;
+  timestamp: number;
+}
+
 export function useOfflineMarket() {
   const [markets, setMarkets] = useState<MarketData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +46,7 @@ export function useOfflineMarket() {
       setIsLoading(true);
       
       // Try to get data from cache first
-      const cachedData = await offlineSync.getCachedData('markets');
+      const cachedData = await offlineSync.getCachedData('markets') as CachedData<MarketData[]> | null;
       if (cachedData) {
         setMarkets(cachedData.data);
       }

@@ -30,6 +30,21 @@ export const SupplyChainChatbot = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const questionAnsweringRef = useRef<any>(null);
 
+  // Common supply chain knowledge about Kenya
+  const kenyaSupplyChainContext = `
+    Kenya is a key logistics hub in East Africa with major transport corridors including the Northern Corridor.
+    The Port of Mombasa is Kenya's primary maritime gateway handling over 30 million tons annually.
+    Kenya's key distribution centers are located in Nairobi, Mombasa, Kisumu, Nakuru, and Eldoret.
+    Kenya has developed the Standard Gauge Railway (SGR) connecting Mombasa to Nairobi and Naivasha.
+    Common logistics challenges in Kenya include infrastructure gaps, traffic congestion, and security concerns.
+    Kenya's major agricultural exports include tea, coffee, flowers, and fresh produce requiring specialized cold chains.
+    The Kenya Revenue Authority handles customs clearance through the Integrated Customs Management System.
+    Key trade corridors connect Kenya to Uganda, Rwanda, South Sudan, Ethiopia, and Tanzania.
+    KES (Kenyan Shilling) is the currency used for local transactions, with an average exchange rate of approximately 100 KES to 1 USD.
+    Last-mile delivery in Kenya often relies on motorcycles (boda bodas) in urban areas.
+    Kenya's digital payment platform M-Pesa has revolutionized financial transactions in the supply chain.
+  `;
+
   // Load the model on component mount
   useEffect(() => {
     const loadModel = async () => {
@@ -64,21 +79,6 @@ export const SupplyChainChatbot = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  // Common supply chain knowledge about Kenya
-  const kenyaSupplyChainContext = `
-    Kenya is a key logistics hub in East Africa with major transport corridors including the Northern Corridor.
-    The Port of Mombasa is Kenya's primary maritime gateway handling over 30 million tons annually.
-    Kenya's key distribution centers are located in Nairobi, Mombasa, Kisumu, Nakuru, and Eldoret.
-    Kenya has developed the Standard Gauge Railway (SGR) connecting Mombasa to Nairobi and Naivasha.
-    Common logistics challenges in Kenya include infrastructure gaps, traffic congestion, and security concerns.
-    Kenya's major agricultural exports include tea, coffee, flowers, and fresh produce requiring specialized cold chains.
-    The Kenya Revenue Authority handles customs clearance through the Integrated Customs Management System.
-    Key trade corridors connect Kenya to Uganda, Rwanda, South Sudan, Ethiopia, and Tanzania.
-    KES (Kenyan Shilling) is the currency used for local transactions, with an average exchange rate of approximately 100 KES to 1 USD.
-    Last-mile delivery in Kenya often relies on motorcycles (boda bodas) in urban areas.
-    Kenya's digital payment platform M-Pesa has revolutionized financial transactions in the supply chain.
-  `;
 
   const handleSendMessage = async () => {
     if (!input.trim() || isProcessing) return;
@@ -144,21 +144,6 @@ export const SupplyChainChatbot = () => {
       handleSendMessage();
     }
   };
-
-  // Common supply chain knowledge about Kenya
-  const kenyaSupplyChainContext = `
-    Kenya is a key logistics hub in East Africa with major transport corridors including the Northern Corridor.
-    The Port of Mombasa is Kenya's primary maritime gateway handling over 30 million tons annually.
-    Kenya's key distribution centers are located in Nairobi, Mombasa, Kisumu, Nakuru, and Eldoret.
-    Kenya has developed the Standard Gauge Railway (SGR) connecting Mombasa to Nairobi and Naivasha.
-    Common logistics challenges in Kenya include infrastructure gaps, traffic congestion, and security concerns.
-    Kenya's major agricultural exports include tea, coffee, flowers, and fresh produce requiring specialized cold chains.
-    The Kenya Revenue Authority handles customs clearance through the Integrated Customs Management System.
-    Key trade corridors connect Kenya to Uganda, Rwanda, South Sudan, Ethiopia, and Tanzania.
-    KES (Kenyan Shilling) is the currency used for local transactions, with an average exchange rate of approximately 100 KES to 1 USD.
-    Last-mile delivery in Kenya often relies on motorcycles (boda bodas) in urban areas.
-    Kenya's digital payment platform M-Pesa has revolutionized financial transactions in the supply chain.
-  `;
 
   return (
     <Card className="flex flex-col h-[600px] w-full">
