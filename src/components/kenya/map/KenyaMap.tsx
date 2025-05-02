@@ -70,9 +70,11 @@ export const KenyaMap = ({
                   [fromLocation.latitude, fromLocation.longitude],
                   [toLocation.latitude, toLocation.longitude]
                 ]}
-                color={getRouteColor(route.type)}
-                weight={getRouteWeight(route.volume)}
-                dashArray={route.type === "rail" ? "10, 10" : undefined}
+                pathOptions={{
+                  color: getRouteColor(route.type),
+                  weight: getRouteWeight(route.volume),
+                  dashArray: route.type === "rail" ? "10, 10" : undefined
+                }}
               >
                 <Popup>
                   <div className="p-2">
