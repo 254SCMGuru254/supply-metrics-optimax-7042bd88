@@ -55,6 +55,7 @@ export const ModelWalkthrough = ({ steps }: ModelWalkthroughProps) => {
           onClick={goToPreviousStep}
           disabled={currentStep === 0}
           size="icon"
+          variant="outline"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -64,7 +65,8 @@ export const ModelWalkthrough = ({ steps }: ModelWalkthroughProps) => {
             <Button
               key={index}
               onClick={() => goToStep(index)}
-              size="icon"
+              size="sm"
+              variant={index === currentStep ? "default" : "ghost"}
               className={`h-2 w-2 rounded-full p-0 ${
                 index === currentStep ? "bg-primary" : "bg-muted"
               }`}
@@ -78,6 +80,7 @@ export const ModelWalkthrough = ({ steps }: ModelWalkthroughProps) => {
           onClick={goToNextStep}
           disabled={currentStep === steps.length - 1}
           size="icon"
+          variant="outline"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
