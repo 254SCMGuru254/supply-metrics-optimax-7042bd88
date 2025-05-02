@@ -42,13 +42,15 @@ export interface Route {
 export interface NodeMarkerProps {
   node: Node;
   onNodeClick?: (node: Node) => void;
+  key?: any;
 }
 
 export interface RoutePolylineProps {
   route: Route;
   fromNode: Node;
   toNode: Node;
-  isOptimized?: boolean;
+  isOptimized: boolean;
+  key?: any;
 }
 
 export interface NetworkMapProps {
@@ -84,7 +86,7 @@ export interface InventoryItem {
   leadTime: number; // In days
   serviceLevel: number; // As percentage (e.g., 95%)
   abcClass?: "A" | "B" | "C";
-  annualValue?: number; // Added this property to fix errors
+  annualValue?: number;
 }
 
 export interface EOQResult {

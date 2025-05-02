@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { OfflineSync } from '@/utils/offlineSync';
 import localforage from 'localforage';
@@ -46,9 +45,9 @@ export function useOfflineMarket() {
       setIsLoading(true);
       
       // Try to get data from cache first
-      const cachedData = await offlineSync.getCachedData('markets') as CachedData<MarketData[]> | null;
-      if (cachedData) {
-        setMarkets(cachedData.data);
+      const cachedData = await offlineSync.getCachedData('markets');
+      if (cachedData && typeof cachedData === 'object' && 'data' in cachedData) {
+        setMarkets((cachedData as CachedData<MarketData[]>).data);
       }
 
       // If online, fetch fresh data

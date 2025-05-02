@@ -52,10 +52,9 @@ export const ModelWalkthrough = ({ steps }: ModelWalkthroughProps) => {
 
       <div className="flex justify-between items-center mt-4">
         <Button 
-          variant="outline" 
-          size="icon"
           onClick={goToPreviousStep}
           disabled={currentStep === 0}
+          size="icon"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -64,12 +63,11 @@ export const ModelWalkthrough = ({ steps }: ModelWalkthroughProps) => {
           {steps.map((_, index) => (
             <Button
               key={index}
-              variant="ghost"
+              onClick={() => goToStep(index)}
               size="icon"
               className={`h-2 w-2 rounded-full p-0 ${
                 index === currentStep ? "bg-primary" : "bg-muted"
               }`}
-              onClick={() => goToStep(index)}
             >
               <span className="sr-only">Go to step {index + 1}</span>
             </Button>
@@ -77,10 +75,9 @@ export const ModelWalkthrough = ({ steps }: ModelWalkthroughProps) => {
         </div>
 
         <Button 
-          variant="outline" 
-          size="icon"
           onClick={goToNextStep}
           disabled={currentStep === steps.length - 1}
+          size="icon"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
