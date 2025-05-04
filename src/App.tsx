@@ -1,53 +1,56 @@
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
-import { Layout } from "./components/Layout";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Onboarding from "./pages/Onboarding";
-import DataInput from "./pages/DataInput";
-import CenterOfGravity from "./pages/CenterOfGravity";
-import NetworkOptimization from "./pages/NetworkOptimization";
-import Heuristic from "./pages/Heuristic";
-import Isohedron from "./pages/Isohedron";
-import Simulation from "./pages/Simulation";
-import Analytics from "./pages/Analytics";
-import ChatAssistant from "./pages/ChatAssistant";
-import KenyaSupplyChain from "./pages/KenyaSupplyChain";
-import RouteOptimization from "./pages/RouteOptimization";
-import Dashboard from "./pages/Dashboard";
-import Introduction from "./pages/Introduction";
-import DemandForecasting from "./pages/DemandForecasting";
-import InventoryManagement from "./pages/InventoryManagement";
-import FleetManagement from "./pages/FleetManagement";
-import Pricing from "./pages/Pricing";
-import "./App.css";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+import { Layout } from "@/components/Layout";
+import { Index } from "@/pages/Index";
+import { Introduction } from "@/pages/Introduction";
+import { Dashboard } from "@/pages/Dashboard";
+import { Analytics } from "@/pages/Analytics";
+import { DataInput } from "@/pages/DataInput";
+import { KenyaSupplyChain } from "@/pages/KenyaSupplyChain";
+import { DemandForecasting } from "@/pages/DemandForecasting";
+import { ChatAssistant } from "@/pages/ChatAssistant";
+import { InventoryManagement } from "@/pages/InventoryManagement";
+import { RouteOptimization } from "@/pages/RouteOptimization";
+import { CenterOfGravity } from "@/pages/CenterOfGravity";
+import { NetworkOptimization } from "@/pages/NetworkOptimization";
+import { Heuristic } from "@/pages/Heuristic";
+import { Simulation } from "@/pages/Simulation";
+import { Isohedron } from "@/pages/Isohedron";
+import { FleetManagement } from "@/pages/FleetManagement";
+import { Pricing } from "@/pages/Pricing";
+import { NotFound } from "@/pages/NotFound";
+import BusinessValue from "@/pages/BusinessValue";
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout><Outlet /></Layout>}>
+        <Route path="/" element={<Layout />}>
           <Route index element={<Index />} />
-          <Route path="pricing" element={<Pricing />} />
           <Route path="introduction" element={<Introduction />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="onboarding/*" element={<Onboarding />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route path="data-input" element={<DataInput />} />
+          <Route path="kenya-supply-chain" element={<KenyaSupplyChain />} />
+          <Route path="demand-forecasting" element={<DemandForecasting />} />
+          <Route path="chat-assistant" element={<ChatAssistant />} />
+          <Route path="inventory-management" element={<InventoryManagement />} />
+          <Route path="route-optimization" element={<RouteOptimization />} />
           <Route path="center-of-gravity" element={<CenterOfGravity />} />
           <Route path="network-optimization" element={<NetworkOptimization />} />
-          <Route path="route-optimization" element={<RouteOptimization />} />
-          <Route path="demand-forecasting" element={<DemandForecasting />} />
-          <Route path="inventory-management" element={<InventoryManagement />} />
-          <Route path="fleet-management" element={<FleetManagement />} />
           <Route path="heuristic" element={<Heuristic />} />
-          <Route path="isohedron" element={<Isohedron />} />
           <Route path="simulation" element={<Simulation />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="chat-assistant" element={<ChatAssistant />} />
-          <Route path="kenya-supply-chain" element={<KenyaSupplyChain />} />
+          <Route path="isohedron" element={<Isohedron />} />
+          <Route path="fleet-management" element={<FleetManagement />} />
+          <Route path="business-value" element={<BusinessValue />} />
+          <Route path="pricing" element={<Pricing />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 
