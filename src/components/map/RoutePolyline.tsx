@@ -20,7 +20,7 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
   const positions = [
     [fromNode.latitude, fromNode.longitude],
     [toNode.latitude, toNode.longitude]
-  ];
+  ] as L.LatLngExpression[];
 
   // Set color based on route status
   const color = route.isDisrupted ? '#ff0000' :
@@ -36,7 +36,7 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
 
   return (
     <Polyline 
-      positions={positions as L.LatLngExpression[]} 
+      positions={positions} 
       pathOptions={{ 
         color: color,
         weight: weight,
