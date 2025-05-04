@@ -1,6 +1,6 @@
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "./AppSidebar";
+import AppSidebar from "./AppSidebar";
 import { ReactNode } from "react";
 
 export const Layout = ({ children }: { children: ReactNode }) => {

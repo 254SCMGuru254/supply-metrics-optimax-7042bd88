@@ -1,27 +1,28 @@
+
 import {
   BrowserRouter,
   Routes,
   Route,
 } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { Index } from "@/pages/Index";
-import { Introduction } from "@/pages/Introduction";
-import { Dashboard } from "@/pages/Dashboard";
-import { Analytics } from "@/pages/Analytics";
-import { DataInput } from "@/pages/DataInput";
-import { KenyaSupplyChain } from "@/pages/KenyaSupplyChain";
-import { DemandForecasting } from "@/pages/DemandForecasting";
-import { ChatAssistant } from "@/pages/ChatAssistant";
-import { InventoryManagement } from "@/pages/InventoryManagement";
-import { RouteOptimization } from "@/pages/RouteOptimization";
-import { CenterOfGravity } from "@/pages/CenterOfGravity";
-import { NetworkOptimization } from "@/pages/NetworkOptimization";
-import { Heuristic } from "@/pages/Heuristic";
-import { Simulation } from "@/pages/Simulation";
-import { Isohedron } from "@/pages/Isohedron";
-import { FleetManagement } from "@/pages/FleetManagement";
-import { Pricing } from "@/pages/Pricing";
-import { NotFound } from "@/pages/NotFound";
+import Index from "@/pages/Index";
+import Introduction from "@/pages/Introduction";
+import Dashboard from "@/pages/Dashboard";
+import Analytics from "@/pages/Analytics";
+import DataInput from "@/pages/DataInput";
+import KenyaSupplyChain from "@/pages/KenyaSupplyChain";
+import DemandForecasting from "@/pages/DemandForecasting";
+import ChatAssistant from "@/pages/ChatAssistant";
+import InventoryManagement from "@/pages/InventoryManagement";
+import RouteOptimization from "@/pages/RouteOptimization";
+import CenterOfGravity from "@/pages/CenterOfGravity";
+import NetworkOptimization from "@/pages/NetworkOptimization";
+import Heuristic from "@/pages/Heuristic";
+import Simulation from "@/pages/Simulation";
+import Isohedron from "@/pages/Isohedron";
+import FleetManagement from "@/pages/FleetManagement";
+import Pricing from "@/pages/Pricing";
+import NotFound from "@/pages/NotFound";
 import BusinessValue from "@/pages/BusinessValue";
 
 function App() {
