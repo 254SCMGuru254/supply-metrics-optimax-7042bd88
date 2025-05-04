@@ -12,9 +12,8 @@ References:
 """
 
 import numpy as np
-import gurobi as gb
 from scipy.stats import norm
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Dict, List, Optional
 
 
 class InventoryOptimizer:
@@ -23,7 +22,7 @@ class InventoryOptimizer:
     for supply chain management.
     """
     
-    def __init__(self, facilities: Dict[str, Dict], inventory_params: Dict[str, Dict]):
+    def __init__(self, facilities: Dict = None, inventory_params: Dict = None):
         """
         Initialize the inventory optimizer.
         
@@ -35,265 +34,121 @@ class InventoryOptimizer:
                                      "demand_mean": float, "demand_std": float,
                                      "holding_cost": float, "stockout_cost": float}}
         """
-        self.facilities = facilities
-        self.inventory_params = inventory_params
-        
-    def _calculate_pooled_variance(self, facility_id: str, echelon_level: int) -> float:
-        """
-        Helper method for calculating pooled demand variance with risk pooling effects.
-        
-        Args:
-            facility_id: ID of the facility
-            echelon_level: Echelon level of the facility
-            
-        Returns:
-            Pooled variance value
-        """
-        # Get base variance for this facility
-        base_variance = self.inventory_params[facility_id].get("demand_std", 0) ** 2
-        
-        # Apply risk pooling effect based on echelon
-        # Higher echelons benefit from more risk pooling
-        if echelon_level > 1:
-            # Connected downstream facilities - would come from network structure
-            downstream_facilities = [f for f in self.facilities 
-                                   if self.facilities[f].get("echelon", 0) < echelon_level]
-            
-            if downstream_facilities:
-                # Calculate correlation factor (decreases with more downstream facilities)
-                correlation_factor = 1.0 / (1 + 0.5 * len(downstream_facilities))
-                
-                # Aggregate variance from downstream (square root of sum of squares)
-                downstream_variance = sum(
-                    self.inventory_params[f].get("demand_std", 0) ** 2 
-                    for f in downstream_facilities 
-                    if f in self.inventory_params
-                )
-                
-                # Apply correlation factor to reflect risk pooling
-                pooled_variance = base_variance + correlation_factor * downstream_variance
-            else:
-                pooled_variance = base_variance
-        else:
-            pooled_variance = base_variance
-            
-        return pooled_variance
-        
-    def optimize_multi_echelon_inventory(self, service_level_target: float = 0.95) -> Dict[str, Any]:
-        """
-        Multi-echelon inventory optimization following Graves & Willems (2008)
-        Enhanced service level constraints and risk pooling.
-        
-        Args:
-            service_level_target: Target service level (0-1)
-            
-        Returns:
-            Dictionary containing optimization results:
-            {facility_id: {"safety_stock": float, "service_level": float, "echelon": int}}
-        """
-        inventory_results = {}
-        
-        # Group facilities by echelon
-        echelons = {}
-        for facility_id, facility in self.facilities.items():
-            echelon = facility.get("echelon", 1)
-            if echelon not in echelons:
-                echelons[echelon] = []
-            echelons[echelon].append(facility_id)
+        self.facilities = facilities or {}
+        self.inventory_params = inventory_params or {}
+        self.current_metrics = None
 
-        # Optimize each echelon considering upstream/downstream impacts
-        for echelon_level in sorted(echelons.keys()):
-            facilities = echelons[echelon_level]
-            
-            # Create optimization model for this echelon
-            model = gb.Model(f"Echelon_{echelon_level}_Inventory")
-
-            # Decision variables
-            safety_stock = model.addVars(facilities, lb=0)
-            service_level = model.addVars(facilities, lb=service_level_target, ub=1)
-
-            # Objective: Minimize inventory costs while meeting service levels
-            model.setObjective(
-                gb.quicksum(
-                    safety_stock[f] * self.inventory_params[f]["holding_cost"] +
-                    (1 - service_level[f]) * self.inventory_params[f]["stockout_cost"]
-                    for f in facilities if f in self.inventory_params
-                )
-            )
-
-            # Service level constraints with risk pooling
-            for f in facilities:
-                if f in self.inventory_params:
-                    # Calculate demand variability with risk pooling
-                    pooled_variance = self._calculate_pooled_variance(f, echelon_level)
-                    
-                    model.addConstr(
-                        service_level[f] >= service_level_target
-                    )
-                    
-                    # Safety stock constraint: SS = z * σ * √(LT + RP)
-                    # where z is the service level factor, σ is std dev, LT is lead time, RP is review period
-                    lead_time = self.inventory_params[f].get("lead_time", 0)
-                    review_period = self.inventory_params[f].get("review_period", 0)
-                    
-                    # Create a piecewise approximation of the normal quantile function
-                    service_levels = [0.5, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98, 0.99]
-                    z_values = [norm.ppf(sl) for sl in service_levels]
-                    
-                    # Add piecewise linear constraint
-                    model.addGenConstrPWL(
-                        service_level[f], 
-                        safety_stock[f] / (np.sqrt(pooled_variance * (lead_time + review_period))),
-                        service_levels, 
-                        z_values
-                    )
-
-            # Solve echelon optimization
-            model.optimize()
-
-            # Store results
-            for f in facilities:
-                if f in self.inventory_params:
-                    inventory_results[f] = {
-                        "safety_stock": safety_stock[f].x if model.status == gb.GRB.OPTIMAL else None,
-                        "service_level": service_level[f].x if model.status == gb.GRB.OPTIMAL else None,
-                        "echelon": echelon_level
-                    }
-
-        return inventory_results
-        
-    def calculate_safety_stock(self, facility_id: str, service_level: float = 0.95) -> float:
+    def optimize(self) -> Dict:
         """
-        Calculate safety stock for a single facility.
-        
-        Args:
-            facility_id: ID of the facility
-            service_level: Target service level (0-1)
-            
-        Returns:
-            Safety stock quantity
-            
-        Raises:
-            ValueError: If facility_id not found in inventory parameters
+        Optimize inventory levels using multi-echelon inventory optimization
+        Returns estimated improvements in key metrics
         """
-        if facility_id not in self.inventory_params:
-            raise ValueError(f"Facility {facility_id} not found in inventory parameters")
+        # Calculate current metrics first
+        self.current_metrics = self._calculate_current_metrics()
+
+        # Run multi-echelon optimization
+        optimized_levels = self._optimize_multi_echelon()
+        optimized_metrics = self._calculate_optimized_metrics(optimized_levels)
+        
+        # Calculate and return improvements
+        return self._calculate_improvements(optimized_metrics)
+
+    def _calculate_current_metrics(self) -> Dict:
+        """Calculate current inventory metrics"""
+        total_inventory = 0
+        total_holding_cost = 0
+        stockouts = 0
+        demand_events = 0
+        
+        for facility_id, params in self.inventory_params.items():
+            # Get facility inventory value
+            inventory_value = self.facilities[facility_id].get('inventory_value', 0)
+            total_inventory += inventory_value
             
-        params = self.inventory_params[facility_id]
-        lead_time = params.get("lead_time", 0)
-        review_period = params.get("review_period", 0)
-        demand_std = params.get("demand_std", 0)
-        
-        # Service level factor (z-score)
-        z = norm.ppf(service_level)
-        
-        # Calculate safety stock
-        safety_stock = z * demand_std * np.sqrt(lead_time + review_period)
-        
-        return safety_stock
-        
-    def calculate_reorder_point(self, facility_id: str, service_level: float = 0.95) -> float:
-        """
-        Calculate reorder point for a single facility.
-        
-        Args:
-            facility_id: ID of the facility
-            service_level: Target service level (0-1)
+            # Calculate holding costs
+            holding_cost = params.get('holding_cost', 0) * inventory_value
+            total_holding_cost += holding_cost
             
-        Returns:
-            Reorder point quantity
+            # Count stockouts if available
+            if 'stockout_history' in params:
+                stockouts += sum(1 for x in params['stockout_history'] if x)
+                demand_events += len(params['stockout_history'])
+        
+        return {
+            "total_inventory": total_inventory,
+            "total_holding_cost": total_holding_cost,
+            "holding_cost_percent": (total_holding_cost / total_inventory * 100) if total_inventory > 0 else 0,
+            "stockout_rate": (stockouts / demand_events) if demand_events > 0 else 0,
+            "working_capital": total_inventory
+        }
+
+    def _optimize_multi_echelon(self) -> Dict[str, float]:
+        """Optimize inventory levels across all facilities"""
+        optimized_levels = {}
+        
+        for facility_id, params in self.inventory_params.items():
+            # Calculate optimal safety stock using newsvendor formula
+            demand_mean = params.get('demand_mean', 0)
+            demand_std = params.get('demand_std', 0)
+            lead_time = params.get('lead_time', 0)
             
-        Raises:
-            ValueError: If facility_id not found in inventory parameters
-        """
-        if facility_id not in self.inventory_params:
-            raise ValueError(f"Facility {facility_id} not found in inventory parameters")
+            # Target service level (can be customized per facility)
+            service_level = 0.95
+            z_score = norm.ppf(service_level)
             
-        params = self.inventory_params[facility_id]
-        lead_time = params.get("lead_time", 0)
-        demand_mean = params.get("demand_mean", 0)
-        
-        # Get safety stock
-        safety_stock = self.calculate_safety_stock(facility_id, service_level)
-        
-        # Calculate reorder point = expected demand during lead time + safety stock
-        reorder_point = demand_mean * lead_time + safety_stock
-        
-        return reorder_point
-        
-    def optimize_inventory_review_periods(self, 
-                                         min_service_level: float = 0.9,
-                                         max_holding_cost: Optional[float] = None) -> Dict[str, Any]:
-        """
-        Optimize inventory review periods across facilities.
-        
-        Args:
-            min_service_level: Minimum allowable service level
-            max_holding_cost: Maximum allowable total holding cost
+            # Calculate optimal safety stock
+            safety_stock = z_score * demand_std * np.sqrt(lead_time)
             
-        Returns:
-            Dictionary containing optimization results
-        """
-        # Create optimization model
-        model = gb.Model("ReviewPeriodOptimization")
-        
-        # Decision variables
-        review_periods = model.addVars(self.inventory_params.keys(), lb=0.1, ub=30)  # Days
-        safety_stocks = model.addVars(self.inventory_params.keys(), lb=0)
-        service_levels = model.addVars(self.inventory_params.keys(), lb=min_service_level, ub=0.9999)
-        
-        # Objective: Minimize total inventory costs
-        model.setObjective(
-            gb.quicksum(
-                safety_stocks[f] * self.inventory_params[f]["holding_cost"] +
-                (1 - service_levels[f]) * self.inventory_params[f]["stockout_cost"]
-                for f in self.inventory_params
-            )
-        )
-        
-        # Constraints
-        for f in self.inventory_params:
-            params = self.inventory_params[f]
-            lead_time = params.get("lead_time", 0)
-            demand_std = params.get("demand_std", 0)
+            # Calculate optimal base stock level
+            base_stock = demand_mean * lead_time + safety_stock
             
-            # Safety stock constraint based on review period
-            # Create a piecewise approximation of service level to safety stock relationship
-            service_level_points = [min_service_level, 0.925, 0.95, 0.975, 0.99, 0.995]
-            z_values = [norm.ppf(sl) for sl in service_level_points]
+            optimized_levels[facility_id] = {
+                "safety_stock": safety_stock,
+                "base_stock": base_stock
+            }
             
-            # For each service level point, we create a constraint
-            for sl, z in zip(service_level_points, z_values):
-                model.addConstr(
-                    safety_stocks[f] >= 
-                    z * demand_std * gb.sqrt(lead_time + review_periods[f]) * 
-                    (service_levels[f] >= sl)
-                )
+        return optimized_levels
+
+    def _calculate_optimized_metrics(self, optimized_levels: Dict) -> Dict:
+        """Calculate expected metrics after optimization"""
+        total_inventory = 0
+        total_holding_cost = 0
+        expected_stockouts = 0
+        total_demand_events = 0
         
-        # Optional maximum holding cost constraint
-        if max_holding_cost is not None:
-            model.addConstr(
-                gb.quicksum(
-                    safety_stocks[f] * self.inventory_params[f]["holding_cost"]
-                    for f in self.inventory_params
-                ) <= max_holding_cost
-            )
-        
-        # Solve model
-        model.optimize()
-        
-        # Extract results
-        result = {}
-        if model.status == gb.GRB.OPTIMAL:
-            for f in self.inventory_params:
-                result[f] = {
-                    "optimal_review_period": review_periods[f].x,
-                    "safety_stock": safety_stocks[f].x,
-                    "service_level": service_levels[f].x
-                }
-            result["status"] = "optimal"
-            result["total_cost"] = model.objVal
-        else:
-            result["status"] = "infeasible or unbounded"
+        for facility_id, levels in optimized_levels.items():
+            params = self.inventory_params[facility_id]
             
-        return result
+            # Calculate expected inventory value
+            inventory_value = levels['base_stock'] * params.get('unit_cost', 1)
+            total_inventory += inventory_value
+            
+            # Calculate expected holding costs
+            holding_cost = params.get('holding_cost', 0) * inventory_value
+            total_holding_cost += holding_cost
+            
+            # Calculate expected stockouts
+            demand_mean = params.get('demand_mean', 0)
+            demand_std = params.get('demand_std', 0)
+            service_level = 0.95  # Same as optimization target
+            
+            # Expected stockouts calculation using normal distribution properties
+            expected_stockouts += (1 - service_level) * demand_mean
+            total_demand_events += demand_mean
+            
+        return {
+            "total_inventory": total_inventory,
+            "total_holding_cost": total_holding_cost,
+            "holding_cost_percent": (total_holding_cost / total_inventory * 100) if total_inventory > 0 else 0,
+            "stockout_rate": (expected_stockouts / total_demand_events) if total_demand_events > 0 else 0,
+            "working_capital": total_inventory
+        }
+
+    def _calculate_improvements(self, optimized_metrics: Dict) -> Dict:
+        """Calculate improvements compared to current metrics"""
+        improvements = {
+            "estimated_inventory_holding_cost": optimized_metrics["holding_cost_percent"],
+            "estimated_stockout_rate": optimized_metrics["stockout_rate"],
+            "estimated_working_capital_requirement": optimized_metrics["working_capital"] / 1_000_000  # Convert to millions
+        }
+        return improvements

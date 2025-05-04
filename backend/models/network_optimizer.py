@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import folium
 import json
 from typing import Dict, List, Tuple, Any, Optional
+from datetime import datetime
 
 # Import optimization components
 from .facility_location import FacilityLocationOptimizer
@@ -39,6 +40,139 @@ class SupplyChainNetworkOptimizer:
         self.facility_optimizer = None
         self.routing_optimizer = None
         self.inventory_optimizer = None
+        
+        # Baseline metrics
+        self.baseline_metrics = None
+        
+    async def get_current_state(self) -> Dict:
+        """Get current state of the supply chain network"""
+        state = {
+            "routes": self._get_route_states(),
+            "facilities": self._get_facility_states(),
+            "daily_throughput": self._calculate_throughput(),
+            "bottlenecks": self._identify_bottlenecks(),
+            "resource_utilization": self._calculate_resource_utilization(),
+            "cost_per_unit": self._calculate_cost_per_unit(),
+            "stockout_rate": self._calculate_stockout_rate()
+        }
+        return state
+
+    async def optimize_all(self, network_state: Dict) -> Dict:
+        """Run all optimization models and return estimated improvements"""
+        results = {}
+        
+        # Initialize optimizers if not already done
+        self._initialize_optimizers()
+        
+        # Run route optimization
+        route_results = self.routing_optimizer.optimize()
+        results["route-optimization"] = {
+            "estimated_average_transit_time": route_results["estimated_transit_time"],
+            "estimated_transportation_cost": route_results["estimated_cost_per_unit"],
+            "estimated_vehicle_utilization": route_results["estimated_utilization"]
+        }
+        
+        # Run inventory optimization
+        inv_results = self.inventory_optimizer.optimize()
+        results["inventory-management"] = {
+            "estimated_inventory_holding_cost": inv_results["holding_cost_percent"],
+            "estimated_stockout_rate": inv_results["stockout_rate"],
+            "estimated_working_capital_requirement": inv_results["working_capital"]
+        }
+        
+        # Run network flow optimization
+        network_results = self._optimize_network_flow()
+        results["network-optimization"] = {
+            "estimated_network_throughput": network_results["throughput"],
+            "estimated_bottleneck_count": network_results["bottlenecks"],
+            "estimated_resource_utilization": network_results["utilization"]
+        }
+        
+        return results
+
+    def _get_route_states(self) -> List[Dict]:
+        """Get current state of all routes"""
+        states = []
+        for route_id, route in self.routes.items():
+            states.append({
+                "id": route_id,
+                "distance": route.get("distance", 0),
+                "time": route.get("transit_time", 0),
+                "capacity": route.get("capacity", 0),
+                "load": route.get("current_load", 0)
+            })
+        return states
+
+    def _get_facility_states(self) -> List[Dict]:
+        """Get current state of all facilities"""
+        states = []
+        for facility_id, facility in self.facilities.items():
+            states.append({
+                "id": facility_id,
+                "inventory_value": facility.get("inventory_value", 0),
+                "holding_cost": facility.get("holding_cost", 0),
+                "capacity": facility.get("capacity", 0),
+                "utilization": facility.get("utilization", 0)
+            })
+        return states
+
+    def _calculate_throughput(self) -> float:
+        """Calculate current daily network throughput"""
+        # Sum of all flow through network edges
+        total_flow = sum(edge["flow"] for _, _, edge in self.network_graph.edges(data=True))
+        return total_flow
+
+    def _identify_bottlenecks(self) -> List[str]:
+        """Identify network bottlenecks based on capacity utilization"""
+        bottlenecks = []
+        for node, data in self.network_graph.nodes(data=True):
+            if data.get("utilization", 0) > 0.9:  # 90% utilization threshold
+                bottlenecks.append(node)
+        return bottlenecks
+
+    def _calculate_resource_utilization(self) -> float:
+        """Calculate average resource utilization across network"""
+        utilizations = [data.get("utilization", 0) 
+                       for _, data in self.network_graph.nodes(data=True)]
+        return np.mean(utilizations) if utilizations else 0
+
+    def _calculate_cost_per_unit(self) -> float:
+        """Calculate current transportation cost per unit"""
+        total_cost = sum(edge.get("cost", 0) for _, _, edge in self.network_graph.edges(data=True))
+        total_volume = sum(edge.get("flow", 0) for _, _, edge in self.network_graph.edges(data=True))
+        return total_cost / total_volume if total_volume > 0 else 0
+
+    def _calculate_stockout_rate(self) -> float:
+        """Calculate current stockout rate"""
+        total_demand = 0
+        unfulfilled_demand = 0
+        
+        for node, data in self.network_graph.nodes(data=True):
+            if "demand" in data:
+                total_demand += data["demand"]
+                unfulfilled_demand += max(0, data["demand"] - data.get("fulfilled", 0))
+                
+        return unfulfilled_demand / total_demand if total_demand > 0 else 0
+
+    def _optimize_network_flow(self) -> Dict:
+        """Optimize network flow to maximize throughput and minimize bottlenecks"""
+        # Implementation of network flow optimization using minimum cost flow
+        flow = nx.max_flow_min_cost(self.network_graph, "source", "sink")
+        
+        # Calculate metrics for optimized network
+        optimized_throughput = sum(flow.values())
+        
+        # Count potential bottlenecks in optimized network
+        bottleneck_count = sum(1 for f in flow.values() if f > 0.9)
+        
+        # Calculate resource utilization in optimized network
+        utilization = np.mean([f for f in flow.values() if f > 0])
+        
+        return {
+            "throughput": optimized_throughput,
+            "bottlenecks": bottleneck_count,
+            "utilization": utilization
+        }
         
     def add_facility(self, facility_id: str, location: Tuple[float, float], 
                     capacity: float, fixed_cost: float, echelon: int = 1) -> None:

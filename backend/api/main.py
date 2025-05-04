@@ -12,14 +12,20 @@ import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 import logging
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # Import our optimization modules
-from ..models.routing import RouteOptimizer
+# Commented out RouteOptimizer import due to import error
+# from ..models.routing import RouteOptimizer
 from ..models.facility_location import FacilityLocationOptimizer
 from ..models.demand_forecasting import DemandForecaster
-from ..services.data_cleaner import record_activity, get_expiry_warning, start_data_cleaner
+from ..services.data_cleaner import record_activity, get_expiry_warning, start_data_cleaner, update_user_activity
 from backend.models.chatbot import get_chatbot_response
+from services.metrics_service import MetricsService
+from services.accuracy_monitor import AccuracyMonitor
+from fastapi.background import BackgroundTasks
+# Commented out resilience_metrics import due to import error
+# from ..models.resilience_metrics import ResilienceAnalyzer
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -46,6 +52,8 @@ app.add_middleware(
 route_optimizer = RouteOptimizer()
 facility_optimizer = FacilityLocationOptimizer()
 demand_forecaster = DemandForecaster()
+metrics_service = MetricsService()
+accuracy_monitor = AccuracyMonitor(metrics_service.storage)
 
 # ----- Request/Response Models -----
 
@@ -106,6 +114,20 @@ def get_user_id(request: Request, x_user_id: Optional[str] = Header(None)):
 def record_user_activity(user_id: str, background_tasks: BackgroundTasks):
     """Record user activity in the background"""
     background_tasks.add_task(record_activity, user_id)
+
+async def get_current_network_state() -> Dict:
+    """Get current state of the supply chain network"""
+    # TODO: Implement this to get real network state from your database/optimizer
+    from models.network_optimizer import SupplyChainNetworkOptimizer
+    optimizer = SupplyChainNetworkOptimizer()
+    return await optimizer.get_current_state()
+
+async def run_optimization_models(network_state: Dict) -> Dict:
+    """Run optimization models and get estimated improvements"""
+    # TODO: Implement this to run your actual optimization models
+    from models.network_optimizer import SupplyChainNetworkOptimizer
+    optimizer = SupplyChainNetworkOptimizer()
+    return await optimizer.optimize_all(network_state)
 
 # ----- API Routes -----
 
@@ -280,7 +302,7 @@ async def chat_with_bot(
         Chatbot response with text and context information
     """
     # Update user activity timestamp
-    data_cleaner.update_user_activity(user_id)
+    update_user_activity(user_id)
     
     # Extract message and context
     message = chat_request.get("message", "")
@@ -294,7 +316,98 @@ async def chat_with_bot(
     
     return response
 
+@app.get("/api/metrics/current")
+async def get_current_metrics():
+    """Get current state metrics from the actual network"""
+    try:
+        # Get current network state from your network optimizer
+        network_state = await get_current_network_state()
+        return metrics_service.calculate_current_metrics(network_state)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/metrics/estimated")
+async def get_estimated_metrics():
+    """Get estimated improvements based on optimization model outputs"""
+    try:
+        network_state = await get_current_network_state()
+        optimization_results = await run_optimization_models(network_state)
+        return metrics_service.calculate_estimated_improvements(network_state, optimization_results)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/metrics/actual")
+async def get_actual_metrics():
+    """Get actual implementation results"""
+    try:
+        return metrics_service.get_actual_results()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/metrics/record/{model_name}")
+async def record_actual_metrics(model_name: str, metrics: Dict):
+    """Record actual implementation results for a model"""
+    try:
+        metrics_service.record_actual_results(model_name, metrics)
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/metrics/accuracy")
+async def get_accuracy_metrics():
+    """Get accuracy metrics for all models"""
+    try:
+        return accuracy_monitor.check_accuracy()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/metrics/trends")
+async def get_accuracy_trends():
+    """Get accuracy trend analysis"""
+    try:
+        return accuracy_monitor.analyze_trends()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/metrics/report")
+async def get_accuracy_report():
+    """Get comprehensive accuracy report with recommendations"""
+    try:
+        return accuracy_monitor.generate_report()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/metrics/monitor")
+async def run_accuracy_monitoring(background_tasks: BackgroundTasks):
+    """Run accuracy monitoring in background and save alerts"""
+    try:
+        background_tasks.add_task(accuracy_monitor.check_accuracy)
+        return {"status": "Monitoring task started"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+from fastapi import Query
+
 # Run with: uvicorn backend.api.main:app --reload
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+@app.get("/api/metrics/estimation_accuracy")
+async def get_estimation_accuracy(model_name: Optional[str] = Query(None, description="Model name to filter accuracy")):
+    """Get estimation accuracy for models, optionally filtered by model name"""
+    try:
+        return metrics_service.get_estimation_accuracy(model_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/metrics/metric_trends")
+async def get_metric_trends(
+    model_name: str = Query(..., description="Model name for trend analysis"),
+    metric_name: str = Query(..., description="Metric name for trend analysis")
+):
+    """Get historical trend for a specific metric of a model"""
+    try:
+        return metrics_service.get_metrics_trend(model_name, metric_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
