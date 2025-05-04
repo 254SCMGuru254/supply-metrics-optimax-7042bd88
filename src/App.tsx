@@ -29,27 +29,25 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Index />} />
-          <Route path="introduction" element={<Introduction />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="data-input" element={<DataInput />} />
-          <Route path="kenya-supply-chain" element={<KenyaSupplyChain />} />
-          <Route path="demand-forecasting" element={<DemandForecasting />} />
-          <Route path="chat-assistant" element={<ChatAssistant />} />
-          <Route path="inventory-management" element={<InventoryManagement />} />
-          <Route path="route-optimization" element={<RouteOptimization />} />
-          <Route path="center-of-gravity" element={<CenterOfGravity />} />
-          <Route path="network-optimization" element={<NetworkOptimization />} />
-          <Route path="heuristic" element={<Heuristic />} />
-          <Route path="simulation" element={<Simulation />} />
-          <Route path="isohedron" element={<Isohedron />} />
-          <Route path="fleet-management" element={<FleetManagement />} />
-          <Route path="business-value" element={<BusinessValue />} />
-          <Route path="pricing" element={<Pricing />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
+        <Route path="/" element={<Layout><Index /></Layout>} />
+        <Route path="introduction" element={<Layout><Introduction /></Layout>} />
+        <Route path="dashboard" element={<Layout><Dashboard /></Layout>} />
+        <Route path="analytics" element={<Layout><Analytics /></Layout>} />
+        <Route path="data-input" element={<Layout><DataInput /></Layout>} />
+        <Route path="kenya-supply-chain" element={<Layout><KenyaSupplyChain /></Layout>} />
+        <Route path="demand-forecasting" element={<Layout><DemandForecasting /></Layout>} />
+        <Route path="chat-assistant" element={<Layout><ChatAssistant /></Layout>} />
+        <Route path="inventory-management" element={<Layout><InventoryManagement /></Layout>} />
+        <Route path="route-optimization" element={<Layout><RouteOptimization /></Layout>} />
+        <Route path="center-of-gravity" element={<Layout><CenterOfGravity /></Layout>} />
+        <Route path="network-optimization" element={<Layout><NetworkOptimization /></Layout>} />
+        <Route path="heuristic" element={<Layout><Heuristic /></Layout>} />
+        <Route path="simulation" element={<Layout><Simulation /></Layout>} />
+        <Route path="isohedron" element={<Layout><Isohedron /></Layout>} />
+        <Route path="fleet-management" element={<Layout><FleetManagement /></Layout>} />
+        <Route path="business-value" element={<Layout><BusinessValue /></Layout>} />
+        <Route path="pricing" element={<Layout><Pricing /></Layout>} />
+        <Route path="*" element={<Layout><NotFound /></Layout>} />
       </Routes>
     </BrowserRouter>
   );

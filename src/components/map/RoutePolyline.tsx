@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Polyline, Tooltip } from 'react-leaflet';
+import { Polyline } from 'react-leaflet';
+import L from 'leaflet';
 import { Route, Node } from './MapTypes';
 
 export interface RoutePolylineProps {
@@ -35,7 +36,7 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
 
   return (
     <Polyline 
-      positions={positions} 
+      positions={positions as L.LatLngExpression[]} 
       pathOptions={{ 
         color: color,
         weight: weight,
@@ -43,16 +44,36 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
         opacity: 0.8
       }}
     >
-      <Tooltip sticky>
-        <div>
-          <p><strong>From:</strong> {fromNode.name}</p>
-          <p><strong>To:</strong> {toNode.name}</p>
-          {route.distance && <p><strong>Distance:</strong> {route.distance.toFixed(2)} km</p>}
-          {route.time && <p><strong>Time:</strong> {route.time.toFixed(2)} hrs</p>}
-          {route.cost && <p><strong>Cost:</strong> ${route.cost.toFixed(2)}</p>}
-          {route.flow && <p><strong>Flow:</strong> {route.flow} units</p>}
-        </div>
-      </Tooltip>
+      {/* Replace Tooltip with a popup created on click using Leaflet's bindPopup */}
+      {React.useEffect(() => {
+        const polylines = document.querySelectorAll('.leaflet-interactive');
+        const lastPolyline = polylines[polylines.length - 1];
+        
+        if (lastPolyline) {
+          const popup = L.popup()
+            .setContent(`
+              <div>
+                <p><strong>From:</strong> ${fromNode.name}</p>
+                <p><strong>To:</strong> ${toNode.name}</p>
+                ${route.distance ? `<p><strong>Distance:</strong> ${route.distance.toFixed(2)} km</p>` : ''}
+                ${route.time ? `<p><strong>Time:</strong> ${route.time.toFixed(2)} hrs</p>` : ''}
+                ${route.cost ? `<p><strong>Cost:</strong> $${route.cost.toFixed(2)}</p>` : ''}
+                ${route.flow ? `<p><strong>Flow:</strong> ${route.flow} units</p>` : ''}
+              </div>
+            `);
+          
+          L.DomEvent.on(lastPolyline, 'click', (e) => {
+            popup.setLatLng(e.latlng).openOn((e.target as any)._map);
+            L.DomEvent.stopPropagation(e);
+          });
+        }
+        
+        return () => {
+          if (lastPolyline) {
+            L.DomEvent.off(lastPolyline, 'click');
+          }
+        };
+      }, [])}
     </Polyline>
   );
 };

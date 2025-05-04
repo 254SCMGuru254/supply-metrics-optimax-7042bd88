@@ -3,7 +3,11 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
 import { ReactNode } from "react";
 
-export const Layout = ({ children }: { children: ReactNode }) => {
+interface LayoutProps {
+  children: ReactNode;
+}
+
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -18,4 +22,4 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default Layout; // Add a default export for backward compatibility
+export default Layout;
