@@ -74,7 +74,7 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
         [toNode.latitude, toNode.longitude]
       ]}
       pathOptions={getPathOptions()}
-      onClick={handleRouteClick}
+      eventHandlers={{ click: handleRouteClick }}
     />
   );
 };

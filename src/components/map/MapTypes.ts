@@ -1,7 +1,7 @@
 
 import { LatLngExpression, PathOptions, MarkerOptions } from 'leaflet';
 
-export type NodeType = 'warehouse' | 'factory' | 'retail' | 'distribution' | 'supplier' | 'custom';
+export type NodeType = 'warehouse' | 'factory' | 'retail' | 'distribution' | 'supplier' | 'custom' | 'airport' | 'port' | 'railhub';
 
 export interface Node {
   id: string;
@@ -15,6 +15,7 @@ export interface Node {
   weight?: number;
   isOptimized?: boolean;
   isSelected?: boolean;
+  isOptimal?: boolean;
   icon?: string;
   color?: string;
   notes?: string;
@@ -41,6 +42,7 @@ export interface Route {
   mode?: 'truck' | 'air' | 'rail' | 'ship' | 'multimodal';
   volume?: number;
   transitTime?: number;
+  type?: 'road' | 'rail' | 'air' | 'sea' | 'multimodal';
 }
 
 export interface MapPathOptions extends PathOptions {
@@ -105,16 +107,28 @@ export interface ABCAnalysisResult {
 }
 
 // Additional type for airport integration
-export interface AirportNode extends Node {
+export interface AirportNode {
+  id: string;
+  name: string;
   type: 'airport';
+  latitude: number;
+  longitude: number;
   iataCode?: string;
   runwayLength?: number;
   capacity?: number;
+  hub_type?: string;
+  utilization?: number;
+  delay_probability?: number;
+  region?: string;
 }
 
 // Types for port integration
-export interface PortNode extends Node {
+export interface PortNode {
+  id: string;
+  name: string;
   type: 'port';
+  latitude: number;
+  longitude: number;
   portCode?: string;
   maxShipSize?: number;
   terminals?: number;
