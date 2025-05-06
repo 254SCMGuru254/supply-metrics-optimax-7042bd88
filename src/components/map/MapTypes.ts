@@ -21,6 +21,9 @@ export interface Node {
   inventory?: {
     [productId: string]: number;
   };
+  metadata?: {
+    [key: string]: any;
+  };
 }
 
 export interface Route {
@@ -36,6 +39,8 @@ export interface Route {
   color?: string;
   notes?: string;
   mode?: 'truck' | 'air' | 'rail' | 'ship' | 'multimodal';
+  volume?: number;
+  transitTime?: number;
 }
 
 export interface MapPathOptions extends PathOptions {
@@ -55,4 +60,56 @@ export interface MapMarkerOptions extends MarkerOptions {
 export interface NetworkData {
   nodes: Node[];
   routes: Route[];
+}
+
+// Inventory types for inventory optimization
+export interface InventoryItem {
+  id: string;
+  name: string;
+  unitCost: number;
+  annualDemand: number;
+  orderingCost: number;
+  holdingCost: number;
+  leadTime: number; // in days
+  safetyStock?: number;
+  category?: 'A' | 'B' | 'C';
+  nodeId?: string;
+}
+
+export interface EOQResult {
+  economicOrderQuantity: number;
+  ordersPerYear: number;
+  cycleTime: number; // in days
+  totalAnnualCost: number;
+  totalOrderingCost: number;
+  totalHoldingCost: number;
+  reorderPoint: number;
+}
+
+export interface ABCAnalysisResult {
+  aItems: InventoryItem[];
+  bItems: InventoryItem[];
+  cItems: InventoryItem[];
+  aPercentage: number;
+  bPercentage: number;
+  cPercentage: number;
+  aValuePercentage: number;
+  bValuePercentage: number;
+  cValuePercentage: number;
+}
+
+// Additional type for airport integration
+export interface AirportNode extends Node {
+  type: 'airport';
+  iataCode?: string;
+  runwayLength?: number;
+  capacity?: number;
+}
+
+// Types for port integration
+export interface PortNode extends Node {
+  type: 'port';
+  portCode?: string;
+  maxShipSize?: number;
+  terminals?: number;
 }

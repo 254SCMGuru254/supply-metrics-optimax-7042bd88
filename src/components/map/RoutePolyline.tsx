@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Polyline } from 'react-leaflet';
+import { Polyline, PolylineProps } from 'react-leaflet';
 import { Node, Route, MapPathOptions } from './MapTypes';
 
 interface RoutePolylineProps {
@@ -74,9 +74,7 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
         [toNode.latitude, toNode.longitude]
       ]}
       pathOptions={getPathOptions()}
-      eventHandlers={{
-        click: handleRouteClick
-      }}
+      onClick={handleRouteClick}
     />
   );
 };
