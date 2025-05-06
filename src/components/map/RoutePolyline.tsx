@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Polyline } from 'react-leaflet';
 import { Node, Route, MapPathOptions } from './MapTypes';
 
@@ -18,11 +18,11 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
   isOptimized = false,
   onClick
 }) => {
-  const handleRouteClick = () => {
+  const handleRouteClick = useCallback(() => {
     if (onClick) {
       onClick(route);
     }
-  };
+  }, [onClick, route]);
 
   // Calculate path options based on route properties
   const getPathOptions = (): MapPathOptions => {
@@ -67,6 +67,9 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
     }
   };
 
+  // Create event handlers object only if onClick is provided
+  const eventHandlers = onClick ? { click: handleRouteClick } : {};
+
   return (
     <Polyline
       positions={[
@@ -74,7 +77,7 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
         [toNode.latitude, toNode.longitude]
       ]}
       pathOptions={getPathOptions()}
-      eventHandlers={onClick ? { click: handleRouteClick } : undefined}
+      {...(onClick ? { eventHandlers } : {})}
     />
   );
 };
