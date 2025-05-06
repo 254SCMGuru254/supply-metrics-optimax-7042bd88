@@ -133,3 +133,25 @@ export interface PortNode {
   maxShipSize?: number;
   terminals?: number;
 }
+
+// SuitabilityQuestionnaire types
+export interface SuitabilityQuestion {
+  id: string;
+  text: string;
+  category: string;
+  options: {
+    text: string;
+    score: any;
+    explanation?: string;
+  }[];
+}
+
+export interface SuitabilityResults {
+  routeOptimizationScore: number;
+  inventoryOptimizationScore: number;
+  networkFlowScore: number;
+  cogScore: number;
+  simulationScore: number;
+  recommendedModel: string;
+  explanation: string;
+}
