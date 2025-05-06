@@ -1,19 +1,20 @@
 
-import { useEffect } from 'react';
 import { useMapEvents } from 'react-leaflet';
-import { MapEventHandlerProps } from './MapTypes';
+
+interface MapEventHandlerProps {
+  onMapClick?: (lat: number, lng: number) => void;
+}
 
 export const MapEventHandler: React.FC<MapEventHandlerProps> = ({ onMapClick }) => {
-  const map = useMapEvents({
+  useMapEvents({
     click: (e) => {
-      const { lat, lng } = e.latlng;
-      onMapClick(lat, lng);
-    }
+      if (onMapClick) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      }
+    },
   });
-
-  useEffect(() => {
-    // Additional setup for map events can be done here
-  }, [map]);
 
   return null;
 };
+
+export default MapEventHandler;

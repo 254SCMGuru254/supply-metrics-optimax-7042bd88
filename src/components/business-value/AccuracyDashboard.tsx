@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
@@ -30,18 +31,69 @@ export const AccuracyDashboard = ({ selectedModel }: AccuracyDashboardProps) => 
     const fetchAccuracyData = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/metrics/accuracy');
-        const data = await response.json();
-        setAccuracyData(data);
+        // Mock API call - in a real app, this would be an actual API call
+        // Simulate API response delay
+        await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Fetch trend data for each model
-        const trends: { [key: string]: TrendData[] } = {};
-        for (const model of data) {
-          const trendResponse = await fetch(`/api/metrics/trend/${model.modelName}`);
-          const trendData = await trendResponse.json();
-          trends[model.modelName] = trendData;
-        }
-        setTrendData(trends);
+        // Sample data for demonstration
+        const sampleData: AccuracyData[] = [
+          {
+            modelName: "route-optimization",
+            metrics: {
+              fuel_savings: 92.5,
+              time_reduction: 87.3,
+              cost_efficiency: 94.1,
+              co2_reduction: 88.9
+            }
+          },
+          {
+            modelName: "inventory-optimization",
+            metrics: {
+              stockout_prevention: 91.2,
+              carrying_cost: 86.7,
+              turnover_rate: 83.4,
+              space_utilization: 89.5
+            }
+          },
+          {
+            modelName: "demand-forecasting",
+            metrics: {
+              seasonal_trends: 88.3,
+              promotion_impact: 76.5,
+              new_product: 72.1,
+              overall_accuracy: 85.9
+            }
+          }
+        ];
+        
+        setAccuracyData(sampleData);
+        
+        // Sample trend data
+        const sampleTrends: { [key: string]: TrendData[] } = {
+          "route-optimization": [
+            { date: "2025-01-01", estimated: 89, actual: 92 },
+            { date: "2025-02-01", estimated: 91, actual: 93 },
+            { date: "2025-03-01", estimated: 90, actual: 94 },
+            { date: "2025-04-01", estimated: 92, actual: 93 },
+            { date: "2025-05-01", estimated: 93, actual: 95 }
+          ],
+          "inventory-optimization": [
+            { date: "2025-01-01", estimated: 85, actual: 88 },
+            { date: "2025-02-01", estimated: 87, actual: 89 },
+            { date: "2025-03-01", estimated: 88, actual: 90 },
+            { date: "2025-04-01", estimated: 89, actual: 87 },
+            { date: "2025-05-01", estimated: 91, actual: 92 }
+          ],
+          "demand-forecasting": [
+            { date: "2025-01-01", estimated: 80, actual: 75 },
+            { date: "2025-02-01", estimated: 82, actual: 79 },
+            { date: "2025-03-01", estimated: 83, actual: 82 },
+            { date: "2025-04-01", estimated: 84, actual: 86 },
+            { date: "2025-05-01", estimated: 85, actual: 88 }
+          ]
+        };
+        
+        setTrendData(sampleTrends);
       } catch (error) {
         console.error('Error fetching accuracy data:', error);
       } finally {
@@ -140,7 +192,7 @@ export const AccuracyDashboard = ({ selectedModel }: AccuracyDashboardProps) => 
         <CardContent>
           {loading ? (
             <p>Loading accuracy data...</p>
-          ) : (
+          ) : filteredData.length > 0 ? (
             <Tabs defaultValue={filteredData[0]?.modelName} className="space-y-4">
               <TabsList className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {filteredData.map(model => (
@@ -166,6 +218,8 @@ export const AccuracyDashboard = ({ selectedModel }: AccuracyDashboardProps) => 
                 </TabsContent>
               ))}
             </Tabs>
+          ) : (
+            <p>No accuracy data available for the selected model.</p>
           )}
         </CardContent>
       </Card>
