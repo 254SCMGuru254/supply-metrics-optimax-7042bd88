@@ -30,7 +30,8 @@ export function calculateEOQ(item: InventoryItem): EOQResult {
   
   // Calculate safety stock (based on service level)
   // Using normal distribution approximation
-  const z = getZScoreForServiceLevel(item.serviceLevel / 100);
+  const serviceLevel = item.serviceLevel || 95;
+  const z = getZScoreForServiceLevel(serviceLevel / 100);
   const stdDevLeadTimeDemand = Math.sqrt(item.leadTime) * (D / 365) * 0.25; // Assuming demand variation of 25%
   const safetyStock = z * stdDevLeadTimeDemand;
   
@@ -44,6 +45,8 @@ export function calculateEOQ(item: InventoryItem): EOQResult {
     ordersPerYear,
     cycleTime,
     totalAnnualCost,
+    totalOrderingCost: annualOrderingCost,
+    totalHoldingCost: annualHoldingCost,
     reorderPoint,
     safetyStock
   };
@@ -59,10 +62,10 @@ export function performABCAnalysis(items: InventoryItem[]): ABCAnalysisResult {
   
   // Sort items by annual value in descending order
   const sortedItems = [...itemsWithValue].sort((a, b) => 
-    b.annualValue! - a.annualValue!
+    (b.annualValue || 0) - (a.annualValue || 0)
   );
   
-  const totalValue = sortedItems.reduce((sum, item) => sum + item.annualValue!, 0);
+  const totalValue = sortedItems.reduce((sum, item) => sum + (item.annualValue || 0), 0);
   
   // Assign ABC classes
   let accumulatedValue = 0;
@@ -71,7 +74,7 @@ export function performABCAnalysis(items: InventoryItem[]): ABCAnalysisResult {
   const classC: InventoryItem[] = [];
   
   for (const item of sortedItems) {
-    const itemValuePercentage = (item.annualValue! / totalValue) * 100;
+    const itemValuePercentage = ((item.annualValue || 0) / totalValue) * 100;
     accumulatedValue += itemValuePercentage;
     
     if (accumulatedValue <= 70) {
@@ -96,9 +99,9 @@ export function performABCAnalysis(items: InventoryItem[]): ABCAnalysisResult {
   }
   
   // Calculate metrics
-  const classAValue = classA.reduce((sum, item) => sum + item.annualValue!, 0);
-  const classBValue = classB.reduce((sum, item) => sum + item.annualValue!, 0);
-  const classCValue = classC.reduce((sum, item) => sum + item.annualValue!, 0);
+  const classAValue = classA.reduce((sum, item) => sum + (item.annualValue || 0), 0);
+  const classBValue = classB.reduce((sum, item) => sum + (item.annualValue || 0), 0);
+  const classCValue = classC.reduce((sum, item) => sum + (item.annualValue || 0), 0);
   
   const classAValuePercentage = (classAValue / totalValue) * 100;
   const classBValuePercentage = (classBValue / totalValue) * 100;

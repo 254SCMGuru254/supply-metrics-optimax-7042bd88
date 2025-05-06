@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -601,7 +600,7 @@ export const InventoryOptimizationContent = () => {
                             <tr key={item.id} className="border-b">
                               <td className="p-2">{item.name}</td>
                               <td className="p-2">{item.category}</td>
-                              <td className="p-2">{(item.unitCost * item.annualDemand).toLocaleString()}</td>
+                              <td className="p-2">{((item.unitCost || 0) * (item.annualDemand || 0)).toLocaleString()}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -625,7 +624,7 @@ export const InventoryOptimizationContent = () => {
                             <tr key={item.id} className="border-b">
                               <td className="p-2">{item.name}</td>
                               <td className="p-2">{item.category}</td>
-                              <td className="p-2">{(item.unitCost * item.annualDemand).toLocaleString()}</td>
+                              <td className="p-2">{((item.unitCost || 0) * (item.annualDemand || 0)).toLocaleString()}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -649,7 +648,7 @@ export const InventoryOptimizationContent = () => {
                             <tr key={item.id} className="border-b">
                               <td className="p-2">{item.name}</td>
                               <td className="p-2">{item.category}</td>
-                              <td className="p-2">{(item.unitCost * item.annualDemand).toLocaleString()}</td>
+                              <td className="p-2">{((item.unitCost || 0) * (item.annualDemand || 0)).toLocaleString()}</td>
                             </tr>
                           ))}
                         </tbody>

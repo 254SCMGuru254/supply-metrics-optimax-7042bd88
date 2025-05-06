@@ -72,8 +72,11 @@ export interface InventoryItem {
   holdingCost: number;
   leadTime: number; // in days
   safetyStock?: number;
-  category?: 'A' | 'B' | 'C';
+  category?: string;
   nodeId?: string;
+  serviceLevel?: number;
+  annualValue?: number;
+  abcClass?: 'A' | 'B' | 'C';
 }
 
 export interface EOQResult {
@@ -84,18 +87,21 @@ export interface EOQResult {
   totalOrderingCost: number;
   totalHoldingCost: number;
   reorderPoint: number;
+  safetyStock?: number;
 }
 
 export interface ABCAnalysisResult {
-  aItems: InventoryItem[];
-  bItems: InventoryItem[];
-  cItems: InventoryItem[];
-  aPercentage: number;
-  bPercentage: number;
-  cPercentage: number;
-  aValuePercentage: number;
-  bValuePercentage: number;
-  cValuePercentage: number;
+  classA: InventoryItem[];
+  classB: InventoryItem[];
+  classC: InventoryItem[];
+  metrics: {
+    classAValuePercentage: number;
+    classBValuePercentage: number;
+    classCValuePercentage: number;
+    classAItemPercentage: number;
+    classBItemPercentage: number;
+    classCItemPercentage: number;
+  };
 }
 
 // Additional type for airport integration

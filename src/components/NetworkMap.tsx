@@ -22,6 +22,11 @@ export interface NetworkMapProps {
   onMapClick?: (lat: number, lng: number) => void;
   isOptimized?: boolean;
   highlightNodes?: string[]; // Array of node IDs to highlight
+  selectable?: boolean;
+  onNodeSelect?: (nodes: string[]) => void;
+  disruptionData?: any;
+  resilienceMetrics?: any;
+  airportNodes?: any[];
 }
 
 // Helper to get map bounds based on nodes
@@ -29,7 +34,10 @@ const getMapBounds = (nodes: Node[]): L.LatLngBoundsExpression | undefined => {
   if (!nodes || nodes.length === 0) return undefined;
   
   const latLngs = nodes.map(node => [node.latitude, node.longitude] as [number, number]);
-  return latLngs;
+  if (latLngs.length > 0) {
+    return latLngs;
+  }
+  return undefined;
 };
 
 export const NetworkMap: React.FC<NetworkMapProps> = ({
@@ -39,7 +47,12 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
   onNodeClick,
   onMapClick,
   isOptimized = false,
-  highlightNodes = []
+  highlightNodes = [],
+  selectable = false,
+  onNodeSelect = () => {},
+  disruptionData,
+  resilienceMetrics,
+  airportNodes
 }) => {
   const [map, setMap] = useState<L.Map | null>(null);
   const [networkNodes, setNetworkNodes] = useState<Node[]>([]);
@@ -70,7 +83,7 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
     setMap(mapInstance);
     
     // Fit bounds if we have nodes
-    if (bounds && bounds.length > 0) {
+    if (bounds) {
       mapInstance.fitBounds(bounds);
     }
   };
