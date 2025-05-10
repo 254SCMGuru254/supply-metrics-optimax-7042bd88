@@ -1,5 +1,7 @@
+
 import React, { useCallback } from 'react';
 import { Polyline } from 'react-leaflet';
+import { LatLngTuple } from 'leaflet';
 import { Node, Route, MapPathOptions } from './MapTypes';
 
 interface RoutePolylineProps {
@@ -66,27 +68,32 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
     }
   };
 
-  // Create the props object based on whether onClick is provided
-  const polylineProps = {
-    positions: [
-      [fromNode.latitude, fromNode.longitude],
-      [toNode.latitude, toNode.longitude]
-    ],
-    pathOptions: getPathOptions()
-  };
+  // Cast the coordinates explicitly as LatLngTuple[] to satisfy TypeScript
+  const positions: LatLngTuple[] = [
+    [fromNode.latitude, fromNode.longitude],
+    [toNode.latitude, toNode.longitude]
+  ];
 
-  // Add onClick event handler if provided
+  // Using the onClick prop directly with Polyline's eventHandlers
   if (onClick) {
     return (
       <Polyline
-        {...polylineProps}
-        eventHandlers={{ click: handleRouteClick }}
+        positions={positions}
+        pathOptions={getPathOptions()}
+        eventHandlers={{
+          click: handleRouteClick
+        }}
       />
     );
   }
 
-  // Otherwise render without event handlers
-  return <Polyline {...polylineProps} />;
+  // Render without click handler
+  return (
+    <Polyline
+      positions={positions}
+      pathOptions={getPathOptions()}
+    />
+  );
 };
 
 export default RoutePolyline;
