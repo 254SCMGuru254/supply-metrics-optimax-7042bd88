@@ -35,6 +35,8 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
+        // Increase the maximum file size limit to allow larger assets
+        maximumFileSizeToCacheInBytes: 25 * 1024 * 1024, // 25 MB limit
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,

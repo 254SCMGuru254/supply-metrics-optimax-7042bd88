@@ -74,24 +74,17 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
     [toNode.latitude, toNode.longitude]
   ];
 
-  // Using the onClick prop directly with Polyline's eventHandlers
-  if (onClick) {
-    return (
-      <Polyline
-        positions={positions}
-        pathOptions={getPathOptions()}
-        eventHandlers={{
-          click: handleRouteClick
-        }}
-      />
-    );
-  }
-
-  // Render without click handler
+  // In React-Leaflet v4, eventHandlers need to be passed differently
+  // Creating a single Polyline component and attaching the onClick handler conditionally
   return (
     <Polyline
       positions={positions}
       pathOptions={getPathOptions()}
+      {...(onClick ? { 
+        eventHandlers: {
+          click: handleRouteClick
+        } 
+      } : {})}
     />
   );
 };
