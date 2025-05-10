@@ -67,9 +67,6 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
     }
   };
 
-  // Create event handlers object only if onClick is provided
-  const eventHandlers = onClick ? { click: handleRouteClick } : {};
-
   return (
     <Polyline
       positions={[
@@ -77,7 +74,7 @@ export const RoutePolyline: React.FC<RoutePolylineProps> = ({
         [toNode.latitude, toNode.longitude]
       ]}
       pathOptions={getPathOptions()}
-      {...(onClick ? { eventHandlers } : {})}
+      eventHandlers={onClick ? { click: handleRouteClick } : {}}
     />
   );
 };
