@@ -1,211 +1,145 @@
-import pandas as pd
-import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
-from pulp import *
-import folium
-from sklearn.cluster import KMeans
-from scipy.stats import poisson, norm
-import gurobi as gb  # For advanced optimization
-from sklearn.preprocessing import StandardScaler
+"""
+Main entry point for Supply Chain Network Optimizer
+"""
 import time
+from optimizer.core import SupplyChainNetworkOptimizer
+from optimizer.facility import optimize_facility_location_multi_period
+from optimizer.routing import optimize_routes_real_time
+from optimizer.inventory import optimize_multi_echelon_inventory
 
-class SupplyChainNetworkOptimizer:
-    # ...existing code...
-
-    def optimize_facility_location_multi_period(self, periods=12, demand_growth_rate=0.05):
-        """
-        Multi-period facility location optimization following Melo et al. (2009)
-        Considers demand evolution and capacity expansion over time
-        """
-        if not self.demand_points:
-            raise ValueError("No demand points for optimization")
-
-        # Create time-dependent demand scenarios
-        period_demands = {}
-        for t in range(periods):
-            period_demands[t] = {
-                d_id: {
-                    "mean": d["demand_mean"] * (1 + demand_growth_rate)**t,
-                    "location": d["location"]
-                }
-                for d_id, d in self.demand_points.items()
-            }
-
-        # Create optimization model
-        model = gb.Model("MultiPeriodFacilityLocation")
-
-        # Decision variables
-        facility_open = model.addVars(self.facilities.keys(), periods, vtype=gb.GRB.BINARY)
-        capacity_expansion = model.addVars(self.facilities.keys(), periods, lb=0)
-        flow = model.addVars(
-            [(f, d, t) for f in self.facilities for d in self.demand_points for t in range(periods)],
-            lb=0
-        )
-
-        # Objective: Minimize total cost across all periods
-        model.setObjective(
-            gb.quicksum(
-                self.facilities[f]["fixed_cost"] * facility_open[f, t] +
-                1000 * capacity_expansion[f, t] +  # Expansion cost
-                gb.quicksum(
-                    flow[f, d, t] * self._calculate_distance(
-                        self.facilities[f]["location"],
-                        self.demand_points[d]["location"]
-                    ) for d in self.demand_points
-                )
-                for f in self.facilities for t in range(periods)
-            )
-        )
-
-        # Capacity constraints with expansions
-        for f in self.facilities:
-            for t in range(periods):
-                model.addConstr(
-                    gb.quicksum(flow[f, d, t] for d in self.demand_points) <=
-                    self.facilities[f]["capacity"] * facility_open[f, t] +
-                    gb.quicksum(capacity_expansion[f, tau] for tau in range(t+1))
-                )
-
-        # Solve model
-        model.optimize()
-
-        # Extract results
-        multi_period_results = {
-            "facility_decisions": {},
-            "capacity_expansions": {},
-            "flows": {}
-        }
-        
-        if model.status == gb.GRB.OPTIMAL:
-            for t in range(periods):
-                multi_period_results["facility_decisions"][t] = {
-                    f: facility_open[f, t].x > 0.5 for f in self.facilities
-                }
-                multi_period_results["capacity_expansions"][t] = {
-                    f: capacity_expansion[f, t].x for f in self.facilities
-                }
-
-        return multi_period_results
-
-    def optimize_routes_real_time(self, time_window=60, traffic_factor=0.2):
-        """
-        Real-time routing optimization based on Toth & Vigo (2014)
-        Considers dynamic travel times and real-time updates
-        """
-        # Track route execution times
-        start_time = time.time()
-        
-        # Initialize dynamic travel times with random variations
-        dynamic_times = {}
-        for route_id, route in self.routes.items():
-            base_time = route["transit_time"]
-            variation = np.random.normal(0, traffic_factor * base_time)
-            dynamic_times[route_id] = max(0.1, base_time + variation)
-
-        # Create real-time optimization model
-        model = gb.Model("RealTimeRouting")
-
-        # Decision variables for route selection
-        route_use = model.addVars(self.routes.keys(), vtype=gb.GRB.BINARY)
-
-        # Objective: Minimize total travel time with real-time updates
-        model.setObjective(
-            gb.quicksum(
-                route_use[r] * dynamic_times[r] for r in self.routes
-            )
-        )
-
-        # Time window constraints
-        model.addConstr(
-            gb.quicksum(
-                route_use[r] * dynamic_times[r] for r in self.routes
-            ) <= time_window
-        )
-
-        # Solve with time limit
-        model.setParam('TimeLimit', 10)  # 10 second limit for real-time response
-        model.optimize()
-
-        execution_time = time.time() - start_time
-
-        return {
-            "optimized_routes": {r: route_use[r].x > 0.5 for r in self.routes},
-            "dynamic_times": dynamic_times,
-            "execution_time": execution_time
-        }
-
-    def optimize_multi_echelon_inventory(self, service_level_target=0.95):
-        """
-        Multi-echelon inventory optimization following Graves & Willems (2008)
-        Enhanced service level constraints and risk pooling
-        """
-        inventory_results = {}
-        
-        # Group facilities by echelon
-        echelons = {}
-        for facility_id, facility in self.facilities.items():
-            echelon = facility.get("echelon", 1)
-            if echelon not in echelons:
-                echelons[echelon] = []
-            echelons[echelon].append(facility_id)
-
-        # Optimize each echelon considering upstream/downstream impacts
-        for echelon_level in sorted(echelons.keys()):
-            facilities = echelons[echelon_level]
-            
-            # Create optimization model for this echelon
-            model = gb.Model(f"Echelon_{echelon_level}_Inventory")
-
-            # Decision variables
-            safety_stock = model.addVars(facilities, lb=0)
-            service_level = model.addVars(facilities, lb=service_level_target, ub=1)
-
-            # Objective: Minimize inventory costs while meeting service levels
-            model.setObjective(
-                gb.quicksum(
-                    safety_stock[f] * self.inventory_params[f]["holding_cost"] +
-                    (1 - service_level[f]) * self.inventory_params[f]["stockout_cost"]
-                    for f in facilities if f in self.inventory_params
-                )
-            )
-
-            # Service level constraints with risk pooling
-            for f in facilities:
-                if f in self.inventory_params:
-                    # Calculate demand variability with risk pooling
-                    pooled_variance = self._calculate_pooled_variance(f, echelon_level)
-                    
-                    model.addConstr(
-                        service_level[f] >= service_level_target
-                    )
-                    
-                    model.addConstr(
-                        safety_stock[f] >= 
-                        norm.ppf(service_level[f]) * np.sqrt(pooled_variance)
-                    )
-
-            # Solve echelon optimization
-            model.optimize()
-
-            # Store results
-            for f in facilities:
-                if f in self.inventory_params:
-                    inventory_results[f] = {
-                        "safety_stock": safety_stock[f].x if model.status == gb.GRB.OPTIMAL else None,
-                        "service_level": service_level[f].x if model.status == gb.GRB.OPTIMAL else None,
-                        "echelon": echelon_level
-                    }
-
-        return inventory_results
-
-    def _calculate_pooled_variance(self, facility_id, echelon_level):
-        """Helper method for calculating pooled demand variance with risk pooling effects"""
-        # ...existing code...
-
-# Example usage for Kenya specific implementation
 def create_kenya_supply_chain_model():
-    # ...existing create_kenya_supply_chain_model function code...
+    # Define nodes (cities/towns) with their locations and demand
+    nodes_data = {
+        "Nairobi": {"location": (-1.2921, 36.8219), "demand_mean": 1000, "type": "demand", "fixed_cost": 50000, "capacity": 5000},
+        "Mombasa": {"location": (-4.0435, 39.6682), "demand_mean": 750, "type": "demand", "fixed_cost": 40000, "capacity": 4000},
+        "Kisumu": {"location": (-0.0917, 34.7679), "demand_mean": 500, "type": "demand", "fixed_cost": 35000, "capacity": 3500},
+        "Nakuru": {"location": (-0.2747, 36.0798), "demand_mean": 400, "type": "demand", "fixed_cost": 30000, "capacity": 3000},
+        "Eldoret": {"location": (0.5157, 35.0800), "demand_mean": 300, "type": "demand", "fixed_cost": 25000, "capacity": 2500},
+        "Kitale": {"location": (1.0248, 35.0041), "demand_mean": 200, "type": "demand", "fixed_cost": 20000, "capacity": 2000},
+        "Garissa": {"location": (-0.4536, 39.6413), "demand_mean": 150, "type": "demand", "fixed_cost": 15000, "capacity": 1500},
+        "Kakamega": {"location": (0.2865, 34.7535), "demand_mean": 250, "type": "demand", "fixed_cost": 22000, "capacity": 2200},
+        "Thika": {"location": (-1.0397, 37.0903), "demand_mean": 350, "type": "demand", "fixed_cost": 28000, "capacity": 2800},
+        "Lodwar": {"location": (3.1143, 35.6003), "demand_mean": 100, "type": "demand", "fixed_cost": 10000, "capacity": 1000},
+        "Wajir": {"location": (1.7472, 40.0667), "demand_mean": 80, "type": "demand", "fixed_cost": 8000, "capacity": 800},
+        "Marsabit": {"location": (2.3263, 37.9879), "demand_mean": 70, "type": "demand", "fixed_cost": 7000, "capacity": 700},
+        "Isiolo": {"location": (0.3556, 37.5833), "demand_mean": 90, "type": "demand", "fixed_cost": 9000, "capacity": 900},
+        "Voi": {"location": (-3.3967, 38.5633), "demand_mean": 120, "type": "demand", "fixed_cost": 12000, "capacity": 1200},
+        "Machakos": {"location": (-1.5000, 37.2667), "demand_mean": 220, "type": "demand", "fixed_cost": 21000, "capacity": 2100},
+    }
+
+    # Define potential routes between nodes with distances and transit times
+    routes_data = {
+        "Nairobi-Mombasa": {"nodes": ["Nairobi", "Mombasa"], "distance": 485, "transit_time": 8, "mode": "truck"},
+        "Nairobi-Kisumu": {"nodes": ["Nairobi", "Kisumu"], "distance": 320, "transit_time": 6, "mode": "truck"},
+        "Mombasa-Kisumu": {"nodes": ["Mombasa", "Kisumu"], "distance": 805, "transit_time": 14, "mode": "truck"},
+        "Nairobi-Nakuru": {"nodes": ["Nairobi", "Nakuru"], "distance": 160, "transit_time": 3, "mode": "truck"},
+        "Nakuru-Eldoret": {"nodes": ["Nakuru", "Eldoret"], "distance": 150, "transit_time": 3, "mode": "truck"},
+        "Eldoret-Kitale": {"nodes": ["Eldoret", "Kitale"], "distance": 100, "transit_time": 2, "mode": "truck"},
+        "Kisumu-Kakamega": {"nodes": ["Kisumu", "Kakamega"], "distance": 50, "transit_time": 1, "mode": "truck"},
+        "Nairobi-Thika": {"nodes": ["Nairobi", "Thika"], "distance": 45, "transit_time": 1, "mode": "truck"},
+        "Nairobi-Garissa": {"nodes": ["Nairobi", "Garissa"], "distance": 450, "transit_time": 7, "mode": "truck"},
+        "Nairobi-Lodwar": {"nodes": ["Nairobi", "Lodwar"], "distance": 750, "transit_time": 12, "mode": "truck"},
+        "Garissa-Wajir": {"nodes": ["Garissa", "Wajir"], "distance": 240, "transit_time": 4, "mode": "truck"},
+        "Lodwar-Marsabit": {"nodes": ["Lodwar", "Marsabit"], "distance": 420, "transit_time": 7, "mode": "truck"},
+        "Nairobi-Isiolo": {"nodes": ["Nairobi", "Isiolo"], "distance": 280, "transit_time": 5, "mode": "truck"},
+        "Mombasa-Voi": {"nodes": ["Mombasa", "Voi"], "distance": 330, "transit_time": 6, "mode": "truck"},
+         # SGR routes
+        "Mombasa-Nairobi-Rail": {"nodes": ["Mombasa", "Nairobi"], "distance": 485, "transit_time": 4, "mode": "rail"},
+        "Nairobi-Mombasa-Rail": {"nodes": ["Nairobi", "Mombasa"], "distance": 485, "transit_time": 4, "mode": "rail"},
+        # Intermodal routes
+        "Mombasa-Nairobi-Rail-Truck": {"nodes": ["Mombasa", "Nairobi"], "distance": 485, "transit_time": 5, "mode": "multimodal"},
+        "Nairobi-Mombasa-Rail-Truck": {"nodes": ["Nairobi", "Mombasa"], "distance": 485, "transit_time": 5, "mode": "multimodal"},
+        # Air routes
+        "Nairobi-Kisumu-Air": {"nodes": ["Nairobi", "Kisumu"], "distance": 260, "transit_time": 1, "mode": "air"},
+        "Kisumu-Nairobi-Air": {"nodes": ["Kisumu", "Nairobi"], "distance": 260, "transit_time": 1, "mode": "air"},
+        # Shipping routes (Coastal)
+        "Mombasa-Lamu-Ship": {"nodes": ["Mombasa", "Lamu"], "distance": 350, "transit_time": 12, "mode": "ship"},
+    }
+
+    # Define inventory parameters for each node
+    inventory_params = {
+        "Nairobi": {"holding_cost": 5, "stockout_cost": 500},
+        "Mombasa": {"holding_cost": 4, "stockout_cost": 450},
+        "Kisumu": {"holding_cost": 3, "stockout_cost": 400},
+        "Nakuru": {"holding_cost": 2.5, "stockout_cost": 350},
+        "Eldoret": {"holding_cost": 2, "stockout_cost": 300},
+        "Kitale": {"holding_cost": 1.5, "stockout_cost": 250},
+        "Garissa": {"holding_cost": 1, "stockout_cost": 200},
+        "Kakamega": {"holding_cost": 1.2, "stockout_cost": 220},
+        "Thika": {"holding_cost": 2.2, "stockout_cost": 320},
+    }
+
+    # Create the supply chain optimizer instance
+    kenya_sc = SupplyChainNetworkOptimizer(nodes_data, routes_data, inventory_params)
+
+    # Add facility details (fixed costs, capacities)
+    kenya_sc.add_facility("Nairobi", fixed_cost=50000, capacity=5000)
+    kenya_sc.add_facility("Mombasa", fixed_cost=40000, capacity=4000)
+    kenya_sc.add_facility("Kisumu", fixed_cost=35000, capacity=3500)
+    kenya_sc.add_facility("Nakuru", fixed_cost=30000, capacity=3000)
+    kenya_sc.add_facility("Eldoret", fixed_cost=25000, capacity=2500)
+    kenya_sc.add_facility("Kitale", fixed_cost=20000, capacity=2000)
+    kenya_sc.add_facility("Garissa", fixed_cost=15000, capacity=1500)
+    kenya_sc.add_facility("Kakamega", fixed_cost=22000, capacity=2200)
+    kenya_sc.add_facility("Thika", fixed_cost=28000, capacity=2800)
+    kenya_sc.add_facility("Lodwar", fixed_cost=10000, capacity=1000)
+    kenya_sc.add_facility("Wajir", fixed_cost=8000, capacity=800)
+    kenya_sc.add_facility("Marsabit", fixed_cost=7000, capacity=700)
+    kenya_sc.add_facility("Isiolo", fixed_cost=9000, capacity=900)
+    kenya_sc.add_facility("Voi", fixed_cost=12000, capacity=1200)
+    kenya_sc.add_facility("Machakos", fixed_cost=21000, capacity=2100)
+
+    # Set echelon levels for inventory optimization
+    kenya_sc.set_facility_echelon("Nairobi", 1)
+    kenya_sc.set_facility_echelon("Mombasa", 2)
+    kenya_sc.set_facility_echelon("Kisumu", 2)
+    kenya_sc.set_facility_echelon("Nakuru", 3)
+    kenya_sc.set_facility_echelon("Eldoret", 3)
+    kenya_sc.set_facility_echelon("Kitale", 3)
+    kenya_sc.set_facility_echelon("Garissa", 3)
+    kenya_sc.set_facility_echelon("Kakamega", 3)
+    kenya_sc.set_facility_echelon("Thika", 3)
+    kenya_sc.set_facility_echelon("Lodwar", 3)
+    kenya_sc.set_facility_echelon("Wajir", 3)
+    kenya_sc.set_facility_echelon("Marsabit", 3)
+    kenya_sc.set_facility_echelon("Isiolo", 3)
+    kenya_sc.set_facility_echelon("Voi", 3)
+    kenya_sc.set_facility_echelon("Machakos", 3)
+
+    # Example demand point
+    kenya_sc.add_demand_point("Garissa", demand_mean=150, location=(-0.4536, 39.6413))
+    kenya_sc.add_demand_point("Wajir", demand_mean=80, location=(1.7472, 40.0667))
+    kenya_sc.add_demand_point("Marsabit", demand_mean=70, location=(2.3263, 37.9879))
+    kenya_sc.add_demand_point("Isiolo", demand_mean=90, location=(0.3556, 37.5833))
+    kenya_sc.add_demand_point("Voi", demand_mean=120, location=(-3.3967, 38.5633))
+    kenya_sc.add_demand_point("Machakos", demand_mean=220, location=(-1.5000, 37.2667))
+
+    # Add routes
+    kenya_sc.add_route("Nairobi-Mombasa", ["Nairobi", "Mombasa"], distance=485, transit_time=8, mode="truck")
+    kenya_sc.add_route("Nairobi-Kisumu", ["Nairobi", "Kisumu"], distance=320, transit_time=6, mode="truck")
+    kenya_sc.add_route("Mombasa-Kisumu", ["Mombasa", "Kisumu"], distance=805, transit_time=14, mode="truck")
+    kenya_sc.add_route("Nairobi-Nakuru", ["Nairobi", "Nakuru"], distance=160, transit_time=3, mode="truck")
+    kenya_sc.add_route("Nakuru-Eldoret", ["Nakuru", "Eldoret"], distance=150, transit_time=3, mode="truck")
+    kenya_sc.add_route("Eldoret-Kitale", ["Eldoret", "Kitale"], distance=100, transit_time=2, mode="truck")
+    kenya_sc.add_route("Kisumu-Kakamega", ["Kisumu", "Kakamega"], distance=50, transit_time=1, mode="truck")
+    kenya_sc.add_route("Nairobi-Thika", ["Nairobi", "Thika"], distance=45, "transit_time": 1, mode="truck")
+    kenya_sc.add_route("Nairobi-Garissa", ["Nairobi", "Garissa"], distance=450, transit_time=7, mode="truck")
+    kenya_sc.add_route("Nairobi-Lodwar", ["Nairobi", "Lodwar"], distance=750, transit_time=12, mode="truck")
+    kenya_sc.add_route("Garissa-Wajir", ["Garissa", "Wajir"], distance=240, transit_time=4, mode="truck")
+    kenya_sc.add_route("Lodwar-Marsabit", ["Lodwar", "Marsabit"], distance=420, transit_time=7, mode="truck")
+    kenya_sc.add_route("Nairobi-Isiolo", ["Nairobi", "Isiolo"], distance=280, transit_time=5, mode="truck")
+    kenya_sc.add_route("Mombasa-Voi", ["Mombasa", "Voi"], distance=330, transit_time=6, mode="truck")
+    # SGR routes
+    kenya_sc.add_route("Mombasa-Nairobi-Rail", ["Mombasa", "Nairobi"], distance=485, transit_time=4, mode="rail")
+    kenya_sc.add_route("Nairobi-Mombasa-Rail", ["Nairobi", "Mombasa"], distance=485, transit_time=4, mode="rail")
+    # Intermodal routes
+    kenya_sc.add_route("Mombasa-Nairobi-Rail-Truck", ["Mombasa", "Nairobi"], distance=485, transit_time=5, mode="multimodal")
+    kenya_sc.add_route("Nairobi-Mombasa-Rail-Truck", ["Nairobi", "Mombasa"], distance=485, transit_time=5, mode="multimodal")
+    # Air routes
+    kenya_sc.add_route("Nairobi-Kisumu-Air", ["Nairobi", "Kisumu"], distance=260, transit_time=1, mode="air")
+    kenya_sc.add_route("Kisumu-Nairobi-Air", ["Kisumu", "Nairobi"], distance=260, transit_time=1, mode="air")
+    # Shipping routes (Coastal)
+    kenya_sc.add_route("Mombasa-Lamu-Ship", ["Mombasa", "Lamu"], distance=350, transit_time=12, mode="ship")
     return kenya_sc
 
 def main():
@@ -288,24 +222,16 @@ def main():
     # 11. Export results
     kenya_sc.export_to_json("kenya_supply_chain.json")
 
-    # Add new multi-period facility optimization
-    multi_period_results = kenya_sc.optimize_facility_location_multi_period(
-        periods=12,
-        demand_growth_rate=0.05
-    )
+    # Add multi-period facility optimization using the new modular structure
+    multi_period_results = optimize_facility_location_multi_period(kenya_sc, periods=12, demand_growth_rate=0.05)
     print("\nMulti-Period Facility Results:", multi_period_results)
     
-    # Add real-time routing optimization
-    realtime_routes = kenya_sc.optimize_routes_real_time(
-        time_window=60,
-        traffic_factor=0.2
-    )
+    # Add real-time routing optimization using the new modular structure
+    realtime_routes = optimize_routes_real_time(kenya_sc, time_window=60, traffic_factor=0.2)
     print("\nReal-time Routing Results:", realtime_routes)
     
-    # Add enhanced multi-echelon inventory optimization
-    inventory_results = kenya_sc.optimize_multi_echelon_inventory(
-        service_level_target=0.95
-    )
+    # Add enhanced multi-echelon inventory optimization using the new modular structure
+    inventory_results = optimize_multi_echelon_inventory(kenya_sc, service_level_target=0.95)
     print("\nMulti-echelon Inventory Results:", inventory_results)
 
 if __name__ == "__main__":
