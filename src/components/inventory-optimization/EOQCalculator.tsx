@@ -1,270 +1,425 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Calculator } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Calculator, Package, TrendingUp, Info } from "lucide-react";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+
+export interface EOQParams {
+  annualDemand: number;
+  orderingCost: number;
+  holdingCost: number;
+  unitCost: number;
+  leadTime: number;
+  serviceLevel: number;
+  daysPerYear: number;
+}
 
 interface EOQResult {
   eoq: number;
+  reorderPoint: number;
+  safetyStock: number;
+  orderFrequency: number;
+  orderCycle: number;
   annualOrderingCost: number;
   annualHoldingCost: number;
-  totalCost: number;
-  orderCycleTime: number;
-  ordersPerYear: number;
+  totalAnnualCost: number;
 }
 
 export const EOQCalculator = () => {
-  const [annualDemand, setAnnualDemand] = useState<number>(1000);
-  const [orderingCost, setOrderingCost] = useState<number>(50);
-  const [holdingCost, setHoldingCost] = useState<number>(5);
-  const [unitCost, setUnitCost] = useState<number>(100);
-  const [holdingCostType, setHoldingCostType] = useState<'percentage' | 'absolute'>('percentage');
-  const [leadTime, setLeadTime] = useState<number>(7);
-  const [serviceLevel, setServiceLevel] = useState<number>(95);
-  const [result, setResult] = useState<EOQResult | null>(null);
   const { toast } = useToast();
+  
+  const [params, setParams] = useState<EOQParams>({
+    annualDemand: 1000,
+    orderingCost: 100,
+    holdingCost: 0.2,
+    unitCost: 50,
+    leadTime: 7,
+    serviceLevel: 0.95,
+    daysPerYear: 365
+  });
+  
+  const [result, setResult] = useState<EOQResult | null>(null);
 
-  // Calculate holding cost based on type
-  const calculateEffectiveHoldingCost = (): number => {
-    if (holdingCostType === 'percentage') {
-      return (holdingCost / 100) * unitCost; // Convert percentage to absolute value
+  const handleInputChange = (field: keyof EOQParams, value: string) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setParams({
+        ...params,
+        [field]: numValue
+      });
     }
-    return holdingCost; // Already an absolute value
   };
 
-  // Calculate Economic Order Quantity
   const calculateEOQ = () => {
     try {
-      const effectiveHoldingCost = calculateEffectiveHoldingCost();
+      // Standard EOQ formula (Wilson formula)
+      const eoq = Math.sqrt((2 * params.annualDemand * params.orderingCost) / (params.holdingCost * params.unitCost));
       
-      if (annualDemand <= 0 || orderingCost <= 0 || effectiveHoldingCost <= 0) {
-        throw new Error("Input values must be greater than zero");
-      }
-
-      // EOQ formula: sqrt(2 * D * S / H)
-      // Where D is annual demand, S is ordering cost, H is holding cost
-      const eoq = Math.sqrt((2 * annualDemand * orderingCost) / effectiveHoldingCost);
+      // Safety stock calculation using service level
+      // Convert service level to Z-score (normal distribution)
+      const zScore = getZScore(params.serviceLevel);
       
-      // Number of orders per year = Annual demand / EOQ
-      const ordersPerYear = annualDemand / eoq;
+      // Standard deviation of lead time demand (assumed as 30% of average lead time demand for this example)
+      const leadTimeDemandMean = params.annualDemand * (params.leadTime / params.daysPerYear);
+      const leadTimeDemandStdDev = leadTimeDemandMean * 0.3;
       
-      // Order cycle time in days = Working days per year / Orders per year
-      const orderCycleTime = 365 / ordersPerYear;
+      const safetyStock = zScore * leadTimeDemandStdDev;
       
-      // Annual ordering cost = Number of orders per year * Ordering cost
-      const annualOrderingCost = ordersPerYear * orderingCost;
+      // Reorder point = Lead time demand + Safety stock
+      const reorderPoint = leadTimeDemandMean + safetyStock;
       
-      // Annual holding cost = Average inventory * Holding cost
-      // Average inventory = EOQ / 2
-      const annualHoldingCost = (eoq / 2) * effectiveHoldingCost;
+      // Order frequency per year
+      const orderFrequency = params.annualDemand / eoq;
       
-      // Total annual inventory cost = Annual ordering cost + Annual holding cost
-      const totalCost = annualOrderingCost + annualHoldingCost;
-
+      // Order cycle in days
+      const orderCycle = params.daysPerYear / orderFrequency;
+      
+      // Annual ordering cost
+      const annualOrderingCost = orderFrequency * params.orderingCost;
+      
+      // Annual holding cost
+      const annualHoldingCost = (eoq / 2) * params.holdingCost * params.unitCost;
+      
+      // Total annual cost
+      const totalAnnualCost = annualOrderingCost + annualHoldingCost;
+      
       setResult({
-        eoq: parseFloat(eoq.toFixed(2)),
-        annualOrderingCost: parseFloat(annualOrderingCost.toFixed(2)),
-        annualHoldingCost: parseFloat(annualHoldingCost.toFixed(2)),
-        totalCost: parseFloat(totalCost.toFixed(2)),
-        orderCycleTime: parseFloat(orderCycleTime.toFixed(2)),
-        ordersPerYear: parseFloat(ordersPerYear.toFixed(2))
+        eoq: roundToTwo(eoq),
+        reorderPoint: roundToTwo(reorderPoint),
+        safetyStock: roundToTwo(safetyStock),
+        orderFrequency: roundToTwo(orderFrequency),
+        orderCycle: roundToTwo(orderCycle),
+        annualOrderingCost: roundToTwo(annualOrderingCost),
+        annualHoldingCost: roundToTwo(annualHoldingCost),
+        totalAnnualCost: roundToTwo(totalAnnualCost)
       });
-
+      
       toast({
-        title: "EOQ Calculation Complete",
-        description: `The optimal order quantity is ${eoq.toFixed(2)} units.`,
+        title: "Calculation Complete",
+        description: "EOQ has been calculated successfully."
       });
     } catch (error) {
+      console.error("Calculation error:", error);
       toast({
         title: "Calculation Error",
-        description: error instanceof Error ? error.message : "An error occurred during calculation",
+        description: "An error occurred while calculating EOQ.",
         variant: "destructive"
       });
     }
   };
 
-  // Calculate reorder point
-  const calculateReorderPoint = (): number => {
-    if (!leadTime || !annualDemand) return 0;
-    
-    // Daily demand = Annual demand / 365
-    const dailyDemand = annualDemand / 365;
-    
-    // Safety stock calculation using service level
-    // For service level, we use the Z-score from normal distribution
-    // Common Z-scores: 95% = 1.645, 98% = 2.05, 99% = 2.33
-    let zScore = 1.645; // Default for 95%
-    if (serviceLevel >= 98) zScore = 2.05;
-    if (serviceLevel >= 99) zScore = 2.33;
-    
-    // Standard deviation of daily demand (assuming 20% of daily demand for demonstration)
-    const stdDailyDemand = dailyDemand * 0.2;
-    
-    // Safety stock = Z-score * Standard deviation of lead time demand
-    // Lead time demand standard deviation = sqrt(lead time) * daily demand standard deviation
-    const safetyStock = zScore * Math.sqrt(leadTime) * stdDailyDemand;
-    
-    // Reorder point = Average demand during lead time + Safety stock
-    const reorderPoint = (dailyDemand * leadTime) + safetyStock;
-    
-    return parseFloat(reorderPoint.toFixed(2));
+  // Helper function to get Z-score from service level
+  const getZScore = (serviceLevel: number): number => {
+    // This is a simplified approximation
+    if (serviceLevel >= 0.99) return 2.33;
+    if (serviceLevel >= 0.98) return 2.05;
+    if (serviceLevel >= 0.97) return 1.88;
+    if (serviceLevel >= 0.96) return 1.75;
+    if (serviceLevel >= 0.95) return 1.65;
+    if (serviceLevel >= 0.94) return 1.56;
+    if (serviceLevel >= 0.93) return 1.48;
+    if (serviceLevel >= 0.92) return 1.41;
+    if (serviceLevel >= 0.91) return 1.34;
+    if (serviceLevel >= 0.90) return 1.28;
+    if (serviceLevel >= 0.85) return 1.04;
+    if (serviceLevel >= 0.80) return 0.84;
+    if (serviceLevel >= 0.75) return 0.67;
+    if (serviceLevel >= 0.70) return 0.52;
+    return 0.25; // Default for lower service levels
+  };
+
+  // Helper function to round to two decimal places
+  const roundToTwo = (num: number): number => {
+    return Math.round(num * 100) / 100;
   };
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Calculator className="h-5 w-5 text-primary" />
-        <h3 className="text-xl font-bold">Economic Order Quantity (EOQ) Calculator</h3>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="annual-demand">Annual Demand (units/year)</Label>
-            <Input
-              id="annual-demand"
-              type="number"
-              value={annualDemand}
-              onChange={(e) => setAnnualDemand(Number(e.target.value))}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Total quantity demanded per year
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="ordering-cost">Ordering Cost ($/order)</Label>
-            <Input
-              id="ordering-cost"
-              type="number"
-              value={orderingCost}
-              onChange={(e) => setOrderingCost(Number(e.target.value))}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Cost to place an order (shipping, handling, admin)
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="unit-cost">Unit Cost ($/unit)</Label>
-            <Input
-              id="unit-cost"
-              type="number"
-              value={unitCost}
-              onChange={(e) => setUnitCost(Number(e.target.value))}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Cost per unit of inventory
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="holding-cost">Holding Cost</Label>
-            <div className="flex gap-4">
-              <Input
-                id="holding-cost"
-                type="number"
-                value={holdingCost}
-                onChange={(e) => setHoldingCost(Number(e.target.value))}
-                className="flex-1"
-              />
-              <RadioGroup
-                value={holdingCostType}
-                onValueChange={(val) => setHoldingCostType(val as 'percentage' | 'absolute')}
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="percentage" id="percentage" />
-                  <Label htmlFor="percentage">%</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="absolute" id="absolute" />
-                  <Label htmlFor="absolute">$/unit</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {holdingCostType === 'percentage' 
-                ? 'Holding cost as a percentage of unit cost' 
-                : 'Absolute holding cost per unit per year'}
-            </p>
-          </div>
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center space-x-2 mb-6">
+          <Calculator className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-semibold">Economic Order Quantity (EOQ) Calculator</h2>
         </div>
-
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="lead-time">Lead Time (days)</Label>
-            <Input
-              id="lead-time"
-              type="number"
-              value={leadTime}
-              onChange={(e) => setLeadTime(Number(e.target.value))}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Time from order placement to receipt
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="service-level">Service Level (%)</Label>
-            <Input
-              id="service-level"
-              type="number"
-              min="0"
-              max="100"
-              value={serviceLevel}
-              onChange={(e) => setServiceLevel(Number(e.target.value))}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Target probability of not stocking out
-            </p>
-          </div>
-
-          <Button onClick={calculateEOQ} className="w-full mt-6">Calculate EOQ</Button>
-
-          {result && (
-            <div className="mt-6 space-y-4 p-4 bg-muted rounded-md">
-              <h4 className="font-semibold">EOQ Model Results:</h4>
-              <div className="grid grid-cols-2 gap-y-2">
-                <div>Optimal Order Quantity:</div>
-                <div className="font-semibold text-right">{result.eoq} units</div>
-                
-                <div>Reorder Point:</div>
-                <div className="font-semibold text-right">{calculateReorderPoint()} units</div>
-                
-                <div>Orders Per Year:</div>
-                <div className="font-semibold text-right">{result.ordersPerYear}</div>
-                
-                <div>Order Cycle Time:</div>
-                <div className="font-semibold text-right">{result.orderCycleTime} days</div>
-                
-                <div>Annual Ordering Cost:</div>
-                <div className="font-semibold text-right">${result.annualOrderingCost}</div>
-                
-                <div>Annual Holding Cost:</div>
-                <div className="font-semibold text-right">${result.annualHoldingCost}</div>
-                
-                <div>Total Annual Cost:</div>
-                <div className="font-semibold text-right">${result.totalCost}</div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-md">
-        <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">About the EOQ Model</h4>
-        <p className="text-sm text-muted-foreground">
-          The Economic Order Quantity (EOQ) model determines the optimal order quantity that minimizes total inventory costs, 
-          balancing ordering costs and holding costs. The model was developed by Ford W. Harris in 1913 and has been a 
-          foundational tool in inventory management. The formula used is: EOQ = √(2DS/H) where D is annual demand, 
-          S is ordering cost, and H is holding cost per unit per year.
+        
+        <p className="text-muted-foreground mb-6">
+          Calculate the optimal order quantity that minimizes total inventory costs using the Wilson formula.
+          Also computes safety stock, reorder points, and other inventory parameters.
         </p>
-      </div>
-    </Card>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="annualDemand">Annual Demand (units)</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Total number of units demanded per year</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="annualDemand"
+                type="number"
+                value={params.annualDemand}
+                onChange={(e) => handleInputChange('annualDemand', e.target.value)}
+                min="1"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="orderingCost">Ordering Cost ($)</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Fixed cost incurred for placing an order</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="orderingCost"
+                type="number"
+                value={params.orderingCost}
+                onChange={(e) => handleInputChange('orderingCost', e.target.value)}
+                min="0"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="holdingCost">Holding Cost Rate (fraction of unit cost)</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Annual holding cost as a fraction of unit cost (0.2 = 20%)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="holdingCost"
+                type="number"
+                value={params.holdingCost}
+                onChange={(e) => handleInputChange('holdingCost', e.target.value)}
+                min="0.01"
+                max="1"
+                step="0.01"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="unitCost">Unit Cost ($)</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Cost per unit of inventory</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="unitCost"
+                type="number"
+                value={params.unitCost}
+                onChange={(e) => handleInputChange('unitCost', e.target.value)}
+                min="0.01"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="leadTime">Lead Time (days)</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Time between placing an order and receiving it</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="leadTime"
+                type="number"
+                value={params.leadTime}
+                onChange={(e) => handleInputChange('leadTime', e.target.value)}
+                min="1"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="serviceLevel">Service Level (0-1)</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Probability of not stockout during lead time (0.95 = 95%)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="serviceLevel"
+                type="number"
+                value={params.serviceLevel}
+                onChange={(e) => handleInputChange('serviceLevel', e.target.value)}
+                min="0.5"
+                max="0.999"
+                step="0.01"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="daysPerYear">Days Per Year</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Number of operating days per year</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="daysPerYear"
+                type="number"
+                value={params.daysPerYear}
+                onChange={(e) => handleInputChange('daysPerYear', e.target.value)}
+                min="1"
+                max="365"
+              />
+            </div>
+            
+            <div className="pt-4">
+              <Button 
+                onClick={calculateEOQ} 
+                className="w-full"
+              >
+                <Calculator className="mr-2 h-4 w-4" />
+                Calculate EOQ
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <Separator className="my-6" />
+        
+        {result && (
+          <div className="space-y-6">
+            <h3 className="text-xl font-medium flex items-center">
+              <TrendingUp className="mr-2 h-5 w-5" />
+              Results
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="p-4 bg-primary/5">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Economic Order Quantity</h4>
+                <p className="text-2xl font-bold">{result.eoq} units</p>
+              </Card>
+              
+              <Card className="p-4 bg-primary/5">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Reorder Point</h4>
+                <p className="text-2xl font-bold">{result.reorderPoint} units</p>
+              </Card>
+              
+              <Card className="p-4 bg-primary/5">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Safety Stock</h4>
+                <p className="text-2xl font-bold">{result.safetyStock} units</p>
+              </Card>
+              
+              <Card className="p-4 bg-primary/5">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Order Cycle</h4>
+                <p className="text-2xl font-bold">{result.orderCycle} days</p>
+              </Card>
+            </div>
+            
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cost Component</TableHead>
+                  <TableHead className="text-right">Amount ($)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Annual Ordering Cost</TableCell>
+                  <TableCell className="text-right">${result.annualOrderingCost.toLocaleString()}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Annual Holding Cost</TableCell>
+                  <TableCell className="text-right">${result.annualHoldingCost.toLocaleString()}</TableCell>
+                </TableRow>
+                <TableRow className="font-bold">
+                  <TableCell>Total Annual Cost</TableCell>
+                  <TableCell className="text-right">${result.totalAnnualCost.toLocaleString()}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </Card>
+      
+      <Card className="p-6 bg-muted/50">
+        <div className="flex items-start space-x-3">
+          <Package className="h-6 w-6 text-primary mt-1" />
+          <div>
+            <h3 className="text-lg font-medium">About EOQ Model</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              The Economic Order Quantity (EOQ) model, developed by Ford W. Harris in 1913, determines the optimal order 
+              quantity that minimizes total inventory costs, balancing ordering costs and holding costs. This implementation 
+              uses the Wilson formula and extends it with safety stock calculation based on service level requirements.
+            </p>
+            <div className="mt-4 p-4 bg-muted rounded-md">
+              <h4 className="text-sm font-medium mb-2">Mathematical Formulations:</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><strong>EOQ:</strong> √(2DS/H) where D = annual demand, S = ordering cost, H = annual holding cost per unit</li>
+                <li><strong>Safety Stock:</strong> Z × σL where Z = service level factor, σL = standard deviation of lead time demand</li>
+                <li><strong>Reorder Point:</strong> Average lead time demand + Safety stock</li>
+                <li><strong>Total Annual Cost:</strong> (D/Q)S + (Q/2)H</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 };

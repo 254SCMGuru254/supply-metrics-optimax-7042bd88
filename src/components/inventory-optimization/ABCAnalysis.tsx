@@ -1,442 +1,491 @@
 
-import React, { useState } from 'react';
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BarChart3, FileInput, Download } from "lucide-react";
+import { BarChart3, Upload, Download, FileInput, Info, Plus, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 
 interface InventoryItem {
   id: string;
   name: string;
-  annualUsage: number;
   unitCost: number;
+  annualDemand: number;
   annualValue: number;
-  percentOfTotal: number;
-  cumulativePercent: number;
-  category: 'A' | 'B' | 'C';
+  cumulativePercentage: number;
+  category: "A" | "B" | "C" | null;
 }
 
 export const ABCAnalysis = () => {
-  const [items, setItems] = useState<InventoryItem[]>([]);
-  const [newItem, setNewItem] = useState({
-    name: '',
-    annualUsage: 0,
-    unitCost: 0
-  });
-  const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
+  const [items, setItems] = useState<InventoryItem[]>([
+    { 
+      id: "1", 
+      name: "Product A", 
+      unitCost: 500, 
+      annualDemand: 200, 
+      annualValue: 100000,
+      cumulativePercentage: 0,
+      category: null
+    },
+    { 
+      id: "2", 
+      name: "Product B", 
+      unitCost: 50, 
+      annualDemand: 800, 
+      annualValue: 40000,
+      cumulativePercentage: 0,
+      category: null
+    },
+    { 
+      id: "3", 
+      name: "Product C", 
+      unitCost: 100, 
+      annualDemand: 300, 
+      annualValue: 30000,
+      cumulativePercentage: 0,
+      category: null
+    },
+    { 
+      id: "4", 
+      name: "Product D", 
+      unitCost: 10, 
+      annualDemand: 2000, 
+      annualValue: 20000,
+      cumulativePercentage: 0,
+      category: null
+    },
+    { 
+      id: "5", 
+      name: "Product E", 
+      unitCost: 5, 
+      annualDemand: 1000, 
+      annualValue: 5000,
+      cumulativePercentage: 0,
+      category: null
+    }
+  ]);
+  const [analysisResults, setAnalysisResults] = useState<{
+    classA: { itemCount: number, valuePercent: number },
+    classB: { itemCount: number, valuePercent: number },
+    classC: { itemCount: number, valuePercent: number },
+    totalValue: number
+  } | null>(null);
 
-  const handleAddItem = () => {
-    if (!newItem.name || newItem.annualUsage <= 0 || newItem.unitCost <= 0) {
+  const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
+    name: "",
+    unitCost: 0,
+    annualDemand: 0
+  });
+
+  const handleInputChange = (field: keyof InventoryItem, value: string, id?: string) => {
+    if (id) {
+      // Update existing item
+      setItems(items.map(item => {
+        if (item.id === id) {
+          const updatedItem = { 
+            ...item, 
+            [field]: field === 'name' ? value : Number(value)
+          };
+          
+          if (field === 'unitCost' || field === 'annualDemand') {
+            updatedItem.annualValue = updatedItem.unitCost * updatedItem.annualDemand;
+          }
+          
+          return updatedItem;
+        }
+        return item;
+      }));
+    } else {
+      // Update new item form
+      setNewItem({
+        ...newItem,
+        [field]: field === 'name' ? value : Number(value)
+      });
+    }
+  };
+
+  const addItem = () => {
+    if (!newItem.name || !newItem.unitCost || !newItem.annualDemand) {
       toast({
-        title: "Invalid Input",
-        description: "Please enter valid item details",
+        title: "Missing Information",
+        description: "Please fill all fields for the new item.",
         variant: "destructive"
       });
       return;
     }
 
-    const updatedItems = [
-      ...items,
-      {
-        id: crypto.randomUUID(),
-        name: newItem.name,
-        annualUsage: newItem.annualUsage,
-        unitCost: newItem.unitCost,
-        annualValue: newItem.annualUsage * newItem.unitCost,
-        percentOfTotal: 0, // Will be calculated in performABCAnalysis
-        cumulativePercent: 0, // Will be calculated in performABCAnalysis
-        category: 'C' as 'A' | 'B' | 'C' // Default, will be updated
-      }
-    ];
-
-    setItems(updatedItems);
-    setNewItem({ name: '', annualUsage: 0, unitCost: 0 });
+    const annualValue = (newItem.unitCost || 0) * (newItem.annualDemand || 0);
     
-    // Perform analysis if we have items
-    if (updatedItems.length > 0) {
-      performABCAnalysis(updatedItems);
-    }
-  };
-
-  const performABCAnalysis = (inventoryItems: InventoryItem[]) => {
-    // Calculate annual value for each item
-    const itemsWithValue = inventoryItems.map(item => ({
-      ...item,
-      annualValue: item.annualUsage * item.unitCost
-    }));
-
-    // Sort items by annual value in descending order
-    const sortedItems = [...itemsWithValue].sort((a, b) => b.annualValue - a.annualValue);
+    const newItemComplete: InventoryItem = {
+      id: crypto.randomUUID(),
+      name: newItem.name || "",
+      unitCost: newItem.unitCost || 0,
+      annualDemand: newItem.annualDemand || 0,
+      annualValue,
+      cumulativePercentage: 0,
+      category: null
+    };
     
-    // Calculate total annual value
-    const totalValue = sortedItems.reduce((sum, item) => sum + item.annualValue, 0);
-    
-    // Calculate percent of total and cumulative percent
-    let cumulativePercent = 0;
-    const analyzedItems = sortedItems.map(item => {
-      const percentOfTotal = (item.annualValue / totalValue) * 100;
-      cumulativePercent += percentOfTotal;
-      
-      // Assign categories based on Pareto principle
-      // A items: Top 80% of value (approximately 20% of items)
-      // B items: Next 15% of value (approximately 30% of items)
-      // C items: Bottom 5% of value (approximately 50% of items)
-      let category: 'A' | 'B' | 'C' = 'C';
-      if (cumulativePercent <= 80) {
-        category = 'A';
-      } else if (cumulativePercent <= 95) {
-        category = 'B';
-      }
-      
-      return {
-        ...item,
-        percentOfTotal,
-        cumulativePercent,
-        category
-      };
+    setItems([...items, newItemComplete]);
+    setNewItem({
+      name: "",
+      unitCost: 0,
+      annualDemand: 0
     });
-    
-    setItems(analyzedItems);
     
     toast({
-      title: "ABC Analysis Complete",
-      description: `Analyzed ${analyzedItems.length} items across categories A, B, and C.`
+      title: "Item Added",
+      description: `${newItemComplete.name} has been added to the analysis.`
     });
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-    }
+  const removeItem = (id: string) => {
+    setItems(items.filter(item => item.id !== id));
   };
 
-  const processFile = () => {
-    if (!file) {
-      toast({
-        title: "No File Selected",
-        description: "Please select a CSV file to upload",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target?.result as string;
-        const rows = text.split('\n');
-        
-        // Skip header row and process data rows
-        const uploadedItems: InventoryItem[] = [];
-        
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i].trim();
-          if (row) {
-            const columns = row.split(',');
-            if (columns.length >= 3) {
-              const name = columns[0].trim();
-              const annualUsage = parseFloat(columns[1]);
-              const unitCost = parseFloat(columns[2]);
-              
-              if (name && !isNaN(annualUsage) && !isNaN(unitCost)) {
-                uploadedItems.push({
-                  id: crypto.randomUUID(),
-                  name,
-                  annualUsage,
-                  unitCost,
-                  annualValue: annualUsage * unitCost,
-                  percentOfTotal: 0,
-                  cumulativePercent: 0,
-                  category: 'C' as 'A' | 'B' | 'C'
-                });
-              }
-            }
-          }
-        }
-        
-        if (uploadedItems.length > 0) {
-          performABCAnalysis(uploadedItems);
-        } else {
-          throw new Error("No valid items found in CSV");
-        }
-      } catch (error) {
-        toast({
-          title: "File Processing Error",
-          description: error instanceof Error ? error.message : "Failed to process CSV file",
-          variant: "destructive"
-        });
-      }
-    };
-    
-    reader.onerror = () => {
-      toast({
-        title: "File Reading Error",
-        description: "Failed to read the selected file",
-        variant: "destructive"
-      });
-    };
-    
-    reader.readAsText(file);
-  };
-
-  const exportResults = () => {
+  const performABCAnalysis = () => {
     if (items.length === 0) {
       toast({
-        title: "No Data to Export",
-        description: "Perform an ABC analysis first",
+        title: "No Items",
+        description: "Add items to perform ABC analysis.",
         variant: "destructive"
       });
       return;
     }
     
-    // Create CSV content
-    const headers = "Item,Annual Usage,Unit Cost,Annual Value,% of Total,Cumulative %,Category\n";
-    const rows = items.map(item => 
-      `${item.name},${item.annualUsage},${item.unitCost},${item.annualValue.toFixed(2)},${item.percentOfTotal.toFixed(2)}%,${item.cumulativePercent.toFixed(2)}%,${item.category}`
-    ).join('\n');
+    try {
+      // Sort items by annual value (descending)
+      const sortedItems = [...items].sort((a, b) => b.annualValue - a.annualValue);
+      
+      // Calculate total annual value
+      const totalValue = sortedItems.reduce((sum, item) => sum + item.annualValue, 0);
+      
+      // Calculate cumulative percentages
+      let cumulativeValue = 0;
+      const itemsWithCumulative = sortedItems.map(item => {
+        cumulativeValue += item.annualValue;
+        const cumulativePercentage = (cumulativeValue / totalValue) * 100;
+        
+        let category: "A" | "B" | "C" | null = null;
+        if (cumulativePercentage <= 70) {
+          category = "A";
+        } else if (cumulativePercentage <= 90) {
+          category = "B";
+        } else {
+          category = "C";
+        }
+        
+        return {
+          ...item,
+          cumulativePercentage,
+          category
+        };
+      });
+      
+      // Count items and value by category
+      const categoryStats = itemsWithCumulative.reduce((stats, item) => {
+        if (item.category) {
+          stats[item.category].count += 1;
+          stats[item.category].value += item.annualValue;
+        }
+        return stats;
+      }, {
+        A: { count: 0, value: 0 },
+        B: { count: 0, value: 0 },
+        C: { count: 0, value: 0 }
+      });
+      
+      // Calculate percentages
+      const totalItems = items.length;
+      const results = {
+        classA: {
+          itemCount: (categoryStats.A.count / totalItems) * 100,
+          valuePercent: (categoryStats.A.value / totalValue) * 100
+        },
+        classB: {
+          itemCount: (categoryStats.B.count / totalItems) * 100,
+          valuePercent: (categoryStats.B.value / totalValue) * 100
+        },
+        classC: {
+          itemCount: (categoryStats.C.count / totalItems) * 100,
+          valuePercent: (categoryStats.C.value / totalValue) * 100
+        },
+        totalValue
+      };
+      
+      setItems(itemsWithCumulative);
+      setAnalysisResults(results);
+      
+      toast({
+        title: "ABC Analysis Complete",
+        description: "Items have been classified into A, B, and C categories."
+      });
+    } catch (error) {
+      console.error("Analysis error:", error);
+      toast({
+        title: "Analysis Error",
+        description: "An error occurred while performing the ABC analysis.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const exportCSV = () => {
+    if (items.length === 0) {
+      toast({
+        title: "No Data",
+        description: "There are no items to export.",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    const csvContent = headers + rows;
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const headers = ["Item Name", "Unit Cost", "Annual Demand", "Annual Value", "Cumulative %", "Category"];
+    const rows = items.map(item => [
+      item.name,
+      item.unitCost,
+      item.annualDemand,
+      item.annualValue,
+      item.cumulativePercentage.toFixed(2) + "%",
+      item.category || ""
+    ]);
+    
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+    
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'abc-analysis-results.csv';
+    a.download = "abc_analysis.csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     
     toast({
       title: "Export Complete",
-      description: "ABC analysis results have been downloaded as CSV"
+      description: "ABC analysis data has been exported to CSV."
     });
   };
 
-  // Calculate statistics for summary
-  const calculateStatistics = () => {
-    if (items.length === 0) return null;
-    
-    const categories = {
-      A: items.filter(item => item.category === 'A'),
-      B: items.filter(item => item.category === 'B'),
-      C: items.filter(item => item.category === 'C')
-    };
-    
-    const totalValue = items.reduce((sum, item) => sum + item.annualValue, 0);
-    
-    return {
-      totalItems: items.length,
-      totalValue,
-      categories: {
-        A: {
-          count: categories.A.length,
-          percent: (categories.A.length / items.length) * 100,
-          value: categories.A.reduce((sum, item) => sum + item.annualValue, 0),
-          valuePercent: (categories.A.reduce((sum, item) => sum + item.annualValue, 0) / totalValue) * 100
-        },
-        B: {
-          count: categories.B.length,
-          percent: (categories.B.length / items.length) * 100,
-          value: categories.B.reduce((sum, item) => sum + item.annualValue, 0),
-          valuePercent: (categories.B.reduce((sum, item) => sum + item.annualValue, 0) / totalValue) * 100
-        },
-        C: {
-          count: categories.C.length,
-          percent: (categories.C.length / items.length) * 100,
-          value: categories.C.reduce((sum, item) => sum + item.annualValue, 0),
-          valuePercent: (categories.C.reduce((sum, item) => sum + item.annualValue, 0) / totalValue) * 100
-        }
-      }
-    };
-  };
-
-  const statistics = calculateStatistics();
-
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <BarChart3 className="h-5 w-5 text-primary" />
-        <h3 className="text-xl font-bold">ABC Inventory Analysis</h3>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Add Inventory Items</h4>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="item-name">Item Name</Label>
-                <Input
-                  id="item-name"
-                  value={newItem.name}
-                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                  placeholder="Product name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="annual-usage">Annual Usage (units)</Label>
-                <Input
-                  id="annual-usage"
-                  type="number"
-                  value={newItem.annualUsage || ''}
-                  onChange={(e) => setNewItem({...newItem, annualUsage: Number(e.target.value)})}
-                  placeholder="Annual quantity used"
-                />
-              </div>
-              <div>
-                <Label htmlFor="unit-cost">Unit Cost ($)</Label>
-                <Input
-                  id="unit-cost"
-                  type="number"
-                  value={newItem.unitCost || ''}
-                  onChange={(e) => setNewItem({...newItem, unitCost: Number(e.target.value)})}
-                  placeholder="Cost per unit"
-                />
-              </div>
-              <Button onClick={handleAddItem} className="w-full">Add Item</Button>
-            </div>
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <BarChart3 className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-semibold">ABC Inventory Analysis</h2>
           </div>
-
-          <div className="pt-4 border-t">
-            <h4 className="text-lg font-semibold mb-4">Upload CSV</h4>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <FileInput className="h-4 w-4" />
-                <Label htmlFor="csv-upload">Upload inventory data file</Label>
-              </div>
-              <Input
-                id="csv-upload"
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
+          <div className="flex space-x-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Import inventory data from CSV</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <Button variant="outline" size="sm" onClick={exportCSV}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </div>
+        
+        <p className="text-muted-foreground mb-6">
+          ABC Analysis is an inventory categorization technique that divides inventory into three categories based on value:
+          Class A (high-value), Class B (medium-value), and Class C (low-value). This helps optimize inventory management resources.
+        </p>
+        
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-name">Item Name</Label>
+              <Input 
+                id="new-name"
+                value={newItem.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Enter item name"
               />
-              <p className="text-xs text-muted-foreground">
-                CSV format: name, annual_usage, unit_cost
-              </p>
-              <Button onClick={processFile} variant="outline" className="w-full">
-                Process File
-              </Button>
             </div>
-          </div>
-
-          {statistics && (
-            <div className="pt-4 border-t">
-              <h4 className="text-lg font-semibold mb-4">Analysis Summary</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>Total Items:</span>
-                  <span className="font-medium">{statistics.totalItems}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Total Value:</span>
-                  <span className="font-medium">${statistics.totalValue.toLocaleString()}</span>
-                </div>
-                <div className="pt-2 border-t">
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-4 text-sm font-medium">
-                      <span>Category</span>
-                      <span>Items</span>
-                      <span>% Items</span>
-                      <span>% Value</span>
-                    </div>
-                    <div className="grid grid-cols-4 text-sm bg-green-50 p-1 rounded">
-                      <span className="font-medium">A</span>
-                      <span>{statistics.categories.A.count}</span>
-                      <span>{statistics.categories.A.percent.toFixed(1)}%</span>
-                      <span>{statistics.categories.A.valuePercent.toFixed(1)}%</span>
-                    </div>
-                    <div className="grid grid-cols-4 text-sm bg-yellow-50 p-1 rounded">
-                      <span className="font-medium">B</span>
-                      <span>{statistics.categories.B.count}</span>
-                      <span>{statistics.categories.B.percent.toFixed(1)}%</span>
-                      <span>{statistics.categories.B.valuePercent.toFixed(1)}%</span>
-                    </div>
-                    <div className="grid grid-cols-4 text-sm bg-blue-50 p-1 rounded">
-                      <span className="font-medium">C</span>
-                      <span>{statistics.categories.C.count}</span>
-                      <span>{statistics.categories.C.percent.toFixed(1)}%</span>
-                      <span>{statistics.categories.C.valuePercent.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                </div>
-                <Button onClick={exportResults} variant="outline" className="w-full" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Results
+            
+            <div className="space-y-2">
+              <Label htmlFor="new-unit-cost">Unit Cost ($)</Label>
+              <Input 
+                id="new-unit-cost"
+                type="number"
+                value={newItem.unitCost}
+                onChange={(e) => handleInputChange('unitCost', e.target.value)}
+                placeholder="Enter unit cost"
+                min="0.01"
+                step="0.01"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="new-annual-demand">Annual Demand (units)</Label>
+              <div className="flex space-x-2">
+                <Input 
+                  id="new-annual-demand"
+                  type="number"
+                  value={newItem.annualDemand}
+                  onChange={(e) => handleInputChange('annualDemand', e.target.value)}
+                  placeholder="Enter annual demand"
+                  min="1"
+                  className="flex-1"
+                />
+                <Button onClick={addItem}>
+                  <Plus className="h-4 w-4" />
+                  Add
                 </Button>
               </div>
             </div>
-          )}
-        </div>
-
-        <div className="lg:col-span-2">
-          <h4 className="text-lg font-semibold mb-4">ABC Analysis Results</h4>
-          {items.length > 0 ? (
-            <div className="border rounded-md overflow-hidden">
+          </div>
+          
+          <Separator />
+          
+          <div>
+            <div className="flex justify-between mb-4">
+              <h3 className="text-lg font-medium">Inventory Items</h3>
+              <Button onClick={performABCAnalysis}>Run ABC Analysis</Button>
+            </div>
+            
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Item</TableHead>
-                    <TableHead className="text-right">Annual Usage</TableHead>
-                    <TableHead className="text-right">Unit Cost</TableHead>
-                    <TableHead className="text-right">Annual Value</TableHead>
-                    <TableHead className="text-right">% of Total</TableHead>
-                    <TableHead className="text-right">Cumulative %</TableHead>
-                    <TableHead className="text-center">Category</TableHead>
+                    <TableHead className="text-right">Unit Cost ($)</TableHead>
+                    <TableHead className="text-right">Annual Demand</TableHead>
+                    <TableHead className="text-right">Annual Value ($)</TableHead>
+                    {analysisResults && (
+                      <>
+                        <TableHead className="text-right">Cumulative %</TableHead>
+                        <TableHead>Category</TableHead>
+                      </>
+                    )}
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.name}</TableCell>
-                      <TableCell className="text-right">{item.annualUsage.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">${item.unitCost.toFixed(2)}</TableCell>
+                    <TableRow key={item.id} className={
+                      item.category === "A" ? "bg-green-50 dark:bg-green-900/20" :
+                      item.category === "B" ? "bg-blue-50 dark:bg-blue-900/20" :
+                      item.category === "C" ? "bg-amber-50 dark:bg-amber-900/20" : ""
+                    }>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell className="text-right">${item.unitCost}</TableCell>
+                      <TableCell className="text-right">{item.annualDemand}</TableCell>
                       <TableCell className="text-right">${item.annualValue.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">{item.percentOfTotal.toFixed(2)}%</TableCell>
-                      <TableCell className="text-right">{item.cumulativePercent.toFixed(2)}%</TableCell>
-                      <TableCell className="text-center">
-                        <span className={`
-                          px-2 py-1 rounded-full text-xs font-medium
-                          ${item.category === 'A' ? 'bg-green-100 text-green-800' : ''}
-                          ${item.category === 'B' ? 'bg-yellow-100 text-yellow-800' : ''}
-                          ${item.category === 'C' ? 'bg-blue-100 text-blue-800' : ''}
-                        `}>
-                          {item.category}
-                        </span>
+                      {analysisResults && (
+                        <>
+                          <TableCell className="text-right">{item.cumulativePercentage.toFixed(2)}%</TableCell>
+                          <TableCell>
+                            {item.category && (
+                              <span className={
+                                item.category === "A" ? "font-semibold text-green-600 dark:text-green-400" :
+                                item.category === "B" ? "font-semibold text-blue-600 dark:text-blue-400" :
+                                "font-semibold text-amber-600 dark:text-amber-400"
+                              }>
+                                Class {item.category}
+                              </span>
+                            )}
+                          </TableCell>
+                        </>
+                      )}
+                      <TableCell>
+                        <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
+                          <X className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-8 text-center border rounded-md bg-muted">
-              <BarChart3 className="h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">Add inventory items or upload a CSV file to perform ABC analysis</p>
-            </div>
-          )}
+          </div>
+        </div>
+      </Card>
+      
+      {analysisResults && (
+        <Card className="p-6">
+          <h3 className="text-xl font-semibold mb-6">ABC Analysis Results</h3>
           
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-md">
-            <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">About ABC Analysis</h4>
-            <p className="text-sm text-muted-foreground">
-              ABC Analysis is an inventory categorization method based on the Pareto principle (80/20 rule). 
-              It categorizes inventory into three classes:
-              <br />
-              • <strong>A items</strong>: High-value products (top ~20% of items that account for ~80% of value)
-              <br />
-              • <strong>B items</strong>: Medium-value products (next ~30% of items accounting for ~15% of value)
-              <br />
-              • <strong>C items</strong>: Low-value products (bottom ~50% of items accounting for ~5% of value)
-              <br />
-              <br />
-              This analysis helps prioritize inventory management efforts and optimize control systems for each category.
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card className="p-4 border-l-4 border-green-500">
+              <h4 className="text-lg font-medium text-green-700 dark:text-green-400">Class A Items</h4>
+              <p className="text-3xl font-bold my-2">{analysisResults.classA.itemCount.toFixed(0)}%</p>
+              <p className="text-sm text-muted-foreground">of items</p>
+              <p className="text-xl font-semibold mt-4 text-green-600">{analysisResults.classA.valuePercent.toFixed(0)}%</p>
+              <p className="text-sm text-muted-foreground">of total value</p>
+            </Card>
+            
+            <Card className="p-4 border-l-4 border-blue-500">
+              <h4 className="text-lg font-medium text-blue-700 dark:text-blue-400">Class B Items</h4>
+              <p className="text-3xl font-bold my-2">{analysisResults.classB.itemCount.toFixed(0)}%</p>
+              <p className="text-sm text-muted-foreground">of items</p>
+              <p className="text-xl font-semibold mt-4 text-blue-600">{analysisResults.classB.valuePercent.toFixed(0)}%</p>
+              <p className="text-sm text-muted-foreground">of total value</p>
+            </Card>
+            
+            <Card className="p-4 border-l-4 border-amber-500">
+              <h4 className="text-lg font-medium text-amber-700 dark:text-amber-400">Class C Items</h4>
+              <p className="text-3xl font-bold my-2">{analysisResults.classC.itemCount.toFixed(0)}%</p>
+              <p className="text-sm text-muted-foreground">of items</p>
+              <p className="text-xl font-semibold mt-4 text-amber-600">{analysisResults.classC.valuePercent.toFixed(0)}%</p>
+              <p className="text-sm text-muted-foreground">of total value</p>
+            </Card>
+          </div>
+          
+          <div className="p-4 bg-muted rounded-md">
+            <h4 className="text-lg font-medium mb-2">Management Recommendations</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><strong>Class A Items:</strong> Strict inventory control, frequent counting, accurate demand forecasting, and close monitoring of lead times.</li>
+              <li><strong>Class B Items:</strong> Regular monitoring with moderate controls, less frequent reviews than Class A items.</li>
+              <li><strong>Class C Items:</strong> Simplest controls with minimal record keeping, bulk ordering, and higher safety stock levels.</li>
+            </ul>
+          </div>
+        </Card>
+      )}
+      
+      <Card className="p-6 bg-muted/50">
+        <div className="flex items-start space-x-3">
+          <Info className="h-6 w-6 text-primary mt-1" />
+          <div>
+            <h3 className="text-lg font-medium">About ABC Analysis</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              ABC Analysis is based on the Pareto principle (80/20 rule), which suggests that 80% of effects come from 20% of causes. 
+              In inventory management, this translates to a small percentage of items accounting for a large percentage of inventory value.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Typically, Class A items (10-20% of inventory) account for 70-80% of the total value, Class B items (30%) represent 15-20% of value, 
+              and Class C items (50-60%) account for just 5-10% of value. This categorization helps allocate resources efficiently.
             </p>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 };
