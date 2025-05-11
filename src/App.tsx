@@ -29,7 +29,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/introduction" element={<Introduction />} />
-      <Route element={<Layout />}>
+      <Route path="/" element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/route-optimization" element={<RouteOptimization />} />
         <Route path="/inventory-management" element={<InventoryManagement />} />
