@@ -1,349 +1,226 @@
-import { useState, useRef, useEffect } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import SupplyChainReportGenerator from "./SupplyChainReportGenerator";
-import { Send, Bot, User, Loader2, ChevronRight, Package, Truck, Building2, Download } from "lucide-react";
-
-type Message = {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-};
-
-type NetworkNode = {
-  id: string;
-  type: 'supplier' | 'manufacturer' | 'warehouse' | 'distributor' | 'retailer';
-  name: string;
-  location?: string;
-  capacity?: number;
-  costs?: Record<string, number>;
-};
-
-type NetworkEdge = {
-  id: string;
-  source: string;
-  target: string;
-  cost: number;
-  time: number;
-  distance: number;
-  mode: 'truck' | 'rail' | 'air' | 'sea';
-};
+import { Bot, FileText, Truck, Package, BarChart3, Building, Upload } from "lucide-react";
+import { SupplyChainReportGenerator } from "./SupplyChainReportGenerator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const SupplyChainDesignAssistant = () => {
-  const [userInput, setUserInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
+  const [message, setMessage] = useState("");
+  const [conversation, setConversation] = useState<{role: string, content: string}[]>([
     {
-      id: "1",
-      role: 'assistant',
-      content: "Hello, I'm your Supply Chain Design Assistant. I can help you design, analyze and optimize your supply chain structure. What aspects of your supply chain would you like to work on today?"
+      role: "assistant",
+      content: "Hello! I'm your Supply Chain Design Assistant. I can help you design and optimize your supply chain. What specific aspect would you like help with today?"
     }
   ]);
-  const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
-  const [network, setNetwork] = useState<{nodes: NetworkNode[], edges: NetworkEdge[]}>({
-    nodes: [],
-    edges: []
-  });
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  
-  // Auto-scroll to bottom of messages
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!userInput.trim()) return;
-    
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: userInput
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
+
+    // Add user message to conversation
+    const userMessage = {
+      role: "user",
+      content: message
     };
     
-    setMessages(prev => [...prev, newMessage]);
-    setUserInput("");
-    setLoading(true);
-    
-    try {
-      // Simulate AI response (in a real app, this would call an API)
-      setTimeout(() => {
-        respondToMessage(userInput);
-        setLoading(false);
-      }, 1500);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setLoading(false);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-      });
-    }
-  };
-  
-  const respondToMessage = (input: string) => {
-    const lowerInput = input.toLowerCase();
-    
-    // Check input for supply chain context and provide relevant response
-    let response = "";
-    if (lowerInput.includes("design") || lowerInput.includes("structure")) {
-      response = "To design an effective supply chain structure, we should consider your key suppliers, manufacturing locations, distribution centers, and customer locations. Would you like to start building a visual model of your network?";
+    setConversation(prev => [...prev, userMessage]);
+    setMessage("");
+    setIsTyping(true);
+
+    // Simulate AI response (in production this would call an actual AI service)
+    setTimeout(() => {
+      // Use predefined responses based on keywords for demo purposes
+      let response = "I understand your question about supply chain design. Could you provide more specific details about your supply chain needs so I can give you a more tailored response?";
       
-      // Add sample nodes when mentioning design
-      if (network.nodes.length === 0) {
-        setNetwork({
-          nodes: [
-            { id: "s1", type: "supplier", name: "Raw Materials Supplier" },
-            { id: "m1", type: "manufacturer", name: "Main Production Plant" },
-            { id: "w1", type: "warehouse", name: "Central Warehouse" },
-            { id: "r1", type: "retailer", name: "Retail Store 1" }
-          ],
-          edges: [
-            { id: "e1", source: "s1", target: "m1", cost: 150, time: 2, distance: 500, mode: "truck" },
-            { id: "e2", source: "m1", target: "w1", cost: 100, time: 1, distance: 300, mode: "truck" },
-            { id: "e3", source: "w1", target: "r1", cost: 75, time: 1, distance: 200, mode: "truck" }
-          ]
-        });
+      const lowerCaseMessage = message.toLowerCase();
+      
+      if (lowerCaseMessage.includes("inventory") || lowerCaseMessage.includes("stock")) {
+        response = "For inventory optimization, I recommend analyzing your demand patterns and using EOQ (Economic Order Quantity) models. Would you like me to help you calculate optimal inventory levels based on your demand data and carrying costs?";
+      } 
+      else if (lowerCaseMessage.includes("route") || lowerCaseMessage.includes("transport") || lowerCaseMessage.includes("delivery")) {
+        response = "Route optimization can significantly reduce transportation costs and delivery times. Consider factors like vehicle capacity, delivery windows, and multi-stop routing. Would you like to explore different transportation modes or specific route optimization algorithms?";
       }
-    } else if (lowerInput.includes("optimi") || lowerInput.includes("cost")) {
-      response = "For supply chain optimization, we can model key factors like transportation costs, inventory policies, and facility locations. Based on industry benchmarks, optimizing your network could reduce overall logistics costs by 10-15%. Would you like to focus on cost optimization, service level improvement, or both?";
-    } else if (lowerInput.includes("report") || lowerInput.includes("analysis")) {
-      response = "I can generate a comprehensive supply chain analysis report for you. The report will include network visualization, cost breakdown, improvement opportunities, and recommended next steps. To get started, switch to the 'Report' tab.";
-    } else if (lowerInput.includes("inventory") || lowerInput.includes("stock")) {
-      response = "For inventory optimization, we should analyze your demand patterns, lead times, and service level targets. Using models like EOQ (Economic Order Quantity) and safety stock calculations, we can determine optimal inventory levels. Would you like to focus on specific product categories for inventory analysis?";
-    } else if (lowerInput.includes("transport") || lowerInput.includes("route") || lowerInput.includes("logistics")) {
-      response = "Transportation optimization can significantly impact your supply chain costs and service levels. By analyzing routes, modes of transport, and shipment consolidation opportunities, we can identify potential savings. Would you like to model different transportation scenarios?";
-    } else {
-      response = "Thank you for your input. To help you design an optimal supply chain, I can assist with network design, inventory policies, transportation optimization, facility location analysis, and supply chain simulation. What specific aspect would you like to explore first?";
-    }
-    
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: response
-    };
-    
-    setMessages(prev => [...prev, assistantMessage]);
+      else if (lowerCaseMessage.includes("warehouse") || lowerCaseMessage.includes("location") || lowerCaseMessage.includes("facility")) {
+        response = "For warehouse location optimization, we should consider the center of gravity method or network optimization models that account for demand density, transportation costs, and service level requirements. Would you like me to analyze potential facility locations based on your customer distribution?";
+      }
+      else if (lowerCaseMessage.includes("report") || lowerCaseMessage.includes("analysis")) {
+        response = "I can help you generate a comprehensive supply chain analysis report. This would include inventory status, transportation efficiency, facility utilization, and cost breakdowns. You can customize the report in the Reports tab of this assistant.";
+      }
+      else if (lowerCaseMessage.includes("cost") || lowerCaseMessage.includes("expense")) {
+        response = "Cost optimization in supply chains requires a holistic approach. We should analyze transportation costs, inventory holding costs, facility operation costs, and order processing costs. Would you like to identify specific cost-saving opportunities in your supply chain network?";
+      }
+      
+      const assistantMessage = {
+        role: "assistant",
+        content: response
+      };
+      
+      setConversation(prev => [...prev, assistantMessage]);
+      setIsTyping(false);
+    }, 1500);
   };
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
-  
-  const exportNetworkData = () => {
-    const dataStr = JSON.stringify(network, null, 2);
-    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-    const exportFileName = `supply_chain_network_${new Date().toISOString().slice(0, 10)}.json`;
-    
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", exportFileName);
-    linkElement.click();
-    
-    toast({
-      title: "Export Successful",
-      description: "Network data has been exported as JSON",
-    });
-  };
-  
-  // Get node icon by type
-  const getNodeIcon = (type: string) => {
-    switch (type) {
-      case 'supplier':
-        return <Package className="h-4 w-4" />;
-      case 'manufacturer':
-        return <Building2 className="h-4 w-4" />;
-      case 'warehouse':
-        return <Package className="h-4 w-4" />;
-      case 'distributor':
-      case 'retailer':
-        return <Truck className="h-4 w-4" />;
-      default:
-        return <Package className="h-4 w-4" />;
-    }
-  };
-  
+
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid grid-cols-3 mb-6">
-        <TabsTrigger value="chat">Chat Assistant</TabsTrigger>
-        <TabsTrigger value="network">Network Visualization</TabsTrigger>
-        <TabsTrigger value="report">Generate Report</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="chat" className="space-y-4">
-        <Card className="p-4 h-[500px] flex flex-col">
-          <div className="flex-1 overflow-y-auto mb-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'} mb-4`}>
-                <div className={`flex max-w-[80%] ${msg.role === 'assistant' ? 'items-start' : 'items-end'}`}>
-                  {msg.role === 'assistant' && (
-                    <div className="bg-primary h-8 w-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                      <Bot className="h-4 w-4 text-white" />
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="chat">AI Chat Assistant</TabsTrigger>
+          <TabsTrigger value="report">Supply Chain Reports</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="chat" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Bot className="h-5 w-5" />
+                  <h2 className="text-xl font-semibold">Supply Chain Design Chat</h2>
+                </div>
+                
+                <div className="border rounded-md h-[400px] mb-4 overflow-y-auto p-4 bg-muted/30">
+                  {conversation.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`mb-4 ${msg.role === 'user' ? 'ml-auto max-w-[80%]' : 'mr-auto max-w-[80%]'}`}
+                    >
+                      <div
+                        className={`p-3 rounded-lg ${
+                          msg.role === 'user'
+                            ? 'bg-primary text-primary-foreground ml-auto'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                      <div
+                        className={`text-xs mt-1 text-muted-foreground ${
+                          msg.role === 'user' ? 'text-right' : ''
+                        }`}
+                      >
+                        {msg.role === 'user' ? 'You' : 'Supply Chain AI'}
+                      </div>
                     </div>
-                  )}
-                  
-                  <div className={`rounded-lg p-3 ${
-                    msg.role === 'assistant' 
-                      ? 'bg-muted text-foreground' 
-                      : 'bg-primary text-primary-foreground'
-                  }`}>
-                    {msg.content}
-                  </div>
-                  
-                  {msg.role === 'user' && (
-                    <div className="bg-background border h-8 w-8 rounded-full flex items-center justify-center ml-2 flex-shrink-0">
-                      <User className="h-4 w-4" />
+                  ))}
+                  {isTyping && (
+                    <div className="flex gap-1 p-2 w-16 rounded-full bg-muted">
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"></div>
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{animationDelay: '0.4s'}}></div>
                     </div>
                   )}
                 </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-          
-          <div className="flex items-center mt-auto">
-            <Input
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about supply chain design, optimization, or analysis..."
-              className="flex-1"
-              disabled={loading}
-            />
-            <Button 
-              onClick={handleSendMessage}
-              className="ml-2"
-              disabled={loading || !userInput.trim()}
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </Card>
-        
-        <Card className="p-4">
-          <h3 className="text-sm font-medium mb-2">Suggested Topics</h3>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="cursor-pointer hover:bg-secondary" onClick={() => setUserInput("How do I design an optimal distribution network?")}>
-              Distribution Network Design <ChevronRight className="h-3 w-3 ml-1" />
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-secondary" onClick={() => setUserInput("What's the optimal inventory policy for my products?")}>
-              Inventory Policies <ChevronRight className="h-3 w-3 ml-1" />
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-secondary" onClick={() => setUserInput("How can I optimize transportation costs?")}>
-              Transportation Optimization <ChevronRight className="h-3 w-3 ml-1" />
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-secondary" onClick={() => setUserInput("Can you help me with supplier selection?")}>
-              Supplier Selection <ChevronRight className="h-3 w-3 ml-1" />
-            </Badge>
-          </div>
-        </Card>
-      </TabsContent>
-      
-      <TabsContent value="network">
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Supply Chain Network</h2>
-            <Button variant="outline" size="sm" onClick={exportNetworkData}>
-              <Download className="h-4 w-4 mr-2" />
-              Export Network
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-md font-medium mb-2">Network Nodes</h3>
-              <div className="border rounded-md p-4 max-h-[300px] overflow-y-auto">
-                {network.nodes.length > 0 ? (
-                  <ul className="space-y-2">
-                    {network.nodes.map(node => (
-                      <li key={node.id} className="flex items-center p-2 border rounded-md">
-                        <div className="p-1 bg-primary/10 rounded-md mr-2">
-                          {getNodeIcon(node.type)}
-                        </div>
-                        <div>
-                          <p className="font-medium">{node.name}</p>
-                          <p className="text-xs text-muted-foreground">{node.type}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">
-                    No nodes in the network yet. Start a conversation to build your network.
-                  </p>
-                )}
-              </div>
+                
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Ask about supply chain design, optimization strategies, or inventory management..."
+                    value={message}
+                    onChange={e => setMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="resize-none"
+                  />
+                  <Button onClick={handleSendMessage} disabled={isTyping || !message.trim()}>Send</Button>
+                </div>
+              </Card>
             </div>
             
             <div>
-              <h3 className="text-md font-medium mb-2">Network Connections</h3>
-              <div className="border rounded-md p-4 max-h-[300px] overflow-y-auto">
-                {network.edges.length > 0 ? (
-                  <ul className="space-y-2">
-                    {network.edges.map(edge => {
-                      const sourceNode = network.nodes.find(n => n.id === edge.source);
-                      const targetNode = network.nodes.find(n => n.id === edge.target);
-                      
-                      return (
-                        <li key={edge.id} className="p-2 border rounded-md">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium">
-                              {sourceNode?.name} → {targetNode?.name}
-                            </span>
-                            <Badge variant="outline">{edge.mode}</Badge>
-                          </div>
-                          <div className="grid grid-cols-3 text-xs text-muted-foreground">
-                            <span>Cost: ${edge.cost}</span>
-                            <span>Time: {edge.time} days</span>
-                            <span>Distance: {edge.distance} km</span>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">
-                    No connections in the network yet. Start a conversation to build your network.
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold mb-4">Design Assistant Features</h2>
+                <div className="space-y-4">
+                  <div className="flex gap-3 items-start">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <Truck className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm">Route Optimization</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Design optimal delivery routes and transportation strategies
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 items-start">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <Package className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm">Inventory Planning</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Optimize stock levels and replenishment strategies
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 items-start">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <Building className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm">Network Design</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Optimize facility locations and distribution network
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 items-start">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <BarChart3 className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm">Cost Analysis</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Analyze and optimize total supply chain costs
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 items-start">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <FileText className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm">Custom Reports</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Generate detailed supply chain analysis reports
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 pt-4 border-t">
+                  <h3 className="font-medium text-sm mb-2">Upload Your Data</h3>
+                  <Button variant="outline" className="w-full flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    Upload Supply Chain Data
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Upload your supply chain data for personalized analysis and recommendations
                   </p>
-                )}
-              </div>
+                </div>
+              </Card>
             </div>
           </div>
-          
-          <div className="mt-6">
-            <Textarea 
-              placeholder="Network visualization will be displayed here in a more complete implementation..."
-              value="// A complete implementation would render an interactive network graph here
-// using libraries like vis.js, react-force-graph, or d3.js"
-              disabled
-              rows={6}
-              className="font-mono text-xs"
-            />
-          </div>
-        </Card>
-      </TabsContent>
-      
-      <TabsContent value="report">
-        <SupplyChainReportGenerator />
-      </TabsContent>
-    </Tabs>
+        </TabsContent>
+        
+        <TabsContent value="report" className="mt-6">
+          <SupplyChainReportGenerator />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

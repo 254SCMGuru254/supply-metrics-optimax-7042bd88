@@ -21,6 +21,7 @@ import DemandForecasting from '@/pages/DemandForecasting';
 import Introduction from '@/pages/Introduction';
 import ChatAssistant from '@/pages/ChatAssistant';
 import DesignAssistant from '@/pages/DesignAssistant';
+import { Outlet } from 'react-router-dom';
 
 import './App.css';
 
@@ -29,7 +30,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/introduction" element={<Introduction />} />
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<Layout><Outlet /></Layout>}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/route-optimization" element={<RouteOptimization />} />
         <Route path="/inventory-management" element={<InventoryManagement />} />
