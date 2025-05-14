@@ -8,7 +8,25 @@ declare module '@huggingface/transformers' {
 // Add explicit declarations for react-leaflet
 declare module 'react-leaflet' {
   import { FC, ReactNode } from 'react';
-  import { LatLngExpression, LatLngTuple, LatLngBoundsExpression, Map as LeafletMap, MapOptions, Layer, LayerGroup, Control, DomEvent, DomUtil, Popup, PopupOptions, Tooltip, TooltipOptions, PathOptions, PolylineOptions, CircleMarkerOptions } from 'leaflet';
+  import { 
+    LatLngExpression, 
+    LatLngTuple, 
+    LatLngBoundsExpression, 
+    Map as LeafletMap, 
+    MapOptions, 
+    Layer, 
+    LayerGroup, 
+    Control,
+    DomEvent, 
+    DomUtil, 
+    Popup, 
+    PopupOptions, 
+    Tooltip, 
+    TooltipOptions, 
+    PathOptions, 
+    PolylineOptions, 
+    CircleMarkerOptions 
+  } from 'leaflet';
   
   export interface MapContainerProps extends MapOptions {
     center?: LatLngExpression;
@@ -50,19 +68,13 @@ declare module 'react-leaflet' {
     children?: ReactNode;
   }
 
-  export interface MapContainerComponent extends FC<MapContainerProps> {}
-  export interface TileLayerComponent extends FC<TileLayerProps> {}
-  export interface MarkerComponent extends FC<MarkerProps> {}
-  export interface PopupComponent extends FC<PopupProps> {}
-  export interface PolylineComponent extends FC<PolylineProps> {}
-
-  export const MapContainer: MapContainerComponent;
-  export const TileLayer: TileLayerComponent;
-  export const Marker: MarkerComponent;
-  export const Popup: PopupComponent;
-  export const Polyline: PolylineComponent;
-  
-  export function useMap(): LeafletMap;
-  export function useMapEvent(type: string, handler: (...args: any[]) => void): LeafletMap;
-  export function useMapEvents(handlers: { [key: string]: (...args: any[]) => void }): LeafletMap;
+  export const MapContainer: FC<MapContainerProps>;
+  export const TileLayer: FC<TileLayerProps>;
+  export const Marker: FC<MarkerProps>;
+  export const Popup: FC<PopupProps>;
+  export const Polyline: FC<PolylineProps>;
+  export const CircleMarker: FC<any>;
+  export const useMap: () => LeafletMap;
+  export const useMapEvent: (type: string, handler: (...args: any[]) => void) => LeafletMap;
+  export const useMapEvents: (handlers: { [key: string]: (...args: any[]) => void }) => LeafletMap;
 }

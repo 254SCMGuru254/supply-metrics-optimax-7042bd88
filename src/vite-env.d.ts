@@ -3,6 +3,10 @@
 /// <reference types="react" />
 /// <reference types="react-dom" />
 /// <reference types="react-router-dom" />
+/// <reference types="@tanstack/react-query" />
+/// <reference types="jspdf" />
+/// <reference types="html2canvas" />
+/// <reference types="leaflet" />
 
 // Declare module for any packages that don't have type declarations
 declare module 'leaflet-defaulticon-compatibility';

@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         // Increase the maximum file size limit to allow larger assets
-        maximumFileSizeToCacheInBytes: 25 * 1024 * 1024, // 25 MB limit
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Reduced to 5 MB limit
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
@@ -61,7 +61,7 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: 'map-tiles-cache',
               expiration: {
-                maxEntries: 1000,
+                maxEntries: 500, // Reduced entries
                 maxAgeSeconds: 60 * 60 * 24 * 30
               }
             }
@@ -72,7 +72,7 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: 'market-data-cache',
               expiration: {
-                maxEntries: 100,
+                maxEntries: 50, // Reduced entries
                 maxAgeSeconds: 60 * 60 * 6 // 6 hours
               }
             }
@@ -85,5 +85,17 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src")
     }
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'leaflet',
+      'react-leaflet',
+      'html2canvas',
+      'jspdf'
+    ]
   }
 }));
