@@ -1,5 +1,11 @@
 
 /// <reference lib="webworker" />
+/// <reference types="workbox-precaching" />
+/// <reference types="workbox-routing" />
+/// <reference types="workbox-strategies" />
+/// <reference types="workbox-expiration" />
+/// <reference types="workbox-cacheable-response" />
+/// <reference types="workbox-background-sync" />
 
 import { precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
