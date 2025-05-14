@@ -165,3 +165,87 @@ export const optimizeClusterLocations = (clusters: Node[][]): Node[] => {
     };
   });
 };
+
+// Calculate total weighted distance for a network
+export const calculateTotalWeightedDistance = (nodes: Node[], facilityLocation: [number, number], useHaversine: boolean = true): number => {
+  let totalDist = 0;
+  const [facilityLat, facilityLng] = facilityLocation;
+  
+  nodes.forEach(node => {
+    const weight = node.weight || 1;
+    let distance;
+    
+    if (useHaversine) {
+      distance = calculateHaversineDistance(node.latitude, node.longitude, facilityLat, facilityLng);
+    } else {
+      distance = calculateEuclideanDistance(node.latitude, node.longitude, facilityLat, facilityLng);
+    }
+    
+    totalDist += distance * weight;
+  });
+  
+  return totalDist;
+};
+
+// Implementation of multi-start local search for finding a more accurate optimal location
+// This improves upon the simple COG calculation
+export const findOptimalLocationAdvanced = (nodes: Node[], useHaversine: boolean = true): [number, number] => {
+  // Start with basic COG
+  const [initialLat, initialLng] = calculateEnhancedCOG(nodes, false);
+  
+  // Initial best solution
+  let bestLat = initialLat;
+  let bestLng = initialLng;
+  let bestDist = calculateTotalWeightedDistance(nodes, [bestLat, bestLng], useHaversine);
+  
+  // Multi-start approach with local search
+  const numStarts = 10;
+  const stepSize = 0.05; // in degrees, approximately 5km
+  const maxIterations = 50;
+  
+  for (let start = 0; start < numStarts; start++) {
+    // Random starting point near the COG
+    let currentLat = initialLat + (Math.random() - 0.5) * 2;
+    let currentLng = initialLng + (Math.random() - 0.5) * 2;
+    let currentDist = calculateTotalWeightedDistance(nodes, [currentLat, currentLng], useHaversine);
+    
+    // Local search
+    let improved = true;
+    let iterations = 0;
+    let currentStep = stepSize;
+    
+    while (improved && iterations < maxIterations) {
+      improved = false;
+      iterations++;
+      
+      // Check nearby points
+      for (const [dLat, dLng] of [[currentStep, 0], [-currentStep, 0], [0, currentStep], [0, -currentStep]]) {
+        const newLat = currentLat + dLat;
+        const newLng = currentLng + dLng;
+        const newDist = calculateTotalWeightedDistance(nodes, [newLat, newLng], useHaversine);
+        
+        if (newDist < currentDist) {
+          currentLat = newLat;
+          currentLng = newLng;
+          currentDist = newDist;
+          improved = true;
+        }
+      }
+      
+      // Reduce step size gradually
+      if (!improved) {
+        currentStep = currentStep / 2;
+        improved = currentStep > 0.001;
+      }
+    }
+    
+    // Update best solution if better
+    if (currentDist < bestDist) {
+      bestLat = currentLat;
+      bestLng = currentLng;
+      bestDist = currentDist;
+    }
+  }
+  
+  return [bestLat, bestLng];
+};
