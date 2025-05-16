@@ -55,7 +55,7 @@ export const NetworkDesignModel = ({ networkModel }: NetworkDesignModelProps) =>
             <p>3. Capacity constraints: ∑<sub>k</sub> Z<sub>jk</sub> ≤ cap<sub>j</sub>Y<sub>j</sub> for all depots j</p>
             <p>4. Safety stock: S<sub>ij</sub> = z × σ<sub>d</sub> × √L × X<sub>ij</sub> / ∑<sub>i</sub> X<sub>ij</sub></p>
             <p>5. Nonnegativity: X<sub>ij</sub> ≥ 0, Z<sub>jk</sub> ≥ 0, S<sub>ij</sub> ≥ 0</p>
-            <p>6. Binary constraints: Y<sub>j</sub> ∈ {0,1}</p>
+            <p>6. Binary constraints: Y<sub>j</sub> ∈ {"{0,1}"}</p>
             <p className="mt-2">where:</p>
             <ul className="list-disc list-inside mt-1 space-y-1">
               <li>Z<sub>jk</sub> = Flow quantity from depot j to customer k</li>
