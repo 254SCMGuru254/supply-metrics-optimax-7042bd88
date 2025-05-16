@@ -32,6 +32,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/introduction" element={<Introduction />} />
+      <Route path="/pricing" element={<Pricing />} />
       <Route path="/" element={<Layout><Outlet /></Layout>}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/route-optimization" element={<RouteOptimization />} />
@@ -51,7 +52,6 @@ function App() {
         <Route path="/demand-forecasting" element={<DemandForecasting />} />
         <Route path="/chat-assistant" element={<ChatAssistant />} />
         <Route path="/design-assistant" element={<DesignAssistant />} />
-        <Route path="/pricing" element={<Pricing />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

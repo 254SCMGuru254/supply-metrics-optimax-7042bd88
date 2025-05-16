@@ -1,4 +1,3 @@
-
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +41,7 @@ const PricingTier = ({
       </ul>
     </CardContent>
     <CardFooter>
-      <Link to="/dashboard" className="w-full">
+      <Link to="/introduction" className="w-full">
         <Button className="w-full" variant={buttonVariant}>
           Get Started
         </Button>
