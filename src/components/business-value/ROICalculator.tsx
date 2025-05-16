@@ -1,314 +1,210 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
-import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
+import { BusinessValueReport } from "@/types/business";
 
 interface ROICalculatorProps {
   selectedModel: string;
+  customData?: Partial<BusinessValueReport>;
 }
 
-export const ROICalculator = ({ selectedModel }: ROICalculatorProps) => {
-  // Investment inputs
-  const [initialInvestment, setInitialInvestment] = useState(25000);
-  const [ongoingCostPercentage, setOngoingCostPercentage] = useState(15);
-  const [implementationMonths, setImplementationMonths] = useState(3);
-  
-  // Benefit inputs
-  const [annualBenefit, setAnnualBenefit] = useState(100000);
-  const [benefitRampupPercentage, setBenefitRampupPercentage] = useState(20);
-  
-  // Calculated values
-  const [monthlyData, setMonthlyData] = useState<any[]>([]);
-  const [cumulativeROI, setCumulativeROI] = useState(0);
-  const [breakEvenMonth, setBreakEvenMonth] = useState(0);
-  const [fiveYearROI, setFiveYearROI] = useState(0);
-  
-  // Get model specific default values
-  useEffect(() => {
-    switch(selectedModel) {
-      case 'route-optimization':
-        setInitialInvestment(30000);
-        setOngoingCostPercentage(20);
-        setImplementationMonths(3);
-        setAnnualBenefit(120000);
-        setBenefitRampupPercentage(25);
-        break;
-      case 'inventory-management':
-        setInitialInvestment(25000);
-        setOngoingCostPercentage(15);
-        setImplementationMonths(2);
-        setAnnualBenefit(150000);
-        setBenefitRampupPercentage(35);
-        break;
-      case 'network-optimization':
-        setInitialInvestment(80000);
-        setOngoingCostPercentage(10);
-        setImplementationMonths(6);
-        setAnnualBenefit(250000);
-        setBenefitRampupPercentage(10);
-        break;
-      case 'center-of-gravity':
-        setInitialInvestment(15000);
-        setOngoingCostPercentage(5);
-        setImplementationMonths(1);
-        setAnnualBenefit(80000);
-        setBenefitRampupPercentage(50);
-        break;
-      case 'heuristic':
-        setInitialInvestment(45000);
-        setOngoingCostPercentage(25);
-        setImplementationMonths(4);
-        setAnnualBenefit(175000);
-        setBenefitRampupPercentage(20);
-        break;
-      default:
-        break;
+export const ROICalculator = ({ selectedModel, customData }: ROICalculatorProps) => {
+  const [values, setValues] = useState({
+    annualRevenue: customData?.metrics?.find(m => m.name === "Annual Revenue")?.value?.replace('$', '') || "1000000",
+    annualCost: customData?.metrics?.find(m => m.name === "Logistics Costs")?.value?.replace('$', '') || "300000",
+    implementationCost: "50000",
+    annualSavingsPercent: getDefaultSavingsPercent(selectedModel),
+  });
+
+  const [calculatedResults, setCalculatedResults] = useState({
+    annualSavings: 0,
+    implementationROI: 0,
+    threeYearROI: 0,
+    paybackMonths: 0,
+    npv: 0,
+  });
+
+  const [hasCalculated, setHasCalculated] = useState(false);
+
+  const getDefaultSavingsPercent = (model: string) => {
+    switch (model) {
+      case "route-optimization": return "20";
+      case "inventory-management": return "25";
+      case "network-optimization": return "22";
+      case "center-of-gravity": return "28";
+      case "heuristic": return "18";
+      default: return "20";
     }
-  }, [selectedModel]);
-  
-  // Calculate ROI when inputs change
-  useEffect(() => {
-    calculateROI();
-  }, [initialInvestment, ongoingCostPercentage, implementationMonths, annualBenefit, benefitRampupPercentage]);
-  
-  const calculateROI = () => {
-    const monthlyBenefit = annualBenefit / 12;
-    const monthlyOngoingCost = (initialInvestment * (ongoingCostPercentage / 100)) / 12;
-    
-    let cumulativeCost = initialInvestment;
-    let cumulativeBenefit = 0;
-    let breakEvenReached = false;
-    let breakEvenMonth = 0;
-    
-    // Calculate for 5 years (60 months)
-    const data = [];
-    
-    for (let month = 1; month <= 60; month++) {
-      // No benefits during implementation
-      let monthlyBenefitActual = month <= implementationMonths ? 0 : monthlyBenefit;
-      
-      // Apply ramp-up factor for benefits
-      if (month > implementationMonths && month <= implementationMonths + 12) {
-        const rampupMonths = month - implementationMonths;
-        const rampupFactor = Math.min(benefitRampupPercentage * rampupMonths / 100, 1);
-        monthlyBenefitActual *= rampupFactor;
-      }
-      
-      cumulativeCost += monthlyOngoingCost;
-      cumulativeBenefit += monthlyBenefitActual;
-      
-      const netValue = cumulativeBenefit - cumulativeCost;
-      const roi = cumulativeBenefit > 0 ? (netValue / cumulativeCost) * 100 : -100;
-      
-      // Check for break-even point
-      if (!breakEvenReached && netValue >= 0) {
-        breakEvenReached = true;
-        breakEvenMonth = month;
-      }
-      
-      data.push({
-        month,
-        cumulativeCost: Math.round(cumulativeCost),
-        cumulativeBenefit: Math.round(cumulativeBenefit),
-        netValue: Math.round(netValue),
-        roi: Math.round(roi * 10) / 10
-      });
-    }
-    
-    setMonthlyData(data);
-    setCumulativeROI(data[data.length - 1].roi);
-    setFiveYearROI(data[data.length - 1].roi);
-    setBreakEvenMonth(breakEvenMonth);
   };
-  
+
+  const handleChange = (field: string, value: string) => {
+    setValues({
+      ...values,
+      [field]: value,
+    });
+  };
+
+  const calculateROI = () => {
+    const annualRevenue = parseFloat(values.annualRevenue);
+    const annualCost = parseFloat(values.annualCost);
+    const implementationCost = parseFloat(values.implementationCost);
+    const savingsPercent = parseFloat(values.annualSavingsPercent) / 100;
+    
+    const annualSavings = annualCost * savingsPercent;
+    const implementationROI = (annualSavings / implementationCost) * 100;
+    const threeYearROI = ((annualSavings * 3) / implementationCost) * 100;
+    const paybackMonths = (implementationCost / annualSavings) * 12;
+    
+    // Calculate Net Present Value (NPV) with 10% discount rate
+    const discountRate = 0.10;
+    let npv = -implementationCost;
+    for (let i = 1; i <= 3; i++) {
+      npv += annualSavings / Math.pow(1 + discountRate, i);
+    }
+    
+    setCalculatedResults({
+      annualSavings,
+      implementationROI,
+      threeYearROI,
+      paybackMonths,
+      npv,
+    });
+    
+    setHasCalculated(true);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card>
-          <CardHeader>
-            <CardTitle>Investment Parameters</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="initialInvestment">Initial Investment (USD)</Label>
-                <span className="text-sm text-muted-foreground">${initialInvestment.toLocaleString()}</span>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4">ROI Inputs</h3>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="annualRevenue">Annual Revenue ($)</Label>
+                <Input
+                  id="annualRevenue"
+                  type="number"
+                  value={values.annualRevenue}
+                  onChange={(e) => handleChange("annualRevenue", e.target.value)}
+                />
               </div>
-              <Input
-                id="initialInvestment"
-                type="number"
-                value={initialInvestment}
-                onChange={e => setInitialInvestment(Number(e.target.value))}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="ongoingCost">Annual Ongoing Cost (% of Initial)</Label>
-                <span className="text-sm text-muted-foreground">{ongoingCostPercentage}%</span>
+              <div>
+                <Label htmlFor="annualCost">Annual Logistics/Supply Chain Cost ($)</Label>
+                <Input
+                  id="annualCost"
+                  type="number"
+                  value={values.annualCost}
+                  onChange={(e) => handleChange("annualCost", e.target.value)}
+                />
               </div>
-              <Slider 
-                id="ongoingCost"
-                min={0} 
-                max={50}
-                step={1}
-                value={[ongoingCostPercentage]}
-                onValueChange={(vals) => setOngoingCostPercentage(vals[0])}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="implementationTime">Implementation Time (months)</Label>
-                <span className="text-sm text-muted-foreground">{implementationMonths}</span>
+              <div>
+                <Label htmlFor="implementationCost">Expected Implementation Cost ($)</Label>
+                <Input
+                  id="implementationCost"
+                  type="number"
+                  value={values.implementationCost}
+                  onChange={(e) => handleChange("implementationCost", e.target.value)}
+                />
               </div>
-              <Slider 
-                id="implementationTime"
-                min={1} 
-                max={12}
-                step={1}
-                value={[implementationMonths]}
-                onValueChange={(vals) => setImplementationMonths(vals[0])}
-              />
+              <div>
+                <Label htmlFor="annualSavingsPercent">Expected Annual Savings (%)</Label>
+                <Input
+                  id="annualSavingsPercent"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={values.annualSavingsPercent}
+                  onChange={(e) => handleChange("annualSavingsPercent", e.target.value)}
+                />
+              </div>
+              <Button onClick={calculateROI} className="w-full">
+                Calculate ROI
+              </Button>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardHeader>
-            <CardTitle>Benefit Parameters</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="annualBenefit">Annual Benefit (USD)</Label>
-                <span className="text-sm text-muted-foreground">${annualBenefit.toLocaleString()}</span>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4">ROI Results</h3>
+            {hasCalculated ? (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm text-muted-foreground">Annual Cost Savings</p>
+                  <p className="text-3xl font-semibold">${calculatedResults.annualSavings.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">First Year ROI</p>
+                    <p className="text-2xl font-semibold">{calculatedResults.implementationROI.toFixed(0)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Three Year ROI</p>
+                    <p className="text-2xl font-semibold">{calculatedResults.threeYearROI.toFixed(0)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Payback Period</p>
+                    <p className="text-2xl font-semibold">{calculatedResults.paybackMonths.toFixed(1)} months</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">3-Year NPV</p>
+                    <p className="text-2xl font-semibold">${calculatedResults.npv.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                  </div>
+                </div>
+                <hr />
+                <div>
+                  <h4 className="font-medium mb-2">Implementation Recommendation</h4>
+                  <p className="text-sm">
+                    {calculatedResults.paybackMonths < 12
+                      ? "This investment has a strong ROI with payback in less than a year. Highly recommended to proceed with implementation."
+                      : calculatedResults.paybackMonths < 24
+                      ? "This investment shows a moderate ROI with payback in less than two years. Consider proceeding with a phased approach."
+                      : "This investment has a longer payback period. Consider negotiating costs or implementing a more targeted solution."}
+                  </p>
+                </div>
               </div>
-              <Input
-                id="annualBenefit"
-                type="number"
-                value={annualBenefit}
-                onChange={e => setAnnualBenefit(Number(e.target.value))}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="benefitRampup">Monthly Benefit Ramp-up (%)</Label>
-                <span className="text-sm text-muted-foreground">{benefitRampupPercentage}%</span>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64">
+                <p className="text-muted-foreground">Enter your values and calculate ROI to see results</p>
               </div>
-              <Slider 
-                id="benefitRampup"
-                min={5} 
-                max={100}
-                step={5}
-                value={[benefitRampupPercentage]}
-                onValueChange={(vals) => setBenefitRampupPercentage(vals[0])}
-              />
-              <p className="text-xs text-muted-foreground">
-                How quickly benefits ramp up after implementation (higher = faster)
-              </p>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>ROI Analysis</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-primary/10 p-4 rounded-md text-center">
-              <p className="text-sm font-medium">5-Year ROI</p>
-              <p className="text-2xl font-bold text-primary">{fiveYearROI.toFixed(1)}%</p>
-            </div>
-            <div className="bg-primary/10 p-4 rounded-md text-center">
-              <p className="text-sm font-medium">Break-even Point</p>
-              <p className="text-2xl font-bold text-primary">
-                {breakEvenMonth > 0 ? `${breakEvenMonth} months` : "N/A"}
-              </p>
-            </div>
-            <div className="bg-primary/10 p-4 rounded-md text-center">
-              <p className="text-sm font-medium">Net 5-Year Value</p>
-              <p className="text-2xl font-bold text-primary">
-                ${monthlyData.length > 0 ? Math.round(monthlyData[monthlyData.length - 1].netValue).toLocaleString() : 0}
-              </p>
+      {hasCalculated && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">Implementation Timeline</h3>
+          <div className="relative">
+            <div className="h-2 bg-muted rounded-full mb-8">
+              <div className="h-2 bg-primary rounded-full" style={{ width: "100%" }}></div>
+              <div className="absolute -top-1 left-0" style={{ left: "0%" }}>
+                <div className="h-4 w-4 rounded-full bg-primary"></div>
+                <p className="absolute -bottom-8 transform -translate-x-1/2 text-xs text-center w-20">Project Start</p>
+              </div>
+              <div className="absolute -top-1" style={{ left: "30%" }}>
+                <div className="h-4 w-4 rounded-full bg-primary"></div>
+                <p className="absolute -bottom-8 transform -translate-x-1/2 text-xs text-center w-20">Data Integration</p>
+              </div>
+              <div className="absolute -top-1" style={{ left: "60%" }}>
+                <div className="h-4 w-4 rounded-full bg-primary"></div>
+                <p className="absolute -bottom-8 transform -translate-x-1/2 text-xs text-center w-20">Deployment</p>
+              </div>
+              <div className="absolute -top-1" style={{ left: "90%" }}>
+                <div className="h-4 w-4 rounded-full bg-primary"></div>
+                <p className="absolute -bottom-8 transform -translate-x-1/2 text-xs text-center w-20">Full ROI</p>
+              </div>
             </div>
           </div>
-          
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyData.filter((_, idx) => idx % 3 === 0)}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="month" 
-                label={{ value: "Month", position: "insideBottomRight", offset: -5 }}
-                tickFormatter={(val) => (val % 12 === 0) ? val.toString() : ''}
-              />
-              <YAxis />
-              <Tooltip 
-                formatter={(value: number) => ['$' + value.toLocaleString(), '']}
-                labelFormatter={(label) => `Month ${label}`}
-              />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="cumulativeCost" 
-                name="Cumulative Cost" 
-                stroke="#ef4444" 
-                activeDot={{ r: 6 }} 
-              />
-              <Line 
-                type="monotone" 
-                dataKey="cumulativeBenefit" 
-                name="Cumulative Benefit" 
-                stroke="#10b981" 
-                activeDot={{ r: 6 }} 
-              />
-              <Line 
-                type="monotone" 
-                dataKey="netValue" 
-                name="Net Value" 
-                stroke="#3b82f6" 
-                activeDot={{ r: 6 }} 
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button onClick={calculateROI} variant="outline">Recalculate</Button>
-          <ExportPdfButton
-            networkName={selectedModel}
-            optimizationType="ROI Analysis"
-            results={{
-              initialInvestment,
-              ongoingCostPercentage,
-              implementationMonths,
-              annualBenefit,
-              benefitRampupPercentage,
-              fiveYearROI,
-              breakEvenMonth,
-              netValue: monthlyData.length > 0 ? monthlyData[monthlyData.length - 1].netValue : 0
-            }}
-            fileName={`${selectedModel}-roi-analysis`}
-            isOptimized={true}
-          />
-        </CardFooter>
-      </Card>
+          <div className="mt-12 text-sm text-muted-foreground">
+            <p>* ROI calculations are estimates based on industry standards and the values you provided. Actual results may vary.</p>
+            <p>* Implementation timeline shown is approximate and will vary based on your organization's specific requirements.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

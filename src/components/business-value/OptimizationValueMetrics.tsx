@@ -1,15 +1,16 @@
-
 import { useState } from 'react';
 import { ModelValueMetrics } from './ModelValueMetrics';
 import { BusinessImpactDashboard } from './BusinessImpactDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, TrendingUp, Lightbulb } from "lucide-react";
+import { BusinessValueReport } from '@/types/business';
 
 interface OptimizationValueMetricsProps {
   selectedModel: string;
+  customData?: Partial<BusinessValueReport>;
 }
 
-export const OptimizationValueMetrics = ({ selectedModel }: OptimizationValueMetricsProps) => {
+export const OptimizationValueMetrics = ({ selectedModel, customData }: OptimizationValueMetricsProps) => {
   const [activeTab, setActiveTab] = useState<string>("metrics");
 
   // Map model types to value metrics props
@@ -32,6 +33,12 @@ export const OptimizationValueMetrics = ({ selectedModel }: OptimizationValueMet
 
   // Model-specific case studies
   const getCaseStudies = () => {
+    // If user has provided custom case studies, use those
+    if (customData?.caseStudies && customData.caseStudies.length > 0) {
+      return customData.caseStudies;
+    }
+    
+    // Otherwise use default case studies
     switch (selectedModel) {
       case "route-optimization":
         return [
@@ -142,7 +149,11 @@ export const OptimizationValueMetrics = ({ selectedModel }: OptimizationValueMet
         </TabsList>
         
         <TabsContent value="metrics" className="pt-6">
-          <ModelValueMetrics modelType={getModelType()} showDescription={true} />
+          <ModelValueMetrics 
+            modelType={getModelType()} 
+            showDescription={true}
+            customMetrics={customData?.metrics}
+          />
         </TabsContent>
         
         <TabsContent value="implementation" className="pt-6">
@@ -150,7 +161,7 @@ export const OptimizationValueMetrics = ({ selectedModel }: OptimizationValueMet
         </TabsContent>
         
         <TabsContent value="case-studies" className="pt-6 space-y-4">
-          <h2 className="text-xl font-bold">East African Success Stories</h2>
+          <h2 className="text-xl font-bold">Success Stories</h2>
           <p className="text-muted-foreground">Real-world examples of successful implementations in Kenya and neighboring countries</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

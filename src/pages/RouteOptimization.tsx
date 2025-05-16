@@ -8,6 +8,8 @@ import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { ModelValueMetrics } from "@/components/business-value/ModelValueMetrics";
+import { VehicleFleetConfig } from "@/components/route-optimization/VehicleFleetConfig";
+import { Vehicle } from "@/components/route-optimization/types";
 
 const RouteOptimization = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -16,6 +18,19 @@ const RouteOptimization = () => {
   const [isOptimized, setIsOptimized] = useState(false);
   const [activeTab, setActiveTab] = useState("input");
   const [optimizationResults, setOptimizationResults] = useState<any>(null);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([
+    {
+      id: crypto.randomUUID(),
+      name: "Standard Truck",
+      capacity: 5000,
+      costPerKm: 2.5,
+      fixedCost: 100,
+      speed: 60,
+      emissions: 200,
+      maxDistance: 500,
+      tonnageLimit: 10
+    }
+  ]);
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -29,8 +44,8 @@ const RouteOptimization = () => {
       description: "Connect your locations with routes to define your transportation network."
     },
     {
-      title: "Set Constraints",
-      description: "Define cost parameters, vehicle capacity, and time windows for delivery."
+      title: "Configure Fleet",
+      description: "Set up your vehicle fleet with capacities, costs, and other constraints."
     },
     {
       title: "Run Optimization",
@@ -69,6 +84,15 @@ const RouteOptimization = () => {
       return;
     }
 
+    if (vehicles.length === 0) {
+      toast({
+        title: "No vehicles configured",
+        description: "Add at least one vehicle to your fleet",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsOptimizing(true);
     
     // This is where real-world routing algorithms would be applied
@@ -81,25 +105,33 @@ const RouteOptimization = () => {
       
       // Simple algorithm to connect nodes with routes
       for (let i = 0; i < nodes.length - 1; i++) {
+        // Assign a random vehicle to each route
+        const vehicle = vehicles[Math.floor(Math.random() * vehicles.length)];
+        
         optimizedRoutes.push({
           id: crypto.randomUUID(),
           from: nodes[i].id,
           to: nodes[i + 1].id,
           volume: Math.floor(Math.random() * 100) + 20,
           transitTime: Math.floor(Math.random() * 8) + 1,
-          isOptimized: true
+          isOptimized: true,
+          vehicleId: vehicle.id,
+          vehicleName: vehicle.name
         });
       }
       
       // Add a route back to start for a complete circuit
       if (nodes.length > 2) {
+        const vehicle = vehicles[Math.floor(Math.random() * vehicles.length)];
         optimizedRoutes.push({
           id: crypto.randomUUID(),
           from: nodes[nodes.length - 1].id, 
           to: nodes[0].id,
           volume: Math.floor(Math.random() * 100) + 20,
           transitTime: Math.floor(Math.random() * 8) + 1,
-          isOptimized: true
+          isOptimized: true,
+          vehicleId: vehicle.id,
+          vehicleName: vehicle.name
         });
       }
       
@@ -123,10 +155,12 @@ const RouteOptimization = () => {
             from: fromNode?.name || route.from,
             to: toNode?.name || route.to,
             transit_time: route.transitTime,
-            volume: route.volume
+            volume: route.volume,
+            vehicle: route.vehicleName
           };
         }),
-        execution_time: Math.random() * 2 + 0.5 // 0.5-2.5 seconds
+        execution_time: Math.random() * 2 + 0.5, // 0.5-2.5 seconds
+        vehicles_used: [...new Set(optimizedRoutes.map(r => r.vehicleId))].length
       };
       
       setRoutes(optimizedRoutes);
@@ -136,7 +170,7 @@ const RouteOptimization = () => {
       
       toast({
         title: "Routes Optimized",
-        description: `Created ${optimizedRoutes.length} optimized delivery routes`,
+        description: `Created ${optimizedRoutes.length} optimized delivery routes using ${results.vehicles_used} vehicles`,
       });
     } catch (error) {
       toast({
@@ -169,7 +203,7 @@ const RouteOptimization = () => {
           />
           <Button 
             onClick={handleOptimizeRoutes} 
-            disabled={isOptimizing || nodes.length < 2}
+            disabled={isOptimizing || nodes.length < 2 || vehicles.length === 0}
           >
             {isOptimizing ? "Optimizing..." : "Optimize Routes"}
           </Button>
@@ -179,8 +213,9 @@ const RouteOptimization = () => {
       <ModelWalkthrough steps={walkthroughSteps} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="input">Input Data</TabsTrigger>
+        <TabsList className="grid grid-cols-4 mb-4">
+          <TabsTrigger value="input">Network</TabsTrigger>
+          <TabsTrigger value="fleet">Vehicle Fleet</TabsTrigger>
           <TabsTrigger value="constraints">Constraints</TabsTrigger>
           <TabsTrigger value="results">Results</TabsTrigger>
         </TabsList>
@@ -202,17 +237,18 @@ const RouteOptimization = () => {
             </div>
           </Card>
         </TabsContent>
+
+        <TabsContent value="fleet" className="mt-0">
+          <VehicleFleetConfig 
+            vehicles={vehicles} 
+            onChange={setVehicles} 
+          />
+        </TabsContent>
         
         <TabsContent value="constraints" className="mt-0">
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Optimization Constraints</h2>
             <div className="space-y-4">
-              <div>
-                <h3 className="font-medium">Vehicle Fleet</h3>
-                <p className="text-sm text-muted-foreground">
-                  Configure available vehicles, capacities, and costs.
-                </p>
-              </div>
               <div>
                 <h3 className="font-medium">Time Windows</h3>
                 <p className="text-sm text-muted-foreground">
@@ -236,7 +272,7 @@ const RouteOptimization = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="font-medium">Route Summary</h3>
-                  <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Routes</p>
                       <p className="text-2xl font-semibold">{routes.length}</p>
@@ -244,6 +280,12 @@ const RouteOptimization = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Total Locations</p>
                       <p className="text-2xl font-semibold">{nodes.length}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Vehicles Used</p>
+                      <p className="text-2xl font-semibold">
+                        {optimizationResults?.vehicles_used || 0}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Average Transit Time</p>
@@ -268,6 +310,7 @@ const RouteOptimization = () => {
                         <tr>
                           <th className="p-2 text-left">From</th>
                           <th className="p-2 text-left">To</th>
+                          <th className="p-2 text-left">Vehicle</th>
                           <th className="p-2 text-left">Transit Time</th>
                           <th className="p-2 text-left">Volume</th>
                         </tr>
@@ -281,6 +324,7 @@ const RouteOptimization = () => {
                             <tr key={route.id} className="border-b">
                               <td className="p-2">{fromNode?.name || "Unknown"}</td>
                               <td className="p-2">{toNode?.name || "Unknown"}</td>
+                              <td className="p-2">{route.vehicleName || "Standard"}</td>
                               <td className="p-2">{route.transitTime}h</td>
                               <td className="p-2">{route.volume} units</td>
                             </tr>

@@ -3,12 +3,19 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OptimizationValueMetrics } from "@/components/business-value/OptimizationValueMetrics";
 import { ROICalculator } from "@/components/business-value/ROICalculator";
-import { BarChart3, Calculator } from "lucide-react";
+import { UserDataInput } from "@/components/business-value/UserDataInput";
+import { BarChart3, Calculator, FileEdit } from "lucide-react";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ModelValueMetricsType, BusinessValueReport } from "@/types/business";
 
 const BusinessValue = () => {
   const [selectedModel, setSelectedModel] = useState<string>("route-optimization");
+  const [customBusinessData, setCustomBusinessData] = useState<Partial<BusinessValueReport>>({});
+
+  const handleSaveUserData = (data: Partial<BusinessValueReport>) => {
+    setCustomBusinessData(data);
+  };
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -36,7 +43,7 @@ const BusinessValue = () => {
       </div>
 
       <Tabs defaultValue="metrics" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="metrics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             <span>Optimization Metrics</span>
@@ -45,14 +52,31 @@ const BusinessValue = () => {
             <Calculator className="h-4 w-4" />
             <span>ROI Calculator</span>
           </TabsTrigger>
+          <TabsTrigger value="your-data" className="flex items-center gap-2">
+            <FileEdit className="h-4 w-4" />
+            <span>Your Business Data</span>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="metrics" className="mt-6">
-          <OptimizationValueMetrics selectedModel={selectedModel} />
+          <OptimizationValueMetrics 
+            selectedModel={selectedModel} 
+            customData={customBusinessData}
+          />
         </TabsContent>
         
         <TabsContent value="roi" className="mt-6">
-          <ROICalculator selectedModel={selectedModel} />
+          <ROICalculator 
+            selectedModel={selectedModel}
+            customData={customBusinessData}
+          />
+        </TabsContent>
+
+        <TabsContent value="your-data" className="mt-6">
+          <UserDataInput 
+            modelType={selectedModel as ModelValueMetricsType}
+            onSave={handleSaveUserData}
+          />
         </TabsContent>
       </Tabs>
     </div>
