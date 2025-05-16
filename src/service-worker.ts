@@ -5,22 +5,10 @@ import { precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { BackgroundSyncPlugin } from 'workbox-background-sync'
 
 declare const self: ServiceWorkerGlobalScope;
-
-// Define the missing CacheableResponsePlugin interface
-interface CacheableResponseOptions {
-  statuses?: number[];
-  headers?: Record<string, string>;
-}
-
-class CacheableResponsePlugin {
-  constructor(options: CacheableResponseOptions) {
-    this.options = options;
-  }
-  options: CacheableResponseOptions;
-}
 
 // Precache all static assets
 precacheAndRoute(self.__WB_MANIFEST || []);
