@@ -1,356 +1,313 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { FileDown, Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
+import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 
 interface ROICalculatorProps {
-  selectedModel?: string;
-}
-
-interface ROIParameters {
-  initialInvestment: number;
-  annualSavings: number;
-  implementationTime: number;
-  annualMaintenanceCost: number;
-  projectLifespan: number;
-}
-
-interface ROIResults {
-  roi: number;
-  paybackPeriod: number;
-  npv: number;
-  irr: number;
+  selectedModel: string;
 }
 
 export const ROICalculator = ({ selectedModel }: ROICalculatorProps) => {
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [parameters, setParameters] = useState<ROIParameters>({
-    initialInvestment: 50000,
-    annualSavings: 150000,
-    implementationTime: 3,
-    annualMaintenanceCost: 10000,
-    projectLifespan: 5
-  });
-  const [results, setResults] = useState<ROIResults | null>(null);
-  const { toast } = useToast();
-
+  // Investment inputs
+  const [initialInvestment, setInitialInvestment] = useState(25000);
+  const [ongoingCostPercentage, setOngoingCostPercentage] = useState(15);
+  const [implementationMonths, setImplementationMonths] = useState(3);
+  
+  // Benefit inputs
+  const [annualBenefit, setAnnualBenefit] = useState(100000);
+  const [benefitRampupPercentage, setBenefitRampupPercentage] = useState(20);
+  
+  // Calculated values
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [cumulativeROI, setCumulativeROI] = useState(0);
+  const [breakEvenMonth, setBreakEvenMonth] = useState(0);
+  const [fiveYearROI, setFiveYearROI] = useState(0);
+  
+  // Get model specific default values
   useEffect(() => {
-    // Load default parameters based on the selected model
-    if (selectedModel) {
-      const modelDefaults = getModelDefaults(selectedModel);
-      setParameters(modelDefaults);
+    switch(selectedModel) {
+      case 'route-optimization':
+        setInitialInvestment(30000);
+        setOngoingCostPercentage(20);
+        setImplementationMonths(3);
+        setAnnualBenefit(120000);
+        setBenefitRampupPercentage(25);
+        break;
+      case 'inventory-management':
+        setInitialInvestment(25000);
+        setOngoingCostPercentage(15);
+        setImplementationMonths(2);
+        setAnnualBenefit(150000);
+        setBenefitRampupPercentage(35);
+        break;
+      case 'network-optimization':
+        setInitialInvestment(80000);
+        setOngoingCostPercentage(10);
+        setImplementationMonths(6);
+        setAnnualBenefit(250000);
+        setBenefitRampupPercentage(10);
+        break;
+      case 'center-of-gravity':
+        setInitialInvestment(15000);
+        setOngoingCostPercentage(5);
+        setImplementationMonths(1);
+        setAnnualBenefit(80000);
+        setBenefitRampupPercentage(50);
+        break;
+      case 'heuristic':
+        setInitialInvestment(45000);
+        setOngoingCostPercentage(25);
+        setImplementationMonths(4);
+        setAnnualBenefit(175000);
+        setBenefitRampupPercentage(20);
+        break;
+      default:
+        break;
     }
   }, [selectedModel]);
-
-  const getModelDefaults = (model: string): ROIParameters => {
-    // Default parameters specific to each optimization model
-    const defaults: { [key: string]: ROIParameters } = {
-      "route-optimization": {
-        initialInvestment: 50000,
-        annualSavings: 150000,
-        implementationTime: 2,
-        annualMaintenanceCost: 10000,
-        projectLifespan: 5
-      },
-      "inventory-management": {
-        initialInvestment: 75000,
-        annualSavings: 300000,
-        implementationTime: 3,
-        annualMaintenanceCost: 15000,
-        projectLifespan: 5
-      },
-      "network-optimization": {
-        initialInvestment: 100000,
-        annualSavings: 400000,
-        implementationTime: 4,
-        annualMaintenanceCost: 20000,
-        projectLifespan: 5
-      },
-      "center-of-gravity": {
-        initialInvestment: 60000,
-        annualSavings: 200000,
-        implementationTime: 2,
-        annualMaintenanceCost: 12000,
-        projectLifespan: 5
-      },
-      "heuristic": {
-        initialInvestment: 65000,
-        annualSavings: 250000,
-        implementationTime: 2,
-        annualMaintenanceCost: 13000,
-        projectLifespan: 5
-      }
-    };
-
-    return defaults[model] || defaults["route-optimization"];
-  };
-
-  const handleInputChange = (key: keyof ROIParameters, value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    setParameters({ ...parameters, [key]: numericValue });
-  };
-
+  
+  // Calculate ROI when inputs change
+  useEffect(() => {
+    calculateROI();
+  }, [initialInvestment, ongoingCostPercentage, implementationMonths, annualBenefit, benefitRampupPercentage]);
+  
   const calculateROI = () => {
-    setIsCalculating(true);
+    const monthlyBenefit = annualBenefit / 12;
+    const monthlyOngoingCost = (initialInvestment * (ongoingCostPercentage / 100)) / 12;
     
-    // Simulate API call or complex calculation
-    setTimeout(() => {
-      const { initialInvestment, annualSavings, implementationTime, annualMaintenanceCost, projectLifespan } = parameters;
+    let cumulativeCost = initialInvestment;
+    let cumulativeBenefit = 0;
+    let breakEvenReached = false;
+    let breakEvenMonth = 0;
+    
+    // Calculate for 5 years (60 months)
+    const data = [];
+    
+    for (let month = 1; month <= 60; month++) {
+      // No benefits during implementation
+      let monthlyBenefitActual = month <= implementationMonths ? 0 : monthlyBenefit;
       
-      // Basic ROI calculation over project lifespan
-      const totalCost = initialInvestment + (annualMaintenanceCost * projectLifespan);
-      const totalSavings = annualSavings * (projectLifespan - (implementationTime / 12));
-      const roi = ((totalSavings - totalCost) / totalCost) * 100;
-      
-      // Payback period calculation (in months)
-      const monthlySavings = annualSavings / 12;
-      const paybackPeriod = (initialInvestment / monthlySavings) + implementationTime;
-      
-      // NPV Calculation (simplified with 5% discount rate)
-      const discountRate = 0.05;
-      let npv = -initialInvestment;
-      for (let year = 1; year <= projectLifespan; year++) {
-        // No savings during implementation period
-        const yearSavings = year <= implementationTime / 12 ? 0 : annualSavings - annualMaintenanceCost;
-        npv += yearSavings / Math.pow(1 + discountRate, year);
+      // Apply ramp-up factor for benefits
+      if (month > implementationMonths && month <= implementationMonths + 12) {
+        const rampupMonths = month - implementationMonths;
+        const rampupFactor = Math.min(benefitRampupPercentage * rampupMonths / 100, 1);
+        monthlyBenefitActual *= rampupFactor;
       }
       
-      // Simple IRR approximation
-      const irr = (annualSavings - annualMaintenanceCost) / initialInvestment * 100;
+      cumulativeCost += monthlyOngoingCost;
+      cumulativeBenefit += monthlyBenefitActual;
       
-      setResults({
-        roi: parseFloat(roi.toFixed(2)),
-        paybackPeriod: parseFloat(paybackPeriod.toFixed(1)),
-        npv: parseFloat(npv.toFixed(2)),
-        irr: parseFloat(irr.toFixed(2))
+      const netValue = cumulativeBenefit - cumulativeCost;
+      const roi = cumulativeBenefit > 0 ? (netValue / cumulativeCost) * 100 : -100;
+      
+      // Check for break-even point
+      if (!breakEvenReached && netValue >= 0) {
+        breakEvenReached = true;
+        breakEvenMonth = month;
+      }
+      
+      data.push({
+        month,
+        cumulativeCost: Math.round(cumulativeCost),
+        cumulativeBenefit: Math.round(cumulativeBenefit),
+        netValue: Math.round(netValue),
+        roi: Math.round(roi * 10) / 10
       });
-      
-      setIsCalculating(false);
-    }, 1000);
-  };
-
-  const handleExportPDF = async () => {
-    if (!results) return;
-    
-    setIsExporting(true);
-    
-    try {
-      // This would be imported from your exportToPdf utility
-      const { exportOptimizationResultsToPdf } = await import('@/utils/exportToPdf');
-      
-      exportOptimizationResultsToPdf(
-        `${selectedModel || 'Supply Chain'} Optimization`,
-        "ROI Analysis",
-        {
-          parameters,
-          results,
-          date: new Date().toISOString()
-        },
-        `${selectedModel || 'optimization'}-roi-analysis`
-      );
-      
-      toast({
-        title: "Export Complete",
-        description: "The ROI analysis has been exported as PDF"
-      });
-    } catch (error) {
-      console.error("PDF export error:", error);
-      toast({
-        variant: "destructive",
-        title: "Export Failed",
-        description: "An error occurred while generating the PDF"
-      });
-    } finally {
-      setIsExporting(false);
     }
+    
+    setMonthlyData(data);
+    setCumulativeROI(data[data.length - 1].roi);
+    setFiveYearROI(data[data.length - 1].roi);
+    setBreakEvenMonth(breakEvenMonth);
   };
-
-  const getModelName = (modelId: string): string => {
-    const modelNames: {[key: string]: string} = {
-      "route-optimization": "Route Optimization",
-      "inventory-management": "Inventory Management",
-      "network-optimization": "Network Optimization",
-      "center-of-gravity": "Center of Gravity",
-      "heuristic": "Heuristic Optimization"
-    };
-    return modelNames[modelId] || "Supply Chain Optimization";
-  };
-
+  
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">ROI Calculator</h2>
-        {results && (
-          <Button 
-            variant="outline" 
-            onClick={handleExportPDF} 
-            disabled={isExporting}
-            className="flex items-center gap-2"
-          >
-            {isExporting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <FileDown className="h-4 w-4" />
-            )}
-            Export PDF
-          </Button>
-        )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Investment Parameters</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="initialInvestment">Initial Investment (USD)</Label>
+                <span className="text-sm text-muted-foreground">${initialInvestment.toLocaleString()}</span>
+              </div>
+              <Input
+                id="initialInvestment"
+                type="number"
+                value={initialInvestment}
+                onChange={e => setInitialInvestment(Number(e.target.value))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="ongoingCost">Annual Ongoing Cost (% of Initial)</Label>
+                <span className="text-sm text-muted-foreground">{ongoingCostPercentage}%</span>
+              </div>
+              <Slider 
+                id="ongoingCost"
+                min={0} 
+                max={50}
+                step={1}
+                value={[ongoingCostPercentage]}
+                onValueChange={(vals) => setOngoingCostPercentage(vals[0])}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="implementationTime">Implementation Time (months)</Label>
+                <span className="text-sm text-muted-foreground">{implementationMonths}</span>
+              </div>
+              <Slider 
+                id="implementationTime"
+                min={1} 
+                max={12}
+                step={1}
+                value={[implementationMonths]}
+                onValueChange={(vals) => setImplementationMonths(vals[0])}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Benefit Parameters</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="annualBenefit">Annual Benefit (USD)</Label>
+                <span className="text-sm text-muted-foreground">${annualBenefit.toLocaleString()}</span>
+              </div>
+              <Input
+                id="annualBenefit"
+                type="number"
+                value={annualBenefit}
+                onChange={e => setAnnualBenefit(Number(e.target.value))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="benefitRampup">Monthly Benefit Ramp-up (%)</Label>
+                <span className="text-sm text-muted-foreground">{benefitRampupPercentage}%</span>
+              </div>
+              <Slider 
+                id="benefitRampup"
+                min={5} 
+                max={100}
+                step={5}
+                value={[benefitRampupPercentage]}
+                onValueChange={(vals) => setBenefitRampupPercentage(vals[0])}
+              />
+              <p className="text-xs text-muted-foreground">
+                How quickly benefits ramp up after implementation (higher = faster)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       <Card>
         <CardHeader>
-          <CardTitle>{getModelName(selectedModel || "route-optimization")} ROI Analysis</CardTitle>
-          <CardDescription>
-            Calculate the return on investment for implementing this optimization solution
-          </CardDescription>
+          <CardTitle>ROI Analysis</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="parameters" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="parameters">Parameters</TabsTrigger>
-              <TabsTrigger value="results" disabled={!results}>Results</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="parameters" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="initialInvestment">Initial Investment (USD)</Label>
-                  <Input
-                    id="initialInvestment"
-                    type="number"
-                    value={parameters.initialInvestment}
-                    onChange={(e) => handleInputChange('initialInvestment', e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    The upfront cost of implementing the optimization solution
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="annualSavings">Expected Annual Savings (USD)</Label>
-                  <Input
-                    id="annualSavings"
-                    type="number"
-                    value={parameters.annualSavings}
-                    onChange={(e) => handleInputChange('annualSavings', e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    The yearly cost savings expected from the optimization
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="implementationTime">Implementation Time (months)</Label>
-                  <Input
-                    id="implementationTime"
-                    type="number"
-                    value={parameters.implementationTime}
-                    onChange={(e) => handleInputChange('implementationTime', e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Time required to fully implement the solution
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="annualMaintenanceCost">Annual Maintenance Cost (USD)</Label>
-                  <Input
-                    id="annualMaintenanceCost"
-                    type="number"
-                    value={parameters.annualMaintenanceCost}
-                    onChange={(e) => handleInputChange('annualMaintenanceCost', e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Yearly cost to maintain and support the solution
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="projectLifespan">Project Lifespan (years)</Label>
-                  <Input
-                    id="projectLifespan"
-                    type="number"
-                    value={parameters.projectLifespan}
-                    onChange={(e) => handleInputChange('projectLifespan', e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Expected useful life of the solution
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex justify-end mt-6">
-                <Button 
-                  onClick={calculateROI}
-                  disabled={isCalculating}
-                >
-                  {isCalculating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Calculating...
-                    </>
-                  ) : "Calculate ROI"}
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="results">
-              {results && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-primary">{results.roi}%</div>
-                        <p className="text-sm font-medium">Return on Investment</p>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-primary">{results.paybackPeriod} months</div>
-                        <p className="text-sm font-medium">Payback Period</p>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-primary">${results.npv.toLocaleString()}</div>
-                        <p className="text-sm font-medium">Net Present Value</p>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-primary">{results.irr}%</div>
-                        <p className="text-sm font-medium">Internal Rate of Return</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Analysis</h3>
-                    <p className="text-muted-foreground">
-                      Based on your inputs, the {getModelName(selectedModel || "route-optimization")} project is expected to 
-                      yield a {results.roi}% return on investment over {parameters.projectLifespan} years. 
-                      The initial investment of ${parameters.initialInvestment.toLocaleString()} will be recovered in 
-                      approximately {results.paybackPeriod} months, with annual savings of ${parameters.annualSavings.toLocaleString()}.
-                    </p>
-                    <p className="text-muted-foreground mt-2">
-                      With a positive NPV of ${results.npv.toLocaleString()}, this project is financially viable and expected to 
-                      create significant value for your organization.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="bg-primary/10 p-4 rounded-md text-center">
+              <p className="text-sm font-medium">5-Year ROI</p>
+              <p className="text-2xl font-bold text-primary">{fiveYearROI.toFixed(1)}%</p>
+            </div>
+            <div className="bg-primary/10 p-4 rounded-md text-center">
+              <p className="text-sm font-medium">Break-even Point</p>
+              <p className="text-2xl font-bold text-primary">
+                {breakEvenMonth > 0 ? `${breakEvenMonth} months` : "N/A"}
+              </p>
+            </div>
+            <div className="bg-primary/10 p-4 rounded-md text-center">
+              <p className="text-sm font-medium">Net 5-Year Value</p>
+              <p className="text-2xl font-bold text-primary">
+                ${monthlyData.length > 0 ? Math.round(monthlyData[monthlyData.length - 1].netValue).toLocaleString() : 0}
+              </p>
+            </div>
+          </div>
+          
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={monthlyData.filter((_, idx) => idx % 3 === 0)}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="month" 
+                label={{ value: "Month", position: "insideBottomRight", offset: -5 }}
+                tickFormatter={(val) => (val % 12 === 0) ? val.toString() : ''}
+              />
+              <YAxis />
+              <Tooltip 
+                formatter={(value: number) => ['$' + value.toLocaleString(), '']}
+                labelFormatter={(label) => `Month ${label}`}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="cumulativeCost" 
+                name="Cumulative Cost" 
+                stroke="#ef4444" 
+                activeDot={{ r: 6 }} 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="cumulativeBenefit" 
+                name="Cumulative Benefit" 
+                stroke="#10b981" 
+                activeDot={{ r: 6 }} 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="netValue" 
+                name="Net Value" 
+                stroke="#3b82f6" 
+                activeDot={{ r: 6 }} 
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button onClick={calculateROI} variant="outline">Recalculate</Button>
+          <ExportPdfButton
+            networkName={selectedModel}
+            optimizationType="ROI Analysis"
+            results={{
+              initialInvestment,
+              ongoingCostPercentage,
+              implementationMonths,
+              annualBenefit,
+              benefitRampupPercentage,
+              fiveYearROI,
+              breakEvenMonth,
+              netValue: monthlyData.length > 0 ? monthlyData[monthlyData.length - 1].netValue : 0
+            }}
+            fileName={`${selectedModel}-roi-analysis`}
+            isOptimized={true}
+          />
+        </CardFooter>
       </Card>
     </div>
   );

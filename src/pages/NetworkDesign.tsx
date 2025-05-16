@@ -8,7 +8,7 @@ import { Node, Route } from '@/components/map/MapTypes';
 import { NetworkMap } from "@/components/NetworkMap";
 import { 
   NetworkModel, 
-  Factory as NetworkFactory, 
+  Factory, 
   Depot,
   Customer, 
   CostAnalysis 
@@ -19,6 +19,8 @@ import {
 } from '@/components/network-design/utils/NetworkModelCalculator';
 import { NetworkDesignForm } from '@/components/network-design/NetworkDesignForm';
 import { CostBreakdown } from '@/components/network-design/CostBreakdown';
+import { NetworkDesignModel } from '@/components/network-design/NetworkDesignModel';
+import { ExportPdfButton } from '@/components/ui/ExportPdfButton';
 
 const NetworkDesign = () => {
   const [networkModel, setNetworkModel] = useState<NetworkModel>({
@@ -41,8 +43,8 @@ const NetworkDesign = () => {
   };
 
   // Add a factory to the network
-  const handleAddFactory = (factory: Omit<NetworkFactory, 'id'>) => {
-    const newFactory: NetworkFactory = {
+  const handleAddFactory = (factory: Omit<Factory, 'id'>) => {
+    const newFactory: Factory = {
       ...factory,
       id: generateId('factory'),
     };
@@ -179,7 +181,7 @@ const NetworkDesign = () => {
   };
 
   // Convert our network model to nodes and routes for the map
-  const getMapNodes = () => {
+  const getMapNodes = (): Node[] => {
     return [
       ...networkModel.factories.map(factory => ({
         id: factory.id,
@@ -201,14 +203,14 @@ const NetworkDesign = () => {
         name: customer.name,
         latitude: customer.latitude,
         longitude: customer.longitude,
-        type: 'custom' as const, // Changed from 'customer' to 'custom'
+        type: 'custom' as const,
         demand: customer.demand
       }))
     ];
   };
 
   // Generate routes between connected locations
-  const getMapRoutes = () => {
+  const getMapRoutes = (): Route[] => {
     const routes: Route[] = [];
     
     // Factory to depot routes
@@ -221,7 +223,7 @@ const NetworkDesign = () => {
             from: factory.id,
             to: depot.id,
             volume: depot.throughput,
-            type: 'road' // Changed from 'primary' to 'road'
+            type: 'road'
           });
         }
       }
@@ -237,7 +239,7 @@ const NetworkDesign = () => {
             from: depot.id,
             to: customer.id,
             volume: customer.demand,
-            type: 'road' // Changed from 'secondary' to 'road'
+            type: 'road'
           });
         }
       }
@@ -255,8 +257,15 @@ const NetworkDesign = () => {
             Design and optimize your supply chain network with cost analysis
           </p>
         </div>
-        <div>
+        <div className="flex gap-2">
           <Button onClick={handleAnalyzeNetwork}>Calculate Network Costs</Button>
+          <ExportPdfButton
+            networkName="Physical Network Design"
+            optimizationType="Location-Allocation Analysis"
+            results={costAnalysis}
+            fileName="network-design-results"
+            isOptimized={!!costAnalysis}
+          />
         </div>
       </div>
 
@@ -270,9 +279,10 @@ const NetworkDesign = () => {
 
         <div className="space-y-6">
           <Tabs defaultValue="form">
-            <TabsList className="grid grid-cols-2">
+            <TabsList className="grid grid-cols-3">
               <TabsTrigger value="form">Add Locations</TabsTrigger>
               <TabsTrigger value="analysis">Cost Analysis</TabsTrigger>
+              <TabsTrigger value="model">Math Model</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="space-y-4">
               <NetworkDesignForm
@@ -287,6 +297,9 @@ const NetworkDesign = () => {
             </TabsContent>
             <TabsContent value="analysis">
               <CostBreakdown costAnalysis={costAnalysis} />
+            </TabsContent>
+            <TabsContent value="model">
+              <NetworkDesignModel networkModel={networkModel} />
             </TabsContent>
           </Tabs>
         </div>
