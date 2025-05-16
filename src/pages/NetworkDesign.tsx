@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { Factory, Route } from '@/components/map/MapTypes';
+import { Node, Route } from '@/components/map/MapTypes';
 import { NetworkMap } from "@/components/NetworkMap";
 import { 
   NetworkModel, 
@@ -180,7 +180,7 @@ const NetworkDesign = () => {
 
   // Convert our network model to nodes and routes for the map
   const getMapNodes = () => {
-    const nodes = [
+    return [
       ...networkModel.factories.map(factory => ({
         id: factory.id,
         name: factory.name,
@@ -201,12 +201,10 @@ const NetworkDesign = () => {
         name: customer.name,
         latitude: customer.latitude,
         longitude: customer.longitude,
-        type: 'customer' as const,
+        type: 'custom' as const, // Changed from 'customer' to 'custom'
         demand: customer.demand
       }))
     ];
-    
-    return nodes;
   };
 
   // Generate routes between connected locations
@@ -223,7 +221,7 @@ const NetworkDesign = () => {
             from: factory.id,
             to: depot.id,
             volume: depot.throughput,
-            type: 'primary'
+            type: 'road' // Changed from 'primary' to 'road'
           });
         }
       }
@@ -239,7 +237,7 @@ const NetworkDesign = () => {
             from: depot.id,
             to: customer.id,
             volume: customer.demand,
-            type: 'secondary'
+            type: 'road' // Changed from 'secondary' to 'road'
           });
         }
       }
