@@ -21,6 +21,7 @@ import DemandForecasting from '@/pages/DemandForecasting';
 import Introduction from '@/pages/Introduction';
 import ChatAssistant from '@/pages/ChatAssistant';
 import DesignAssistant from '@/pages/DesignAssistant';
+import NetworkDesign from '@/pages/NetworkDesign';
 import { Outlet } from 'react-router-dom';
 
 import './App.css';
@@ -35,6 +36,7 @@ function App() {
         <Route path="/route-optimization" element={<RouteOptimization />} />
         <Route path="/inventory-management" element={<InventoryManagement />} />
         <Route path="/network-optimization" element={<NetworkOptimization />} />
+        <Route path="/network-design" element={<NetworkDesign />} />
         <Route path="/center-of-gravity" element={<CenterOfGravity />} />
         <Route path="/heuristic" element={<Heuristic />} />
         <Route path="/business-value" element={<BusinessValue />} />
