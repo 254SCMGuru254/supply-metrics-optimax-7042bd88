@@ -1,34 +1,51 @@
 
+// Business model types for the application
+
 export type ModelValueMetricsType = 
-  | 'route-optimization'
-  | 'inventory-management'
-  | 'center-of-gravity'
-  | 'heuristic'
-  | 'network-optimization';
+  | 'route-optimization' 
+  | 'inventory-management' 
+  | 'network-optimization' 
+  | 'center-of-gravity' 
+  | 'heuristic';
 
-export interface CaseStudy {
-  company: string;
-  industry: string;
-  challenge: string;
-  solution: string;
-  results: string;
-}
-
-export interface BusinessImpactDetails {
-  difficulty: string;
-  timeToValue: string;
-  dataReadiness: string;
-  requirements: string[];
-  teamRoles: string[];
-  skillsNeeded: string[];
+export interface BusinessValueMetric {
+  name: string;
+  value: string | number;
+  icon: string;
 }
 
 export interface BusinessValueReport {
-  metrics: {
-    name: string;
-    value: string;
-    icon: string;
+  companyName: string;
+  industry: string;
+  fleetSize?: number;
+  annualShipments?: number;
+  annualTransportationCosts?: number;
+  warehouseCount?: number;
+  inventoryValue?: number;
+  serviceLevel?: number;
+  metrics?: BusinessValueMetric[];
+  notes?: string;
+  calculatedOn?: string;
+}
+
+export interface ROIParameters {
+  implementationCost: number;
+  monthlySubscription: number;
+  expectedSavingsPercent: number;
+  annualCosts: number;
+  timeframe: number; // In months
+}
+
+export interface ROICalculation {
+  totalCost: number;
+  totalSavings: number;
+  netBenefit: number;
+  roi: number;
+  paybackPeriod: number; // In months
+  monthlyBreakdown: {
+    month: number;
+    costs: number;
+    savings: number;
+    cumulativeNetBenefit: number;
   }[];
-  implementationDetails: BusinessImpactDetails;
-  caseStudies: CaseStudy[];
 }

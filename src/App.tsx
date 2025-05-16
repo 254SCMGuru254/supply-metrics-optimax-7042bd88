@@ -22,6 +22,7 @@ import Introduction from '@/pages/Introduction';
 import ChatAssistant from '@/pages/ChatAssistant';
 import DesignAssistant from '@/pages/DesignAssistant';
 import NetworkDesign from '@/pages/NetworkDesign';
+import Pricing from '@/pages/Pricing';
 import { Outlet } from 'react-router-dom';
 
 import './App.css';
@@ -50,6 +51,7 @@ function App() {
         <Route path="/demand-forecasting" element={<DemandForecasting />} />
         <Route path="/chat-assistant" element={<ChatAssistant />} />
         <Route path="/design-assistant" element={<DesignAssistant />} />
+        <Route path="/pricing" element={<Pricing />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

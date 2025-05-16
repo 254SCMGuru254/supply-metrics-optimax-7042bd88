@@ -7,7 +7,7 @@ import { UserDataInput } from "@/components/business-value/UserDataInput";
 import { BarChart3, Calculator, FileEdit } from "lucide-react";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ModelValueMetricsType, BusinessValueReport } from "@/types/business";
+import { BusinessValueReport, ModelValueMetricsType } from "@/types/business";
 
 const BusinessValue = () => {
   const [selectedModel, setSelectedModel] = useState<string>("route-optimization");
