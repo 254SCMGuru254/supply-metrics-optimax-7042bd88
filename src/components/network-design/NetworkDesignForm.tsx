@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Factory, Depot, Customer, NetworkModel } from './types/NetworkTypes';
-import { Building, BuildingWarehouse, User, Truck } from 'lucide-react';
+import { Building, Warehouse, User, Truck } from 'lucide-react';
 
 interface NetworkDesignFormProps {
   networkModel: NetworkModel;
@@ -212,7 +212,7 @@ export const NetworkDesignForm: React.FC<NetworkDesignFormProps> = ({
         
         <TabsContent value="depot" className="space-y-4 pt-4">
           <div className="flex items-center space-x-2">
-            <BuildingWarehouse className="h-5 w-5" />
+            <Warehouse className="h-5 w-5" />
             <h3 className="text-lg font-medium">Add Depot</h3>
           </div>
           
