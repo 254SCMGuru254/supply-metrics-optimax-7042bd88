@@ -33,6 +33,10 @@ function App() {
       <Route path="/" element={<Index />} />
       <Route path="/introduction" element={<Introduction />} />
       <Route path="/pricing" element={<Pricing />} />
+      
+      {/* Handle nested onboarding routes */}
+      <Route path="/onboarding/*" element={<Onboarding />} />
+      
       <Route path="/" element={<Layout><Outlet /></Layout>}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/route-optimization" element={<RouteOptimization />} />
@@ -47,7 +51,6 @@ function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/isohedron" element={<Isohedron />} />
         <Route path="/data-input" element={<DataInput />} />
-        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/fleet-management" element={<FleetManagement />} />
         <Route path="/demand-forecasting" element={<DemandForecasting />} />
         <Route path="/chat-assistant" element={<ChatAssistant />} />

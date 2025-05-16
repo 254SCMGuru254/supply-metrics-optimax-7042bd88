@@ -1,17 +1,17 @@
 
 import { 
-  Database, 
-  Boxes, 
-  Target, 
+  LayoutDashboard, 
+  Package, 
+  MapPin, 
   Network, 
-  BarChart4, 
+  BarChart3, 
   Calculator, 
   Hexagon,
   Truck,
-  Warehouse,
+  Building,
   Route,
   DollarSign,
-  Package,
+  Package2,
   FileQuestion
 } from "lucide-react";
 import { ModelSelectionButton } from "./ModelSelectionButton";
@@ -32,21 +32,21 @@ export const ModelSelection = ({
         description="Detailed data for all models"
         isActive={activeModel === "comprehensive"}
         onClick={() => setActiveModel("comprehensive")}
-        icon={Database}
+        icon={LayoutDashboard}
       />
       <ModelSelectionButton
         title="General"
         description="Basic supply chain data"
         isActive={activeModel === "general"}
         onClick={() => setActiveModel("general")}
-        icon={Boxes}
+        icon={Package}
       />
       <ModelSelectionButton
         title="Center of Gravity"
         description="Location data for CoG analysis"
         isActive={activeModel === "cog"}
         onClick={() => setActiveModel("cog")}
-        icon={Target}
+        icon={MapPin}
       />
       <ModelSelectionButton
         title="Network Flow"
@@ -60,7 +60,7 @@ export const ModelSelection = ({
         description="Data for supply chain simulation"
         isActive={activeModel === "simulation"}
         onClick={() => setActiveModel("simulation")}
-        icon={BarChart4}
+        icon={BarChart3}
       />
       <ModelSelectionButton
         title="Heuristic"
@@ -95,7 +95,7 @@ export const ModelSelection = ({
         description="Warehouse location & configuration"
         isActive={activeModel === "warehouse"}
         onClick={() => setActiveModel("warehouse")}
-        icon={Warehouse}
+        icon={Building}
       />
       <ModelSelectionButton
         title="Route Optimization"
@@ -116,7 +116,7 @@ export const ModelSelection = ({
         description="EOQ & ABC Analysis"
         isActive={activeModel === "inventory"}
         onClick={() => setActiveModel("inventory")}
-        icon={Package}
+        icon={Package2}
       />
       <ModelSelectionButton
         title="Suitability Questionnaire"

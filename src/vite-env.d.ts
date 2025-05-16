@@ -1,3 +1,4 @@
+
 /// <reference types="vite/client" />
 /// <reference types="react" />
 /// <reference types="react-dom" />
@@ -134,6 +135,7 @@ declare module 'lucide-react' {
   export const LayoutDashboard: React.FC<IconProps>;
   export const Settings: React.FC<IconProps>;
   export const Package: React.FC<IconProps>;
+  export const Package2: React.FC<IconProps>;
   export const Truck: React.FC<IconProps>;
   export const LineChart: React.FC<IconProps>;
   export const BarChart3: React.FC<IconProps>;
@@ -146,8 +148,38 @@ declare module 'lucide-react' {
   export const Check: React.FC<IconProps>;
   export const Plus: React.FC<IconProps>;
   export const Link: React.FC<IconProps>;
+  export const Network: React.FC<IconProps>;
+  export const MapPin: React.FC<IconProps>;
+  export const Building: React.FC<IconProps>;
+  export const Hexagon: React.FC<IconProps>;
+  export const DollarSign: React.FC<IconProps>;
+  export const FileQuestion: React.FC<IconProps>;
+  export const ChevronRight: React.FC<IconProps>;
+  export const Route: React.FC<IconProps>;
   
-  // Add more icons as needed based on your project
+  // Added missing icons that were causing errors
+  export const Download: React.FC<IconProps>;
+  export const Loader2: React.FC<IconProps>;
+  export const ChevronLeft: React.FC<IconProps>;
+  export const Bot: React.FC<IconProps>;
+  export const Upload: React.FC<IconProps>;
+  export const AlertCircle: React.FC<IconProps>;
+  export const Save: React.FC<IconProps>;
+  export const FileDown: React.FC<IconProps>;
+  export const Lightbulb: React.FC<IconProps>;
+  export const Send: React.FC<IconProps>;
+  export const Globe: React.FC<IconProps>;
+  export const Store: React.FC<IconProps>;
+  export const ChevronDown: React.FC<IconProps>;
+  export const ChevronUp: React.FC<IconProps>;
+  export const Factory: React.FC<IconProps>;
+  export const PlusCircle: React.FC<IconProps>;
+  export const Trash2: React.FC<IconProps>;
+  export const Database: React.FC<IconProps>;
+  export const Boxes: React.FC<IconProps>;
+  export const Target: React.FC<IconProps>;
+  
+  // Map of all icons
   export const icons: Record<string, React.FC<IconProps>>;
 }
 
