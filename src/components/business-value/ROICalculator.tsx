@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,9 +11,21 @@ interface ROICalculatorProps {
 }
 
 export const ROICalculator = ({ selectedModel, customData }: ROICalculatorProps) => {
+  // Define the helper function before using it
+  const getDefaultSavingsPercent = (model: string) => {
+    switch (model) {
+      case "route-optimization": return "20";
+      case "inventory-management": return "25";
+      case "network-optimization": return "22";
+      case "center-of-gravity": return "28";
+      case "heuristic": return "18";
+      default: return "20";
+    }
+  };
+
   const [values, setValues] = useState({
-    annualRevenue: customData?.metrics?.find(m => m.name === "Annual Revenue")?.value?.replace('$', '') || "1000000",
-    annualCost: customData?.metrics?.find(m => m.name === "Logistics Costs")?.value?.replace('$', '') || "300000",
+    annualRevenue: customData?.metrics?.find(m => m.name === "Annual Revenue")?.value?.toString().replace('$', '') || "1000000",
+    annualCost: customData?.metrics?.find(m => m.name === "Logistics Costs")?.value?.toString().replace('$', '') || "300000",
     implementationCost: "50000",
     annualSavingsPercent: getDefaultSavingsPercent(selectedModel),
   });
@@ -28,17 +39,6 @@ export const ROICalculator = ({ selectedModel, customData }: ROICalculatorProps)
   });
 
   const [hasCalculated, setHasCalculated] = useState(false);
-
-  const getDefaultSavingsPercent = (model: string) => {
-    switch (model) {
-      case "route-optimization": return "20";
-      case "inventory-management": return "25";
-      case "network-optimization": return "22";
-      case "center-of-gravity": return "28";
-      case "heuristic": return "18";
-      default: return "20";
-    }
-  };
 
   const handleChange = (field: string, value: string) => {
     setValues({

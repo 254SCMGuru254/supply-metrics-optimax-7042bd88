@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash, Truck } from "lucide-react";
+import { Plus, Trash2, Truck } from "lucide-react";
 import { Vehicle } from "./types";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -111,7 +111,7 @@ export function VehicleFleetConfig({ vehicles, onChange }: VehicleFleetConfigPro
                     size="sm" 
                     onClick={() => handleRemoveVehicle(vehicle.id)}
                   >
-                    <Trash className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ))}

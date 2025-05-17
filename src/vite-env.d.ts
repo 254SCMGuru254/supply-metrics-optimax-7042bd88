@@ -122,7 +122,7 @@ interface ImportMeta {
 declare module 'lucide-react' {
   import React from 'react';
   
-  interface IconProps extends React.SVGProps<SVGSVGElement> {
+  export interface LucideProps extends React.SVGProps<SVGSVGElement> {
     color?: string;
     size?: number | string;
     strokeWidth?: number | string;
@@ -130,57 +130,87 @@ declare module 'lucide-react' {
     className?: string;
   }
   
+  export type LucideIcon = React.FC<LucideProps>;
+  
   // Common icons
-  export const Home: React.FC<IconProps>;
-  export const LayoutDashboard: React.FC<IconProps>;
-  export const Settings: React.FC<IconProps>;
-  export const Package: React.FC<IconProps>;
-  export const Package2: React.FC<IconProps>;
-  export const Truck: React.FC<IconProps>;
-  export const LineChart: React.FC<IconProps>;
-  export const BarChart3: React.FC<IconProps>;
-  export const FileText: React.FC<IconProps>;
-  export const HelpCircle: React.FC<IconProps>;
-  export const CircleDollarSign: React.FC<IconProps>;
-  export const TrendingUp: React.FC<IconProps>;
-  export const Calculator: React.FC<IconProps>;
-  export const FileEdit: React.FC<IconProps>;
-  export const Check: React.FC<IconProps>;
-  export const Plus: React.FC<IconProps>;
-  export const Link: React.FC<IconProps>;
-  export const Network: React.FC<IconProps>;
-  export const MapPin: React.FC<IconProps>;
-  export const Building: React.FC<IconProps>;
-  export const Hexagon: React.FC<IconProps>;
-  export const DollarSign: React.FC<IconProps>;
-  export const FileQuestion: React.FC<IconProps>;
-  export const ChevronRight: React.FC<IconProps>;
-  export const Route: React.FC<IconProps>;
+  export const Home: LucideIcon;
+  export const LayoutDashboard: LucideIcon;
+  export const Settings: LucideIcon;
+  export const Package: LucideIcon;
+  export const Package2: LucideIcon;
+  export const Truck: LucideIcon;
+  export const LineChart: LucideIcon;
+  export const BarChart3: LucideIcon;
+  export const FileText: LucideIcon;
+  export const HelpCircle: LucideIcon;
+  export const CircleDollarSign: LucideIcon;
+  export const TrendingUp: LucideIcon;
+  export const Calculator: LucideIcon;
+  export const FileEdit: LucideIcon;
+  export const Check: LucideIcon;
+  export const Plus: LucideIcon;
+  export const Link: LucideIcon;
+  export const Network: LucideIcon;
+  export const MapPin: LucideIcon;
+  export const Building: LucideIcon;
+  export const Hexagon: LucideIcon;
+  export const DollarSign: LucideIcon;
+  export const FileQuestion: LucideIcon;
+  export const ChevronRight: LucideIcon;
+  export const Route: LucideIcon;
   
   // Added missing icons that were causing errors
-  export const Download: React.FC<IconProps>;
-  export const Loader2: React.FC<IconProps>;
-  export const ChevronLeft: React.FC<IconProps>;
-  export const Bot: React.FC<IconProps>;
-  export const Upload: React.FC<IconProps>;
-  export const AlertCircle: React.FC<IconProps>;
-  export const Save: React.FC<IconProps>;
-  export const FileDown: React.FC<IconProps>;
-  export const Lightbulb: React.FC<IconProps>;
-  export const Send: React.FC<IconProps>;
-  export const Globe: React.FC<IconProps>;
-  export const Store: React.FC<IconProps>;
-  export const ChevronDown: React.FC<IconProps>;
-  export const ChevronUp: React.FC<IconProps>;
-  export const Factory: React.FC<IconProps>;
-  export const PlusCircle: React.FC<IconProps>;
-  export const Trash2: React.FC<IconProps>;
-  export const Database: React.FC<IconProps>;
-  export const Boxes: React.FC<IconProps>;
-  export const Target: React.FC<IconProps>;
+  export const Download: LucideIcon;
+  export const Loader2: LucideIcon;
+  export const ChevronLeft: LucideIcon;
+  export const Bot: LucideIcon;
+  export const Upload: LucideIcon;
+  export const AlertTriangle: LucideIcon;
+  export const Save: LucideIcon;
+  export const FileDown: LucideIcon;
+  export const Lightbulb: LucideIcon;
+  export const Send: LucideIcon;
+  export const Globe: LucideIcon;
+  export const Store: LucideIcon;
+  export const ChevronDown: LucideIcon;
+  export const ChevronUp: LucideIcon;
+  export const Factory: LucideIcon;
+  export const PlusCircle: LucideIcon;
+  export const Trash2: LucideIcon;
+  export const Database: LucideIcon;
+  export const Boxes: LucideIcon;
+  export const Target: LucideIcon;
+  export const Train: LucideIcon;
+  export const Ship: LucideIcon;
+  export const Plane: LucideIcon;
+  export const Clock: LucideIcon;
+  export const Shield: LucideIcon;
+  export const ArrowDown: LucideIcon;
+  export const Users: LucideIcon;
+  export const Percent: LucideIcon;
+  export const CalendarDays: LucideIcon;
+  export const TrendingDown: LucideIcon;
+  export const ShoppingCart: LucideIcon;
+  export const Compass: LucideIcon;
+  export const LayoutGrid: LucideIcon;
+  export const Map: LucideIcon;
+  export const MessageSquare: LucideIcon;
+  export const FileInput: LucideIcon;
+  export const Info: LucideIcon;
+  export const X: LucideIcon;
+  export const CheckCircle: LucideIcon;
+  export const CheckCircle2: LucideIcon;
+  export const ArrowRight: LucideIcon;
+  export const ArrowLeft: LucideIcon;
+  export const ListChecks: LucideIcon;
+  export const Gauge: LucideIcon;
+  export const Scale: LucideIcon;
+  export const Coins: LucideIcon;
+  export const Warehouse: LucideIcon;
+  export const User: LucideIcon;
   
   // Map of all icons
-  export const icons: Record<string, React.FC<IconProps>>;
+  export const icons: Record<string, LucideIcon>;
 }
 
 declare namespace React {
