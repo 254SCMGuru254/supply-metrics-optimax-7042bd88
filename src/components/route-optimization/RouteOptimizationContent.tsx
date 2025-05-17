@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { NetworkMap } from "@/components/NetworkMap";
 import { Node, Route } from "@/components/map/MapTypes";
-import { MapPin, Truck, Train, Ship, Plane, AlertTriangle, BarChart, Clock, DollarSign } from "lucide-react";
+import { MapPin, Truck, Train, Ship, Plane, AlertTriangle, BarChart3, Clock, DollarSign } from "lucide-react";
 import { kenyaLocationsWithRestrictions } from "@/data/kenya-route-data";
 
 export const RouteOptimizationContent = () => {
@@ -467,7 +466,7 @@ export const RouteOptimizationContent = () => {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="balanced" id="balanced" />
                     <Label htmlFor="balanced" className="flex items-center">
-                      <BarChart size={16} className="mr-1" />
+                      <BarChart3 size={16} className="mr-1" />
                       Balanced (Cost/Time)
                     </Label>
                   </div>

@@ -1,4 +1,3 @@
-
 /// <reference types="vite/client" />
 /// <reference types="react" />
 /// <reference types="react-dom" />
@@ -131,6 +130,13 @@ declare module 'lucide-react' {
   }
   
   export type LucideIcon = React.FC<LucideProps>;
+  export type LucideIconType = React.ForwardRefExoticComponent<
+    React.SVGProps<SVGSVGElement> & {
+      size?: number | string;
+      color?: string;
+      strokeWidth?: number | string;
+    } & React.RefAttributes<SVGSVGElement>
+  >;
   
   // Common icons
   export const Home: LucideIcon;
@@ -159,13 +165,13 @@ declare module 'lucide-react' {
   export const ChevronRight: LucideIcon;
   export const Route: LucideIcon;
   
-  // Added missing icons that were causing errors
+  // Add missing icons that were causing errors
+  export const AlertCircle: LucideIcon;
   export const Download: LucideIcon;
   export const Loader2: LucideIcon;
   export const ChevronLeft: LucideIcon;
   export const Bot: LucideIcon;
   export const Upload: LucideIcon;
-  export const AlertTriangle: LucideIcon;
   export const Save: LucideIcon;
   export const FileDown: LucideIcon;
   export const Lightbulb: LucideIcon;
@@ -208,15 +214,27 @@ declare module 'lucide-react' {
   export const Coins: LucideIcon;
   export const Warehouse: LucideIcon;
   export const User: LucideIcon;
+  export const BarChart: LucideIcon;
   
   // Map of all icons
   export const icons: Record<string, LucideIcon>;
 }
 
+// Fix unknown type errors in CostBreakdown.tsx by adding type definitions
+declare namespace NetworkDesign {
+  interface CostBreakdown {
+    trunkingCost: number;
+    deliveryCost: number;
+    depotCost: number;
+    stockHoldingCost: number;
+    totalCost: number;
+  }
+}
+
+// Fix React attributes
 declare namespace React {
   interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
     // Add any custom attributes used in your project
-    // For example:
     css?: any;
   }
 }

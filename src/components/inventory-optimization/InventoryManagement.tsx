@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { SafetyStockCalculator } from "@/components/inventory-optimization/Safet
 import { ABCAnalysis } from "@/components/inventory-optimization/ABCAnalysis";
 import { MultiEchelonVisualization } from "@/components/inventory-optimization/MultiEchelonVisualization";
 import { useToast } from "@/components/ui/use-toast";
-import { Package, Calculator, Shield, BarChart, Network } from "lucide-react";
+import { Package, Calculator, Shield, BarChart3, Network } from "lucide-react";
 
 export const InventoryManagement = () => {
   const [activeTab, setActiveTab] = useState("eoq");
@@ -51,7 +50,7 @@ export const InventoryManagement = () => {
             <span>Safety Stock</span>
           </TabsTrigger>
           <TabsTrigger value="abc-analysis" className="flex items-center">
-            <BarChart className="mr-2 h-4 w-4" />
+            <BarChart3 className="mr-2 h-4 w-4" />
             <span>ABC Analysis</span>
           </TabsTrigger>
           <TabsTrigger value="multi-echelon" className="flex items-center">
@@ -89,7 +88,7 @@ export const InventoryManagement = () => {
         <TabsContent value="abc-analysis" className="space-y-4">
           <Card className="p-4">
             <div className="flex items-center space-x-2 mb-4">
-              <BarChart className="h-5 w-5 text-primary" />
+              <BarChart3 className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-semibold">ABC Analysis</h2>
             </div>
             <p className="text-muted-foreground mb-4">

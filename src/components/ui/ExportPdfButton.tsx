@@ -1,93 +1,47 @@
-
-import React from 'react';
-import { Button } from './button';
-import { FileDown, Loader2 } from 'lucide-react';
-import { exportOptimizationResultsToPdf } from '@/utils/exportToPdf';
-import { useState } from 'react';
-import { useToast } from './use-toast';
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Download, Loader2 } from "lucide-react";
+import { useReactToPrint } from 'react-to-print';
 
 interface ExportPdfButtonProps {
-  networkName: string;
-  optimizationType: string;
-  results: any;
+  title: string;
+  exportId: string;
+  disabled?: boolean;
   fileName?: string;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-  className?: string;
-  isOptimized?: boolean;
 }
 
-/**
- * A button component that exports optimization results to PDF
- */
-export const ExportPdfButton: React.FC<ExportPdfButtonProps> = ({
-  networkName,
-  optimizationType,
-  results,
-  fileName = 'optimization-results',
-  variant = 'outline',
-  size = 'default',
-  className = '',
-  isOptimized = true
-}) => {
+export function ExportPdfButton({ title, exportId, disabled, fileName }: ExportPdfButtonProps) {
+  const componentRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const { toast } = useToast();
 
-  const handleExport = async () => {
-    if (!isOptimized) {
-      toast({
-        title: "Cannot Export",
-        description: "Run optimization first to generate results for export",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsExporting(true);
-    
-    try {
-      await exportOptimizationResultsToPdf(
-        networkName,
-        optimizationType,
-        results,
-        fileName
-      );
-      
-      toast({
-        title: "Export Complete",
-        description: "Your optimization results have been exported as PDF"
-      });
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-      toast({
-        title: "Export Failed",
-        description: "An error occurred during PDF generation",
-        variant: "destructive"
-      });
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
+  const handleExport = useReactToPrint({
+    content: () => componentRef.current as HTMLDivElement,
+    documentTitle: fileName || `${title.replace(/\s+/g, '_')}.pdf`,
+    onBeforeGetContent: () => {
+      setIsExporting(true);
+      return Promise.resolve();
+    },
+    onAfterPrint: () => setIsExporting(false),
+  });
+  
   return (
     <Button
-      variant={variant}
-      size={size}
-      className={className}
       onClick={handleExport}
-      disabled={isExporting || !isOptimized}
+      disabled={disabled || isExporting}
+      variant="default" 
+      size="default"
     >
       {isExporting ? (
         <>
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Exporting...
         </>
       ) : (
         <>
-          <FileDown className="w-4 h-4 mr-2" />
+          <Download className="mr-2 h-4 w-4" />
           Export PDF
         </>
       )}
     </Button>
   );
-};
+}

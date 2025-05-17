@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,7 +13,7 @@ import {
   Package, 
   Network,
   Target,
-  BarChart4,
+  BarChart3, // Replaced BarChart4 with BarChart3
   ArrowRight,
   ListChecks
 } from "lucide-react";
@@ -293,7 +292,7 @@ export const SuitabilityQuestionnaire = () => {
       case "Center of Gravity":
         return <Target className="h-6 w-6 text-red-500" />;
       case "Supply Chain Simulation":
-        return <BarChart4 className="h-6 w-6 text-amber-500" />;
+        return <BarChart3 className="h-6 w-6 text-amber-500" />;
       default:
         return <HelpCircle className="h-6 w-6" />;
     }

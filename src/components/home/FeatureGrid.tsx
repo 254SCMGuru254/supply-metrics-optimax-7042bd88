@@ -6,7 +6,7 @@ import {
   BarChart3, 
   Compass, 
   LayoutGrid, 
-  Building2, 
+  Building, 
   Map, 
   MessageSquare 
 } from "lucide-react";
@@ -21,7 +21,7 @@ const features = [
     buttonText: "Explore Kenya"
   },
   {
-    icon: Building2,
+    icon: Building,
     title: "Center of Gravity",
     description: "Find optimal facility locations based on demand centers and weights",
     linkTo: "/center-of-gravity",

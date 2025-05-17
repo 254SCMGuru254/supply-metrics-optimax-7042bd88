@@ -1,13 +1,14 @@
-
 import { Card } from "@/components/ui/card";
 import { CostAnalysis } from "./types/NetworkTypes";
+import { NetworkDesign } from "./types/NetworkDesign";
 
 interface CostBreakdownProps {
-  costAnalysis: CostAnalysis | null;
+  costData: NetworkDesign.CostBreakdown; // Use the newly defined interface
+  previousCostData?: NetworkDesign.CostBreakdown;
 }
 
-export const CostBreakdown: React.FC<CostBreakdownProps> = ({ costAnalysis }) => {
-  if (!costAnalysis) {
+export const CostBreakdown: React.FC<CostBreakdownProps> = ({ costData, previousCostData }) => {
+  if (!costData) {
     return (
       <Card className="p-4">
         <div className="text-center py-8">
@@ -27,7 +28,7 @@ export const CostBreakdown: React.FC<CostBreakdownProps> = ({ costAnalysis }) =>
   };
 
   const calculatePercentage = (cost: number) => {
-    return ((cost / costAnalysis.totalCost) * 100).toFixed(1) + '%';
+    return ((cost / costData.totalCost) * 100).toFixed(1) + '%';
   };
 
   return (
@@ -41,7 +42,7 @@ export const CostBreakdown: React.FC<CostBreakdownProps> = ({ costAnalysis }) =>
           <div className="bg-primary/5 p-4 rounded-md">
             <div className="flex justify-between items-center">
               <span className="text-lg font-semibold">Total Network Cost</span>
-              <span className="text-lg font-semibold">{formatCost(costAnalysis.totalCost)}</span>
+              <span className="text-lg font-semibold">{formatCost(costData.totalCost)}</span>
             </div>
           </div>
         </div>
@@ -58,42 +59,42 @@ export const CostBreakdown: React.FC<CostBreakdownProps> = ({ costAnalysis }) =>
             
             <div className="grid grid-cols-3 gap-2 py-2 border-b">
               <div>Trunking Cost</div>
-              <div className="text-right">{formatCost(costAnalysis.trunkingCost)}</div>
-              <div className="text-right">{calculatePercentage(costAnalysis.trunkingCost)}</div>
+              <div className="text-right">{formatCost(costData.trunkingCost)}</div>
+              <div className="text-right">{calculatePercentage(costData.trunkingCost)}</div>
             </div>
             
             <div className="grid grid-cols-3 gap-2 py-2 border-b">
               <div>Local Delivery Cost</div>
-              <div className="text-right">{formatCost(costAnalysis.deliveryCost)}</div>
-              <div className="text-right">{calculatePercentage(costAnalysis.deliveryCost)}</div>
+              <div className="text-right">{formatCost(costData.deliveryCost)}</div>
+              <div className="text-right">{calculatePercentage(costData.deliveryCost)}</div>
             </div>
             
             <div className="grid grid-cols-3 gap-2 py-2 border-b">
               <div>Depot Cost</div>
-              <div className="text-right">{formatCost(costAnalysis.depotCost)}</div>
-              <div className="text-right">{calculatePercentage(costAnalysis.depotCost)}</div>
+              <div className="text-right">{formatCost(costData.depotCost)}</div>
+              <div className="text-right">{calculatePercentage(costData.depotCost)}</div>
             </div>
             
             <div className="grid grid-cols-3 gap-2 py-2 border-b">
               <div>Stock Holding Cost</div>
-              <div className="text-right">{formatCost(costAnalysis.stockHoldingCost)}</div>
-              <div className="text-right">{calculatePercentage(costAnalysis.stockHoldingCost)}</div>
+              <div className="text-right">{formatCost(costData.stockHoldingCost)}</div>
+              <div className="text-right">{calculatePercentage(costData.stockHoldingCost)}</div>
             </div>
             
             <div className="grid grid-cols-3 gap-2 py-2 bg-primary/5 font-medium">
               <div>Total</div>
-              <div className="text-right">{formatCost(costAnalysis.totalCost)}</div>
+              <div className="text-right">{formatCost(costData.totalCost)}</div>
               <div className="text-right">100.0%</div>
             </div>
           </div>
         </div>
         
         {/* Cost Breakdown by Depot */}
-        {Object.keys(costAnalysis.breakdown.byDepot).length > 0 && (
+        {Object.keys(costData.breakdown.byDepot).length > 0 && (
           <div>
             <h4 className="text-sm font-medium mb-2">Cost Breakdown by Depot</h4>
             <div className="space-y-4">
-              {Object.entries(costAnalysis.breakdown.byDepot).map(([depotId, costs]) => (
+              {Object.entries(costData.breakdown.byDepot).map(([depotId, costs]) => (
                 <div key={depotId} className="bg-secondary/10 p-4 rounded-md space-y-2">
                   <div className="font-medium">Depot ID: {depotId}</div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
