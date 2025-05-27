@@ -1,3 +1,4 @@
+
 /// <reference types="vite/client" />
 /// <reference types="react" />
 /// <reference types="react-dom" />
@@ -6,6 +7,16 @@
 /// <reference types="jspdf" />
 /// <reference types="html2canvas" />
 /// <reference types="leaflet" />
+
+// Ensure React is properly declared
+import * as React from 'react';
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      [elemName: string]: any;
+    }
+  }
+}
 
 // Declare module for any packages that don't have type declarations
 declare module '@huggingface/transformers' {
@@ -138,7 +149,7 @@ declare module 'lucide-react' {
     } & React.RefAttributes<SVGSVGElement>
   >;
   
-  // Common icons
+  // All the icons from the previous declaration
   export const Home: LucideIcon;
   export const LayoutDashboard: LucideIcon;
   export const Settings: LucideIcon;
@@ -164,8 +175,6 @@ declare module 'lucide-react' {
   export const FileQuestion: LucideIcon;
   export const ChevronRight: LucideIcon;
   export const Route: LucideIcon;
-  
-  // Add missing icons that were causing errors
   export const AlertCircle: LucideIcon;
   export const Download: LucideIcon;
   export const Loader2: LucideIcon;
@@ -228,14 +237,6 @@ declare namespace NetworkDesign {
     depotCost: number;
     stockHoldingCost: number;
     totalCost: number;
-  }
-}
-
-// Fix React attributes
-declare namespace React {
-  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-    // Add any custom attributes used in your project
-    css?: any;
   }
 }
 

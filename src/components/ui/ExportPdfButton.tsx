@@ -1,7 +1,8 @@
+
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
-import { useReactToPrint } from 'react-to-print';
+import { exportToPdf } from "@/utils/exportToPdf";
 
 interface ExportPdfButtonProps {
   title: string;
@@ -11,18 +12,20 @@ interface ExportPdfButtonProps {
 }
 
 export function ExportPdfButton({ title, exportId, disabled, fileName }: ExportPdfButtonProps) {
-  const componentRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = useReactToPrint({
-    content: () => componentRef.current as HTMLDivElement,
-    documentTitle: fileName || `${title.replace(/\s+/g, '_')}.pdf`,
-    onBeforeGetContent: () => {
-      setIsExporting(true);
-      return Promise.resolve();
-    },
-    onAfterPrint: () => setIsExporting(false),
-  });
+  const handleExport = async () => {
+    if (!exportId) return;
+    
+    setIsExporting(true);
+    try {
+      await exportToPdf(exportId, fileName || title.replace(/\s+/g, '_'));
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
   
   return (
     <Button
