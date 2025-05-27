@@ -214,6 +214,9 @@ declare module 'lucide-react' {
   export const Warehouse: LucideIcon;
   export const User: LucideIcon;
   export const BarChart: LucideIcon;
+  export const AlertTriangle: LucideIcon;
+  export const MoreHorizontal: LucideIcon;
+  export const Search: LucideIcon;
   
   // Map of all icons
   export const icons: Record<string, LucideIcon>;

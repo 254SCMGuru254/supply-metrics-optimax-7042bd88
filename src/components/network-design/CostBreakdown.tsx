@@ -1,9 +1,10 @@
+
 import { Card } from "@/components/ui/card";
 import { CostAnalysis } from "./types/NetworkTypes";
 import { NetworkDesign } from "./types/NetworkDesign";
 
 interface CostBreakdownProps {
-  costData: NetworkDesign.CostBreakdown; // Use the newly defined interface
+  costData: NetworkDesign.CostBreakdown;
   previousCostData?: NetworkDesign.CostBreakdown;
 }
 
@@ -94,27 +95,30 @@ export const CostBreakdown: React.FC<CostBreakdownProps> = ({ costData, previous
           <div>
             <h4 className="text-sm font-medium mb-2">Cost Breakdown by Depot</h4>
             <div className="space-y-4">
-              {Object.entries(costData.breakdown.byDepot).map(([depotId, costs]) => (
-                <div key={depotId} className="bg-secondary/10 p-4 rounded-md space-y-2">
-                  <div className="font-medium">Depot ID: {depotId}</div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>Trunking Cost:</div>
-                    <div className="text-right">{formatCost(costs.trunkingCost)}</div>
-                    
-                    <div>Local Delivery Cost:</div>
-                    <div className="text-right">{formatCost(costs.deliveryCost)}</div>
-                    
-                    <div>Depot Operating Cost:</div>
-                    <div className="text-right">{formatCost(costs.depotCost)}</div>
-                    
-                    <div>Stock Holding Cost:</div>
-                    <div className="text-right">{formatCost(costs.stockHoldingCost)}</div>
-                    
-                    <div className="font-medium">Total Cost:</div>
-                    <div className="font-medium text-right">{formatCost(costs.totalCost)}</div>
+              {Object.entries(costData.breakdown.byDepot).map(([depotId, costs]) => {
+                const depotCosts = costs as NetworkDesign.CostBreakdown["breakdown"]["byDepot"][string];
+                return (
+                  <div key={depotId} className="bg-secondary/10 p-4 rounded-md space-y-2">
+                    <div className="font-medium">Depot ID: {depotId}</div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Trunking Cost:</div>
+                      <div className="text-right">{formatCost(depotCosts.trunkingCost)}</div>
+                      
+                      <div>Local Delivery Cost:</div>
+                      <div className="text-right">{formatCost(depotCosts.deliveryCost)}</div>
+                      
+                      <div>Depot Operating Cost:</div>
+                      <div className="text-right">{formatCost(depotCosts.depotCost)}</div>
+                      
+                      <div>Stock Holding Cost:</div>
+                      <div className="text-right">{formatCost(depotCosts.stockHoldingCost)}</div>
+                      
+                      <div className="font-medium">Total Cost:</div>
+                      <div className="font-medium text-right">{formatCost(depotCosts.totalCost)}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
