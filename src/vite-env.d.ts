@@ -8,16 +8,6 @@
 /// <reference types="html2canvas" />
 /// <reference types="leaflet" />
 
-// Ensure React is properly declared
-import * as React from 'react';
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
-  }
-}
-
 // Declare module for any packages that don't have type declarations
 declare module '@huggingface/transformers' {
   export function pipeline(task: string, model: string, options?: any): Promise<any>;

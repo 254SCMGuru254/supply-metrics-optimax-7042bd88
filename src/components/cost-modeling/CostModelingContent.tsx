@@ -49,14 +49,22 @@ export const CostModelingContent = () => {
     }
   };
 
-  const updateCost = (type: "fixed" | "variable", index: number, field: "name" | "value", value: any) => {
+  const updateCost = (type: "fixed" | "variable", index: number, field: "name" | "value", value: string | number) => {
     if (type === "fixed") {
       const updatedCosts = [...fixedCosts];
-      updatedCosts[index][field] = field === "value" ? parseFloat(value) : value;
+      if (field === "value") {
+        updatedCosts[index][field] = typeof value === "string" ? parseFloat(value) || 0 : value;
+      } else {
+        updatedCosts[index][field] = value as string;
+      }
       setFixedCosts(updatedCosts);
     } else {
       const updatedCosts = [...variableCosts];
-      updatedCosts[index][field] = field === "value" ? parseFloat(value) : value;
+      if (field === "value") {
+        updatedCosts[index][field] = typeof value === "string" ? parseFloat(value) || 0 : value;
+      } else {
+        updatedCosts[index][field] = value as string;
+      }
       setVariableCosts(updatedCosts);
     }
   };
