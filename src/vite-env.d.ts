@@ -231,21 +231,18 @@ declare module 'lovable-tagger' {
   export function componentTagger(): any;
 }
 
-// Override React types to be more permissive
-declare module 'react' {
-  export interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-    css?: any;
-  }
-
-  export type ElementType<P = any> = any;
-  export type ComponentType<P = {}> = any;
-  export type FC<P = {}> = any;
-  export type FunctionComponent<P = {}> = any;
-  export type ReactElement<P = any, T = any> = any;
-  export type ReactNode = any;
-  export type JSXElementConstructor<P> = any;
-  export type FormEvent<T = Element> = any;
-  export type KeyboardEvent<T = Element> = any;
-  export type RefObject<T> = any;
-  export type ForwardRefExoticComponent<P> = any;
+// Declare module for recharts to fix chart component errors
+declare module 'recharts' {
+  import { Component } from 'react';
+  
+  export class LineChart extends Component<any> {}
+  export class BarChart extends Component<any> {}
+  export class XAxis extends Component<any> {}
+  export class YAxis extends Component<any> {}
+  export class CartesianGrid extends Component<any> {}
+  export class Tooltip extends Component<any> {}
+  export class Legend extends Component<any> {}
+  export class Line extends Component<any> {}
+  export class Bar extends Component<any> {}
+  export class ResponsiveContainer extends Component<any> {}
 }
