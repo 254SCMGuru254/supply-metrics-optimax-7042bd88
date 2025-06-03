@@ -24,7 +24,8 @@
     "noImplicitReturns": false,
     "exactOptionalPropertyTypes": false,
     "noImplicitOverride": false,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.tsx", "**/*.test.tsx", "node_modules"]

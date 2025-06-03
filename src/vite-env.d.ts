@@ -8,6 +8,26 @@
 /// <reference types="html2canvas" />
 /// <reference types="leaflet" />
 
+// Global type overrides to fix Radix UI compatibility issues
+declare global {
+  namespace React {
+    type ElementType<P = any> = any;
+    type ComponentType<P = {}> = any;
+    type ForwardRefExoticComponent<P> = any;
+    type ReactNode = any;
+    type ReactElement<P = any, T = any> = any;
+    type FunctionComponent<P = {}> = any;
+    type FC<P = {}> = any;
+    type Component<P = {}, S = {}, SS = any> = any;
+    interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+      [key: string]: any;
+    }
+    interface SVGProps<T> extends SVGAttributes<T>, ClassAttributes<T> {
+      [key: string]: any;
+    }
+  }
+}
+
 // Declare module for any packages that don't have type declarations
 declare module '@huggingface/transformers' {
   export function pipeline(task: string, model: string, options?: any): Promise<any>;
@@ -133,7 +153,7 @@ declare module 'lucide-react' {
   export type LucideIcon = React.FC<LucideProps>;
   export type LucideIconType = any;
   
-  // All the icons from the previous declaration
+  // All the icons
   export const Home: LucideIcon;
   export const LayoutDashboard: LucideIcon;
   export const Settings: LucideIcon;
@@ -216,22 +236,11 @@ declare module 'lucide-react' {
   export const icons: Record<string, LucideIcon>;
 }
 
-// Fix unknown type errors in CostBreakdown.tsx by adding type definitions
-declare namespace NetworkDesign {
-  interface CostBreakdown {
-    trunkingCost: number;
-    deliveryCost: number;
-    depotCost: number;
-    stockHoldingCost: number;
-    totalCost: number;
-  }
-}
-
 declare module 'lovable-tagger' {
   export function componentTagger(): any;
 }
 
-// Declare module for recharts to fix chart component errors
+// Comprehensive recharts declarations
 declare module 'recharts' {
   import React from 'react';
   
@@ -250,23 +259,14 @@ declare module 'recharts' {
     onClick?: any;
   }
   
-  export class LineChart extends React.Component<any> {}
-  export class BarChart extends React.Component<any> {}
-  export class XAxis extends React.Component<any> {}
-  export class YAxis extends React.Component<any> {}
-  export class CartesianGrid extends React.Component<any> {}
-  export class Tooltip extends React.Component<any> {}
-  export class Legend extends React.Component<LegendProps> {}
-  export class Line extends React.Component<any> {}
-  export class Bar extends React.Component<any> {}
-  export class ResponsiveContainer extends React.Component<any> {}
-}
-
-// Override React types to be more permissive for Radix UI compatibility
-declare global {
-  namespace React {
-    type ElementType<P = any> = any;
-    type ComponentType<P = {}> = any;
-    type ForwardRefExoticComponent<P> = any;
-  }
+  export const LineChart: React.FC<any>;
+  export const BarChart: React.FC<any>;
+  export const XAxis: React.FC<any>;
+  export const YAxis: React.FC<any>;
+  export const CartesianGrid: React.FC<any>;
+  export const Tooltip: React.FC<any>;
+  export const Legend: React.FC<LegendProps>;
+  export const Line: React.FC<any>;
+  export const Bar: React.FC<any>;
+  export const ResponsiveContainer: React.FC<any>;
 }

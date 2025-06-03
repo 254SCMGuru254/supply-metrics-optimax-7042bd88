@@ -1,63 +1,80 @@
 
-import { Routes, Route } from 'react-router-dom';
-import { Layout } from '@/components/Layout';
-import NotFound from '@/pages/NotFound';
-import Dashboard from '@/pages/Dashboard';
-import RouteOptimization from '@/pages/RouteOptimization';
-import InventoryManagement from '@/pages/InventoryManagement';
-import NetworkOptimization from '@/pages/NetworkOptimization';
-import CenterOfGravity from '@/pages/CenterOfGravity';
-import Heuristic from '@/pages/Heuristic';
-import BusinessValue from '@/pages/BusinessValue';
-import Simulation from '@/pages/Simulation';
-import KenyaSupplyChain from '@/pages/KenyaSupplyChain';
-import Index from '@/pages/Index';
-import Analytics from '@/pages/Analytics';
-import Isohedron from '@/pages/Isohedron';
-import DataInput from '@/pages/DataInput';
-import Onboarding from '@/pages/Onboarding';
-import FleetManagement from '@/pages/FleetManagement';
-import DemandForecasting from '@/pages/DemandForecasting';
-import Introduction from '@/pages/Introduction';
-import ChatAssistant from '@/pages/ChatAssistant';
-import DesignAssistant from '@/pages/DesignAssistant';
-import NetworkDesign from '@/pages/NetworkDesign';
-import Pricing from '@/pages/Pricing';
-import { Outlet } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Layout } from "@/components/Layout";
 
-import './App.css';
+// Import all pages
+import Index from "@/pages/Index";
+import Dashboard from "@/pages/Dashboard";
+import NetworkOptimization from "@/pages/NetworkOptimization";
+import RouteOptimization from "@/pages/RouteOptimization";
+import InventoryManagement from "@/pages/InventoryManagement";
+import NetworkDesign from "@/pages/NetworkDesign";
+import CenterOfGravity from "@/pages/CenterOfGravity";
+import DataInput from "@/pages/DataInput";
+import Analytics from "@/pages/Analytics";
+import BusinessValue from "@/pages/BusinessValue";
+import NotFound from "@/pages/NotFound";
+import Pricing from "@/pages/Pricing";
+import Introduction from "@/pages/Introduction";
+import Onboarding from "@/pages/Onboarding";
+import DemandForecasting from "@/pages/DemandForecasting";
+import FleetManagement from "@/pages/FleetManagement";
+import Simulation from "@/pages/Simulation";
+import Heuristic from "@/pages/Heuristic";
+import Isohedron from "@/pages/Isohedron";
+import NetworkFlow from "@/pages/NetworkFlow";
+import ChatAssistant from "@/pages/ChatAssistant";
+import DesignAssistant from "@/pages/DesignAssistant";
+import KenyaSupplyChain from "@/pages/KenyaSupplyChain";
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/introduction" element={<Introduction />} />
-      <Route path="/pricing" element={<Pricing />} />
-      
-      {/* Handle nested onboarding routes */}
-      <Route path="/onboarding/*" element={<Onboarding />} />
-      
-      <Route path="/" element={<Layout><Outlet /></Layout>}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/route-optimization" element={<RouteOptimization />} />
-        <Route path="/inventory-management" element={<InventoryManagement />} />
-        <Route path="/network-optimization" element={<NetworkOptimization />} />
-        <Route path="/network-design" element={<NetworkDesign />} />
-        <Route path="/center-of-gravity" element={<CenterOfGravity />} />
-        <Route path="/heuristic" element={<Heuristic />} />
-        <Route path="/business-value" element={<BusinessValue />} />
-        <Route path="/simulation" element={<Simulation />} />
-        <Route path="/kenya-supply-chain" element={<KenyaSupplyChain />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/isohedron" element={<Isohedron />} />
-        <Route path="/data-input" element={<DataInput />} />
-        <Route path="/fleet-management" element={<FleetManagement />} />
-        <Route path="/demand-forecasting" element={<DemandForecasting />} />
-        <Route path="/chat-assistant" element={<ChatAssistant />} />
-        <Route path="/design-assistant" element={<DesignAssistant />} />
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router>
+          <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/introduction" element={<Introduction />} />
+              
+              {/* Protected routes with Layout */}
+              <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+              <Route path="/onboarding" element={<Layout><Onboarding /></Layout>} />
+              <Route path="/onboarding/select-model" element={<Layout><DataInput /></Layout>} />
+              <Route path="/data-input" element={<Layout><DataInput /></Layout>} />
+              <Route path="/network-optimization" element={<Layout><NetworkOptimization /></Layout>} />
+              <Route path="/route-optimization" element={<Layout><RouteOptimization /></Layout>} />
+              <Route path="/inventory-management" element={<Layout><InventoryManagement /></Layout>} />
+              <Route path="/network-design" element={<Layout><NetworkDesign /></Layout>} />
+              <Route path="/center-of-gravity" element={<Layout><CenterOfGravity /></Layout>} />
+              <Route path="/analytics" element={<Layout><Analytics /></Layout>} />
+              <Route path="/business-value" element={<Layout><BusinessValue /></Layout>} />
+              <Route path="/demand-forecasting" element={<Layout><DemandForecasting /></Layout>} />
+              <Route path="/fleet-management" element={<Layout><FleetManagement /></Layout>} />
+              <Route path="/simulation" element={<Layout><Simulation /></Layout>} />
+              <Route path="/heuristic" element={<Layout><Heuristic /></Layout>} />
+              <Route path="/isohedron" element={<Layout><Isohedron /></Layout>} />
+              <Route path="/network-flow" element={<Layout><NetworkFlow /></Layout>} />
+              <Route path="/chat-assistant" element={<Layout><ChatAssistant /></Layout>} />
+              <Route path="/design-assistant" element={<Layout><DesignAssistant /></Layout>} />
+              <Route path="/kenya-supply-chain" element={<Layout><KenyaSupplyChain /></Layout>} />
+              
+              {/* 404 route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+          <Toaster />
+        </Router>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
