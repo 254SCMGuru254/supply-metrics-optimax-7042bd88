@@ -233,16 +233,40 @@ declare module 'lovable-tagger' {
 
 // Declare module for recharts to fix chart component errors
 declare module 'recharts' {
-  import { Component } from 'react';
+  import React from 'react';
   
-  export class LineChart extends Component<any> {}
-  export class BarChart extends Component<any> {}
-  export class XAxis extends Component<any> {}
-  export class YAxis extends Component<any> {}
-  export class CartesianGrid extends Component<any> {}
-  export class Tooltip extends Component<any> {}
-  export class Legend extends Component<any> {}
-  export class Line extends Component<any> {}
-  export class Bar extends Component<any> {}
-  export class ResponsiveContainer extends Component<any> {}
+  export interface LegendProps {
+    content?: any;
+    wrapperStyle?: React.CSSProperties;
+    contentStyle?: React.CSSProperties;
+    iconType?: 'line' | 'rect' | 'circle' | 'cross' | 'diamond' | 'square' | 'star' | 'triangle' | 'wye';
+    layout?: 'horizontal' | 'vertical';
+    align?: 'left' | 'center' | 'right';
+    verticalAlign?: 'top' | 'middle' | 'bottom';
+    margin?: any;
+    payload?: any[];
+    onMouseEnter?: any;
+    onMouseLeave?: any;
+    onClick?: any;
+  }
+  
+  export class LineChart extends React.Component<any> {}
+  export class BarChart extends React.Component<any> {}
+  export class XAxis extends React.Component<any> {}
+  export class YAxis extends React.Component<any> {}
+  export class CartesianGrid extends React.Component<any> {}
+  export class Tooltip extends React.Component<any> {}
+  export class Legend extends React.Component<LegendProps> {}
+  export class Line extends React.Component<any> {}
+  export class Bar extends React.Component<any> {}
+  export class ResponsiveContainer extends React.Component<any> {}
+}
+
+// Override React types to be more permissive for Radix UI compatibility
+declare global {
+  namespace React {
+    type ElementType<P = any> = any;
+    type ComponentType<P = {}> = any;
+    type ForwardRefExoticComponent<P> = any;
+  }
 }

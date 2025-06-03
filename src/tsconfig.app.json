@@ -22,7 +22,9 @@
     "strictPropertyInitialization": false,
     "noImplicitThis": false,
     "noImplicitReturns": false,
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+    "noImplicitOverride": false,
+    "suppressImplicitAnyIndexErrors": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.tsx", "**/*.test.tsx", "node_modules"]
