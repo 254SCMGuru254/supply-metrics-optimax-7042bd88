@@ -1,14 +1,7 @@
 
 /// <reference types="vite/client" />
-/// <reference types="react" />
-/// <reference types="react-dom" />
-/// <reference types="react-router-dom" />
-/// <reference types="@tanstack/react-query" />
-/// <reference types="jspdf" />
-/// <reference types="html2canvas" />
-/// <reference types="leaflet" />
 
-// Global type overrides to fix Radix UI compatibility issues
+// Override React types to fix Radix UI compatibility
 declare global {
   namespace React {
     type ElementType<P = any> = any;
@@ -28,137 +21,44 @@ declare global {
   }
 }
 
-// Declare module for any packages that don't have type declarations
-declare module '@huggingface/transformers' {
-  export function pipeline(task: string, model: string, options?: any): Promise<any>;
+// Declare modules for packages
+declare module 'react' {
+  export * from 'react';
+  export = React;
+  export as namespace React;
 }
 
-declare module 'react-leaflet' {
-  import { FC, ReactNode } from 'react';
-  import { 
-    LatLngExpression, 
-    LatLngTuple, 
-    LatLngBoundsExpression, 
-    Map as LeafletMap, 
-    MapOptions, 
-    Layer, 
-    LayerGroup, 
-    Control,
-    DomEvent, 
-    DomUtil, 
-    Popup, 
-    PopupOptions, 
-    Tooltip, 
-    TooltipOptions, 
-    PathOptions, 
-    PolylineOptions, 
-    CircleMarkerOptions 
-  } from 'leaflet';
-  
-  export interface MapContainerProps extends MapOptions {
-    center?: LatLngExpression;
-    zoom?: number;
-    children?: ReactNode;
-    className?: string;
-    id?: string;
-    style?: React.CSSProperties;
-    whenCreated?: (map: LeafletMap) => void;
-    whenReady?: () => void;
+declare module 'recharts' {
+  import React from 'react';
+  export const LineChart: React.FC<any>;
+  export const BarChart: React.FC<any>;
+  export const XAxis: React.FC<any>;
+  export const YAxis: React.FC<any>;
+  export const CartesianGrid: React.FC<any>;
+  export const Tooltip: React.FC<any>;
+  export const Legend: React.FC<any>;
+  export const Line: React.FC<any>;
+  export const Bar: React.FC<any>;
+  export const ResponsiveContainer: React.FC<any>;
+  export interface LegendProps {
+    [key: string]: any;
   }
-  
-  export interface TileLayerProps {
-    attribution?: string;
-    url: string;
-    zIndex?: number;
-    opacity?: number;
-    tileSize?: number;
-  }
-  
-  export interface MarkerProps {
-    position: LatLngExpression;
-    icon?: any;
-    draggable?: boolean;
-    eventHandlers?: any;
-    zIndexOffset?: number;
-    opacity?: number;
-    children?: ReactNode;
-  }
-  
-  export interface PopupProps extends PopupOptions {
-    position?: LatLngExpression;
-    children?: ReactNode;
-  }
-  
-  export interface PolylineProps {
-    positions: LatLngExpression[] | LatLngExpression[][];
-    pathOptions?: PolylineOptions;
-    children?: ReactNode;
-  }
-
-  export const MapContainer: FC<MapContainerProps>;
-  export const TileLayer: FC<TileLayerProps>;
-  export const Marker: FC<MarkerProps>;
-  export const Popup: FC<PopupProps>;
-  export const Polyline: FC<PolylineProps>;
-  export const CircleMarker: FC<any>;
-  export const useMap: () => LeafletMap;
-  export const useMapEvent: (type: string, handler: (...args: any[]) => void) => LeafletMap;
-  export const useMapEvents: (handlers: { [key: string]: (...args: any[]) => void }) => LeafletMap;
 }
 
-// Add additional module declarations
-declare module 'leaflet-defaulticon-compatibility' {
-  const content: any;
-  export default content;
-}
-
-declare module '*.svg' {
-  import React = require('react');
-  export const ReactComponent: React.FC<React.SVGProps<SVGSVGElement>>;
-  const src: string;
-  export default src;
-}
-
-declare module '*.png' {
-  const src: string;
-  export default src;
-}
-
-declare module '*.jpg' {
-  const src: string;
-  export default src;
-}
-
-interface ImportMetaEnv {
-  readonly VITE_API_URL: string;
-  // add more env variables as needed
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
-
-// Add explicit declarations for packages with type issues
 declare module 'lucide-react' {
   import React from 'react';
-  
-  export interface LucideProps extends React.SVGProps<SVGSVGElement> {
+  export interface LucideProps {
     color?: string;
     size?: number | string;
     strokeWidth?: number | string;
-    absoluteStrokeWidth?: boolean;
     className?: string;
+    [key: string]: any;
   }
-  
   export type LucideIcon = React.FC<LucideProps>;
-  export type LucideIconType = any;
-  
-  // All the icons
   export const Home: LucideIcon;
   export const LayoutDashboard: LucideIcon;
   export const Settings: LucideIcon;
   export const Package: LucideIcon;
-  export const Package2: LucideIcon;
   export const Truck: LucideIcon;
   export const LineChart: LucideIcon;
   export const BarChart3: LucideIcon;
@@ -167,16 +67,12 @@ declare module 'lucide-react' {
   export const CircleDollarSign: LucideIcon;
   export const TrendingUp: LucideIcon;
   export const Calculator: LucideIcon;
-  export const FileEdit: LucideIcon;
   export const Check: LucideIcon;
   export const Plus: LucideIcon;
-  export const Link: LucideIcon;
   export const Network: LucideIcon;
   export const MapPin: LucideIcon;
   export const Building: LucideIcon;
-  export const Hexagon: LucideIcon;
   export const DollarSign: LucideIcon;
-  export const FileQuestion: LucideIcon;
   export const ChevronRight: LucideIcon;
   export const Route: LucideIcon;
   export const AlertCircle: LucideIcon;
@@ -186,7 +82,6 @@ declare module 'lucide-react' {
   export const Bot: LucideIcon;
   export const Upload: LucideIcon;
   export const Save: LucideIcon;
-  export const FileDown: LucideIcon;
   export const Lightbulb: LucideIcon;
   export const Send: LucideIcon;
   export const Globe: LucideIcon;
@@ -197,7 +92,6 @@ declare module 'lucide-react' {
   export const PlusCircle: LucideIcon;
   export const Trash2: LucideIcon;
   export const Database: LucideIcon;
-  export const Boxes: LucideIcon;
   export const Target: LucideIcon;
   export const Train: LucideIcon;
   export const Ship: LucideIcon;
@@ -214,7 +108,6 @@ declare module 'lucide-react' {
   export const LayoutGrid: LucideIcon;
   export const Map: LucideIcon;
   export const MessageSquare: LucideIcon;
-  export const FileInput: LucideIcon;
   export const Info: LucideIcon;
   export const X: LucideIcon;
   export const CheckCircle: LucideIcon;
@@ -231,42 +124,66 @@ declare module 'lucide-react' {
   export const AlertTriangle: LucideIcon;
   export const MoreHorizontal: LucideIcon;
   export const Search: LucideIcon;
-  
-  // Map of all icons
-  export const icons: Record<string, LucideIcon>;
+  export const FileInput: LucideIcon;
+  export const FileEdit: LucideIcon;
+  export const FileDown: LucideIcon;
+  export const FileQuestion: LucideIcon;
+  export const Package2: LucideIcon;
+  export const Hexagon: LucideIcon;
+  export const Link: LucideIcon;
+  export const Boxes: LucideIcon;
 }
 
-declare module 'lovable-tagger' {
-  export function componentTagger(): any;
-}
-
-// Comprehensive recharts declarations
-declare module 'recharts' {
+declare module 'react-leaflet' {
   import React from 'react';
+  import { LatLngExpression, Map as LeafletMap } from 'leaflet';
   
-  export interface LegendProps {
-    content?: any;
-    wrapperStyle?: React.CSSProperties;
-    contentStyle?: React.CSSProperties;
-    iconType?: 'line' | 'rect' | 'circle' | 'cross' | 'diamond' | 'square' | 'star' | 'triangle' | 'wye';
-    layout?: 'horizontal' | 'vertical';
-    align?: 'left' | 'center' | 'right';
-    verticalAlign?: 'top' | 'middle' | 'bottom';
-    margin?: any;
-    payload?: any[];
-    onMouseEnter?: any;
-    onMouseLeave?: any;
-    onClick?: any;
+  export interface MapContainerProps {
+    center?: LatLngExpression;
+    zoom?: number;
+    children?: React.ReactNode;
+    style?: React.CSSProperties;
+    [key: string]: any;
   }
   
-  export const LineChart: React.FC<any>;
-  export const BarChart: React.FC<any>;
-  export const XAxis: React.FC<any>;
-  export const YAxis: React.FC<any>;
-  export const CartesianGrid: React.FC<any>;
-  export const Tooltip: React.FC<any>;
-  export const Legend: React.FC<LegendProps>;
-  export const Line: React.FC<any>;
-  export const Bar: React.FC<any>;
-  export const ResponsiveContainer: React.FC<any>;
+  export interface TileLayerProps {
+    url: string;
+    attribution?: string;
+    [key: string]: any;
+  }
+  
+  export interface MarkerProps {
+    position: LatLngExpression;
+    icon?: any;
+    eventHandlers?: any;
+    children?: React.ReactNode;
+    [key: string]: any;
+  }
+  
+  export interface PopupProps {
+    children?: React.ReactNode;
+    [key: string]: any;
+  }
+  
+  export interface PolylineProps {
+    positions: LatLngExpression[];
+    pathOptions?: any;
+    children?: React.ReactNode;
+    [key: string]: any;
+  }
+
+  export const MapContainer: React.FC<MapContainerProps>;
+  export const TileLayer: React.FC<TileLayerProps>;
+  export const Marker: React.FC<MarkerProps>;
+  export const Popup: React.FC<PopupProps>;
+  export const Polyline: React.FC<PolylineProps>;
+  export const useMap: () => LeafletMap;
+}
+
+interface ImportMetaEnv {
+  readonly VITE_API_URL: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
