@@ -1,7 +1,7 @@
 
 /// <reference types="vite/client" />
 
-// Override React types to fix Radix UI compatibility
+// Global React type overrides for maximum compatibility
 declare global {
   namespace React {
     type ElementType<P = any> = any;
@@ -55,6 +55,8 @@ declare module 'lucide-react' {
     [key: string]: any;
   }
   export type LucideIcon = React.FC<LucideProps>;
+  
+  // Export all icons individually
   export const Home: LucideIcon;
   export const LayoutDashboard: LucideIcon;
   export const Settings: LucideIcon;
@@ -132,6 +134,12 @@ declare module 'lucide-react' {
   export const Hexagon: LucideIcon;
   export const Link: LucideIcon;
   export const Boxes: LucideIcon;
+  export const CreditCard: LucideIcon;
+  export const Wallet: LucideIcon;
+  export const Receipt: LucideIcon;
+  
+  // Export the icons object for dynamic access
+  export const icons: Record<string, LucideIcon>;
 }
 
 declare module 'react-leaflet' {

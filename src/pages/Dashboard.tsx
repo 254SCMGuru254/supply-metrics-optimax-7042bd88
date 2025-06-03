@@ -1,201 +1,256 @@
 
-import { Card } from "@/components/ui/card";
-import { BarChart3, Network, Truck, LineChart, Target, Building2, Map, Warehouse, TrendingUp, Package, DollarSign } from "lucide-react";
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { 
+  LayoutDashboard, 
+  BarChart3, 
+  MapPin, 
+  Settings, 
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  Package
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  const metrics = [
-    { label: "Active Networks", value: "7", change: "+2", positive: true },
-    { label: "Optimized Routes", value: "124", change: "+12", positive: true },
-    { label: "Cost Savings", value: "32%", change: "+5%", positive: true },
-    { label: "Logistics Score", value: "86", change: "+3", positive: true },
-  ];
+  const [activeProjects] = useState([
+    {
+      id: 1,
+      name: "Kenya Distribution Network",
+      model: "Center of Gravity",
+      status: "Running",
+      progress: 75,
+      lastUpdated: "2 hours ago"
+    },
+    {
+      id: 2,
+      name: "Regional Route Optimization", 
+      model: "MILP",
+      status: "Completed",
+      progress: 100,
+      lastUpdated: "1 day ago"
+    }
+  ]);
 
-  const modules = [
-    { 
-      title: "Route Optimization", 
-      icon: Truck, 
-      description: "Optimize delivery routes for minimum time and cost", 
-      path: "/route-optimization", 
-      status: "Active" 
-    },
-    { 
-      title: "Network Design", 
-      icon: Network, 
-      description: "Configure optimal facility locations and flows", 
-      path: "/network-optimization", 
-      status: "Active" 
-    },
-    { 
-      title: "Center of Gravity", 
-      icon: Target, 
-      description: "Find optimal facility locations based on weighted demand", 
-      path: "/center-of-gravity", 
-      status: "Active" 
-    },
-    { 
-      title: "Supply Chain Simulation", 
-      icon: LineChart, 
-      description: "Simulate different scenarios to test network resilience", 
-      path: "/simulation", 
-      status: "Active" 
-    },
-    { 
-      title: "Inventory Management", 
-      icon: Package, 
-      description: "Optimize inventory levels and safety stock", 
-      path: "/inventory-management", 
-      status: "Active" 
-    },
-    { 
-      title: "Fleet Management", 
-      icon: Truck, 
-      description: "Manage and optimize transportation fleet", 
-      path: "/fleet-management", 
-      status: "Active" 
-    },
-    { 
-      title: "Demand Forecasting", 
-      icon: TrendingUp, 
-      description: "Predict future demand using time-series analysis", 
-      path: "/demand-forecasting", 
-      status: "Active" 
-    },
-    { 
-      title: "Heuristic Analysis", 
-      icon: BarChart3, 
-      description: "Apply heuristic algorithms for complex problems", 
-      path: "/heuristic", 
-      status: "Active" 
-    },
-    { 
-      title: "Warehouse Analysis", 
-      icon: Warehouse, 
-      description: "Analyze warehouse capacities and throughput", 
-      path: "/warehouse", 
-      status: "Active" 
-    },
-    { 
-      title: "Cost Modeling", 
-      icon: DollarSign, 
-      description: "Model and analyze supply chain costs", 
-      path: "/cost-modeling", 
-      status: "Active" 
-    },
-    { 
-      title: "Data Management", 
-      icon: BarChart3, 
-      description: "Import, manage and analyze supply chain data", 
-      path: "/data-input", 
-      status: "Active" 
-    },
-    { 
-      title: "Kenya Supply Chain", 
-      icon: Map, 
-      description: "Explore Kenya's supply chain network and data", 
-      path: "/kenya-supply-chain", 
-      status: "Featured" 
-    },
-  ];
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "Running":
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case "Completed":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "Error":
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Running":
+        return "bg-yellow-100 text-yellow-800";
+      case "Completed":
+        return "bg-green-100 text-green-800";
+      case "Error":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Your supply chain optimization control center
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map((metric, index) => (
-          <Card key={index} className="p-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">{metric.label}</span>
-              <span className="text-3xl font-bold">{metric.value}</span>
-              <div className={`flex items-center ${metric.positive ? 'text-green-500' : 'text-red-500'}`}>
-                <span>{metric.change}</span>
-                <span className="text-xs ml-1">vs last month</span>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold mb-4">Optimization Modules</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {modules.map((module, index) => (
-            <Link key={index} to={module.path}>
-              <Card className="p-6 h-full hover:border-primary transition-all">
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center gap-3 mb-4">
-                    <module.icon className="h-8 w-8 text-primary" />
-                    <div>
-                      <h3 className="font-semibold">{module.title}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        module.status === 'Featured' 
-                          ? 'bg-purple-100 text-purple-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {module.status}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground text-sm flex-grow">
-                    {module.description}
-                  </p>
-                </div>
-              </Card>
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <LayoutDashboard className="h-8 w-8" />
+            Supply Chain Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Monitor your optimization projects and system performance
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button asChild>
+            <Link to="/data-input">
+              <Package className="h-4 w-4 mr-2" />
+              New Project
             </Link>
-          ))}
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/pricing">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="projects">Active Projects</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="system">System Status</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+                <Package className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">2</div>
+                <p className="text-xs text-muted-foreground">
+                  +1 from last month
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Optimization Models</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">12</div>
+                <p className="text-xs text-muted-foreground">
+                  Available models
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Cost Savings</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">18.5%</div>
+                <p className="text-xs text-muted-foreground">
+                  Average improvement
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Locations Optimized</CardTitle>
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">47</div>
+                <p className="text-xs text-muted-foreground">
+                  Across Kenya
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="projects">
           <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Network className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Network optimized</p>
-                <p className="text-sm text-muted-foreground">Kenya Distribution Network</p>
-                <p className="text-xs text-muted-foreground">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Truck className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Routes optimized</p>
-                <p className="text-sm text-muted-foreground">Nairobi Delivery Network</p>
-                <p className="text-xs text-muted-foreground">5 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Target className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Center of gravity calculated</p>
-                <p className="text-sm text-muted-foreground">Central Distribution Hub</p>
-                <p className="text-xs text-muted-foreground">Yesterday</p>
-              </div>
-            </div>
+            {activeProjects.map((project) => (
+              <Card key={project.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <CardDescription>Model: {project.model}</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(project.status)}
+                      <Badge className={getStatusColor(project.status)}>
+                        {project.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Progress</span>
+                      <span>{project.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${project.progress}%` }}
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Last updated: {project.lastUpdated}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </Card>
-
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Optimization Overview</h2>
-          <div className="h-[200px] flex items-center justify-center">
-            <BarChart3 className="h-24 w-24 text-muted-foreground/50" />
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Analytics</CardTitle>
+              <CardDescription>
+                Detailed insights into your optimization results
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 flex items-center justify-center border rounded-lg">
+                <p className="text-muted-foreground">Analytics charts will be displayed here</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="system">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Health</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span>API Status</span>
+                    <Badge className="bg-green-100 text-green-800">Operational</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Database</span>
+                    <Badge className="bg-green-100 text-green-800">Connected</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Optimization Engine</span>
+                    <Badge className="bg-green-100 text-green-800">Running</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <p>• Kenya Distribution Network optimization started</p>
+                  <p>• Route optimization completed for Mombasa region</p>
+                  <p>• New demand points added to Nairobi cluster</p>
+                  <p>• System backup completed successfully</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </Card>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

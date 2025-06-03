@@ -1,47 +1,34 @@
 
-import React from 'react';
+import { LucideIcon } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { useNavigate } from 'react-router-dom';
-import { icons } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 
 interface FeatureCardProps {
-  icon: LucideIcon;
   title: string;
   description: string;
-  linkTo: string;
-  buttonText: string;
-  index: number;
+  icon: LucideIcon;
+  href?: string;
 }
 
-const FeatureCard = ({ icon: Icon, title, description, linkTo, buttonText, index }: FeatureCardProps) => {
-  const navigate = useNavigate();
-  
+export const FeatureCard = ({ title, description, icon: Icon, href }: FeatureCardProps) => {
   return (
-    <Card 
-      className="overflow-hidden transition-all hover:shadow-md"
-      data-aos="fade-up" 
-      data-aos-delay={50 * index}
-    >
-      <CardContent className="p-6">
-        <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-5">
-          <Icon className="h-6 w-6 text-primary" />
+    <Card className="h-full">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Icon className="h-6 w-6" />
+          <CardTitle className="text-lg">{title}</CardTitle>
         </div>
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>{description}</CardDescription>
       </CardContent>
-      <CardFooter className="px-6 pb-6 pt-0">
-        <Button 
-          variant="outline" 
-          className="w-full justify-start"
-          onClick={() => navigate(linkTo)}
-        >
-          {buttonText}
-        </Button>
-      </CardFooter>
+      {href && (
+        <CardFooter>
+          <Button variant="outline" className="w-full" asChild>
+            <a href={href}>Learn More</a>
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 };
-
-export default FeatureCard;

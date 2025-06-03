@@ -26,7 +26,8 @@
     "noImplicitOverride": false,
     "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true
+    "noEmit": true,
+    "noErrorTruncation": false
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.tsx", "**/*.test.tsx", "node_modules"]
