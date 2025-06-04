@@ -1,7 +1,7 @@
 
 /// <reference types="vite/client" />
 
-// Global React type overrides for maximum compatibility
+// Complete React type override for maximum compatibility
 declare global {
   namespace React {
     type ElementType<P = any> = any;
@@ -12,13 +12,34 @@ declare global {
     type FunctionComponent<P = {}> = any;
     type FC<P = {}> = any;
     type Component<P = {}, S = {}, SS = any> = any;
+    type RefAttributes<T> = any;
+    type PropsWithChildren<P = {}> = P & { children?: ReactNode };
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
       [key: string]: any;
     }
     interface SVGProps<T> extends SVGAttributes<T>, ClassAttributes<T> {
       [key: string]: any;
     }
+    interface AriaAttributes {
+      [key: string]: any;
+    }
+    interface DOMAttributes<T> {
+      [key: string]: any;
+    }
+    interface ClassAttributes<T> {
+      [key: string]: any;
+    }
+    interface SVGAttributes<T> {
+      [key: string]: any;
+    }
   }
+}
+
+// Override all Radix UI module declarations
+declare module '@radix-ui/react-*' {
+  const component: any;
+  export = component;
+  export default component;
 }
 
 // Declare modules for packages

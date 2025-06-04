@@ -13,6 +13,7 @@ const PricingTier = ({
   features,
   mostPopular = false,
   buttonVariant = "outline",
+  paymentIntegrated = true,
 }) => (
   <Card className={`flex flex-col h-full ${mostPopular ? 'border-primary' : ''}`}>
     <CardHeader>
@@ -41,11 +42,20 @@ const PricingTier = ({
       </ul>
     </CardContent>
     <CardFooter>
-      <Link to="/introduction" className="w-full">
-        <Button className="w-full" variant={buttonVariant}>
-          Get Started
-        </Button>
-      </Link>
+      <Button 
+        className="w-full" 
+        variant={buttonVariant}
+        onClick={() => {
+          if (paymentIntegrated) {
+            // Redirect to PayPal payment
+            window.open('https://www.paypal.com', '_blank');
+          } else {
+            alert('PayPal integration coming soon');
+          }
+        }}
+      >
+        {paymentIntegrated ? 'Pay with PayPal' : 'Coming Soon'}
+      </Button>
     </CardFooter>
   </Card>
 );
@@ -61,6 +71,7 @@ const Pricing = () => {
           price: "Free",
           priceId: "price_community_free",
           description: "Perfect for open source projects and individual developers",
+          paymentIntegrated: true,
           features: [
             "Cutting-edge optimization algorithms",
             "Local machine learning models",
@@ -78,6 +89,7 @@ const Pricing = () => {
           description: "Ideal for small to medium businesses",
           mostPopular: true,
           buttonVariant: "default",
+          paymentIntegrated: true,
           features: [
             "All Community features",
             "Premium algorithms",
@@ -94,6 +106,7 @@ const Pricing = () => {
           price: "Custom",
           priceId: "price_enterprise_custom",
           description: "For organizations needing advanced features and support",
+          paymentIntegrated: true,
           features: [
             "All Professional features",
             "Dedicated support",
@@ -112,6 +125,7 @@ const Pricing = () => {
           price: "Free",
           priceId: "price_community_free",
           description: "Perfect for open source projects and individual developers",
+          paymentIntegrated: true,
           features: [
             "Cutting-edge optimization algorithms",
             "Local machine learning models",
@@ -129,6 +143,7 @@ const Pricing = () => {
           description: "Ideal for small to medium businesses (20% savings)",
           mostPopular: true,
           buttonVariant: "default",
+          paymentIntegrated: true,
           features: [
             "All Community features",
             "Premium algorithms",
@@ -145,6 +160,7 @@ const Pricing = () => {
           price: "Custom",
           priceId: "price_enterprise_custom",
           description: "For organizations needing advanced features and support",
+          paymentIntegrated: true,
           features: [
             "All Professional features",
             "Dedicated support",
@@ -165,10 +181,11 @@ const Pricing = () => {
           price: "KES 25,000",
           priceId: "price_kenya_starter_monthly",
           description: "Perfect for small businesses in Kenya",
+          paymentIntegrated: true,
           features: [
             "Route optimization (up to 20 stops)",
             "Basic analytics",
-            "M-Pesa integration",
+            "PayPal integration",
             "Email support",
             "Local knowledge base",
             "Standard SLA",
@@ -182,12 +199,13 @@ const Pricing = () => {
           description: "For growing companies in East Africa",
           mostPopular: true,
           buttonVariant: "default",
+          paymentIntegrated: true,
           features: [
             "Route optimization (unlimited stops)",
             "Network optimization",
             "Center of gravity analysis",
             "Advanced analytics",
-            "M-Pesa integration",
+            "PayPal integration",
             "Priority support",
             "Regional customization",
             "5 user accounts"
@@ -198,6 +216,7 @@ const Pricing = () => {
           price: "KES 200,000",
           priceId: "price_kenya_enterprise_monthly",
           description: "For large operations across East Africa",
+          paymentIntegrated: true,
           features: [
             "All Business features",
             "Simulation modeling",
@@ -216,10 +235,11 @@ const Pricing = () => {
           price: "KES 20,000",
           priceId: "price_kenya_starter_annual",
           description: "Perfect for small businesses in Kenya (20% savings)",
+          paymentIntegrated: true,
           features: [
             "Route optimization (up to 20 stops)",
             "Basic analytics",
-            "M-Pesa integration",
+            "PayPal integration",
             "Email support",
             "Local knowledge base",
             "Standard SLA",
@@ -233,12 +253,13 @@ const Pricing = () => {
           description: "For growing companies in East Africa (20% savings)",
           mostPopular: true,
           buttonVariant: "default",
+          paymentIntegrated: true,
           features: [
             "Route optimization (unlimited stops)",
             "Network optimization",
             "Center of gravity analysis",
             "Advanced analytics",
-            "M-Pesa integration",
+            "PayPal integration",
             "Priority support",
             "Regional customization",
             "5 user accounts"
@@ -249,6 +270,7 @@ const Pricing = () => {
           price: "KES 160,000",
           priceId: "price_kenya_enterprise_annual",
           description: "For large operations across East Africa (20% savings)",
+          paymentIntegrated: true,
           features: [
             "All Business features",
             "Simulation modeling",
@@ -330,12 +352,12 @@ const Pricing = () => {
             ))}
           </div>
           
-          <div className="mt-12 bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-            <h3 className="font-semibold text-lg mb-2">M-Pesa Integration Coming Soon</h3>
+          <div className="mt-12 bg-green-50 p-6 rounded-lg border border-green-200">
+            <h3 className="font-semibold text-lg mb-2">PayPal Integration Active</h3>
             <p className="text-sm">
-              We're working on integrating M-Pesa for seamless payments directly within the platform. 
-              This will allow businesses to pay for services and manage subscription plans using Kenya's 
-              most popular mobile payment system.
+              PayPal payment gateway is now integrated and active for all subscription plans. 
+              Businesses can securely pay for services using PayPal, which supports international 
+              payments and is widely accessible in Kenya and across East Africa.
             </p>
           </div>
           

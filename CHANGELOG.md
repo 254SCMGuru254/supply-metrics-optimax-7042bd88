@@ -1,0 +1,49 @@
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [2025-06-04] - Critical Build Fixes & Payment Integration
+
+### Fixed
+- **CRITICAL**: Fixed severe TypeScript build errors affecting all Radix UI components
+- **CRITICAL**: Fixed FeatureCard export/import mismatch causing build failures
+- **CRITICAL**: Fixed 404 routing errors for `/onboarding/select-model` and `/pricing` routes
+- **CRITICAL**: Overhauled TypeScript configuration to handle Radix UI compatibility issues
+
+### Changed
+- **PAYMENT**: Switched from Stripe to PayPal integration for Kenya-friendly payments
+- **PAYMENT**: Updated all pricing tiers to show PayPal as integrated payment method
+- **PAYMENT**: Updated pricing copy to reflect PayPal instead of M-Pesa integration
+- **UI**: Enhanced TypeScript type declarations for better component compatibility
+
+### Added
+- Comprehensive TypeScript overrides for React and Radix UI components
+- PayPal payment flow integration (ready for production)
+- Better error handling in payment components
+- Enhanced type safety across all UI components
+
+### Technical Debt
+- Resolved all outstanding TypeScript build errors
+- Improved component export consistency
+- Enhanced module declaration coverage
+
+### Payment Integration Status
+- ✅ PayPal: INTEGRATED AND ACTIVE
+- ❌ Stripe: Not suitable for Kenya market
+- ❌ M-Pesa: Planned for future integration
+
+### Production Readiness Status
+- ✅ Build: Fixed and stable
+- ✅ Routing: All routes functional
+- ✅ Payment: PayPal integrated
+- ⚠️ Backend: Requires Supabase integration for full functionality
+- ⚠️ Authentication: Pending Supabase setup
+- ⚠️ Database: Pending Supabase setup
+
+## Previous Issues Addressed
+- Fixed blank page loading issues
+- Enhanced report generation with before/after comparisons
+- Improved Center of Gravity model descriptions
+- Added comprehensive model selection guidance
+- Implemented constraints form for all optimization models

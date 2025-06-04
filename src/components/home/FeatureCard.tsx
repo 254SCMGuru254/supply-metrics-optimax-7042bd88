@@ -10,7 +10,7 @@ interface FeatureCardProps {
   href?: string;
 }
 
-export const FeatureCard = ({ title, description, icon: Icon, href }: FeatureCardProps) => {
+const FeatureCard = ({ title, description, icon: Icon, href }: FeatureCardProps) => {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -32,3 +32,5 @@ export const FeatureCard = ({ title, description, icon: Icon, href }: FeatureCar
     </Card>
   );
 };
+
+export default FeatureCard;

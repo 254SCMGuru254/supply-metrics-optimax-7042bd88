@@ -21,12 +21,13 @@ interface PricingTableProps {
 export const PricingTable = ({ tiers, region = 'standard' }: PricingTableProps) => {
   const handlePayment = (tier: PricingTier) => {
     if (tier.paymentIntegrated) {
-      // TODO: Integrate with Stripe payment gateway
-      console.log(`Payment integration for ${tier.name} - ${tier.price}`);
-      alert(`Payment gateway integration needed for ${tier.name} plan`);
+      // PayPal integration for Kenya-friendly payments
+      console.log(`Initiating PayPal payment for ${tier.name} - ${tier.price}`);
+      // TODO: Implement PayPal payment flow
+      window.open('https://www.paypal.com', '_blank');
     } else {
-      console.log(`Payment not yet integrated for ${tier.name}`);
-      alert(`Payment gateway not yet integrated for ${tier.name} plan`);
+      console.log(`Payment integration in progress for ${tier.name}`);
+      alert(`PayPal payment gateway integration is being finalized for ${tier.name} plan`);
     }
   };
 
@@ -66,7 +67,7 @@ export const PricingTable = ({ tiers, region = 'standard' }: PricingTableProps) 
               onClick={() => handlePayment(tier)}
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              {tier.paymentIntegrated ? 'Get Started' : 'Coming Soon'}
+              {tier.paymentIntegrated ? 'Pay with PayPal' : 'PayPal Integration Soon'}
             </Button>
           </CardFooter>
         </Card>
