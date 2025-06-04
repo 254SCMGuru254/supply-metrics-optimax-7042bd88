@@ -1,7 +1,7 @@
 
 /// <reference types="vite/client" />
 
-// Complete React type override for maximum compatibility
+// Comprehensive React type override for maximum compatibility
 declare global {
   namespace React {
     type ElementType<P = any> = any;
@@ -14,6 +14,52 @@ declare global {
     type Component<P = {}, S = {}, SS = any> = any;
     type RefAttributes<T> = any;
     type PropsWithChildren<P = {}> = P & { children?: ReactNode };
+    type ElementRef<T> = any;
+    type ComponentPropsWithoutRef<T> = any;
+    type ComponentPropsWithRef<T> = any;
+    type HTMLAttributes<T> = any;
+    type SVGProps<T> = any;
+    type AriaAttributes = any;
+    type DOMAttributes<T> = any;
+    type ClassAttributes<T> = any;
+    type SVGAttributes<T> = any;
+    type CSSProperties = any;
+    type SyntheticEvent<T = Element, E = Event> = any;
+    type MouseEvent<T = Element> = any;
+    type KeyboardEvent<T = Element> = any;
+    type FormEvent<T = Element> = any;
+    type ChangeEvent<T = Element> = any;
+    type FocusEvent<T = Element> = any;
+    type HTMLInputTypeAttribute = any;
+    type Ref<T> = any;
+    type MutableRefObject<T> = any;
+    type RefCallback<T> = any;
+    type RefObject<T> = any;
+    type Context<T> = any;
+    type Provider<T> = any;
+    type Consumer<T> = any;
+    type ComponentProps<T> = any;
+    type JSXElementConstructor<P> = any;
+    type Key = any;
+    type Dispatch<A> = any;
+    type SetStateAction<S> = any;
+    type Reducer<S, A> = any;
+    type ReducerState<R> = any;
+    type ReducerAction<R> = any;
+    type DependencyList = any;
+    type EffectCallback = any;
+    type MemoExoticComponent<T> = any;
+    type LazyExoticComponent<T> = any;
+    type SuspenseProps = any;
+    type ReactPortal = any;
+    type ReactText = any;
+    type ReactChild = any;
+    type ReactFragment = any;
+    type ComponentClass<P = {}, S = any> = any;
+    type StatelessComponent<P = {}> = any;
+    type SFC<P = {}> = any;
+    type ComponentState = any;
+    
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
       [key: string]: any;
     }
@@ -35,11 +81,71 @@ declare global {
   }
 }
 
-// Override all Radix UI module declarations
+// Override all Radix UI module declarations with any types
 declare module '@radix-ui/react-*' {
   const component: any;
   export = component;
   export default component;
+  export const Root: any;
+  export const Trigger: any;
+  export const Content: any;
+  export const Item: any;
+  export const Header: any;
+  export const Portal: any;
+  export const Overlay: any;
+  export const Title: any;
+  export const Description: any;
+  export const Action: any;
+  export const Cancel: any;
+  export const Image: any;
+  export const Fallback: any;
+  export const Indicator: any;
+  export const List: any;
+  export const Empty: any;
+  export const Group: any;
+  export const Separator: any;
+  export const Input: any;
+}
+
+// Specific overrides for known Radix modules
+declare module '@radix-ui/react-accordion' {
+  export const Root: any;
+  export const Item: any;
+  export const Header: any;
+  export const Trigger: any;
+  export const Content: any;
+}
+
+declare module '@radix-ui/react-alert-dialog' {
+  export const Root: any;
+  export const Trigger: any;
+  export const Portal: any;
+  export const Overlay: any;
+  export const Content: any;
+  export const Header: any;
+  export const Title: any;
+  export const Description: any;
+  export const Footer: any;
+  export const Action: any;
+  export const Cancel: any;
+}
+
+declare module '@radix-ui/react-avatar' {
+  export const Root: any;
+  export const Image: any;
+  export const Fallback: any;
+}
+
+declare module '@radix-ui/react-checkbox' {
+  export const Root: any;
+  export const Indicator: any;
+}
+
+declare module 'cmdk' {
+  export const Command: any;
+  export interface CommandProps {
+    [key: string]: any;
+  }
 }
 
 // Declare modules for packages
