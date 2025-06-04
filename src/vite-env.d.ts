@@ -1,13 +1,51 @@
 
 /// <reference types="vite/client" />
 
-// Enhanced TypeScript overrides for React and Radix UI compatibility
+// Enhanced TypeScript declarations for React compatibility
 declare module 'react' {
   interface ForwardRefExoticComponent<P> extends React.ComponentType<P> {
     $$typeof: symbol;
     render: (props: P, ref: React.Ref<any>) => React.ReactElement | null;
     displayName?: string;
+    defaultProps?: Partial<P>;
   }
+}
+
+// React Router DOM compatibility
+declare module 'react-router-dom' {
+  export const Link: React.ForwardRefExoticComponent<any>;
+  export const NavLink: React.ForwardRefExoticComponent<any>;
+  export const useNavigate: () => any;
+  export const useLocation: () => any;
+  export const useParams: () => any;
+  export const Routes: React.ForwardRefExoticComponent<any>;
+  export const Route: React.ForwardRefExoticComponent<any>;
+  export const BrowserRouter: React.ForwardRefExoticComponent<any>;
+}
+
+// Lucide React icons compatibility
+declare module 'lucide-react' {
+  export const Home: React.ForwardRefExoticComponent<any>;
+  export const LayoutDashboard: React.ForwardRefExoticComponent<any>;
+  export const Settings: React.ForwardRefExoticComponent<any>;
+  export const Package: React.ForwardRefExoticComponent<any>;
+  export const Truck: React.ForwardRefExoticComponent<any>;
+  export const LineChart: React.ForwardRefExoticComponent<any>;
+  export const BarChart3: React.ForwardRefExoticComponent<any>;
+  export const FileText: React.ForwardRefExoticComponent<any>;
+  export const HelpCircle: React.ForwardRefExoticComponent<any>;
+  export const CircleDollarSign: React.ForwardRefExoticComponent<any>;
+  export const TrendingUp: React.ForwardRefExoticComponent<any>;
+  export const Activity: React.ForwardRefExoticComponent<any>;
+  export const Hexagon: React.ForwardRefExoticComponent<any>;
+  export const ChevronLeft: React.ForwardRefExoticComponent<any>;
+  export const ChevronRight: React.ForwardRefExoticComponent<any>;
+  export const Download: React.ForwardRefExoticComponent<any>;
+  export const Loader2: React.ForwardRefExoticComponent<any>;
+  export const Check: React.ForwardRefExoticComponent<any>;
+  export const CheckCircle: React.ForwardRefExoticComponent<any>;
+  export const Search: React.ForwardRefExoticComponent<any>;
+  export const X: React.ForwardRefExoticComponent<any>;
 }
 
 // Complete Radix UI module declarations
@@ -89,47 +127,6 @@ declare module '@radix-ui/react-dropdown-menu' {
   export const SubContent: React.ForwardRefExoticComponent<any>;
 }
 
-declare module '@radix-ui/react-hover-card' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-  export const Trigger: React.ForwardRefExoticComponent<any>;
-  export const Portal: React.ForwardRefExoticComponent<any>;
-  export const Content: React.ForwardRefExoticComponent<any>;
-}
-
-declare module '@radix-ui/react-label' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-}
-
-declare module '@radix-ui/react-menubar' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-  export const Menu: React.ForwardRefExoticComponent<any>;
-  export const Trigger: React.ForwardRefExoticComponent<any>;
-  export const Portal: React.ForwardRefExoticComponent<any>;
-  export const Content: React.ForwardRefExoticComponent<any>;
-  export const Group: React.ForwardRefExoticComponent<any>;
-  export const Item: React.ForwardRefExoticComponent<any>;
-  export const CheckboxItem: React.ForwardRefExoticComponent<any>;
-  export const RadioGroup: React.ForwardRefExoticComponent<any>;
-  export const RadioItem: React.ForwardRefExoticComponent<any>;
-  export const ItemIndicator: React.ForwardRefExoticComponent<any>;
-  export const Separator: React.ForwardRefExoticComponent<any>;
-  export const Label: React.ForwardRefExoticComponent<any>;
-  export const Sub: React.ForwardRefExoticComponent<any>;
-  export const SubTrigger: React.ForwardRefExoticComponent<any>;
-  export const SubContent: React.ForwardRefExoticComponent<any>;
-}
-
-declare module '@radix-ui/react-navigation-menu' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-  export const List: React.ForwardRefExoticComponent<any>;
-  export const Item: React.ForwardRefExoticComponent<any>;
-  export const Trigger: React.ForwardRefExoticComponent<any>;
-  export const Content: React.ForwardRefExoticComponent<any>;
-  export const Link: React.ForwardRefExoticComponent<any>;
-  export const Indicator: React.ForwardRefExoticComponent<any>;
-  export const Viewport: React.ForwardRefExoticComponent<any>;
-}
-
 declare module '@radix-ui/react-popover' {
   export const Root: React.ForwardRefExoticComponent<any>;
   export const Trigger: React.ForwardRefExoticComponent<any>;
@@ -137,25 +134,6 @@ declare module '@radix-ui/react-popover' {
   export const Content: React.ForwardRefExoticComponent<any>;
   export const Anchor: React.ForwardRefExoticComponent<any>;
   export const Close: React.ForwardRefExoticComponent<any>;
-}
-
-declare module '@radix-ui/react-progress' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-  export const Indicator: React.ForwardRefExoticComponent<any>;
-}
-
-declare module '@radix-ui/react-radio-group' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-  export const Item: React.ForwardRefExoticComponent<any>;
-  export const Indicator: React.ForwardRefExoticComponent<any>;
-}
-
-declare module '@radix-ui/react-scroll-area' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-  export const Viewport: React.ForwardRefExoticComponent<any>;
-  export const Scrollbar: React.ForwardRefExoticComponent<any>;
-  export const Thumb: React.ForwardRefExoticComponent<any>;
-  export const Corner: React.ForwardRefExoticComponent<any>;
 }
 
 declare module '@radix-ui/react-select' {
@@ -214,15 +192,6 @@ declare module '@radix-ui/react-toast' {
   export const Viewport: React.ForwardRefExoticComponent<any>;
 }
 
-declare module '@radix-ui/react-toggle' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-}
-
-declare module '@radix-ui/react-toggle-group' {
-  export const Root: React.ForwardRefExoticComponent<any>;
-  export const Item: React.ForwardRefExoticComponent<any>;
-}
-
 declare module '@radix-ui/react-tooltip' {
   export const Provider: React.ForwardRefExoticComponent<any>;
   export const Root: React.ForwardRefExoticComponent<any>;
@@ -253,21 +222,6 @@ declare module 'vaul' {
   export const DrawerClose: React.ForwardRefExoticComponent<any>;
   export const DrawerOverlay: React.ForwardRefExoticComponent<any>;
   export const DrawerPortal: React.ForwardRefExoticComponent<any>;
-}
-
-// Global type enhancements
-declare global {
-  namespace React {
-    interface ForwardRefExoticComponent<P> extends ComponentType<P> {
-      $$typeof: symbol;
-      render: (props: P, ref: Ref<any>) => ReactElement | null;
-      displayName?: string;
-    }
-    
-    interface ExoticComponent<P = {}> extends ComponentType<P> {
-      $$typeof: symbol;
-    }
-  }
 }
 
 // Class variance authority compatibility

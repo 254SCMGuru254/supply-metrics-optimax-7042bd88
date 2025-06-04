@@ -7,7 +7,7 @@ declare module 'react' {
     css?: any;
   }
 
-  // Add missing React types
+  // Add missing React types and ensure useState is properly exported
   export type FC<P = {}> = FunctionComponent<P>;
   export interface FunctionComponent<P = {}> {
     (props: P, context?: any): ReactElement<any, any> | null;
@@ -20,4 +20,13 @@ declare module 'react' {
   export type FormEvent<T = Element> = React.FormEvent<T>;
   export type KeyboardEvent<T = Element> = React.KeyboardEvent<T>;
   export type RefObject<T> = React.RefObject<T>;
+  
+  // Ensure useState and other hooks are properly exported
+  export const useState: typeof React.useState;
+  export const useEffect: typeof React.useEffect;
+  export const useRef: typeof React.useRef;
+  export const useCallback: typeof React.useCallback;
+  export const useMemo: typeof React.useMemo;
+  export const useContext: typeof React.useContext;
+  export const forwardRef: typeof React.forwardRef;
 }
