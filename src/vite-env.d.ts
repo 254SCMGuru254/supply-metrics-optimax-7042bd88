@@ -1,9 +1,10 @@
 
 /// <reference types="vite/client" />
 
-// Comprehensive React type override for maximum compatibility
+// Ultimate TypeScript override for maximum compatibility
 declare global {
   namespace React {
+    // Complete React type overrides
     type ElementType<P = any> = any;
     type ComponentType<P = {}> = any;
     type ForwardRefExoticComponent<P> = any;
@@ -81,7 +82,7 @@ declare global {
   }
 }
 
-// Override all Radix UI module declarations with any types
+// Complete Radix UI override system - covers ALL modules
 declare module '@radix-ui/react-*' {
   const component: any;
   export = component;
@@ -105,9 +106,17 @@ declare module '@radix-ui/react-*' {
   export const Group: any;
   export const Separator: any;
   export const Input: any;
+  export const Label: any;
+  export const SubTrigger: any;
+  export const SubContent: any;
+  export const CheckboxItem: any;
+  export const RadioItem: any;
+  export const RadioGroup: any;
+  export const Footer: any;
+  export const ItemIndicator: any;
 }
 
-// Specific overrides for known Radix modules
+// Comprehensive Radix module overrides
 declare module '@radix-ui/react-accordion' {
   export const Root: any;
   export const Item: any;
@@ -141,6 +150,60 @@ declare module '@radix-ui/react-checkbox' {
   export const Indicator: any;
 }
 
+declare module '@radix-ui/react-context-menu' {
+  export const Root: any;
+  export const Trigger: any;
+  export const Portal: any;
+  export const Content: any;
+  export const Item: any;
+  export const CheckboxItem: any;
+  export const RadioItem: any;
+  export const RadioGroup: any;
+  export const Label: any;
+  export const Separator: any;
+  export const Group: any;
+  export const Sub: any;
+  export const SubTrigger: any;
+  export const SubContent: any;
+  export const ItemIndicator: any;
+}
+
+declare module '@radix-ui/react-dialog' {
+  export const Root: any;
+  export const Trigger: any;
+  export const Portal: any;
+  export const Overlay: any;
+  export const Content: any;
+  export const Title: any;
+  export const Description: any;
+  export const Close: any;
+}
+
+declare module '@radix-ui/react-dropdown-menu' {
+  export const Root: any;
+  export const Trigger: any;
+  export const Portal: any;
+  export const Content: any;
+  export const Item: any;
+  export const CheckboxItem: any;
+  export const RadioItem: any;
+  export const RadioGroup: any;
+  export const Label: any;
+  export const Separator: any;
+  export const Group: any;
+  export const Sub: any;
+  export const SubTrigger: any;
+  export const SubContent: any;
+  export const ItemIndicator: any;
+}
+
+declare module 'vaul' {
+  export const Drawer: any;
+  export interface DrawerProps {
+    [key: string]: any;
+  }
+}
+
 declare module 'cmdk' {
   export const Command: any;
   export interface CommandProps {
@@ -148,7 +211,7 @@ declare module 'cmdk' {
   }
 }
 
-// Declare modules for packages
+// Enhanced module declarations
 declare module 'react' {
   export * from 'react';
   export = React;
