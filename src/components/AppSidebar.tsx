@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Home, LayoutDashboard, Settings, Package, Truck, LineChart, BarChart3, FileText, HelpCircle, CircleDollarSign, TrendingUp } from "lucide-react";
+import { Home, LayoutDashboard, Settings, Package, Truck, LineChart, BarChart3, FileText, HelpCircle, CircleDollarSign, TrendingUp, Activity, Hexagon } from "lucide-react";
 
 const AppSidebar = () => {
   return (
@@ -46,24 +46,8 @@ const AppSidebar = () => {
         </Link>
 
         <div className="px-2 py-2 text-xs font-bold text-muted-foreground uppercase">
-          Models
+          Optimization Models
         </div>
-
-        <Link
-          to="/inventory-management"
-          className="flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-muted group"
-        >
-          <Package className="mr-3 h-5 w-5 text-muted-foreground" />
-          Inventory Management
-        </Link>
-
-        <Link
-          to="/route-optimization"
-          className="flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-muted group"
-        >
-          <Truck className="mr-3 h-5 w-5 text-muted-foreground" />
-          Route Optimization
-        </Link>
 
         <Link
           to="/center-of-gravity"
@@ -82,11 +66,47 @@ const AppSidebar = () => {
         </Link>
 
         <Link
+          to="/route-optimization"
+          className="flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-muted group"
+        >
+          <Truck className="mr-3 h-5 w-5 text-muted-foreground" />
+          Route Optimization
+        </Link>
+
+        <Link
+          to="/simulation"
+          className="flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-muted group"
+        >
+          <Activity className="mr-3 h-5 w-5 text-muted-foreground" />
+          Simulation
+        </Link>
+
+        <Link
+          to="/isohedron"
+          className="flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-muted group"
+        >
+          <Hexagon className="mr-3 h-5 w-5 text-muted-foreground" />
+          Isohedron
+        </Link>
+
+        <Link
           to="/heuristic"
           className="flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-muted group"
         >
           <HelpCircle className="mr-3 h-5 w-5 text-muted-foreground" />
           Heuristic
+        </Link>
+
+        <div className="px-2 py-2 text-xs font-bold text-muted-foreground uppercase">
+          Management
+        </div>
+
+        <Link
+          to="/inventory-management"
+          className="flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-muted group"
+        >
+          <Package className="mr-3 h-5 w-5 text-muted-foreground" />
+          Inventory Management
         </Link>
         
         <Link 
