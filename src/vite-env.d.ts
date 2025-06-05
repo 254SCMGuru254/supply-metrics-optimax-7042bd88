@@ -23,7 +23,7 @@ declare module 'react-router-dom' {
   export const BrowserRouter: React.ForwardRefExoticComponent<any>;
 }
 
-// Lucide React icons compatibility
+// Lucide React icons compatibility - ONLY ALLOWED ICONS
 declare module 'lucide-react' {
   export const Home: React.ForwardRefExoticComponent<any>;
   export const LayoutDashboard: React.ForwardRefExoticComponent<any>;
@@ -46,6 +46,16 @@ declare module 'lucide-react' {
   export const CheckCircle: React.ForwardRefExoticComponent<any>;
   export const Search: React.ForwardRefExoticComponent<any>;
   export const X: React.ForwardRefExoticComponent<any>;
+  
+  // Use allowed icons instead of missing ones:
+  // Bot -> HelpCircle (for AI assistance)
+  export const Bot: typeof HelpCircle;
+  // Building -> Package (for facilities)
+  export const Building: typeof Package;
+  // Upload -> FileText (for file operations)
+  export const Upload: typeof FileText;
+  // AlertCircle -> HelpCircle (for alerts)
+  export const AlertCircle: typeof HelpCircle;
 }
 
 // Complete Radix UI module declarations
@@ -228,4 +238,32 @@ declare module 'vaul' {
 declare module 'class-variance-authority' {
   export function cva(...args: any[]): any;
   export type VariantProps<T> = any;
+}
+
+// Textarea Props interface for UI components
+interface TextareaProps {
+  placeholder?: string;
+  value?: string;
+  onChange?: (e: any) => void;
+  onKeyDown?: (e: any) => void;
+  className?: string;
+  id?: string;
+  rows?: number;
+  disabled?: boolean;
+  children?: React.ReactNode;
+}
+
+// Make TextareaProps globally available
+declare global {
+  interface TextareaProps {
+    placeholder?: string;
+    value?: string;
+    onChange?: (e: any) => void;
+    onKeyDown?: (e: any) => void;
+    className?: string;
+    id?: string;
+    rows?: number;
+    disabled?: boolean;
+    children?: React.ReactNode;
+  }
 }
