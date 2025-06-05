@@ -9,6 +9,69 @@ declare module 'react' {
     displayName?: string;
     defaultProps?: Partial<P>;
   }
+  
+  // Complete React exports
+  export const useState: any;
+  export const useEffect: any;
+  export const useContext: any;
+  export const createContext: any;
+  export const useRef: any;
+  export const useMemo: any;
+  export const useCallback: any;
+  export const forwardRef: any;
+  export const Fragment: any;
+  
+  // React types
+  export type ChangeEvent<T = Element> = {
+    target: T & { value: string; checked?: boolean; name?: string };
+    currentTarget: T;
+  };
+  export type KeyboardEvent<T = Element> = {
+    key: string;
+    preventDefault: () => void;
+    stopPropagation: () => void;
+    currentTarget: T;
+  };
+  export type MouseEvent<T = Element> = {
+    preventDefault: () => void;
+    stopPropagation: () => void;
+    currentTarget: T;
+  };
+  export type FormEvent<T = Element> = {
+    preventDefault: () => void;
+    currentTarget: T;
+  };
+  
+  // Component types
+  export type ComponentProps<T> = any;
+  export type ComponentPropsWithoutRef<T> = any;
+  export type ElementRef<T> = any;
+  export type HTMLAttributes<T> = {
+    className?: string;
+    children?: React.ReactNode;
+    onClick?: (event: MouseEvent<T>) => void;
+    style?: React.CSSProperties;
+    id?: string;
+  };
+  export type ButtonHTMLAttributes<T> = HTMLAttributes<T> & {
+    type?: 'button' | 'submit' | 'reset';
+    disabled?: boolean;
+  };
+  export type InputHTMLAttributes<T> = HTMLAttributes<T> & {
+    type?: string;
+    value?: string | number;
+    placeholder?: string;
+    onChange?: (event: ChangeEvent<T>) => void;
+    onKeyDown?: (event: KeyboardEvent<T>) => void;
+    disabled?: boolean;
+    min?: string | number;
+    max?: string | number;
+    step?: string | number;
+    rows?: number;
+  };
+  
+  export type ReactNode = string | number | boolean | React.ReactElement | React.ReactFragment | React.ReactPortal | null | undefined;
+  export type CSSProperties = any;
 }
 
 // React Router DOM compatibility
@@ -67,7 +130,6 @@ declare module 'lucide-react' {
   export const DollarSign: typeof CircleDollarSign;
   export const Package2: typeof Package;
   export const FileQuestion: typeof FileText;
-  export const LucideIcon: typeof Settings;
   export const ArrowRight: typeof ChevronRight;
   export const AlertTriangle: typeof HelpCircle;
   export const Coins: typeof CircleDollarSign;
@@ -86,7 +148,76 @@ declare module 'lucide-react' {
   export const Plus: typeof Check;
   export const FileInput: typeof FileText;
   export const Clock: typeof Settings;
+  
+  // Additional missing icons
+  export const Database: typeof Package;
+  export const Boxes: typeof Package;
+  export const ArrowDown: typeof ChevronRight;
+  export const Percent: typeof Settings;
+  export const CalendarDays: typeof Settings;
+  export const TrendingDown: typeof TrendingUp;
+  export const ShoppingCart: typeof Package;
+  export const User: typeof Users;
+  export const Link: typeof Search;
+  export const CreditCard: typeof Settings;
+  export const Train: typeof Truck;
+  export const Ship: typeof Truck;
+  export const Plane: typeof Truck;
+  export const ListChecks: typeof Check;
+  export const ChevronDown: typeof ChevronRight;
+  export const MoreHorizontal: typeof Settings;
+  
+  // LucideIcon type and props
+  export const LucideIcon: typeof Settings;
   export const LucideProps: any;
+}
+
+// Enhanced TextareaProps interface with ALL required properties
+declare global {
+  interface TextareaProps {
+    placeholder?: string;
+    value?: string;
+    onChange?: (e: any) => void;
+    onKeyDown?: (e: any) => void;
+    className?: string;
+    id?: string;
+    rows?: number;
+    disabled?: boolean;
+    children?: React.ReactNode;
+  }
+  
+  // HTML Element interfaces with children support
+  interface HTMLDivElement {
+    children?: React.ReactNode;
+  }
+  
+  interface HTMLTableElement {
+    children?: React.ReactNode;
+  }
+  
+  interface HTMLTableSectionElement {
+    children?: React.ReactNode;
+  }
+  
+  interface HTMLTableRowElement {
+    children?: React.ReactNode;
+  }
+  
+  interface HTMLTableCellElement {
+    children?: React.ReactNode;
+  }
+  
+  interface HTMLTableCaptionElement {
+    children?: React.ReactNode;
+  }
+  
+  interface HTMLHeadingElement {
+    children?: React.ReactNode;
+  }
+  
+  interface HTMLParagraphElement {
+    children?: React.ReactNode;
+  }
 }
 
 // Recharts compatibility
@@ -289,32 +420,4 @@ declare module 'vaul' {
 declare module 'class-variance-authority' {
   export function cva(...args: any[]): any;
   export type VariantProps<T> = any;
-}
-
-// Enhanced TextareaProps interface with ALL required properties
-interface TextareaProps {
-  placeholder?: string;
-  value?: string;
-  onChange?: (e: any) => void;
-  onKeyDown?: (e: any) => void;
-  className?: string;
-  id?: string;
-  rows?: number;
-  disabled?: boolean;
-  children?: React.ReactNode;
-}
-
-// Make TextareaProps globally available
-declare global {
-  interface TextareaProps {
-    placeholder?: string;
-    value?: string;
-    onChange?: (e: any) => void;
-    onKeyDown?: (e: any) => void;
-    className?: string;
-    id?: string;
-    rows?: number;
-    disabled?: boolean;
-    children?: React.ReactNode;
-  }
 }
