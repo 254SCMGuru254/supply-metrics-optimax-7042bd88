@@ -26,6 +26,7 @@ import ChatAssistant from "@/pages/ChatAssistant";
 import BusinessValue from "@/pages/BusinessValue";
 import DesignAssistant from "@/pages/DesignAssistant";
 import Introduction from "@/pages/Introduction";
+import HorticulturalOptimization from "@/pages/HorticulturalOptimization";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -70,6 +71,7 @@ function App() {
             <Route path="/business-value" element={<Layout><BusinessValue /></Layout>} />
             <Route path="/design-assistant" element={<Layout><DesignAssistant /></Layout>} />
             <Route path="/introduction" element={<Layout><Introduction /></Layout>} />
+            <Route path="/horticultural-optimization" element={<Layout><HorticulturalOptimization /></Layout>} />
             
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />

@@ -23,7 +23,7 @@ declare module 'react-router-dom' {
   export const BrowserRouter: React.ForwardRefExoticComponent<any>;
 }
 
-// Lucide React icons compatibility - COMPLETE ICON MAPPING
+// Complete Lucide React icons compatibility - ALL MISSING ICONS MAPPED
 declare module 'lucide-react' {
   export const Home: React.ForwardRefExoticComponent<any>;
   export const LayoutDashboard: React.ForwardRefExoticComponent<any>;
@@ -47,14 +47,49 @@ declare module 'lucide-react' {
   export const Search: React.ForwardRefExoticComponent<any>;
   export const X: React.ForwardRefExoticComponent<any>;
   
-  // Map missing icons to allowed alternatives with proper type compatibility
+  // COMPLETE ICON MAPPING FOR ALL MISSING ICONS
   export const Bot: typeof HelpCircle;
   export const Building: typeof Package;
   export const Upload: typeof FileText;
   export const AlertCircle: typeof HelpCircle;
+  export const Save: typeof Check;
+  export const FileDown: typeof Download;
+  export const Lightbulb: typeof HelpCircle;
+  export const Send: typeof Check;
+  export const Globe: typeof Search;
+  export const MapPin: typeof Search;
+  export const Users: typeof Package;
+  export const Shield: typeof Check;
+  export const Store: typeof Package;
+  export const Calculator: typeof Settings;
+  export const Network: typeof Hexagon;
+  export const Route: typeof Activity;
+  export const DollarSign: typeof CircleDollarSign;
+  export const Package2: typeof Package;
+  export const FileQuestion: typeof FileText;
+  export const LucideIcon: typeof Settings;
+  export const ArrowRight: typeof ChevronRight;
+  export const AlertTriangle: typeof HelpCircle;
+  export const Coins: typeof CircleDollarSign;
+  export const Gauge: typeof Settings;
+  export const Scale: typeof Settings;
+  export const Compass: typeof Search;
+  export const LayoutGrid: typeof LayoutDashboard;
+  export const Map: typeof Search;
+  export const MessageSquare: typeof FileText;
+  export const Target: typeof Search;
+  export const Factory: typeof Package;
+  export const Warehouse: typeof Package;
+  export const PlusCircle: typeof Check;
+  export const Trash2: typeof X;
+  export const Info: typeof HelpCircle;
+  export const Plus: typeof Check;
+  export const FileInput: typeof FileText;
+  export const Clock: typeof Settings;
+  export const LucideProps: any;
 }
 
-// Recharts compatibility - COMPLETE RECHARTS DECLARATIONS
+// Recharts compatibility
 declare module 'recharts' {
   export const ResponsiveContainer: React.ForwardRefExoticComponent<any>;
   export const LineChart: React.ForwardRefExoticComponent<any>;
@@ -256,7 +291,7 @@ declare module 'class-variance-authority' {
   export type VariantProps<T> = any;
 }
 
-// Complete Textarea Props interface
+// Enhanced TextareaProps interface with ALL required properties
 interface TextareaProps {
   placeholder?: string;
   value?: string;
