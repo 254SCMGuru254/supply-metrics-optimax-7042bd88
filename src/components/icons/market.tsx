@@ -1,7 +1,7 @@
 
-import { LucideProps } from "lucide-react";
+import { LucideIconProps } from "lucide-react";
 
-export const Market = ({ size = 24, ...props }: LucideProps) => (
+export const Market = ({ size = 24, ...props }: LucideIconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}

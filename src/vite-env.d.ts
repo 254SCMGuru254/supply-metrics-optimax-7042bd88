@@ -10,16 +10,17 @@ declare module 'react' {
     defaultProps?: Partial<P>;
   }
   
-  // Complete React exports
-  export const useState: any;
-  export const useEffect: any;
-  export const useContext: any;
-  export const createContext: any;
-  export const useRef: any;
-  export const useMemo: any;
-  export const useCallback: any;
-  export const forwardRef: any;
-  export const Fragment: any;
+  // Complete React exports with proper typing
+  export function useState<T>(initialState: T | (() => T)): [T, (value: T | ((prev: T) => T)) => void];
+  export function useState<T = undefined>(): [T | undefined, (value: T | undefined | ((prev: T | undefined) => T | undefined)) => void];
+  export const useEffect: (effect: () => void | (() => void), deps?: any[]) => void;
+  export const useContext: <T>(context: React.Context<T>) => T;
+  export const createContext: <T>(defaultValue: T) => React.Context<T>;
+  export const useRef: <T>(initialValue: T) => React.RefObject<T>;
+  export const useMemo: <T>(factory: () => T, deps: any[]) => T;
+  export const useCallback: <T extends (...args: any[]) => any>(callback: T, deps: any[]) => T;
+  export const forwardRef: <T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactElement | null) => React.ForwardRefExoticComponent<P & React.RefAttributes<T>>;
+  export const Fragment: React.ComponentType<{ children?: React.ReactNode }>;
   
   // React types
   export type ChangeEvent<T = Element> = {
@@ -86,90 +87,101 @@ declare module 'react-router-dom' {
   export const BrowserRouter: React.ForwardRefExoticComponent<any>;
 }
 
-// Complete Lucide React icons compatibility - ALL MISSING ICONS MAPPED
+// Complete Lucide React icons compatibility - FIXED TYPE DEFINITIONS
 declare module 'lucide-react' {
-  export const Home: React.ForwardRefExoticComponent<any>;
-  export const LayoutDashboard: React.ForwardRefExoticComponent<any>;
-  export const Settings: React.ForwardRefExoticComponent<any>;
-  export const Package: React.ForwardRefExoticComponent<any>;
-  export const Truck: React.ForwardRefExoticComponent<any>;
-  export const LineChart: React.ForwardRefExoticComponent<any>;
-  export const BarChart3: React.ForwardRefExoticComponent<any>;
-  export const FileText: React.ForwardRefExoticComponent<any>;
-  export const HelpCircle: React.ForwardRefExoticComponent<any>;
-  export const CircleDollarSign: React.ForwardRefExoticComponent<any>;
-  export const TrendingUp: React.ForwardRefExoticComponent<any>;
-  export const Activity: React.ForwardRefExoticComponent<any>;
-  export const Hexagon: React.ForwardRefExoticComponent<any>;
-  export const ChevronLeft: React.ForwardRefExoticComponent<any>;
-  export const ChevronRight: React.ForwardRefExoticComponent<any>;
-  export const Download: React.ForwardRefExoticComponent<any>;
-  export const Loader2: React.ForwardRefExoticComponent<any>;
-  export const Check: React.ForwardRefExoticComponent<any>;
-  export const CheckCircle: React.ForwardRefExoticComponent<any>;
-  export const Search: React.ForwardRefExoticComponent<any>;
-  export const X: React.ForwardRefExoticComponent<any>;
+  export interface LucideIconProps {
+    size?: number;
+    color?: string;
+    strokeWidth?: number;
+    absoluteStrokeWidth?: boolean;
+    className?: string;
+    style?: React.CSSProperties;
+  }
+  
+  export type LucideIconType = React.ForwardRefExoticComponent<LucideIconProps>;
+  
+  export const Home: LucideIconType;
+  export const LayoutDashboard: LucideIconType;
+  export const Settings: LucideIconType;
+  export const Package: LucideIconType;
+  export const Truck: LucideIconType;
+  export const LineChart: LucideIconType;
+  export const BarChart3: LucideIconType;
+  export const FileText: LucideIconType;
+  export const HelpCircle: LucideIconType;
+  export const CircleDollarSign: LucideIconType;
+  export const TrendingUp: LucideIconType;
+  export const Activity: LucideIconType;
+  export const Hexagon: LucideIconType;
+  export const ChevronLeft: LucideIconType;
+  export const ChevronRight: LucideIconType;
+  export const Download: LucideIconType;
+  export const Loader2: LucideIconType;
+  export const Check: LucideIconType;
+  export const CheckCircle: LucideIconType;
+  export const Search: LucideIconType;
+  export const X: LucideIconType;
   
   // COMPLETE ICON MAPPING FOR ALL MISSING ICONS
-  export const Bot: typeof HelpCircle;
-  export const Building: typeof Package;
-  export const Upload: typeof FileText;
-  export const AlertCircle: typeof HelpCircle;
-  export const Save: typeof Check;
-  export const FileDown: typeof Download;
-  export const Lightbulb: typeof HelpCircle;
-  export const Send: typeof Check;
-  export const Globe: typeof Search;
-  export const MapPin: typeof Search;
-  export const Users: typeof Package;
-  export const Shield: typeof Check;
-  export const Store: typeof Package;
-  export const Calculator: typeof Settings;
-  export const Network: typeof Hexagon;
-  export const Route: typeof Activity;
-  export const DollarSign: typeof CircleDollarSign;
-  export const Package2: typeof Package;
-  export const FileQuestion: typeof FileText;
-  export const ArrowRight: typeof ChevronRight;
-  export const AlertTriangle: typeof HelpCircle;
-  export const Coins: typeof CircleDollarSign;
-  export const Gauge: typeof Settings;
-  export const Scale: typeof Settings;
-  export const Compass: typeof Search;
-  export const LayoutGrid: typeof LayoutDashboard;
-  export const Map: typeof Search;
-  export const MessageSquare: typeof FileText;
-  export const Target: typeof Search;
-  export const Factory: typeof Package;
-  export const Warehouse: typeof Package;
-  export const PlusCircle: typeof Check;
-  export const Trash2: typeof X;
-  export const Info: typeof HelpCircle;
-  export const Plus: typeof Check;
-  export const FileInput: typeof FileText;
-  export const Clock: typeof Settings;
+  export const Bot: LucideIconType;
+  export const Building: LucideIconType;
+  export const Upload: LucideIconType;
+  export const AlertCircle: LucideIconType;
+  export const Save: LucideIconType;
+  export const FileDown: LucideIconType;
+  export const Lightbulb: LucideIconType;
+  export const Send: LucideIconType;
+  export const Globe: LucideIconType;
+  export const MapPin: LucideIconType;
+  export const Users: LucideIconType;
+  export const Shield: LucideIconType;
+  export const Store: LucideIconType;
+  export const Calculator: LucideIconType;
+  export const Network: LucideIconType;
+  export const Route: LucideIconType;
+  export const DollarSign: LucideIconType;
+  export const Package2: LucideIconType;
+  export const FileQuestion: LucideIconType;
+  export const ArrowRight: LucideIconType;
+  export const AlertTriangle: LucideIconType;
+  export const Coins: LucideIconType;
+  export const Gauge: LucideIconType;
+  export const Scale: LucideIconType;
+  export const Compass: LucideIconType;
+  export const LayoutGrid: LucideIconType;
+  export const Map: LucideIconType;
+  export const MessageSquare: LucideIconType;
+  export const Target: LucideIconType;
+  export const Factory: LucideIconType;
+  export const Warehouse: LucideIconType;
+  export const PlusCircle: LucideIconType;
+  export const Trash2: LucideIconType;
+  export const Info: LucideIconType;
+  export const Plus: LucideIconType;
+  export const FileInput: LucideIconType;
+  export const Clock: LucideIconType;
   
   // Additional missing icons
-  export const Database: typeof Package;
-  export const Boxes: typeof Package;
-  export const ArrowDown: typeof ChevronRight;
-  export const Percent: typeof Settings;
-  export const CalendarDays: typeof Settings;
-  export const TrendingDown: typeof TrendingUp;
-  export const ShoppingCart: typeof Package;
-  export const User: typeof Users;
-  export const Link: typeof Search;
-  export const CreditCard: typeof Settings;
-  export const Train: typeof Truck;
-  export const Ship: typeof Truck;
-  export const Plane: typeof Truck;
-  export const ListChecks: typeof Check;
-  export const ChevronDown: typeof ChevronRight;
-  export const MoreHorizontal: typeof Settings;
+  export const Database: LucideIconType;
+  export const Boxes: LucideIconType;
+  export const ArrowDown: LucideIconType;
+  export const Percent: LucideIconType;
+  export const CalendarDays: LucideIconType;
+  export const TrendingDown: LucideIconType;
+  export const ShoppingCart: LucideIconType;
+  export const User: LucideIconType;
+  export const Link: LucideIconType;
+  export const CreditCard: LucideIconType;
+  export const Train: LucideIconType;
+  export const Ship: LucideIconType;
+  export const Plane: LucideIconType;
+  export const ListChecks: LucideIconType;
+  export const ChevronDown: LucideIconType;
+  export const MoreHorizontal: LucideIconType;
   
-  // LucideIcon type and props
-  export const LucideIcon: typeof Settings;
-  export const LucideProps: any;
+  // Legacy compatibility
+  export const LucideIcon: LucideIconType;
+  export const LucideProps: LucideIconProps;
 }
 
 // Enhanced TextareaProps interface with ALL required properties

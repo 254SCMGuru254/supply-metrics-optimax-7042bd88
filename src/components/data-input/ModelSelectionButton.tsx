@@ -1,11 +1,11 @@
 
 import { Button } from "@/components/ui/button";
-import { LucideIcon } from "lucide-react";
+import { LucideIconType } from "lucide-react";
 
 type ModelSelectionButtonProps = {
   isActive: boolean;
   onClick: () => void;
-  icon: LucideIcon;
+  icon: LucideIconType;
   title: string;
   description: string;
 };
