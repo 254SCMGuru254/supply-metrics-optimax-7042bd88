@@ -23,7 +23,7 @@ declare module 'react-router-dom' {
   export const BrowserRouter: React.ForwardRefExoticComponent<any>;
 }
 
-// Lucide React icons compatibility - ONLY ALLOWED ICONS
+// Lucide React icons compatibility - COMPLETE ICON MAPPING
 declare module 'lucide-react' {
   export const Home: React.ForwardRefExoticComponent<any>;
   export const LayoutDashboard: React.ForwardRefExoticComponent<any>;
@@ -47,15 +47,31 @@ declare module 'lucide-react' {
   export const Search: React.ForwardRefExoticComponent<any>;
   export const X: React.ForwardRefExoticComponent<any>;
   
-  // Use allowed icons instead of missing ones:
-  // Bot -> HelpCircle (for AI assistance)
+  // Map missing icons to allowed alternatives with proper type compatibility
   export const Bot: typeof HelpCircle;
-  // Building -> Package (for facilities)
   export const Building: typeof Package;
-  // Upload -> FileText (for file operations)
   export const Upload: typeof FileText;
-  // AlertCircle -> HelpCircle (for alerts)
   export const AlertCircle: typeof HelpCircle;
+}
+
+// Recharts compatibility - COMPLETE RECHARTS DECLARATIONS
+declare module 'recharts' {
+  export const ResponsiveContainer: React.ForwardRefExoticComponent<any>;
+  export const LineChart: React.ForwardRefExoticComponent<any>;
+  export const Line: React.ForwardRefExoticComponent<any>;
+  export const XAxis: React.ForwardRefExoticComponent<any>;
+  export const YAxis: React.ForwardRefExoticComponent<any>;
+  export const Tooltip: React.ForwardRefExoticComponent<any>;
+  export const Legend: React.ForwardRefExoticComponent<any>;
+  export const CartesianGrid: React.ForwardRefExoticComponent<any>;
+  export const BarChart: React.ForwardRefExoticComponent<any>;
+  export const Bar: React.ForwardRefExoticComponent<any>;
+  export const PieChart: React.ForwardRefExoticComponent<any>;
+  export const Pie: React.ForwardRefExoticComponent<any>;
+  export const Cell: React.ForwardRefExoticComponent<any>;
+  export const ReferenceLine: React.ForwardRefExoticComponent<any>;
+  export const Area: React.ForwardRefExoticComponent<any>;
+  export const AreaChart: React.ForwardRefExoticComponent<any>;
 }
 
 // Complete Radix UI module declarations
@@ -240,7 +256,7 @@ declare module 'class-variance-authority' {
   export type VariantProps<T> = any;
 }
 
-// Textarea Props interface for UI components
+// Complete Textarea Props interface
 interface TextareaProps {
   placeholder?: string;
   value?: string;

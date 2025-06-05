@@ -3,9 +3,18 @@ import 'react';
 
 declare module 'react' {
   export interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-    // Add custom attributes used in the project
-    css?: any;
+    // Add all standard HTML attributes
+    className?: string;
+    style?: React.CSSProperties;
+    id?: string;
     children?: ReactNode;
+    key?: React.Key;
+    ref?: React.Ref<T>;
+    role?: string;
+    tabIndex?: number;
+    title?: string;
+    'data-*'?: string;
+    'aria-*'?: string;
   }
 
   // Add missing React types and ensure all hooks are properly exported
@@ -23,6 +32,7 @@ declare module 'react' {
   export type ChangeEvent<T = Element> = React.ChangeEvent<T>;
   export type RefObject<T> = React.RefObject<T>;
   export type Context<T> = React.Context<T>;
+  export type CSSProperties = React.CSSProperties;
   
   // Ensure all React hooks and functions are properly exported
   export const useState: typeof React.useState;
@@ -34,99 +44,262 @@ declare module 'react' {
   export const createContext: typeof React.createContext;
   export const forwardRef: typeof React.forwardRef;
 
-  // HTML element interfaces with children support
+  // Enhanced HTML element interfaces with full attribute support
   export interface HTMLDivElement extends React.HTMLAttributes<HTMLDivElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+    id?: string;
+    role?: string;
+    tabIndex?: number;
+    onClick?: (e: any) => void;
   }
 
   export interface HTMLTableElement extends React.HTMLAttributes<HTMLTableElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+    id?: string;
   }
 
   export interface HTMLTableRowElement extends React.HTMLAttributes<HTMLTableRowElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+    key?: React.Key;
   }
 
   export interface HTMLTableCellElement extends React.HTMLAttributes<HTMLTableCellElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+    colSpan?: number;
+    rowSpan?: number;
   }
 
   export interface HTMLTableSectionElement extends React.HTMLAttributes<HTMLTableSectionElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
   }
 
   export interface HTMLTableCaptionElement extends React.HTMLAttributes<HTMLTableCaptionElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
   }
 
   export interface HTMLHeadingElement extends React.HTMLAttributes<HTMLHeadingElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
   }
 
   export interface HTMLParagraphElement extends React.HTMLAttributes<HTMLParagraphElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
   }
 
   export interface HTMLFormElement extends React.HTMLAttributes<HTMLFormElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+    onSubmit?: (e: any) => void;
   }
 
   export interface HTMLInputElement extends React.HTMLAttributes<HTMLInputElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+    placeholder?: string;
+    value?: string;
+    onChange?: (e: any) => void;
+    type?: string;
+    disabled?: boolean;
+    id?: string;
   }
 
   export interface HTMLTextAreaElement extends React.HTMLAttributes<HTMLTextAreaElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
     placeholder?: string;
     rows?: number;
     id?: string;
     disabled?: boolean;
     value?: string;
     onChange?: (e: any) => void;
+    onKeyDown?: (e: any) => void;
   }
 
   export interface HTMLButtonElement extends React.HTMLAttributes<HTMLButtonElement> {
     children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
     disabled?: boolean;
     type?: "button" | "submit" | "reset";
+    onClick?: (e: any) => void;
+  }
+
+  export interface HTMLSpanElement extends React.HTMLAttributes<HTMLSpanElement> {
+    children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+  }
+
+  export interface HTMLLabelElement extends React.HTMLAttributes<HTMLLabelElement> {
+    children?: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+    htmlFor?: string;
   }
 }
 
-// Declare global HTML element interfaces
+// Declare global HTML element interfaces with full attribute support
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }, HTMLDivElement>;
-      table: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableElement> & { children?: React.ReactNode }, HTMLTableElement>;
-      thead: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableSectionElement> & { children?: React.ReactNode }, HTMLTableSectionElement>;
-      tbody: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableSectionElement> & { children?: React.ReactNode }, HTMLTableSectionElement>;
-      tr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableRowElement> & { children?: React.ReactNode }, HTMLTableRowElement>;
-      th: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableHeaderCellElement> & { children?: React.ReactNode }, HTMLTableHeaderCellElement>;
-      td: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableDataCellElement> & { children?: React.ReactNode }, HTMLTableDataCellElement>;
-      caption: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableCaptionElement> & { children?: React.ReactNode }, HTMLTableCaptionElement>;
-      h1: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { children?: React.ReactNode }, HTMLHeadingElement>;
-      h2: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { children?: React.ReactNode }, HTMLHeadingElement>;
-      h3: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { children?: React.ReactNode }, HTMLHeadingElement>;
-      h4: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { children?: React.ReactNode }, HTMLHeadingElement>;
-      p: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement> & { children?: React.ReactNode }, HTMLParagraphElement>;
-      form: React.DetailedHTMLProps<React.HTMLAttributes<HTMLFormElement> & { children?: React.ReactNode }, HTMLFormElement>;
-      input: React.DetailedHTMLProps<React.HTMLAttributes<HTMLInputElement> & { children?: React.ReactNode }, HTMLInputElement>;
+      div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+        id?: string;
+        role?: string;
+        tabIndex?: number;
+        onClick?: (e: any) => void;
+      }, HTMLDivElement>;
+      
+      table: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLTableElement>;
+      
+      thead: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableSectionElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLTableSectionElement>;
+      
+      tbody: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableSectionElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLTableSectionElement>;
+      
+      tr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableRowElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+        key?: React.Key;
+      }, HTMLTableRowElement>;
+      
+      th: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableHeaderCellElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+        colSpan?: number;
+        rowSpan?: number;
+      }, HTMLTableHeaderCellElement>;
+      
+      td: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableDataCellElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+        colSpan?: number;
+        rowSpan?: number;
+      }, HTMLTableDataCellElement>;
+      
+      caption: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableCaptionElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLTableCaptionElement>;
+      
+      h1: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLHeadingElement>;
+      
+      h2: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLHeadingElement>;
+      
+      h3: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLHeadingElement>;
+      
+      h4: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLHeadingElement>;
+      
+      p: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLParagraphElement>;
+      
+      form: React.DetailedHTMLProps<React.HTMLAttributes<HTMLFormElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+        onSubmit?: (e: any) => void;
+      }, HTMLFormElement>;
+      
+      input: React.DetailedHTMLProps<React.HTMLAttributes<HTMLInputElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+        placeholder?: string;
+        value?: string;
+        onChange?: (e: any) => void;
+        type?: string;
+        disabled?: boolean;
+        id?: string;
+      }, HTMLInputElement>;
+      
       textarea: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTextAreaElement> & { 
         children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
         placeholder?: string;
         rows?: number;
         id?: string;
         disabled?: boolean;
         value?: string;
         onChange?: (e: any) => void;
+        onKeyDown?: (e: any) => void;
       }, HTMLTextAreaElement>;
+      
       button: React.DetailedHTMLProps<React.HTMLAttributes<HTMLButtonElement> & { 
         children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
         disabled?: boolean;
         type?: "button" | "submit" | "reset";
+        onClick?: (e: any) => void;
       }, HTMLButtonElement>;
-      span: React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement> & { children?: React.ReactNode }, HTMLSpanElement>;
-      label: React.DetailedHTMLProps<React.HTMLAttributes<HTMLLabelElement> & { children?: React.ReactNode }, HTMLLabelElement>;
+      
+      span: React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+      }, HTMLSpanElement>;
+      
+      label: React.DetailedHTMLProps<React.HTMLAttributes<HTMLLabelElement> & { 
+        children?: React.ReactNode;
+        className?: string;
+        style?: React.CSSProperties;
+        htmlFor?: string;
+      }, HTMLLabelElement>;
     }
   }
 }
