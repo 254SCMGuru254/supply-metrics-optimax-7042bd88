@@ -21,8 +21,10 @@ declare module 'react' {
   export const useCallback: <T extends (...args: any[]) => any>(callback: T, deps: any[]) => T;
   export const forwardRef: <T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactElement | null) => React.ForwardRefExoticComponent<P & React.RefAttributes<T>>;
   export const Fragment: React.ComponentType<{ children?: React.ReactNode }>;
+  export const useId: () => string;
   
   // React types
+  export type ComponentType<P = {}> = React.ComponentType<P>;
   export type ChangeEvent<T = Element> = {
     target: T & { value: string; checked?: boolean; name?: string };
     currentTarget: T;
@@ -69,6 +71,25 @@ declare module 'react' {
     max?: string | number;
     step?: string | number;
     rows?: number;
+  };
+  export type TextareaHTMLAttributes<T> = HTMLAttributes<T> & {
+    placeholder?: string;
+    value?: string;
+    onChange?: (event: ChangeEvent<T>) => void;
+    onKeyDown?: (event: KeyboardEvent<T>) => void;
+    disabled?: boolean;
+    rows?: number;
+    cols?: number;
+    wrap?: string;
+    maxLength?: number;
+    minLength?: number;
+    readOnly?: boolean;
+    required?: boolean;
+    autoComplete?: string;
+    autoFocus?: boolean;
+    form?: string;
+    name?: string;
+    spellCheck?: boolean;
   };
   
   export type ReactNode = string | number | boolean | React.ReactElement | React.ReactFragment | React.ReactPortal | null | undefined;
@@ -179,14 +200,18 @@ declare module 'lucide-react' {
   export const ChevronDown: LucideIconType;
   export const MoreHorizontal: LucideIconType;
   
+  // MISSING ARROW ICONS - CRITICAL FIX
+  export const ArrowLeft: LucideIconType;
+  export const ArrowUp: LucideIconType;
+  
   // Legacy compatibility
   export const LucideIcon: LucideIconType;
-  export const LucideProps: LucideIconProps;
+  export type LucideProps = LucideIconProps;
 }
 
 // Enhanced TextareaProps interface with ALL required properties
 declare global {
-  interface TextareaProps {
+  interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     placeholder?: string;
     value?: string;
     onChange?: (e: any) => void;
@@ -232,7 +257,7 @@ declare global {
   }
 }
 
-// Recharts compatibility
+// Recharts compatibility with complete type definitions
 declare module 'recharts' {
   export const ResponsiveContainer: React.ForwardRefExoticComponent<any>;
   export const LineChart: React.ForwardRefExoticComponent<any>;
@@ -250,9 +275,19 @@ declare module 'recharts' {
   export const ReferenceLine: React.ForwardRefExoticComponent<any>;
   export const Area: React.ForwardRefExoticComponent<any>;
   export const AreaChart: React.ForwardRefExoticComponent<any>;
+  
+  // Missing Recharts types
+  export interface LegendProps {
+    content?: React.ComponentType<any>;
+    payload?: any[];
+    verticalAlign?: 'top' | 'middle' | 'bottom';
+    align?: 'left' | 'center' | 'right';
+    iconType?: string;
+    wrapperStyle?: React.CSSProperties;
+  }
 }
 
-// Complete Radix UI module declarations
+// Complete Radix UI module declarations with proper typing
 declare module '@radix-ui/react-accordion' {
   export const Root: React.ForwardRefExoticComponent<any>;
   export const Item: React.ForwardRefExoticComponent<any>;
@@ -315,6 +350,37 @@ declare module '@radix-ui/react-dialog' {
 
 declare module '@radix-ui/react-dropdown-menu' {
   export const Root: React.ForwardRefExoticComponent<any>;
+  export const Trigger: React.ForwardRefExoticComponent<any>;
+  export const Portal: React.ForwardRefExoticComponent<any>;
+  export const Content: React.ForwardRefExoticComponent<any>;
+  export const Group: React.ForwardRefExoticComponent<any>;
+  export const Item: React.ForwardRefExoticComponent<any>;
+  export const CheckboxItem: React.ForwardRefExoticComponent<any>;
+  export const RadioGroup: React.ForwardRefExoticComponent<any>;
+  export const RadioItem: React.ForwardRefExoticComponent<any>;
+  export const ItemIndicator: React.ForwardRefExoticComponent<any>;
+  export const Separator: React.ForwardRefExoticComponent<any>;
+  export const Label: React.ForwardRefExoticComponent<any>;
+  export const Sub: React.ForwardRefExoticComponent<any>;
+  export const SubTrigger: React.ForwardRefExoticComponent<any>;
+  export const SubContent: React.ForwardRefExoticComponent<any>;
+}
+
+declare module '@radix-ui/react-hover-card' {
+  export const Root: React.ForwardRefExoticComponent<any>;
+  export const Trigger: React.ForwardRefExoticComponent<any>;
+  export const Portal: React.ForwardRefExoticComponent<any>;
+  export const Content: React.ForwardRefExoticComponent<any>;
+  export const Arrow: React.ForwardRefExoticComponent<any>;
+}
+
+declare module '@radix-ui/react-label' {
+  export const Root: React.ForwardRefExoticComponent<any>;
+}
+
+declare module '@radix-ui/react-menubar' {
+  export const Root: React.ForwardRefExoticComponent<any>;
+  export const Menu: React.ForwardRefExoticComponent<any>;
   export const Trigger: React.ForwardRefExoticComponent<any>;
   export const Portal: React.ForwardRefExoticComponent<any>;
   export const Content: React.ForwardRefExoticComponent<any>;
@@ -407,7 +473,15 @@ declare module '@radix-ui/react-tooltip' {
 
 // Additional UI library declarations
 declare module 'cmdk' {
-  export const Command: React.ForwardRefExoticComponent<any>;
+  export const Command: {
+    Input: React.ForwardRefExoticComponent<any>;
+    List: React.ForwardRefExoticComponent<any>;
+    Empty: React.ForwardRefExoticComponent<any>;
+    Group: React.ForwardRefExoticComponent<any>;
+    Item: React.ForwardRefExoticComponent<any>;
+    Separator: React.ForwardRefExoticComponent<any>;
+    displayName?: string;
+  } & React.ForwardRefExoticComponent<any>;
 }
 
 declare module 'input-otp' {
@@ -416,7 +490,18 @@ declare module 'input-otp' {
 }
 
 declare module 'vaul' {
-  export const Drawer: React.ForwardRefExoticComponent<any>;
+  export const Drawer: {
+    Root: React.ForwardRefExoticComponent<any>;
+    Trigger: React.ForwardRefExoticComponent<any>;
+    Portal: React.ForwardRefExoticComponent<any>;
+    Overlay: React.ForwardRefExoticComponent<any>;
+    Content: React.ForwardRefExoticComponent<any>;
+    Header: React.ForwardRefExoticComponent<any>;
+    Footer: React.ForwardRefExoticComponent<any>;
+    Title: React.ForwardRefExoticComponent<any>;
+    Description: React.ForwardRefExoticComponent<any>;
+    Close: React.ForwardRefExoticComponent<any>;
+  } & React.ForwardRefExoticComponent<any>;
   export const DrawerTrigger: React.ForwardRefExoticComponent<any>;
   export const DrawerContent: React.ForwardRefExoticComponent<any>;
   export const DrawerHeader: React.ForwardRefExoticComponent<any>;
