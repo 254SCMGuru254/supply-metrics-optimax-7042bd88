@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, Brain, Network, Target } from "lucide-react";
+import { Calculator, Network, Target } from "lucide-react";
 
 export type CogFormula = {
   id: string;
@@ -152,7 +152,7 @@ export const CogFormulaSelector = ({
                   <SelectItem key={formula.id} value={formula.id}>
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
-                        {formula.machinelearning && <Brain className="h-4 w-4 text-purple-600" />}
+                        {formula.machinelearning && <Network className="h-4 w-4 text-purple-600" />}
                         <span>{formula.name}</span>
                       </div>
                       <Badge variant="secondary" className="ml-2">
@@ -171,7 +171,7 @@ export const CogFormulaSelector = ({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {selectedFormulaData.machinelearning && <Brain className="h-5 w-5 text-purple-600" />}
+                      {selectedFormulaData.machinelearning && <Network className="h-5 w-5 text-purple-600" />}
                       <h4 className="font-semibold">{selectedFormulaData.name}</h4>
                     </div>
                     <div className="flex gap-2">
@@ -217,7 +217,7 @@ export const CogFormulaSelector = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <h4 className="font-semibold flex items-center gap-2">
-                <Brain className="h-4 w-4" />
+                <Network className="h-4 w-4" />
                 AI-Enhanced Features
               </h4>
               <ul className="text-sm text-muted-foreground space-y-1">

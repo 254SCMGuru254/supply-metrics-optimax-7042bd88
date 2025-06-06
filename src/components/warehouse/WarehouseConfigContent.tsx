@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NetworkMap, Node } from "@/components/NetworkMap";
-import { WarehouseIcon, LayersIcon, ThermometerIcon, MapPinIcon } from "lucide-react";
+import { Warehouse, Layers, Thermometer, MapPin } from "lucide-react";
 
 export type WarehouseConfigProps = {
   onSubmit?: (data: WarehouseConfigData) => void;
@@ -169,7 +168,7 @@ export const WarehouseConfigContent = ({ onSubmit }: WarehouseConfigProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <WarehouseIcon className="h-5 w-5" />
+                <Warehouse className="h-5 w-5" />
                 Warehouse Type Selection
               </CardTitle>
               <CardDescription>
@@ -250,7 +249,7 @@ export const WarehouseConfigContent = ({ onSubmit }: WarehouseConfigProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <LayersIcon className="h-5 w-5" />
+                <Layers className="h-5 w-5" />
                 Automation Level
               </CardTitle>
               <CardDescription>
@@ -334,7 +333,7 @@ export const WarehouseConfigContent = ({ onSubmit }: WarehouseConfigProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ThermometerIcon className="h-5 w-5" />
+                <Thermometer className="h-5 w-5" />
                 Cold Chain Configuration
               </CardTitle>
               <CardDescription>
@@ -406,7 +405,7 @@ export const WarehouseConfigContent = ({ onSubmit }: WarehouseConfigProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MapPinIcon className="h-5 w-5" />
+                <MapPin className="h-5 w-5" />
                 Location Analysis
               </CardTitle>
               <CardDescription>

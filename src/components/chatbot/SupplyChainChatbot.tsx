@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Globe } from "lucide-react";
+import { Send, Loader2, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -212,7 +212,7 @@ export const SupplyChainChatbot = () => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -239,7 +239,7 @@ export const SupplyChainChatbot = () => {
           </div>
           <Select value={chatLanguage} onValueChange={handleLanguageChange}>
             <SelectTrigger className="w-[100px]">
-              <Globe className="mr-2 h-4 w-4" />
+              <Calculator className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent>

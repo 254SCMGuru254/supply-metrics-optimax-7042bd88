@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Bot, FileText, Truck, Package, BarChart3, Building, Upload } from "lucide-react";
+import { Calculator, FileText, Truck, Box, BarChart3, Building, Upload } from "lucide-react";
 import { SupplyChainReportGenerator } from "./SupplyChainReportGenerator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -66,7 +66,7 @@ export const SupplyChainDesignAssistant = () => {
     }, 1500);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -86,7 +86,7 @@ export const SupplyChainDesignAssistant = () => {
             <div className="md:col-span-2">
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <Bot className="h-5 w-5" />
+                  <Calculator className="h-5 w-5" />
                   <h2 className="text-xl font-semibold">Supply Chain Design Chat</h2>
                 </div>
                 
@@ -154,7 +154,7 @@ export const SupplyChainDesignAssistant = () => {
                   
                   <div className="flex gap-3 items-start">
                     <div className="bg-primary/10 p-2 rounded-full">
-                      <Package className="h-4 w-4 text-primary" />
+                      <Box className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-medium text-sm">Inventory Planning</h3>
