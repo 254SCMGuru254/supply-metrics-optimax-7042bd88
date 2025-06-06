@@ -1,5 +1,5 @@
 
-import { Node, Route } from "@/components/NetworkMap";
+import type { Node, Route } from "@/components/NetworkMap";
 
 // Simulated annealing parameters
 export interface SimulatedAnnealingParams {
@@ -26,6 +26,7 @@ export const createInitialRoutes = (nodes: Node[]): Route[] => {
         to: nodes[j].id,
         volume: Math.floor(Math.random() * 100) + 50,
         cost: Math.round(distance * 10), // Cost based on distance
+        ownership: 'owned'
       });
     }
   }

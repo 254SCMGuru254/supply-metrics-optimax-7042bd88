@@ -1,5 +1,5 @@
 
-import { Node, Route } from "@/components/NetworkMap";
+import type { Node, Route } from "@/components/NetworkMap";
 
 // Network flow optimization utility functions
 export const createInitialNetwork = (nodes: Node[]): Route[] => {
@@ -20,6 +20,7 @@ export const createInitialNetwork = (nodes: Node[]): Route[] => {
         to: nodes[j].id,
         volume: 0, // Initial flow
         cost: Math.round(distance * 100), // Cost proportional to distance
+        ownership: 'owned'
       });
     }
   }

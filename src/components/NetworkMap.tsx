@@ -15,9 +15,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Warehouse, Factory, Store, Truck, MapPin, Edit, Save, X } from "lucide-react";
-import { Node, Route, NodeType, OwnershipType } from "@/components/map/MapTypes";
+import type { Node, Route, NodeType, OwnershipType } from "@/components/map/MapTypes";
 
-export { Node, Route, NodeType, OwnershipType };
+export type { Node, Route, NodeType, OwnershipType };
 
 export interface NetworkMapProps {
   nodes: Node[];
@@ -438,14 +438,18 @@ export const NetworkMap: React.FC<NetworkMapProps> = ({
         [toNode.latitude, toNode.longitude]
       ];
       
+      const routeColor = route.color || (route.ownership === 'owned' ? '#22c55e' : route.ownership === 'hired' ? '#3b82f6' : '#f59e0b');
+      
       return (
         <Polyline
           key={route.id}
           positions={positions}
-          color={route.color || (route.ownership === 'owned' ? '#22c55e' : route.ownership === 'hired' ? '#3b82f6' : '#f59e0b')}
-          weight={route.isOptimized ? 4 : 2}
-          opacity={route.isOptimized ? 0.8 : 0.6}
-          dashArray={route.ownership === 'outsourced' ? '10, 5' : undefined}
+          pathOptions={{
+            color: routeColor,
+            weight: route.isOptimized ? 4 : 2,
+            opacity: route.isOptimized ? 0.8 : 0.6,
+            dashArray: route.ownership === 'outsourced' ? '10, 5' : undefined
+          }}
         >
           <Popup>
             <div className="space-y-2">

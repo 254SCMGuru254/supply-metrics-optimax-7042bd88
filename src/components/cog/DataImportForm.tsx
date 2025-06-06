@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, Download, Plus, Trash2 } from "lucide-react";
-import { Node } from "@/components/NetworkMap";
+import type { Node } from "@/components/NetworkMap";
 
 interface DataImportFormProps {
   onImport: (nodes: Node[]) => void;
@@ -62,11 +62,12 @@ export const DataImportForm = ({ onImport }: DataImportFormProps) => {
         if (values.length >= 3) {
           const node: Node = {
             id: crypto.randomUUID(),
-            type: "retail",
+            type: "customer",
             name: values[nameIndex] || `Location ${i}`,
             latitude: parseFloat(values[latIndex]),
             longitude: parseFloat(values[lngIndex]),
             weight: weightIndex !== -1 ? parseFloat(values[weightIndex]) || 10 : 10,
+            ownership: 'owned'
           };
           
           if (!isNaN(node.latitude) && !isNaN(node.longitude)) {
@@ -114,11 +115,12 @@ export const DataImportForm = ({ onImport }: DataImportFormProps) => {
         .filter(entry => entry.name && entry.latitude && entry.longitude)
         .map((entry, index) => ({
           id: crypto.randomUUID(),
-          type: "retail" as const,
+          type: "customer" as const,
           name: entry.name,
           latitude: parseFloat(entry.latitude),
           longitude: parseFloat(entry.longitude),
           weight: parseFloat(entry.weight) || 10,
+          ownership: 'owned' as const,
         }))
         .filter(node => !isNaN(node.latitude) && !isNaN(node.longitude));
 
