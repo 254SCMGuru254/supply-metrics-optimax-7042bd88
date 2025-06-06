@@ -66,7 +66,7 @@ export const CogRecommendations = ({
         
         <p>
           <strong>Demand Concentration:</strong> {
-            nodes.filter(n => n.type === "retail").length > 10 
+            nodes.filter(n => n.type === "customer").length > 10 
               ? "Your demand points show significant clustering. Consider multiple smaller facilities instead of one central facility."
               : "Your demand pattern supports a centralized distribution model."
           }

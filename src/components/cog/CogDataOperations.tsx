@@ -33,7 +33,8 @@ export const CogDataOperations = ({
       type: node.type,
       latitude: node.latitude,
       longitude: node.longitude,
-      weight: node.weight || 1
+      weight: node.weight || 1,
+      ownership: node.ownership
     }));
 
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
@@ -66,10 +67,11 @@ export const CogDataOperations = ({
           ).map(item => ({
             id: item.id || crypto.randomUUID(),
             name: item.name || `Demand Point ${Math.floor(Math.random() * 1000)}`,
-            type: item.type || "retail",
+            type: item.type || "customer",
             latitude: item.latitude,
             longitude: item.longitude,
-            weight: item.weight || 1
+            weight: item.weight || 1,
+            ownership: item.ownership || 'owned'
           }));
 
           if (validData.length > 0) {

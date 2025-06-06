@@ -145,6 +145,85 @@ declare module 'lucide-react' {
   export { Calculator as CalculatorIcon };
 }
 
+// Complete Recharts type definitions
+declare module 'recharts' {
+  import { ComponentType, ReactNode } from 'react';
+  
+  export interface ResponsiveContainerProps {
+    width?: string | number;
+    height?: string | number;
+    children?: ReactNode;
+  }
+  
+  export interface LineChartProps {
+    data?: any[];
+    margin?: {
+      top?: number;
+      right?: number;
+      left?: number;
+      bottom?: number;
+    };
+    children?: ReactNode;
+  }
+  
+  export interface BarChartProps {
+    data?: any[];
+    margin?: {
+      top?: number;
+      right?: number;
+      left?: number;
+      bottom?: number;
+    };
+    children?: ReactNode;
+  }
+  
+  export interface XAxisProps {
+    dataKey?: string;
+    tickFormatter?: (value: any) => string;
+  }
+  
+  export interface YAxisProps {
+    tickFormatter?: (value: any) => string;
+  }
+  
+  export interface TooltipProps {
+    labelFormatter?: (value: any) => string;
+    formatter?: (value: any, name?: string) => [string, string];
+  }
+  
+  export interface LineProps {
+    type?: "monotone" | "basis" | "cardinal" | "linear" | "step";
+    dataKey?: string;
+    stroke?: string;
+    strokeWidth?: number;
+    name?: string;
+    activeDot?: { r: number } | boolean;
+  }
+  
+  export interface BarProps {
+    dataKey?: string;
+    fill?: string;
+    name?: string;
+  }
+  
+  export interface CartesianGridProps {
+    strokeDasharray?: string;
+  }
+  
+  export interface LegendProps {}
+  
+  export const ResponsiveContainer: ComponentType<ResponsiveContainerProps>;
+  export const LineChart: ComponentType<LineChartProps>;
+  export const BarChart: ComponentType<BarChartProps>;
+  export const XAxis: ComponentType<XAxisProps>;
+  export const YAxis: ComponentType<YAxisProps>;
+  export const CartesianGrid: ComponentType<CartesianGridProps>;
+  export const Tooltip: ComponentType<TooltipProps>;
+  export const Legend: ComponentType<LegendProps>;
+  export const Line: ComponentType<LineProps>;
+  export const Bar: ComponentType<BarProps>;
+}
+
 // Enhanced Button component props
 declare module '@/components/ui/button' {
   import { ComponentType, ReactNode } from 'react';

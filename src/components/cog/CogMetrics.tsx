@@ -18,7 +18,7 @@ export const CogMetrics = ({
   distanceReduction,
   calculationType,
 }: CogMetricsProps) => {
-  const retailNodes = nodes.filter(n => n.type === "retail");
+  const customerNodes = nodes.filter(n => n.type === "customer");
   const warehouseNodes = nodes.filter(n => n.type === "warehouse" && !n.isOptimal);
   const hasExistingWarehouse = warehouseNodes.length > 0;
   
@@ -26,7 +26,7 @@ export const CogMetrics = ({
     <div className="space-y-4">
       <div>
         <p className="text-sm text-muted-foreground">Total Demand Points</p>
-        <p className="text-2xl font-semibold">{retailNodes.length}</p>
+        <p className="text-2xl font-semibold">{customerNodes.length}</p>
       </div>
       
       {hasExistingWarehouse && (
