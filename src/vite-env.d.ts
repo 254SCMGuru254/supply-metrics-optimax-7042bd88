@@ -28,30 +28,9 @@ declare module 'react' {
   export type DetailedHTMLProps<E, T> = React.DetailedHTMLProps<E, T>;
   export type KeyboardEventHandler<T = Element> = React.KeyboardEventHandler<T>;
   export type MouseEventHandler<T = Element> = React.MouseEventHandler<T>;
-  
-  // Enhanced TextareaProps interface
-  export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-    className?: string;
-    placeholder?: string;
-    value?: string;
-    defaultValue?: string;
-    disabled?: boolean;
-    readOnly?: boolean;
-    rows?: number;
-    cols?: number;
-    id?: string;
-    name?: string;
-    onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
-    onKeyDown?: React.KeyboardEventHandler<HTMLTextAreaElement>;
-    onFocus?: React.FocusEventHandler<HTMLTextAreaElement>;
-    onBlur?: React.FocusEventHandler<HTMLTextAreaElement>;
-    style?: React.CSSProperties;
-    children?: React.ReactNode;
-    ref?: React.Ref<HTMLTextAreaElement>;
-  }
 }
 
-// Enhanced Lucide React type definitions
+// Enhanced Lucide React type definitions with ALL required icons
 declare module 'lucide-react' {
   import { ComponentType } from 'react';
   
@@ -65,8 +44,34 @@ declare module 'lucide-react' {
   
   export type LucideIcon = ComponentType<LucideProps>;
   
-  // All available icons from lucide-react
+  // All required icons for the application
+  export const Home: LucideIcon;
+  export const LayoutDashboard: LucideIcon;
+  export const Settings: LucideIcon;
+  export const Package: LucideIcon;
+  export const LineChart: LucideIcon;
+  export const BarChart3: LucideIcon;
+  export const FileText: LucideIcon;
+  export const HelpCircle: LucideIcon;
+  export const CircleDollarSign: LucideIcon;
+  export const TrendingUp: LucideIcon;
+  export const Activity: LucideIcon;
+  export const Hexagon: LucideIcon;
+  export const Loader2: LucideIcon;
+  export const ChevronLeft: LucideIcon;
+  export const ChevronRight: LucideIcon;
+  export const Check: LucideIcon;
+  export const AlertCircle: LucideIcon;
+  export const BookOpen: LucideIcon;
+  export const Calendar: LucideIcon;
+  export const ArrowDownToLine: LucideIcon;
+  export const Play: LucideIcon;
+  export const RefreshCcw: LucideIcon;
   export const Calculator: LucideIcon;
+  export const Building: LucideIcon;
+  export const Building2: LucideIcon;
+  export const MessageSquare: LucideIcon;
+  export const MessageSquareQuote: LucideIcon;
   export const Brain: LucideIcon;
   export const Network: LucideIcon;
   export const Target: LucideIcon;
@@ -84,28 +89,41 @@ declare module 'lucide-react' {
   export const Thermometer: LucideIcon;
   export const Box: LucideIcon;
   export const FileEdit: LucideIcon;
-  export const MessageSquare: LucideIcon;
-  export const BookOpen: LucideIcon;
-  export const Calendar: LucideIcon;
-  export const ArrowDownToLine: LucideIcon;
-  export const Play: LucideIcon;
-  export const RefreshCcw: LucideIcon;
-  export const Building: LucideIcon;
   export const ArrowLeft: LucideIcon;
   export const ArrowRight: LucideIcon;
   export const GripVertical: LucideIcon;
+  export const Route: LucideIcon;
+  export const DollarSign: LucideIcon;
+  export const Package2: LucideIcon;
+  export const FileQuestion: LucideIcon;
   
-  // Icon aliases for common names
+  // Icon aliases
   export const WarehouseIcon: LucideIcon;
   export const LayersIcon: LucideIcon;
   export const ThermometerIcon: LucideIcon;
   export const MapPinIcon: LucideIcon;
   export const CalculatorIcon: LucideIcon;
-  export const Building2: LucideIcon;
-  export const MessageSquareQuote: LucideIcon;
 }
 
-// Recharts type definitions
+// Enhanced Button component props
+declare module '@/components/ui/button' {
+  import { ComponentType, ReactNode } from 'react';
+  
+  export interface ButtonProps {
+    children?: ReactNode;
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    size?: 'default' | 'sm' | 'lg' | 'icon';
+    className?: string;
+    disabled?: boolean;
+    type?: 'button' | 'submit' | 'reset';
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    asChild?: boolean;
+  }
+  
+  export const Button: ComponentType<ButtonProps>;
+}
+
+// Enhanced Recharts type definitions
 declare module 'recharts' {
   export interface LegendProps {
     content?: any;
@@ -133,143 +151,12 @@ declare module 'recharts' {
   export const Cell: React.ComponentType<any>;
 }
 
-// Radix UI type definitions with proper component interfaces
-declare module '@radix-ui/react-primitive' {
-  export interface PrimitiveProps {
-    asChild?: boolean;
-    children?: React.ReactNode;
-    className?: string;
-    style?: React.CSSProperties;
-  }
-}
-
-declare module '@radix-ui/react-hover-card' {
-  import { ComponentType } from 'react';
-  interface ContentProps {
-    children?: React.ReactNode;
-    className?: string;
-    sideOffset?: number;
-    align?: 'start' | 'center' | 'end';
-  }
-  export const Root: ComponentType<any>;
-  export const Trigger: ComponentType<any>;
-  export const Content: ComponentType<ContentProps>;
-  export const Portal: ComponentType<any>;
-}
-
-declare module '@radix-ui/react-label' {
-  import { ComponentType } from 'react';
-  interface RootProps {
-    children?: React.ReactNode;
-    className?: string;
-    htmlFor?: string;
-  }
-  export const Root: ComponentType<RootProps>;
-}
-
-declare module '@radix-ui/react-menubar' {
-  import { ComponentType } from 'react';
-  interface RootProps {
-    children?: React.ReactNode;
-    className?: string;
-  }
-  export const Root: ComponentType<RootProps>;
-  export const Menu: ComponentType<any>;
-  export const MenuTrigger: ComponentType<any>;
-  export const MenuContent: ComponentType<any>;
-  export const MenuItem: ComponentType<any>;
-}
-
-declare module 'cmdk' {
-  import { ComponentType } from 'react';
-  
-  interface CommandProps {
-    children?: React.ReactNode;
-    className?: string;
-    shouldFilter?: boolean;
-    filter?: (value: string, search: string) => number;
-    value?: string;
-    onValueChange?: (value: string) => void;
-  }
-  
-  interface CommandSubComponent {
-    Input: ComponentType<any>;
-    List: ComponentType<any>;
-    Empty: ComponentType<any>;
-    Group: ComponentType<any>;
-    Item: ComponentType<any>;
-    Separator: ComponentType<any>;
-  }
-  
-  export const Command: ComponentType<CommandProps> & CommandSubComponent;
-}
-
-declare module 'vaul' {
-  import { ComponentType } from 'react';
-  
-  interface DrawerSubComponent {
-    Root: ComponentType<any>;
-    Trigger: ComponentType<any>;
-    Portal: ComponentType<any>;
-    Overlay: ComponentType<any>;
-    Content: ComponentType<any>;
-    Title: ComponentType<any>;
-    Description: ComponentType<any>;
-    Close: ComponentType<any>;
-  }
-  
-  export const Drawer: DrawerSubComponent;
-}
-
-declare module 'react-resizable-panels' {
-  import { ComponentType } from 'react';
-  
-  interface PanelGroupProps {
-    children?: React.ReactNode;
-    className?: string;
-    direction?: 'horizontal' | 'vertical';
-  }
-  
-  interface PanelProps {
-    children?: React.ReactNode;
-    className?: string;
-    defaultSize?: number;
-    minSize?: number;
-    maxSize?: number;
-  }
-  
-  interface PanelResizeHandleProps {
-    children?: React.ReactNode;
-    className?: string;
-    disabled?: boolean;
-  }
-  
-  export const PanelGroup: ComponentType<PanelGroupProps>;
-  export const Panel: ComponentType<PanelProps>;
-  export const PanelResizeHandle: ComponentType<PanelResizeHandleProps>;
-}
-
-// Enhanced HTML element interfaces with proper event handlers
+// Enhanced HTML element interfaces
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      textarea: React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> & {
-        className?: string;
-        placeholder?: string;
-        value?: string;
-        onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
-        onKeyDown?: React.KeyboardEventHandler<HTMLTextAreaElement>;
-        disabled?: boolean;
-        rows?: number;
-        id?: string;
-        ref?: React.Ref<HTMLTextAreaElement>;
-      };
-      
-      caption: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableCaptionElement>, HTMLTableCaptionElement> & {
-        className?: string;
-        children?: React.ReactNode;
-        ref?: React.Ref<HTMLTableCaptionElement>;
-      };
+      textarea: React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
+      caption: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableCaptionElement>, HTMLTableCaptionElement>;
     }
   }
 }

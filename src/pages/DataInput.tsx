@@ -55,81 +55,55 @@ const DataInput = () => {
       case "inventory":
         return <InventoryOptimizationContent />;
       case "suitability":
-        return <SuitabilityQuestionnaire />;
+        return <SuitabilityQuestionnaire onModelSelect={setActiveModel} />;
       default:
-        return null;
-    }
-  };
-
-  const handleModelSelect = (model: string) => {
-    setActiveModel(model);
-    if (model) {
-      setActiveTab("input");
+        return (
+          <div className="text-center py-12">
+            <FileQuestion className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Select an Optimization Model</h3>
+            <p className="text-muted-foreground mb-4">
+              Choose from our comprehensive suite of supply chain optimization models
+            </p>
+            <Button onClick={() => setActiveTab("guide")}>
+              <HelpCircle className="h-4 w-4 mr-2" />
+              View Model Guide
+            </Button>
+          </div>
+        );
     }
   };
 
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Data Management</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate("/dashboard")}>
-            Back to Dashboard
-          </Button>
-          <Button variant="outline" onClick={() => navigate("/onboarding")}>
-            Go to Onboarding
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Data Input & Model Selection</h1>
+          <p className="text-muted-foreground mt-2">
+            Configure and input data for your supply chain optimization models
+          </p>
         </div>
+        <Button variant="outline" onClick={() => navigate("/dashboard")}>
+          Back to Dashboard
+        </Button>
       </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="guide">
-            <HelpCircle className="h-4 w-4 mr-2" />
-            Model Selection Guide
-          </TabsTrigger>
-          <TabsTrigger value="input" disabled={!activeModel}>
-            Data Input
-          </TabsTrigger>
-          <TabsTrigger value="suitability" onClick={() => setActiveModel("suitability")}>
-            <FileQuestion className="h-4 w-4 mr-2" />
-            Suitability Questionnaire
-          </TabsTrigger>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="guide">Model Selection Guide</TabsTrigger>
+          <TabsTrigger value="input">Data Input</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="guide" className="pt-6">
-          <ModelSelectionGuide onModelSelect={handleModelSelect} />
+        <TabsContent value="guide">
+          <ModelSelectionGuide />
         </TabsContent>
         
-        <TabsContent value="input" className="pt-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-4">Data Input for Selected Model</h2>
-            <p className="text-muted-foreground mb-6">
-              Enter the required data for your selected optimization model. All fields marked with * are required.
-            </p>
-            
-            <Button 
-              variant="outline"
-              onClick={() => {
-                setActiveModel("");
-                setActiveTab("guide");
-              }}
-              className="mb-6"
-            >
-              Change Model Selection
-            </Button>
-            
-            <ModelSelection 
-              activeModel={activeModel} 
-              setActiveModel={setActiveModel} 
-            />
-          </div>
+        <TabsContent value="input" className="space-y-6">
+          <ModelSelection 
+            activeModel={activeModel} 
+            setActiveModel={setActiveModel} 
+          />
           
           {renderModelContent()}
-        </TabsContent>
-        
-        <TabsContent value="suitability" className="pt-6">
-          <SuitabilityQuestionnaire />
         </TabsContent>
       </Tabs>
     </div>
