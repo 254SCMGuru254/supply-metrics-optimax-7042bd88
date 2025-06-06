@@ -1,7 +1,8 @@
 
 import { LatLngExpression, PathOptions, MarkerOptions } from 'leaflet';
 
-export type NodeType = 'warehouse' | 'factory' | 'retail' | 'distribution' | 'supplier' | 'custom' | 'airport' | 'port' | 'railhub';
+export type NodeType = 'warehouse' | 'factory' | 'distribution' | 'supplier' | 'customer' | 'airport' | 'port' | 'railhub';
+export type OwnershipType = 'owned' | 'hired' | 'outsourced';
 
 export interface Node {
   id: string;
@@ -19,6 +20,19 @@ export interface Node {
   icon?: string;
   color?: string;
   notes?: string;
+  ownership?: OwnershipType;
+  // Ownership-specific data
+  monthlyRent?: number;
+  contractDuration?: number;
+  serviceProvider?: string;
+  leaseTerms?: string;
+  maintenanceIncluded?: boolean;
+  // Asset details
+  floorArea?: number;
+  storageType?: string;
+  temperature?: number;
+  securityLevel?: string;
+  accessibility?: string;
   inventory?: {
     [productId: string]: number;
   };
@@ -43,6 +57,16 @@ export interface Route {
   volume?: number;
   transitTime?: number;
   type?: 'road' | 'rail' | 'air' | 'sea' | 'multimodal';
+  ownership?: OwnershipType;
+  vehicleId?: string;
+  vehicleName?: string;
+  // Transportation-specific ownership data
+  fuelCostPerKm?: number;
+  driverCost?: number;
+  maintenanceCost?: number;
+  insuranceCost?: number;
+  rentalCostPerDay?: number;
+  logisticsProvider?: string;
 }
 
 export interface MapPathOptions extends PathOptions {

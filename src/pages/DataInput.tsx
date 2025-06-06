@@ -18,15 +18,63 @@ import { RouteOptimizationContent } from "@/components/route-optimization/RouteO
 import { CostModelingContent } from "@/components/cost-modeling/CostModelingContent";
 import { InventoryOptimizationContent } from "@/components/inventory-optimization/InventoryOptimizationContent";
 import { SuitabilityQuestionnaire } from "@/components/suitability/SuitabilityQuestionnaire";
-import { HelpCircle, FileQuestion } from "lucide-react";
+import { HelpCircle, FileQuestion, Calculator, Network, Target } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const DataInput = () => {
   const navigate = useNavigate();
   const [activeModel, setActiveModel] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("guide");
 
+  const handleModelSelect = (model: string) => {
+    setActiveModel(model);
+    setActiveTab("input");
+  };
+
+  const handleStartOptimization = () => {
+    if (!activeModel) return;
+    
+    // Navigate to the appropriate optimization page based on selected model
+    const routeMap: Record<string, string> = {
+      comprehensive: "/dashboard",
+      general: "/dashboard", 
+      cog: "/center-of-gravity",
+      network: "/network-optimization",
+      simulation: "/simulation",
+      heuristic: "/heuristic",
+      isohedron: "/isohedron",
+      milp: "/dashboard",
+      fleet: "/fleet-management",
+      warehouse: "/network-design",
+      route: "/route-optimization",
+      cost: "/dashboard",
+      inventory: "/inventory-management",
+      suitability: "/dashboard"
+    };
+
+    const targetRoute = routeMap[activeModel] || "/dashboard";
+    navigate(targetRoute);
+  };
+
   const renderModelContent = () => {
+    if (!activeModel) {
+      return (
+        <div className="text-center py-12">
+          <FileQuestion className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Select an Optimization Model</h3>
+          <p className="text-muted-foreground mb-4">
+            Choose from our comprehensive suite of supply chain optimization models
+          </p>
+          <Button onClick={() => setActiveTab("guide")}>
+            <HelpCircle className="h-4 w-4 mr-2" />
+            View Model Guide
+          </Button>
+        </div>
+      );
+    }
+
     switch (activeModel) {
       case "comprehensive":
         return <ComprehensiveDataContent />;
@@ -55,19 +103,15 @@ const DataInput = () => {
       case "inventory":
         return <InventoryOptimizationContent />;
       case "suitability":
-        return <SuitabilityQuestionnaire onModelSelect={setActiveModel} />;
+        return <SuitabilityQuestionnaire onModelSelect={handleModelSelect} />;
       default:
         return (
           <div className="text-center py-12">
-            <FileQuestion className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Select an Optimization Model</h3>
+            <Calculator className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Model Configuration</h3>
             <p className="text-muted-foreground mb-4">
-              Choose from our comprehensive suite of supply chain optimization models
+              Configure your {activeModel} optimization model
             </p>
-            <Button onClick={() => setActiveTab("guide")}>
-              <HelpCircle className="h-4 w-4 mr-2" />
-              View Model Guide
-            </Button>
           </div>
         );
     }
@@ -91,19 +135,67 @@ const DataInput = () => {
         <TabsList>
           <TabsTrigger value="guide">Model Selection Guide</TabsTrigger>
           <TabsTrigger value="input">Data Input</TabsTrigger>
+          <TabsTrigger value="questionnaire">Suitability Assessment</TabsTrigger>
         </TabsList>
         
         <TabsContent value="guide">
           <ModelSelectionGuide />
         </TabsContent>
         
+        <TabsContent value="questionnaire">
+          <div className="flex justify-center">
+            <SuitabilityQuestionnaire onModelSelect={handleModelSelect} />
+          </div>
+        </TabsContent>
+        
         <TabsContent value="input" className="space-y-6">
-          <ModelSelection 
-            activeModel={activeModel} 
-            setActiveModel={setActiveModel} 
-          />
-          
-          {renderModelContent()}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Model Selection</CardTitle>
+                  <CardDescription>Choose your optimization model</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ModelSelection 
+                    activeModel={activeModel} 
+                    setActiveModel={setActiveModel} 
+                  />
+                  {activeModel && (
+                    <div className="mt-4 pt-4 border-t space-y-3">
+                      <Badge variant="default" className="w-full justify-center">
+                        Selected: {activeModel.toUpperCase()}
+                      </Badge>
+                      <Button 
+                        className="w-full" 
+                        onClick={handleStartOptimization}
+                      >
+                        <Target className="h-4 w-4 mr-2" />
+                        Start Optimization
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="lg:col-span-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Network className="h-5 w-5" />
+                    {activeModel ? `${activeModel.toUpperCase()} Model Configuration` : "Model Configuration"}
+                  </CardTitle>
+                  <CardDescription>
+                    Configure parameters and input data for your selected optimization model
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {renderModelContent()}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

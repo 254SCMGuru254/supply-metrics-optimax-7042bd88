@@ -43,6 +43,8 @@ declare module 'lucide-react' {
   }
   
   export type LucideIcon = ComponentType<LucideProps>;
+  export type LucideIconType = LucideIcon;
+  export interface LucideIconProps extends LucideProps {}
   
   // All required icons for the application
   export const Home: LucideIcon;
@@ -55,54 +57,92 @@ declare module 'lucide-react' {
   export const HelpCircle: LucideIcon;
   export const CircleDollarSign: LucideIcon;
   export const TrendingUp: LucideIcon;
+  export const TrendingDown: LucideIcon;
   export const Activity: LucideIcon;
   export const Hexagon: LucideIcon;
   export const Loader2: LucideIcon;
   export const ChevronLeft: LucideIcon;
   export const ChevronRight: LucideIcon;
   export const Check: LucideIcon;
+  export const CheckCircle: LucideIcon;
   export const AlertCircle: LucideIcon;
+  export const AlertTriangle: LucideIcon;
   export const BookOpen: LucideIcon;
   export const Calendar: LucideIcon;
+  export const CalendarDays: LucideIcon;
   export const ArrowDownToLine: LucideIcon;
+  export const ArrowDown: LucideIcon;
+  export const ArrowLeft: LucideIcon;
+  export const ArrowRight: LucideIcon;
   export const Play: LucideIcon;
   export const RefreshCcw: LucideIcon;
   export const Calculator: LucideIcon;
+  export const CalculatorIcon: LucideIcon;
   export const Building: LucideIcon;
   export const Building2: LucideIcon;
   export const MessageSquare: LucideIcon;
   export const MessageSquareQuote: LucideIcon;
   export const Brain: LucideIcon;
+  export const Train: LucideIcon;
   export const Network: LucideIcon;
   export const Target: LucideIcon;
   export const Warehouse: LucideIcon;
+  export const WarehouseIcon: LucideIcon;
   export const Factory: LucideIcon;
   export const Truck: LucideIcon;
+  export const Ship: LucideIcon;
+  export const Plane: LucideIcon;
   export const Shield: LucideIcon;
   export const Store: LucideIcon;
   export const MapPin: LucideIcon;
+  export const MapPinIcon: LucideIcon;
   export const Upload: LucideIcon;
   export const Download: LucideIcon;
   export const Plus: LucideIcon;
+  export const PlusCircle: LucideIcon;
   export const Trash2: LucideIcon;
   export const Layers: LucideIcon;
+  export const LayersIcon: LucideIcon;
   export const Thermometer: LucideIcon;
+  export const ThermometerIcon: LucideIcon;
   export const Box: LucideIcon;
+  export const Boxes: LucideIcon;
   export const FileEdit: LucideIcon;
-  export const ArrowLeft: LucideIcon;
-  export const ArrowRight: LucideIcon;
+  export const FileInput: LucideIcon;
+  export const FileQuestion: LucideIcon;
   export const GripVertical: LucideIcon;
   export const Route: LucideIcon;
   export const DollarSign: LucideIcon;
   export const Package2: LucideIcon;
-  export const FileQuestion: LucideIcon;
+  export const Save: LucideIcon;
+  export const Send: LucideIcon;
+  export const Users: LucideIcon;
+  export const User: LucideIcon;
+  export const Clock: LucideIcon;
+  export const Info: LucideIcon;
+  export const X: LucideIcon;
+  export const Database: LucideIcon;
+  export const Percent: LucideIcon;
+  export const ShoppingCart: LucideIcon;
+  export const Link: LucideIcon;
+  export const CreditCard: LucideIcon;
+  export const Coins: LucideIcon;
+  export const Gauge: LucideIcon;
+  export const Scale: LucideIcon;
+  export const Compass: LucideIcon;
+  export const LayoutGrid: LucideIcon;
+  export const Map: LucideIcon;
+  export const Globe: LucideIcon;
+  export const FileDown: LucideIcon;
+  export const Lightbulb: LucideIcon;
+  export const Edit: LucideIcon;
   
   // Icon aliases
-  export const WarehouseIcon: LucideIcon;
-  export const LayersIcon: LucideIcon;
-  export const ThermometerIcon: LucideIcon;
-  export const MapPinIcon: LucideIcon;
-  export const CalculatorIcon: LucideIcon;
+  export { Warehouse as WarehouseIcon };
+  export { Layers as LayersIcon };
+  export { Thermometer as ThermometerIcon };
+  export { MapPin as MapPinIcon };
+  export { Calculator as CalculatorIcon };
 }
 
 // Enhanced Button component props
@@ -117,38 +157,11 @@ declare module '@/components/ui/button' {
     disabled?: boolean;
     type?: 'button' | 'submit' | 'reset';
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
     asChild?: boolean;
   }
   
   export const Button: ComponentType<ButtonProps>;
-}
-
-// Enhanced Recharts type definitions
-declare module 'recharts' {
-  export interface LegendProps {
-    content?: any;
-    wrapperStyle?: React.CSSProperties;
-    iconType?: string;
-    layout?: 'horizontal' | 'vertical';
-    align?: 'left' | 'center' | 'right';
-    verticalAlign?: 'top' | 'middle' | 'bottom';
-    height?: number;
-    formatter?: (value: any, entry: any) => React.ReactNode;
-  }
-  
-  export const ResponsiveContainer: React.ComponentType<any>;
-  export const BarChart: React.ComponentType<any>;
-  export const LineChart: React.ComponentType<any>;
-  export const PieChart: React.ComponentType<any>;
-  export const Bar: React.ComponentType<any>;
-  export const Line: React.ComponentType<any>;
-  export const Pie: React.ComponentType<any>;
-  export const XAxis: React.ComponentType<any>;
-  export const YAxis: React.ComponentType<any>;
-  export const CartesianGrid: React.ComponentType<any>;
-  export const Tooltip: React.ComponentType<any>;
-  export const Legend: React.ComponentType<LegendProps>;
-  export const Cell: React.ComponentType<any>;
 }
 
 // Enhanced HTML element interfaces
