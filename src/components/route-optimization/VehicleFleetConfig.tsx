@@ -1,228 +1,137 @@
 
 import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, Truck } from "lucide-react";
-import { Vehicle } from "./types";
-import { useToast } from "@/components/ui/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trash2, Plus } from "lucide-react";
 
-interface VehicleFleetConfigProps {
+export interface Vehicle {
+  id: string;
+  name: string;
+  type: "truck" | "van" | "car";
+  capacity: number;
+  costPerKm: number;
+  fuelEfficiency: number;
+}
+
+export interface VehicleFleetConfigProps {
   vehicles: Vehicle[];
   onChange: (vehicles: Vehicle[]) => void;
 }
 
-export function VehicleFleetConfig({ vehicles, onChange }: VehicleFleetConfigProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [newVehicle, setNewVehicle] = useState<Partial<Vehicle>>({
-    name: "",
-    capacity: 1000,
-    costPerKm: 2.5,
-    fixedCost: 100,
-    speed: 60,
-    emissions: 200,
-    maxDistance: 500,
-    tonnageLimit: 10
-  });
-  const { toast } = useToast();
+export const VehicleFleetConfig = ({ vehicles, onChange }: VehicleFleetConfigProps) => {
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
-  const handleAddVehicle = () => {
-    if (!newVehicle.name?.trim()) {
-      toast({
-        title: "Vehicle name required",
-        description: "Please provide a name for the vehicle",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const id = crypto.randomUUID();
-    onChange([
-      ...vehicles,
-      {
-        id,
-        name: newVehicle.name,
-        capacity: newVehicle.capacity || 1000,
-        costPerKm: newVehicle.costPerKm || 2.5,
-        fixedCost: newVehicle.fixedCost || 100,
-        speed: newVehicle.speed || 60,
-        emissions: newVehicle.emissions || 200,
-        maxDistance: newVehicle.maxDistance || 500,
-        tonnageLimit: newVehicle.tonnageLimit || 10
-      }
-    ]);
-
-    setIsAdding(false);
-    setNewVehicle({
-      name: "",
+  const addVehicle = () => {
+    const newVehicle: Vehicle = {
+      id: crypto.randomUUID(),
+      name: `Vehicle ${vehicles.length + 1}`,
+      type: "truck",
       capacity: 1000,
       costPerKm: 2.5,
-      fixedCost: 100,
-      speed: 60,
-      emissions: 200,
-      maxDistance: 500,
-      tonnageLimit: 10
-    });
-
-    toast({
-      title: "Vehicle added",
-      description: `${newVehicle.name} has been added to your fleet`
-    });
+      fuelEfficiency: 8.0
+    };
+    onChange([...vehicles, newVehicle]);
   };
 
-  const handleRemoveVehicle = (id: string) => {
+  const updateVehicle = (id: string, updates: Partial<Vehicle>) => {
+    const updated = vehicles.map(v => v.id === id ? { ...v, ...updates } : v);
+    onChange(updated);
+  };
+
+  const removeVehicle = (id: string) => {
     onChange(vehicles.filter(v => v.id !== id));
-    toast({
-      title: "Vehicle removed",
-      description: "Vehicle has been removed from your fleet"
-    });
-  };
-
-  const updateNewVehicleField = (field: keyof Vehicle, value: any) => {
-    setNewVehicle(prev => ({
-      ...prev,
-      [field]: field === "name" ? value : Number(value)
-    }));
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Truck className="h-5 w-5" />
-          Vehicle Fleet Configuration
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {vehicles.length > 0 && (
-            <div className="grid grid-cols-1 divide-y">
-              {vehicles.map(vehicle => (
-                <div key={vehicle.id} className="py-3 flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{vehicle.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Capacity: {vehicle.capacity}kg | Cost: ${vehicle.costPerKm}/km + ${vehicle.fixedCost} fixed
-                    </p>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleRemoveVehicle(vehicle.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Vehicle Fleet Configuration</h3>
+        <Button onClick={addVehicle} size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Vehicle
+        </Button>
+      </div>
 
-          {vehicles.length === 0 && !isAdding && (
-            <div className="text-center py-8 text-muted-foreground">
-              No vehicles in your fleet. Add a vehicle to get started.
-            </div>
-          )}
-
-          {isAdding ? (
-            <div className="space-y-4 border rounded-md p-4 bg-muted/50">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="vehicle-name">Vehicle Name</Label>
-                  <Input 
-                    id="vehicle-name" 
-                    value={newVehicle.name} 
-                    onChange={e => updateNewVehicleField("name", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vehicle-capacity">Capacity (kg)</Label>
-                  <Input 
-                    id="vehicle-capacity" 
-                    type="number" 
-                    value={newVehicle.capacity} 
-                    onChange={e => updateNewVehicleField("capacity", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vehicle-cost">Cost per km ($)</Label>
-                  <Input 
-                    id="vehicle-cost" 
-                    type="number" 
-                    step="0.01"
-                    value={newVehicle.costPerKm} 
-                    onChange={e => updateNewVehicleField("costPerKm", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vehicle-fixed-cost">Fixed Cost ($)</Label>
-                  <Input 
-                    id="vehicle-fixed-cost" 
-                    type="number" 
-                    value={newVehicle.fixedCost} 
-                    onChange={e => updateNewVehicleField("fixedCost", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vehicle-speed">Average Speed (km/h)</Label>
-                  <Input 
-                    id="vehicle-speed" 
-                    type="number" 
-                    value={newVehicle.speed} 
-                    onChange={e => updateNewVehicleField("speed", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vehicle-emissions">Emissions (g CO2/km)</Label>
-                  <Input 
-                    id="vehicle-emissions" 
-                    type="number" 
-                    value={newVehicle.emissions} 
-                    onChange={e => updateNewVehicleField("emissions", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vehicle-max-distance">Max Distance (km)</Label>
-                  <Input 
-                    id="vehicle-max-distance" 
-                    type="number" 
-                    value={newVehicle.maxDistance} 
-                    onChange={e => updateNewVehicleField("maxDistance", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vehicle-tonnage">Tonnage Limit (tons)</Label>
-                  <Input 
-                    id="vehicle-tonnage" 
-                    type="number" 
-                    step="0.1"
-                    value={newVehicle.tonnageLimit} 
-                    onChange={e => updateNewVehicleField("tonnageLimit", e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setIsAdding(false)}>
-                  Cancel
+      <div className="grid gap-4">
+        {vehicles.map((vehicle) => (
+          <Card key={vehicle.id}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center justify-between">
+                {vehicle.name}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeVehicle(vehicle.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
-                <Button onClick={handleAddVehicle}>
-                  Save Vehicle
-                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor={`name-${vehicle.id}`}>Name</Label>
+                <Input
+                  id={`name-${vehicle.id}`}
+                  value={vehicle.name}
+                  onChange={(e) => updateVehicle(vehicle.id, { name: e.target.value })}
+                />
               </div>
-            </div>
-          ) : (
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => setIsAdding(true)}
-            >
+              <div>
+                <Label htmlFor={`type-${vehicle.id}`}>Type</Label>
+                <Select
+                  value={vehicle.type}
+                  onValueChange={(value: "truck" | "van" | "car") => 
+                    updateVehicle(vehicle.id, { type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="truck">Truck</SelectItem>
+                    <SelectItem value="van">Van</SelectItem>
+                    <SelectItem value="car">Car</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor={`capacity-${vehicle.id}`}>Capacity (kg)</Label>
+                <Input
+                  id={`capacity-${vehicle.id}`}
+                  type="number"
+                  value={vehicle.capacity}
+                  onChange={(e) => updateVehicle(vehicle.id, { capacity: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor={`cost-${vehicle.id}`}>Cost per km</Label>
+                <Input
+                  id={`cost-${vehicle.id}`}
+                  type="number"
+                  step="0.1"
+                  value={vehicle.costPerKm}
+                  onChange={(e) => updateVehicle(vehicle.id, { costPerKm: Number(e.target.value) })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {vehicles.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground mb-4">No vehicles configured</p>
+            <Button onClick={addVehicle}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Vehicle
+              Add Your First Vehicle
             </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
-}
+};

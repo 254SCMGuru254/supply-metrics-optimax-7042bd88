@@ -1,3 +1,4 @@
+
 import { Node, Route } from "@/components/map/MapTypes";
 
 // OSRM-like parameters for route optimization
@@ -181,6 +182,7 @@ export const createInitialRoutes = (nodes: Node[], vehicle: Vehicle, params: Rou
             cost,
             transitTime,
             type: "road", // Default to road
+            ownership: 'owned' // Add ownership property
           });
         }
       }
@@ -482,6 +484,7 @@ export const generateMultiModalRoutes = (nodes: Node[]): Route[] => {
           cost,
           transitTime,
           type: routeType,
+          ownership: 'owned' // Add ownership property
         });
       }
     });

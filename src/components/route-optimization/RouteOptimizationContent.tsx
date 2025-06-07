@@ -1,16 +1,28 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { NetworkMap } from "@/components/NetworkMap";
-import { VehicleFleetConfig } from "./VehicleFleetConfig";
+import { VehicleFleetConfig, Vehicle } from "./VehicleFleetConfig";
 import { generateOptimizedRoutes, optimizeMultiModalNetwork } from "./EnhancedRouteUtils";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import type { Node, Route } from "@/components/map/MapTypes";
 import { Truck, Plane, Ship, Train, MapPin, BarChart3, Download } from "lucide-react";
 
 export const RouteOptimizationContent = () => {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([
+    {
+      id: "vehicle-1",
+      name: "Delivery Truck 1",
+      type: "truck",
+      capacity: 5000,
+      costPerKm: 2.5,
+      fuelEfficiency: 8.0
+    }
+  ]);
+
   const [nodes, setNodes] = useState<Node[]>([
     {
       id: "nairobi-hub",
@@ -18,7 +30,7 @@ export const RouteOptimizationContent = () => {
       type: "warehouse",
       latitude: -1.2921,
       longitude: 36.8219,
-      ownership: 'owned', // Add ownership property
+      ownership: 'owned',
       metadata: {
         restrictions: {
           weightLimit: 40000,
@@ -36,7 +48,7 @@ export const RouteOptimizationContent = () => {
       type: "port",
       latitude: -4.0435,
       longitude: 39.6682,
-      ownership: 'owned', // Add ownership property
+      ownership: 'owned',
       metadata: {
         quayCapacity: 50000,
         maxDraft: 15.0,
@@ -49,7 +61,7 @@ export const RouteOptimizationContent = () => {
       type: "airport",
       latitude: -0.0917,
       longitude: 34.7578,
-      ownership: 'owned', // Add ownership property
+      ownership: 'owned',
       metadata: {
         runwayLength: 3300,
         cargoCapacity: 15000,
@@ -62,7 +74,7 @@ export const RouteOptimizationContent = () => {
       type: "retail",
       latitude: -0.2833,
       longitude: 36.0667,
-      ownership: 'owned', // Add ownership property
+      ownership: 'owned',
       metadata: {
         storageCapacity: 10000,
         customerFootfall: 5000,
@@ -75,7 +87,7 @@ export const RouteOptimizationContent = () => {
       type: "factory",
       latitude: 0.5167,
       longitude: 35.2667,
-      ownership: 'owned', // Add ownership property
+      ownership: 'owned',
       metadata: {
         productionCapacity: 75000,
         rawMaterialSupply: "Reliable",
@@ -99,7 +111,7 @@ export const RouteOptimizationContent = () => {
         cost: 15000,
         transitTime: 8,
         isOptimized: true,
-        ownership: 'owned' as const // Add ownership property
+        ownership: 'owned' as const
       },
       {
         id: "route-2",
@@ -110,7 +122,7 @@ export const RouteOptimizationContent = () => {
         cost: 22000,
         transitTime: 14,
         isOptimized: true,
-        ownership: 'owned' as const // Add ownership property
+        ownership: 'owned' as const
       },
       {
         id: "route-3",
@@ -121,7 +133,7 @@ export const RouteOptimizationContent = () => {
         cost: 35000,
         transitTime: 2,
         isOptimized: true,
-        ownership: 'owned' as const // Add ownership property
+        ownership: 'owned' as const
       },
       {
         id: "route-4",
@@ -132,7 +144,7 @@ export const RouteOptimizationContent = () => {
         cost: 12000,
         transitTime: 6,
         isOptimized: true,
-        ownership: 'owned' as const // Add ownership property
+        ownership: 'owned' as const
       }
     ];
     
@@ -257,7 +269,7 @@ export const RouteOptimizationContent = () => {
               <CardTitle>Vehicle Fleet Configuration</CardTitle>
             </CardHeader>
             <CardContent>
-              <VehicleFleetConfig />
+              <VehicleFleetConfig vehicles={vehicles} onChange={setVehicles} />
             </CardContent>
           </Card>
         </TabsContent>

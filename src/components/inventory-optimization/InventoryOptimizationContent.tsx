@@ -10,7 +10,7 @@ import { ColdChainOptimizer } from "./ColdChainOptimizer";
 import { RetailSupplyChainOptimizer } from "./RetailSupplyChainOptimizer";
 import { SupplyChainReportGenerator } from "@/components/ai-design-assistant/SupplyChainReportGenerator";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
-import { Calculator, BarChart3, Network, Flower, Thermometer, Store, FileText } from "lucide-react";
+import { Calculator, BarChart3, Network, Leaf, Thermometer, Store, FileText } from "lucide-react";
 
 export const InventoryOptimizationContent = () => {
   const [activeTab, setActiveTab] = useState<string>("eoq");
@@ -57,7 +57,7 @@ export const InventoryOptimizationContent = () => {
               value="horticultural" 
               className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
             >
-              <Flower className="h-4 w-4" />
+              <Leaf className="h-4 w-4" />
               <span className="text-xs font-medium">Horticultural</span>
             </TabsTrigger>
             <TabsTrigger 
@@ -126,7 +126,7 @@ export const InventoryOptimizationContent = () => {
         <TabsContent value="horticultural" className="space-y-4">
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Flower className="h-6 w-6 text-primary" />
+              <Leaf className="h-6 w-6 text-primary" />
               <div>
                 <h3 className="text-xl font-semibold">Horticultural EOQ</h3>
                 <p className="text-gray-600">Perishability-adjusted model for flowers and fresh produce</p>
