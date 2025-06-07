@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 const PricingTier = ({
   name,
@@ -47,7 +46,6 @@ const PricingTier = ({
         variant={buttonVariant}
         onClick={() => {
           if (paymentIntegrated) {
-            // Redirect to PayPal payment
             window.open('https://www.paypal.com', '_blank');
           } else {
             alert('PayPal integration coming soon');
@@ -178,7 +176,7 @@ const Pricing = () => {
       monthly: [
         {
           name: "Starter",
-          price: "KES 25,000",
+          price: "KES 2,500",
           priceId: "price_kenya_starter_monthly",
           description: "Perfect for small businesses in Kenya",
           paymentIntegrated: true,
@@ -194,7 +192,7 @@ const Pricing = () => {
         },
         {
           name: "Business",
-          price: "KES 75,000",
+          price: "KES 8,000",
           priceId: "price_kenya_business_monthly",
           description: "For growing companies in East Africa",
           mostPopular: true,
@@ -213,7 +211,7 @@ const Pricing = () => {
         },
         {
           name: "Enterprise",
-          price: "KES 200,000",
+          price: "KES 15,000",
           priceId: "price_kenya_enterprise_monthly",
           description: "For large operations across East Africa",
           paymentIntegrated: true,
@@ -232,7 +230,7 @@ const Pricing = () => {
       annual: [
         {
           name: "Starter",
-          price: "KES 20,000",
+          price: "KES 2,000",
           priceId: "price_kenya_starter_annual",
           description: "Perfect for small businesses in Kenya (20% savings)",
           paymentIntegrated: true,
@@ -248,7 +246,7 @@ const Pricing = () => {
         },
         {
           name: "Business",
-          price: "KES 60,000",
+          price: "KES 6,400",
           priceId: "price_kenya_business_annual",
           description: "For growing companies in East Africa (20% savings)",
           mostPopular: true,
@@ -267,7 +265,7 @@ const Pricing = () => {
         },
         {
           name: "Enterprise",
-          price: "KES 160,000",
+          price: "KES 12,000",
           priceId: "price_kenya_enterprise_annual",
           description: "For large operations across East Africa (20% savings)",
           paymentIntegrated: true,
@@ -369,19 +367,19 @@ const Pricing = () => {
             <ul className="space-y-2">
               <li className="flex justify-between">
                 <span>Starter tier international equivalent:</span>
-                <span>KES 90,000 (~$705)</span>
+                <span>KES 35,000 (~$270)</span>
               </li>
               <li className="flex justify-between">
                 <span>Business tier international equivalent:</span>
-                <span>KES 250,000 (~$1,960)</span>
+                <span>KES 120,000 (~$930)</span>
               </li>
               <li className="flex justify-between">
                 <span>Enterprise tier international equivalent:</span>
-                <span>KES 600,000 (~$4,700)</span>
+                <span>KES 300,000 (~$2,330)</span>
               </li>
             </ul>
             <p className="text-sm mt-4">
-              Our local pricing represents a 60-75% discount compared to international rates, 
+              Our local pricing represents a 85-95% discount compared to international rates, 
               making enterprise-grade supply chain optimization accessible to Kenyan businesses.
             </p>
           </div>

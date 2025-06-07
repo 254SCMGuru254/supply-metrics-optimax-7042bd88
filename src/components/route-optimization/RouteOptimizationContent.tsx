@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { NetworkMap } from "@/components/NetworkMap";
 import { VehicleFleetConfig, Vehicle } from "./VehicleFleetConfig";
+import { ConstraintsForm } from "@/components/data-input/ConstraintsForm";
 import { generateOptimizedRoutes, optimizeMultiModalNetwork } from "./EnhancedRouteUtils";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import type { Node, Route } from "@/components/map/MapTypes";
@@ -216,7 +216,7 @@ export const RouteOptimizationContent = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="network">Network Map</TabsTrigger>
           <TabsTrigger value="fleet">Vehicle Fleet</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="constraints">Constraints</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4">
@@ -274,37 +274,8 @@ export const RouteOptimizationContent = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="reports" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports and Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>
-                Generate detailed reports on route optimization performance, 
-                cost savings, and environmental impact.
-              </p>
-              
-              <div className="mt-4">
-                <h3 className="text-xl font-semibold mb-2">Key Performance Indicators</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="bg-yellow-50 border-yellow-200">
-                    <CardContent className="flex flex-col items-center justify-center">
-                      <div className="text-2xl font-bold">15%</div>
-                      <div className="text-sm text-gray-500">Cost Reduction</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-pink-50 border-pink-200">
-                    <CardContent className="flex flex-col items-center justify-center">
-                      <div className="text-2xl font-bold">20%</div>
-                      <div className="text-sm text-gray-500">Emissions Reduction</div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="constraints" className="space-y-4">
+          <ConstraintsForm />
         </TabsContent>
       </Tabs>
     </div>

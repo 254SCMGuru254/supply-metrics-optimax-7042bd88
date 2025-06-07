@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,13 +9,24 @@ import { CogApplicationSelector, CogApplication } from "@/components/cog/CogAppl
 import { DataImportForm } from "@/components/cog/DataImportForm";
 
 export default function CenterOfGravity() {
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodes] = useState<Node[]>([
+    {
+      id: crypto.randomUUID(),
+      type: "retail",
+      name: "Customer Zone A",
+      latitude: -1.2921,
+      longitude: 36.8219,
+      weight: 100,
+      ownership: 'owned'
+    }
+  ]);
   const [cogResult, setCogResult] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedFormula, setSelectedFormula] = useState<string>("weighted-euclidean");
   const [selectedApplication, setSelectedApplication] = useState<string>("warehouse");
   const [formulaData, setFormulaData] = useState<CogFormula | null>(null);
   const [applicationData, setApplicationData] = useState<CogApplication | null>(null);
   const { toast } = useToast();
+  const [isOptimized, setIsOptimized] = useState(false);
 
   const handleMapClick = (lat: number, lng: number) => {
     const newNode: Node = {
@@ -96,6 +106,26 @@ export default function CenterOfGravity() {
     toast({
       title: "Center of Gravity Calculated",
       description: `Using ${currentFormula.name} (${currentFormula.accuracy} accuracy)`,
+    });
+  };
+
+  const handleOptimize = () => {
+    const optimizedNodes = [...nodes, {
+      id: crypto.randomUUID(),
+      type: "warehouse" as const,
+      name: "Optimal Warehouse Location",
+      latitude: cogResult.latitude,
+      longitude: cogResult.longitude,
+      capacity: 50000,
+      ownership: 'owned' as const
+    }];
+    
+    setNodes(optimizedNodes);
+    setIsOptimized(true);
+    
+    toast({
+      title: "Optimization Complete",
+      description: "The optimal warehouse location has been added to the map.",
     });
   };
 
