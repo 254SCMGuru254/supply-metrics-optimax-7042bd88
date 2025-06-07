@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { EOQCalculator } from "./EOQCalculator";
 import { ABCAnalysis } from "./ABCAnalysis";
 import { MultiEchelonVisualization } from "./MultiEchelonVisualization";
@@ -8,98 +9,191 @@ import { HorticulturalEOQCalculator } from "./HorticulturalEOQCalculator";
 import { ColdChainOptimizer } from "./ColdChainOptimizer";
 import { RetailSupplyChainOptimizer } from "./RetailSupplyChainOptimizer";
 import { SupplyChainReportGenerator } from "@/components/ai-design-assistant/SupplyChainReportGenerator";
+import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
+import { Calculator, BarChart3, Network, Flower, Thermometer, Store, FileText } from "lucide-react";
 
 export const InventoryOptimizationContent = () => {
   const [activeTab, setActiveTab] = useState<string>("eoq");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" id="inventory-optimization-content">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Inventory Optimization Tools</h2>
+          <p className="text-gray-600 mt-1">Industry-standard mathematical models for optimal inventory management</p>
+        </div>
+        <ExportPdfButton 
+          title="Inventory Optimization Report"
+          exportId="inventory-optimization-content"
+          fileName="inventory_optimization_report"
+        />
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-7 mb-8">
-          <TabsTrigger value="eoq">EOQ Calculator</TabsTrigger>
-          <TabsTrigger value="abc">ABC Analysis</TabsTrigger>
-          <TabsTrigger value="multi-echelon">Multi-Echelon</TabsTrigger>
-          <TabsTrigger value="horticultural">Horticultural</TabsTrigger>
-          <TabsTrigger value="cold-chain">Cold Chain</TabsTrigger>
-          <TabsTrigger value="retail">Retail</TabsTrigger>
-          <TabsTrigger value="report">Reports</TabsTrigger>
-        </TabsList>
+        <div className="bg-white rounded-lg shadow-sm p-1 mb-6">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-7 w-full h-auto p-1 bg-transparent gap-1">
+            <TabsTrigger 
+              value="eoq" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <Calculator className="h-4 w-4" />
+              <span className="text-xs font-medium">EOQ</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="abc" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="text-xs font-medium">ABC</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="multi-echelon" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <Network className="h-4 w-4" />
+              <span className="text-xs font-medium">Multi-Echelon</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="horticultural" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <Flower className="h-4 w-4" />
+              <span className="text-xs font-medium">Horticultural</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="cold-chain" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <Thermometer className="h-4 w-4" />
+              <span className="text-xs font-medium">Cold Chain</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="retail" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <Store className="h-4 w-4" />
+              <span className="text-xs font-medium">Retail</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="report" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="text-xs font-medium">Reports</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="eoq">
-          <EOQCalculator />
+        <TabsContent value="eoq" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Calculator className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Economic Order Quantity (EOQ)</h3>
+                <p className="text-gray-600">Wilson formula for optimal order quantities minimizing total costs</p>
+              </div>
+            </div>
+            <EOQCalculator />
+          </Card>
         </TabsContent>
 
-        <TabsContent value="abc">
-          <ABCAnalysis />
+        <TabsContent value="abc" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <BarChart3 className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">ABC Analysis</h3>
+                <p className="text-gray-600">Pareto-based inventory classification (80/20 rule)</p>
+              </div>
+            </div>
+            <ABCAnalysis />
+          </Card>
         </TabsContent>
 
-        <TabsContent value="multi-echelon">
-          <MultiEchelonVisualization />
+        <TabsContent value="multi-echelon" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Network className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Multi-Echelon Optimization</h3>
+                <p className="text-gray-600">METRIC and Graves-Willems algorithms for network optimization</p>
+              </div>
+            </div>
+            <MultiEchelonVisualization />
+          </Card>
         </TabsContent>
 
-        <TabsContent value="horticultural">
-          <HorticulturalEOQCalculator />
+        <TabsContent value="horticultural" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Flower className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Horticultural EOQ</h3>
+                <p className="text-gray-600">Perishability-adjusted model for flowers and fresh produce</p>
+              </div>
+            </div>
+            <HorticulturalEOQCalculator />
+          </Card>
         </TabsContent>
 
-        <TabsContent value="cold-chain">
-          <ColdChainOptimizer />
+        <TabsContent value="cold-chain" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Thermometer className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Cold Chain Optimization</h3>
+                <p className="text-gray-600">Temperature-controlled inventory model (TCIM)</p>
+              </div>
+            </div>
+            <ColdChainOptimizer />
+          </Card>
         </TabsContent>
 
-        <TabsContent value="retail">
-          <RetailSupplyChainOptimizer />
+        <TabsContent value="retail" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Store className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Retail Supply Chain</h3>
+                <p className="text-gray-600">Multi-Echelon Retail Optimization (MERO)</p>
+              </div>
+            </div>
+            <RetailSupplyChainOptimizer />
+          </Card>
         </TabsContent>
 
-        <TabsContent value="report">
-          <SupplyChainReportGenerator />
+        <TabsContent value="report" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Supply Chain Reports</h3>
+                <p className="text-gray-600">Comprehensive analysis and optimization reports</p>
+              </div>
+            </div>
+            <SupplyChainReportGenerator />
+          </Card>
         </TabsContent>
       </Tabs>
 
-      <div className="p-4 bg-muted rounded-md">
-        <h3 className="text-lg font-bold mb-2">Enterprise-Grade Supply Chain Models</h3>
-        <p className="text-sm text-muted-foreground">
-          This comprehensive inventory optimization suite implements industry-standard mathematical models 
-          and specialized algorithms for various supply chain scenarios:
-        </p>
-        <ul className="list-disc ml-5 mt-2 text-sm text-muted-foreground space-y-1">
-          <li>Economic Order Quantity (EOQ) - Harris-Wilson formula for optimal order quantities</li>
-          <li>ABC Analysis - Pareto-based inventory classification model (80/20 rule)</li>
-          <li>Multi-Echelon Optimization - Clark-Scarf model for complex supply networks</li>
-          <li>Horticultural EOQ - Perishability-adjusted model for flower and fresh produce businesses</li>
-          <li>Cold Chain Optimization - Temperature-controlled inventory model (TCIM) for pharmaceuticals</li>
-          <li>Retail Supply Chain - Multi-Echelon Retail Optimization (MERO) for omnichannel operations</li>
-          <li>Safety Stock - Statistical calculation based on service level requirements</li>
-        </ul>
-        
-        <div className="mt-4 p-4 bg-primary/10 rounded-md">
-          <h4 className="text-sm font-medium mb-2">Real-World Test Validation:</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div>
-              <strong>BloomCorp (Horticultural):</strong>
-              <ul className="mt-1 space-y-1">
-                <li>✅ EOQ: 1,118 dozen bunches</li>
-                <li>✅ Seasonal: 684 bunches (Feb)</li>
-                <li>✅ Supplier: Ecuador optimal</li>
-              </ul>
-            </div>
-            <div>
-              <strong>FreshPharm (Cold Chain):</strong>
-              <ul className="mt-1 space-y-1">
-                <li>✅ TCIM: 3,297 vials per order</li>
-                <li>✅ Storage: 6.7 days max</li>
-                <li>✅ ROI: 2.8 months payback</li>
-              </ul>
-            </div>
-            <div>
-              <strong>TechMart (Retail):</strong>
-              <ul className="mt-1 space-y-1">
-                <li>✅ Allocation: Multi-tier optimized</li>
-                <li>✅ Reorder: 174/82/29 units</li>
-                <li>✅ Omnichannel: 35% share</li>
-              </ul>
-            </div>
+      {/* Mathematical Models Summary */}
+      <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+        <h3 className="text-lg font-bold mb-4 text-gray-900">Implemented Mathematical Models</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-blue-700 mb-2">Wilson EOQ Formula</h4>
+            <p className="text-sm text-gray-600">√(2DS/H) where D=demand, S=setup cost, H=holding cost</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-green-700 mb-2">Safety Stock Model</h4>
+            <p className="text-sm text-gray-600">Z × σ_LT where Z=service factor, σ=demand std dev</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-purple-700 mb-2">ABC Classification</h4>
+            <p className="text-sm text-gray-600">Pareto principle: 80% value from 20% items</p>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

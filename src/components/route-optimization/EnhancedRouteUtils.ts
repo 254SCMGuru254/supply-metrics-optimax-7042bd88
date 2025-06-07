@@ -1,4 +1,3 @@
-
 import { Node, Route } from "@/components/map/MapTypes";
 
 // OSRM-like parameters for route optimization
@@ -594,4 +593,67 @@ export const planMultiModalRoute = (
   }
   
   return routePath;
+};
+
+// Generate optimized routes
+export const generateOptimizedRoutes = (nodes: Node[]): Route[] => {
+  const routes: Route[] = [];
+  
+  // Create a fully connected network for optimization
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      // Calculate distance
+      const dx = nodes[i].latitude - nodes[j].latitude;
+      const dy = nodes[i].longitude - nodes[j].longitude;
+      const distance = Math.sqrt(dx * dx + dy * dy) * 111; // Rough km conversion
+      
+      routes.push({
+        id: crypto.randomUUID(),
+        from: nodes[i].id,
+        to: nodes[j].id,
+        volume: Math.floor(Math.random() * 100) + 50,
+        cost: Math.round(distance * 10),
+        transitTime: Math.round(distance / 50), // Assumed 50 km/h average speed
+        type: "road",
+        ownership: 'owned' // Add ownership property
+      });
+    }
+  }
+  
+  return routes;
+};
+
+// Optimize multi-modal network
+export const optimizeMultiModalNetwork = (nodes: Node[]): Route[] => {
+  const routes: Route[] = [];
+  
+  // Generate multi-modal routes
+  const transportModes: Array<"road" | "rail" | "air" | "sea"> = ["road", "rail", "air", "sea"];
+  
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].latitude - nodes[j].latitude;
+      const dy = nodes[i].longitude - nodes[j].longitude;
+      const distance = Math.sqrt(dx * dx + dy * dy) * 111;
+      
+      // Choose transport mode based on distance and node types
+      let mode: "road" | "rail" | "air" | "sea" = "road";
+      if (distance > 500) mode = "air";
+      else if (distance > 200) mode = "rail";
+      else if (nodes[i].type === "port" || nodes[j].type === "port") mode = "sea";
+      
+      routes.push({
+        id: crypto.randomUUID(),
+        from: nodes[i].id,
+        to: nodes[j].id,
+        volume: Math.floor(Math.random() * 100) + 50,
+        cost: Math.round(distance * (mode === "air" ? 50 : mode === "rail" ? 15 : 10)),
+        transitTime: Math.round(distance / (mode === "air" ? 800 : mode === "rail" ? 100 : 50)),
+        type: mode,
+        ownership: 'owned' // Add ownership property
+      });
+    }
+  }
+  
+  return routes;
 };

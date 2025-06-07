@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Package, Boxes, Truck, Database, LineChart, BarChart3, Upload, Download, CalculatorIcon, Settings } from "lucide-react";
+import { Package, Boxes, Truck, Database, LineChart, BarChart3, Upload, Download, CalculatorIcon, Settings, FileText, TrendingUp } from "lucide-react";
 import { InventoryOptimizationContent } from "@/components/inventory-optimization/InventoryOptimizationContent";
+import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -28,7 +29,7 @@ const InventoryManagement = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['inventoryData'],
     queryFn: fetchInventoryData,
-    enabled: false, // Don't fetch automatically, will enable when API is ready
+    enabled: false,
   });
 
   const handleImportData = () => {
@@ -39,7 +40,6 @@ const InventoryManagement = () => {
   };
 
   const handleDownloadTemplate = () => {
-    // Generate a sample CSV with headers for inventory data
     const headers = "product_id,name,category,unit_cost,annual_demand,ordering_cost,holding_cost,lead_time,service_level";
     const sampleData = [
       "P001,Rice,Grains,100,2000,50,0.2,7,95",
@@ -48,7 +48,6 @@ const InventoryManagement = () => {
     ];
     const csvContent = [headers, ...sampleData].join("\n");
     
-    // Create a download link
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -66,380 +65,398 @@ const InventoryManagement = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Package className="h-8 w-8" />
-            Inventory Management
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Optimize inventory levels and stock policies using industry-standard models
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDownloadTemplate}>
-            <Download className="h-4 w-4 mr-2" />
-            Download Template
-          </Button>
-          
-          <Button onClick={handleImportData}>
-            <Upload className="h-4 w-4 mr-2" />
-            Import Inventory Data
-          </Button>
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-8">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="optimization">Inventory Optimization</TabsTrigger>
-          <TabsTrigger value="multi-echelon">Multi-Echelon Analysis</TabsTrigger>
-          <TabsTrigger value="forecasting">Stock Forecasting</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="p-6 flex flex-col items-center justify-center text-center">
-              <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50" id="inventory-management-page">
+      <div className="container mx-auto py-8 space-y-8">
+        {/* Professional Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white rounded-xl shadow-sm p-8">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
                 <Package className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold">321</h3>
-              <p className="text-sm text-muted-foreground">Total SKUs</p>
-            </Card>
-            
-            <Card className="p-6 flex flex-col items-center justify-center text-center">
-              <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <CalculatorIcon className="h-6 w-6 text-green-600" />
-              </div>
-              <h3 className="text-xl font-bold">$847,320</h3>
-              <p className="text-sm text-muted-foreground">Total Inventory Value</p>
-            </Card>
-            
-            <Card className="p-6 flex flex-col items-center justify-center text-center">
-              <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <Settings className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold">7.2</h3>
-              <p className="text-sm text-muted-foreground">Inventory Turns</p>
-            </Card>
-            
-            <Card className="p-6 flex flex-col items-center justify-center text-center">
-              <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center mb-4">
-                <LineChart className="h-6 w-6 text-amber-600" />
-              </div>
-              <h3 className="text-xl font-bold">98.3%</h3>
-              <p className="text-sm text-muted-foreground">Service Level</p>
-            </Card>
-          </div>
-
-          <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4">Inventory Management System</h2>
-            <p className="mb-6">
-              The Inventory Management System helps you optimize stock levels across your supply chain.
-              It provides tools built on established mathematical models for inventory optimization, multi-echelon analysis, and stock forecasting.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              <Card className="p-4 border-l-4 border-l-blue-500">
-                <div className="flex items-center gap-3 mb-2">
-                  <Boxes className="h-5 w-5 text-blue-500" />
-                  <h3 className="font-medium">EOQ Optimization</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Calculate Economic Order Quantities, safety stock levels, and reorder points using the Wilson formula and statistical models.
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Inventory Management System
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Enterprise-grade inventory optimization with industry-standard mathematical models
                 </p>
-                <div className="mt-2 text-xs text-blue-600">
-                  <strong>Models used:</strong> Wilson EOQ, Safety Stock Calculation, Reorder Point Optimization
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+              <Card className="p-4 border-l-4 border-l-blue-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total SKUs</p>
+                    <p className="text-2xl font-bold text-gray-900">1,247</p>
+                  </div>
+                  <Package className="h-8 w-8 text-blue-500" />
                 </div>
               </Card>
               
               <Card className="p-4 border-l-4 border-l-green-500">
-                <div className="flex items-center gap-3 mb-2">
-                  <Truck className="h-5 w-5 text-green-500" />
-                  <h3 className="font-medium">Multi-Echelon Analysis</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Optimize inventory across multiple tiers using the METRIC model and risk pooling principles.
-                </p>
-                <div className="mt-2 text-xs text-green-600">
-                  <strong>Models used:</strong> METRIC, Clark-Scarf Model, Graves-Willems Algorithm
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Inventory Value</p>
+                    <p className="text-2xl font-bold text-gray-900">$2.4M</p>
+                  </div>
+                  <CalculatorIcon className="h-8 w-8 text-green-500" />
                 </div>
               </Card>
               
               <Card className="p-4 border-l-4 border-l-purple-500">
-                <div className="flex items-center gap-3 mb-2">
-                  <LineChart className="h-5 w-5 text-purple-500" />
-                  <h3 className="font-medium">Demand Forecasting</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Predict future inventory needs using time-series models, exponential smoothing, and machine learning techniques.
-                </p>
-                <div className="mt-2 text-xs text-purple-600">
-                  <strong>Models used:</strong> ARIMA, Holt-Winters, Prophet, Machine Learning
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Turnover Rate</p>
+                    <p className="text-2xl font-bold text-gray-900">8.3x</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-purple-500" />
                 </div>
               </Card>
-            </div>
-
-            <div className="mt-8 p-4 bg-muted rounded-md">
-              <div className="flex items-start">
-                <Database className="h-5 w-5 text-muted-foreground mt-0.5 mr-3 flex-shrink-0" />
-                <div>
-                  <h3 className="font-medium">Industry-Standard Implementation</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Our inventory management system implements established mathematical models used by leading 
-                    supply chain software. All calculations follow published academic formulations and industry benchmarks.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border rounded-md p-4">
-                <h3 className="font-medium mb-2">ABC Analysis Distribution</h3>
-                <div className="h-[200px] bg-slate-50 rounded flex items-center justify-center">
-                  <BarChart3 className="h-24 w-24 text-muted-foreground/30" />
-                </div>
-                <div className="flex justify-around mt-4 text-xs text-muted-foreground">
-                  <div className="text-center">
-                    <div className="font-medium text-sm">Class A</div>
-                    <div>20% of Items</div>
-                    <div>70% of Value</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-medium text-sm">Class B</div>
-                    <div>30% of Items</div>
-                    <div>20% of Value</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-medium text-sm">Class C</div>
-                    <div>50% of Items</div>
-                    <div>10% of Value</div>
-                  </div>
-                </div>
-              </div>
               
-              <div className="border rounded-md p-4">
-                <h3 className="font-medium mb-2">Monthly Inventory Value Trend</h3>
-                <div className="h-[200px] bg-slate-50 rounded flex items-center justify-center">
-                  <LineChart className="h-24 w-24 text-muted-foreground/30" />
-                </div>
-                <div className="mt-4 text-xs text-center text-muted-foreground">
-                  Showing 12-month trend data with seasonality pattern
-                </div>
-              </div>
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="optimization">
-          <InventoryOptimizationContent />
-        </TabsContent>
-
-        <TabsContent value="multi-echelon" className="space-y-4">
-          <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4">Multi-Echelon Inventory Analysis</h2>
-            <p className="text-muted-foreground mb-6">
-              Optimize inventory across multiple tiers in your supply chain network using industry-standard multi-echelon models.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <Card className="p-4 bg-blue-50 dark:bg-blue-900/20">
-                <h3 className="font-medium text-blue-700 dark:text-blue-300 mb-2">Graves-Willems Model</h3>
-                <p className="text-sm text-muted-foreground">
-                  Optimize strategic safety stocks in general networks while considering service time constraints.
-                </p>
-              </Card>
-              <Card className="p-4 bg-green-50 dark:bg-green-900/20">
-                <h3 className="font-medium text-green-700 dark:text-green-300 mb-2">METRIC Model</h3>
-                <p className="text-sm text-muted-foreground">
-                  Multi-Echelon Technique for Recoverable Item Control for spare parts management.
-                </p>
-              </Card>
-              <Card className="p-4 bg-purple-50 dark:bg-purple-900/20">
-                <h3 className="font-medium text-purple-700 dark:text-purple-300 mb-2">Serial System Model</h3>
-                <p className="text-sm text-muted-foreground">
-                  Analyze serial multi-echelon systems with risk-pooling effects.
-                </p>
-              </Card>
-            </div>
-            
-            <div className="border rounded-md p-6">
-              <h3 className="text-lg font-medium mb-4">Multi-Echelon Network Configuration</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium mb-2">Network Structure</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Configure your multi-echelon network by defining the relationships between facilities.
-                  </p>
-                  <div className="h-[300px] flex items-center justify-center border rounded-md bg-slate-50">
-                    <Boxes className="h-16 w-16 text-muted-foreground/30" />
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Parameters</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Set lead times, review periods, service levels and other parameters for each echelon.
-                  </p>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="border rounded-md p-3">
-                        <h5 className="text-sm font-medium">Echelon 1: Distribution Centers</h5>
-                        <p className="text-xs text-muted-foreground">3 facilities</p>
-                        <p className="text-xs text-muted-foreground">Lead time: 5-7 days</p>
-                      </div>
-                      <div className="border rounded-md p-3">
-                        <h5 className="text-sm font-medium">Echelon 2: Regional Warehouses</h5>
-                        <p className="text-xs text-muted-foreground">8 facilities</p>
-                        <p className="text-xs text-muted-foreground">Lead time: 2-3 days</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="border rounded-md p-3">
-                        <h5 className="text-sm font-medium">Echelon 3: Local Stores</h5>
-                        <p className="text-xs text-muted-foreground">42 facilities</p>
-                        <p className="text-xs text-muted-foreground">Lead time: 1 day</p>
-                      </div>
-                      <div className="border rounded-md p-3">
-                        <h5 className="text-sm font-medium">Target Service Level</h5>
-                        <p className="text-xs text-muted-foreground">System-wide: 98%</p>
-                        <p className="text-xs text-muted-foreground">Local: 95%</p>
-                      </div>
-                    </div>
-                    <Button className="w-full">Run Multi-Echelon Optimization</Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="forecasting" className="space-y-4">
-          <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4">Stock Forecasting</h2>
-            <p className="text-muted-foreground mb-6">
-              Predict future inventory levels using time-series models and machine learning techniques.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Card className="p-4 border-l-4 border-l-blue-500">
-                <h3 className="font-medium mb-2">Time Series Models</h3>
-                <p className="text-sm text-muted-foreground">
-                  ARIMA, Seasonal ARIMA (SARIMA), and Exponential Smoothing (ETS) for forecasting demand.
-                </p>
-              </Card>
-              <Card className="p-4 border-l-4 border-l-green-500">
-                <h3 className="font-medium mb-2">Machine Learning Models</h3>
-                <p className="text-sm text-muted-foreground">
-                  Random Forest, XGBoost, and LSTM Neural Networks for complex pattern recognition.
-                </p>
-              </Card>
               <Card className="p-4 border-l-4 border-l-amber-500">
-                <h3 className="font-medium mb-2">Ensemble Forecasts</h3>
-                <p className="text-sm text-muted-foreground">
-                  Combined forecasts from multiple models weighted by historical accuracy.
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Service Level</p>
+                    <p className="text-2xl font-bold text-gray-900">98.7%</p>
+                  </div>
+                  <BarChart3 className="h-8 w-8 text-amber-500" />
+                </div>
               </Card>
             </div>
-            
-            <div className="border rounded-md p-6">
-              <h3 className="font-medium mb-4">Demand Forecast Chart</h3>
-              <div className="h-[300px] bg-slate-50 rounded flex items-center justify-center">
-                <LineChart className="h-16 w-16 text-muted-foreground/30" />
-              </div>
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                  <h4 className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                    Forecast Accuracy (MAPE)
-                  </h4>
-                  <p className="text-2xl font-bold mt-1">8.7%</p>
-                  <p className="text-xs text-muted-foreground">Last 3 months average</p>
-                </div>
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-md">
-                  <h4 className="text-sm font-medium text-green-700 dark:text-green-300">
-                    Bias
-                  </h4>
-                  <p className="text-2xl font-bold mt-1">+2.3%</p>
-                  <p className="text-xs text-muted-foreground">Slight over-forecasting</p>
-                </div>
-                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-md">
-                  <h4 className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                    Seasonality Detected
-                  </h4>
-                  <p className="text-2xl font-bold mt-1">Weekly</p>
-                  <p className="text-xs text-muted-foreground">Pattern strength: High</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </TabsContent>
+          </div>
 
-        <TabsContent value="reports" className="space-y-4">
-          <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4">Inventory Reports</h2>
-            <p className="text-muted-foreground mb-6">
-              Generate comprehensive inventory reports with key metrics and analytics.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Card className="p-4">
-                <h3 className="font-medium mb-2">Inventory Health Report</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Overview of inventory status, turnover, and obsolescence risks.
-                </p>
-                <Button variant="outline" className="w-full">Generate Report</Button>
-              </Card>
-              <Card className="p-4">
-                <h3 className="font-medium mb-2">Stock Level Analysis</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Detailed analysis of current stock levels vs. optimal levels.
-                </p>
-                <Button variant="outline" className="w-full">Generate Report</Button>
-              </Card>
-              <Card className="p-4">
-                <h3 className="font-medium mb-2">Inventory Cost Report</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Cost breakdown of ordering, holding, and stockout costs.
-                </p>
-                <Button variant="outline" className="w-full">Generate Report</Button>
-              </Card>
-            </div>
+          <div className="flex flex-col lg:flex-row gap-3">
+            <ExportPdfButton 
+              title="Inventory Management Report"
+              exportId="inventory-management-page"
+              fileName="inventory_management_report"
+            />
             
-            <div className="border rounded-md p-6">
-              <h3 className="font-medium mb-4">Inventory KPIs Dashboard</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="p-3 border rounded-md">
-                  <h4 className="text-xs font-medium text-muted-foreground">Inventory Turnover</h4>
-                  <p className="text-xl font-bold mt-1">7.2</p>
+            <Button variant="outline" onClick={handleDownloadTemplate} className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Download Template
+            </Button>
+            
+            <Button onClick={handleImportData} className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Import Data
+            </Button>
+          </div>
+        </div>
+
+        {/* Enhanced Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="bg-white rounded-xl shadow-sm p-2 mb-8">
+            <TabsList className="grid grid-cols-3 lg:grid-cols-6 w-full h-auto p-1 bg-transparent">
+              <TabsTrigger 
+                value="overview" 
+                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
+                <Database className="h-5 w-5" />
+                <span className="text-sm font-medium">Overview</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="optimization" 
+                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
+                <Settings className="h-5 w-5" />
+                <span className="text-sm font-medium">EOQ & Safety Stock</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="multi-echelon" 
+                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
+                <Boxes className="h-5 w-5" />
+                <span className="text-sm font-medium">Multi-Echelon</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="forecasting" 
+                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
+                <LineChart className="h-5 w-5" />
+                <span className="text-sm font-medium">Forecasting</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reports" 
+                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
+                <FileText className="h-5 w-5" />
+                <span className="text-sm font-medium">Reports</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="advanced" 
+                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
+                <TrendingUp className="h-5 w-5" />
+                <span className="text-sm font-medium">Advanced Models</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="p-6 bg-white shadow-sm">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Boxes className="h-5 w-5 text-primary" />
+                  Mathematical Models Implemented
+                </h3>
+                <div className="space-y-4">
+                  <div className="border-l-4 border-l-blue-500 pl-4">
+                    <h4 className="font-semibold text-blue-700">Wilson EOQ Formula</h4>
+                    <p className="text-sm text-gray-600">Economic Order Quantity optimization with holding and ordering costs</p>
+                  </div>
+                  <div className="border-l-4 border-l-green-500 pl-4">
+                    <h4 className="font-semibold text-green-700">METRIC Multi-Echelon Model</h4>
+                    <p className="text-sm text-gray-600">Multi-Echelon Technique for Recoverable Item Control</p>
+                  </div>
+                  <div className="border-l-4 border-l-purple-500 pl-4">
+                    <h4 className="font-semibold text-purple-700">Graves-Willems Algorithm</h4>
+                    <p className="text-sm text-gray-600">Strategic safety stock placement in general networks</p>
+                  </div>
+                  <div className="border-l-4 border-l-amber-500 pl-4">
+                    <h4 className="font-semibold text-amber-700">Prophet Time Series</h4>
+                    <p className="text-sm text-gray-600">Advanced demand forecasting with seasonality</p>
+                  </div>
                 </div>
-                <div className="p-3 border rounded-md">
-                  <h4 className="text-xs font-medium text-muted-foreground">Days of Supply</h4>
-                  <p className="text-xl font-bold mt-1">50.7</p>
+              </Card>
+
+              <Card className="p-6 bg-white shadow-sm">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  Performance Metrics
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-blue-700">Inventory Accuracy</h4>
+                    <p className="text-2xl font-bold text-blue-900">99.2%</p>
+                  </div>
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-green-700">Fill Rate</h4>
+                    <p className="text-2xl font-bold text-green-900">98.7%</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-purple-700">Days of Supply</h4>
+                    <p className="text-2xl font-bold text-purple-900">42.3</p>
+                  </div>
+                  <div className="p-4 bg-amber-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-amber-700">Stockout Events</h4>
+                    <p className="text-2xl font-bold text-amber-900">0.8%</p>
+                  </div>
                 </div>
-                <div className="p-3 border rounded-md">
-                  <h4 className="text-xs font-medium text-muted-foreground">Fill Rate</h4>
-                  <p className="text-xl font-bold mt-1">98.3%</p>
-                </div>
-                <div className="p-3 border rounded-md">
-                  <h4 className="text-xs font-medium text-muted-foreground">Stock-to-Sales Ratio</h4>
-                  <p className="text-xl font-bold mt-1">1.8</p>
-                </div>
-              </div>
-              
-              <div className="h-[250px] bg-slate-50 rounded flex items-center justify-center mb-4">
-                <BarChart3 className="h-16 w-16 text-muted-foreground/30" />
-              </div>
-              
-              <div className="flex justify-end">
-                <Button>
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Dashboard
-                </Button>
-              </div>
+              </Card>
             </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+
+          <TabsContent value="optimization">
+            <InventoryOptimizationContent />
+          </TabsContent>
+
+          <TabsContent value="multi-echelon" className="space-y-6">
+            <Card className="p-6 bg-white shadow-sm">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <Boxes className="h-6 w-6 text-primary" />
+                Multi-Echelon Inventory Analysis
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Optimize inventory across multiple supply chain tiers using the METRIC model and Graves-Willems algorithm.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Card className="p-4 bg-blue-50 border-blue-200">
+                  <h3 className="font-semibold text-blue-800 mb-2">Echelon 1: Distribution Centers</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Facilities:</strong> 3 centers</p>
+                    <p><strong>Lead Time:</strong> 5-7 days</p>
+                    <p><strong>Service Level:</strong> 99%</p>
+                    <p><strong>Safety Stock:</strong> 15 days</p>
+                  </div>
+                </Card>
+                
+                <Card className="p-4 bg-green-50 border-green-200">
+                  <h3 className="font-semibold text-green-800 mb-2">Echelon 2: Regional Warehouses</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Facilities:</strong> 8 warehouses</p>
+                    <p><strong>Lead Time:</strong> 2-3 days</p>
+                    <p><strong>Service Level:</strong> 97%</p>
+                    <p><strong>Safety Stock:</strong> 8 days</p>
+                  </div>
+                </Card>
+                
+                <Card className="p-4 bg-purple-50 border-purple-200">
+                  <h3 className="font-semibold text-purple-800 mb-2">Echelon 3: Local Stores</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Facilities:</strong> 42 stores</p>
+                    <p><strong>Lead Time:</strong> 1 day</p>
+                    <p><strong>Service Level:</strong> 95%</p>
+                    <p><strong>Safety Stock:</strong> 3 days</p>
+                  </div>
+                </Card>
+              </div>
+
+              <div className="flex gap-4">
+                <Button className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Run Multi-Echelon Optimization
+                </Button>
+                <ExportPdfButton 
+                  title="Multi-Echelon Analysis Report"
+                  exportId="inventory-management-page"
+                  fileName="multi_echelon_analysis"
+                />
+              </div>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="forecasting" className="space-y-6">
+            <Card className="p-6 bg-white shadow-sm">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <LineChart className="h-6 w-6 text-primary" />
+                Advanced Demand Forecasting
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Predict future inventory needs using Prophet, ARIMA, and machine learning models.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <Card className="p-4 border-l-4 border-l-blue-500">
+                  <h3 className="font-semibold text-blue-700 mb-2">Prophet Time Series</h3>
+                  <p className="text-sm text-gray-600 mb-3">Facebook's robust forecasting with seasonality detection</p>
+                  <div className="text-xs text-blue-600">
+                    <p><strong>MAPE:</strong> 7.2%</p>
+                    <p><strong>Coverage:</strong> 94.5%</p>
+                  </div>
+                </Card>
+                
+                <Card className="p-4 border-l-4 border-l-green-500">
+                  <h3 className="font-semibold text-green-700 mb-2">ARIMA Models</h3>
+                  <p className="text-sm text-gray-600 mb-3">Auto-regressive integrated moving average</p>
+                  <div className="text-xs text-green-600">
+                    <p><strong>MAPE:</strong> 8.7%</p>
+                    <p><strong>AIC:</strong> -1847.2</p>
+                  </div>
+                </Card>
+                
+                <Card className="p-4 border-l-4 border-l-purple-500">
+                  <h3 className="font-semibold text-purple-700 mb-2">Ensemble Methods</h3>
+                  <p className="text-sm text-gray-600 mb-3">Combined forecasts weighted by accuracy</p>
+                  <div className="text-xs text-purple-600">
+                    <p><strong>MAPE:</strong> 6.1%</p>
+                    <p><strong>Models:</strong> 5 combined</p>
+                  </div>
+                </Card>
+              </div>
+
+              <div className="flex gap-4">
+                <Button className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Generate Forecast
+                </Button>
+                <ExportPdfButton 
+                  title="Demand Forecasting Report"
+                  exportId="inventory-management-page"
+                  fileName="demand_forecast_analysis"
+                />
+              </div>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-6">
+            <Card className="p-6 bg-white shadow-sm">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <FileText className="h-6 w-6 text-primary" />
+                Comprehensive Reports
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="p-4 border hover:shadow-md transition-shadow">
+                  <h3 className="font-semibold mb-2">Inventory Health Report</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Complete analysis of inventory status, turnover, and obsolescence risks
+                  </p>
+                  <ExportPdfButton 
+                    title="Inventory Health Report"
+                    exportId="inventory-management-page"
+                    fileName="inventory_health_report"
+                  />
+                </Card>
+                
+                <Card className="p-4 border hover:shadow-md transition-shadow">
+                  <h3 className="font-semibold mb-2">EOQ Analysis Report</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Economic order quantities, reorder points, and safety stock calculations
+                  </p>
+                  <ExportPdfButton 
+                    title="EOQ Analysis Report"
+                    exportId="inventory-management-page"
+                    fileName="eoq_analysis_report"
+                  />
+                </Card>
+                
+                <Card className="p-4 border hover:shadow-md transition-shadow">
+                  <h3 className="font-semibold mb-2">ABC Classification Report</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Pareto analysis and item categorization for focused management
+                  </p>
+                  <ExportPdfButton 
+                    title="ABC Classification Report"
+                    exportId="inventory-management-page"
+                    fileName="abc_classification_report"
+                  />
+                </Card>
+              </div>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="advanced" className="space-y-6">
+            <Card className="p-6 bg-white shadow-sm">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <TrendingUp className="h-6 w-6 text-primary" />
+                Advanced Optimization Models
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Industry-Specific Models</h3>
+                  <div className="space-y-3">
+                    <Card className="p-4 bg-blue-50">
+                      <h4 className="font-medium text-blue-800">Horticultural EOQ</h4>
+                      <p className="text-sm text-gray-600">Perishability-adjusted model for fresh produce</p>
+                    </Card>
+                    <Card className="p-4 bg-green-50">
+                      <h4 className="font-medium text-green-800">Cold Chain Optimization</h4>
+                      <p className="text-sm text-gray-600">Temperature-controlled inventory management</p>
+                    </Card>
+                    <Card className="p-4 bg-purple-50">
+                      <h4 className="font-medium text-purple-800">Retail Supply Chain</h4>
+                      <p className="text-sm text-gray-600">Multi-echelon retail optimization (MERO)</p>
+                    </Card>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Optimization Techniques</h3>
+                  <div className="space-y-3">
+                    <Card className="p-4 bg-amber-50">
+                      <h4 className="font-medium text-amber-800">Stochastic Programming</h4>
+                      <p className="text-sm text-gray-600">Uncertainty handling in demand variability</p>
+                    </Card>
+                    <Card className="p-4 bg-red-50">
+                      <h4 className="font-medium text-red-800">Robust Optimization</h4>
+                      <p className="text-sm text-gray-600">Worst-case scenario protection</p>
+                    </Card>
+                    <Card className="p-4 bg-indigo-50">
+                      <h4 className="font-medium text-indigo-800">Dynamic Programming</h4>
+                      <p className="text-sm text-gray-600">Multi-period inventory optimization</p>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
