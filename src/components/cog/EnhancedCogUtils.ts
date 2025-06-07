@@ -1,5 +1,4 @@
-
-import { Node } from "@/components/map/MapTypes";
+import type { Node } from "@/components/map/MapTypes";
 
 // Haversine formula for accurate distance calculation (equivalent to geopy's distance function)
 export const calculateHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -157,11 +156,12 @@ export const optimizeClusterLocations = (clusters: Node[][]): Node[] => {
     
     return {
       id: `optimal-${Math.random().toString(36).substring(2, 9)}`,
-      type: "warehouse", 
+      type: "warehouse" as const, 
       name: `Optimal Facility for Cluster (${cluster.length} points)`,
       latitude: optLat,
       longitude: optLng,
-      isOptimal: true
+      isOptimal: true,
+      ownership: 'owned' as const
     };
   });
 };

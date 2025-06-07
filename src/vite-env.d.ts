@@ -28,6 +28,8 @@ declare module 'react' {
   export type DetailedHTMLProps<E, T> = React.DetailedHTMLProps<E, T>;
   export type KeyboardEventHandler<T = Element> = React.KeyboardEventHandler<T>;
   export type MouseEventHandler<T = Element> = React.MouseEventHandler<T>;
+  export type ElementRef<T> = React.ElementRef<T>;
+  export type ComponentPropsWithoutRef<T> = React.ComponentPropsWithoutRef<T>;
 }
 
 // Enhanced Lucide React type definitions with ALL required icons
@@ -63,6 +65,8 @@ declare module 'lucide-react' {
   export const Loader2: LucideIcon;
   export const ChevronLeft: LucideIcon;
   export const ChevronRight: LucideIcon;
+  export const ChevronDown: LucideIcon;
+  export const ChevronUp: LucideIcon;
   export const Check: LucideIcon;
   export const CheckCircle: LucideIcon;
   export const AlertCircle: LucideIcon;
@@ -145,6 +149,27 @@ declare module 'lucide-react' {
   export { Calculator as CalculatorIcon };
 }
 
+// Enhanced Button component props with button variants
+declare module '@/components/ui/button' {
+  import { ComponentType, ReactNode } from 'react';
+  import { VariantProps } from 'class-variance-authority';
+  
+  export interface ButtonProps {
+    children?: ReactNode;
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    size?: 'default' | 'sm' | 'lg' | 'icon';
+    className?: string;
+    disabled?: boolean;
+    type?: 'button' | 'submit' | 'reset';
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+    asChild?: boolean;
+  }
+  
+  export const Button: ComponentType<ButtonProps>;
+  export const buttonVariants: any;
+}
+
 // Complete Recharts type definitions
 declare module 'recharts' {
   import { ComponentType, ReactNode } from 'react';
@@ -222,25 +247,6 @@ declare module 'recharts' {
   export const Legend: ComponentType<LegendProps>;
   export const Line: ComponentType<LineProps>;
   export const Bar: ComponentType<BarProps>;
-}
-
-// Enhanced Button component props
-declare module '@/components/ui/button' {
-  import { ComponentType, ReactNode } from 'react';
-  
-  export interface ButtonProps {
-    children?: ReactNode;
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    size?: 'default' | 'sm' | 'lg' | 'icon';
-    className?: string;
-    disabled?: boolean;
-    type?: 'button' | 'submit' | 'reset';
-    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
-    asChild?: boolean;
-  }
-  
-  export const Button: ComponentType<ButtonProps>;
 }
 
 // Enhanced HTML element interfaces

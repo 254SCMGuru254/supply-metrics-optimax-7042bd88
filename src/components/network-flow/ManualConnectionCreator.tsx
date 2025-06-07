@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Link } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Node, Route } from "@/components/map/MapTypes";
+import type { Node, Route } from "@/components/map/MapTypes";
 
 interface ManualConnectionCreatorProps {
   nodes: Node[];
@@ -46,7 +45,8 @@ export function ManualConnectionCreator({ nodes, onAddRoute }: ManualConnectionC
       to: toNode,
       volume,
       transitTime,
-      mode
+      mode,
+      ownership: 'owned'
     };
 
     onAddRoute(newRoute);

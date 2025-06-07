@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { NetworkMap } from "@/components/NetworkMap";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Database, ResilienceMetricsProps } from "@/types/network";
+import type { Database, ResilienceMetricsProps } from "@/types/network";
 
 export const ResilienceMetricsCalculator: React.FC<ResilienceMetricsProps> = ({
   network,
@@ -300,9 +301,10 @@ export const ResilienceMetricsCalculator: React.FC<ResilienceMetricsProps> = ({
         
         <div>
           <div className="h-[400px] border rounded-md overflow-hidden">
-            {network && (
+            {network && network.nodes && network.routes && (
               <NetworkMap 
-                network={network}
+                nodes={network.nodes}
+                routes={network.routes}
                 highlightNodes={selectedNodes}
                 resilienceMetrics={results}
               />
