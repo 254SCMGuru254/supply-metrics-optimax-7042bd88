@@ -220,7 +220,7 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
-  HTMLButtonElement,
+  React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar()
@@ -410,14 +410,14 @@ const SidebarGroupLabel = React.forwardRef<
 SidebarGroupLabel.displayName = "SidebarGroupLabel"
 
 const SidebarGroupAction = React.forwardRef<
-  HTMLButtonElement,
+  React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button> & { asChild?: boolean }
 >(({ className, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : Button
 
   return (
     <Comp
-      ref={ref as React.Ref<HTMLButtonElement>}
+      ref={ref}
       data-sidebar="group-action"
       variant="ghost"
       size="icon"
@@ -541,7 +541,7 @@ const SidebarMenuButton = React.forwardRef<
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
 const SidebarMenuAction = React.forwardRef<
-  HTMLButtonElement,
+  React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button> & {
     asChild?: boolean
     showOnHover?: boolean
