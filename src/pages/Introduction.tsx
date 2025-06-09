@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 const IntroductionPage = () => {
   const [activeSection, setActiveSection] = useState(0);
-  const { formatKES, formatDualCurrency } = useKenyaCurrency();
+  const { formatKES } = useKenyaCurrency();
   
   // Auto-advance through sections
   useEffect(() => {
@@ -89,7 +89,7 @@ const IntroductionPage = () => {
         </div>
 
         <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Pricing Analysis for Kenyan Market</h2>
+          <h2 className="text-2xl font-bold mb-4">Pricing for Kenyan Market</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold text-lg mb-2">Starter</h3>
@@ -106,10 +106,10 @@ const IntroductionPage = () => {
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-500 mr-2">✓</span>
-                  <span>M-Pesa integration</span>
+                  <span>PayPal payment integration</span>
                 </li>
               </ul>
-              <p className="text-sm text-muted-foreground">~{formatKES(850)} per day</p>
+              <p className="text-sm text-muted-foreground">~{formatKES(833)} per day</p>
             </div>
             
             <div className="border rounded-lg p-4 bg-primary/5 border-primary">
@@ -135,7 +135,7 @@ const IntroductionPage = () => {
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-500 mr-2">✓</span>
-                  <span>M-Pesa integration</span>
+                  <span>PayPal payment integration</span>
                 </li>
               </ul>
               <p className="text-sm text-muted-foreground">~{formatKES(2500)} per day</p>
@@ -167,46 +167,20 @@ const IntroductionPage = () => {
                   <span>Dedicated support</span>
                 </li>
               </ul>
-              <p className="text-sm text-muted-foreground">~{formatKES(6700)} per day</p>
+              <p className="text-sm text-muted-foreground">~{formatKES(6667)} per day</p>
             </div>
           </div>
           
-          <div className="mt-6 border-t pt-6">
-            <h3 className="font-semibold mb-3">International vs. Local Pricing Comparison</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Our pricing is optimized for the Kenyan market. Similar services internationally would cost:
-            </p>
-            <ul className="space-y-2">
-              <li className="flex justify-between">
-                <span>Starter tier international equivalent:</span>
-                <span>{formatDualCurrency(90000)}</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Business tier international equivalent:</span>
-                <span>{formatDualCurrency(250000)}</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Enterprise tier international equivalent:</span>
-                <span>{formatDualCurrency(600000)}</span>
-              </li>
-            </ul>
-            <p className="text-sm mt-4">
-              Our local pricing represents a 60-75% discount compared to international rates, 
-              making enterprise-grade supply chain optimization accessible to Kenyan businesses.
-            </p>
-          </div>
-          
-          <div className="mt-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+          <div className="mt-6 bg-green-50 p-4 rounded-lg border border-green-200">
             <h3 className="font-semibold mb-2 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              M-Pesa Integration Coming Soon
+              PayPal Integration Active
             </h3>
             <p className="text-sm">
-              We're working on integrating M-Pesa for seamless payments directly within the platform. 
-              This will allow businesses to pay for services and manage subscription plans using Kenya's 
-              most popular mobile payment system.
+              All plans now include integrated PayPal payment processing for seamless international 
+              and local payments. M-Pesa integration is coming soon for even more convenient local payments.
             </p>
           </div>
         </Card>
