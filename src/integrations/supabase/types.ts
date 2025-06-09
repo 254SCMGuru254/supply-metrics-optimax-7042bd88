@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      data_imports: {
+        Row: {
+          created_at: string | null
+          error_details: Json | null
+          file_name: string
+          file_size_bytes: number | null
+          file_type: string | null
+          id: string
+          project_id: string
+          records_imported: number | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_details?: Json | null
+          file_name: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          id?: string
+          project_id: string
+          records_imported?: number | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_details?: Json | null
+          file_name?: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          id?: string
+          project_id?: string
+          records_imported?: number | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_imports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demand_points: {
         Row: {
           created_at: string | null
@@ -44,6 +91,166 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      inventory_items: {
+        Row: {
+          abc_classification: string | null
+          created_at: string | null
+          demand_rate: number | null
+          description: string | null
+          economic_order_quantity: number | null
+          holding_cost_rate: number | null
+          id: string
+          lead_time_days: number | null
+          node_id: string | null
+          ordering_cost: number | null
+          project_id: string
+          reorder_point: number | null
+          safety_stock: number | null
+          sku: string
+          unit_cost: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          abc_classification?: string | null
+          created_at?: string | null
+          demand_rate?: number | null
+          description?: string | null
+          economic_order_quantity?: number | null
+          holding_cost_rate?: number | null
+          id?: string
+          lead_time_days?: number | null
+          node_id?: string | null
+          ordering_cost?: number | null
+          project_id: string
+          reorder_point?: number | null
+          safety_stock?: number | null
+          sku: string
+          unit_cost: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          abc_classification?: string | null
+          created_at?: string | null
+          demand_rate?: number | null
+          description?: string | null
+          economic_order_quantity?: number | null
+          holding_cost_rate?: number | null
+          id?: string
+          lead_time_days?: number | null
+          node_id?: string | null
+          ordering_cost?: number | null
+          project_id?: string
+          reorder_point?: number | null
+          safety_stock?: number | null
+          sku?: string
+          unit_cost?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "supply_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_policies: {
+        Row: {
+          created_at: string | null
+          echelon_level: number
+          id: string
+          parameters: Json
+          performance_metrics: Json | null
+          policy_type: string | null
+          project_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          echelon_level: number
+          id?: string
+          parameters: Json
+          performance_metrics?: Json | null
+          policy_type?: string | null
+          project_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          echelon_level?: number
+          id?: string
+          parameters?: Json
+          performance_metrics?: Json | null
+          policy_type?: string | null
+          project_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_policies_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      model_constraints: {
+        Row: {
+          constraint_name: string
+          constraint_type: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          parameters: Json
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          constraint_name: string
+          constraint_type: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          parameters: Json
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          constraint_name?: string
+          constraint_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          parameters?: Json
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_constraints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nodes: {
         Row: {
@@ -81,6 +288,89 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           variable_cost?: number | null
+        }
+        Relationships: []
+      }
+      optimization_results: {
+        Row: {
+          cost_savings_percentage: number | null
+          created_at: string | null
+          execution_time_ms: number | null
+          id: string
+          input_parameters: Json
+          optimization_type: string
+          performance_metrics: Json | null
+          project_id: string
+          results: Json
+          user_id: string
+        }
+        Insert: {
+          cost_savings_percentage?: number | null
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_parameters: Json
+          optimization_type: string
+          performance_metrics?: Json | null
+          project_id: string
+          results: Json
+          user_id: string
+        }
+        Update: {
+          cost_savings_percentage?: number | null
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_parameters?: Json
+          optimization_type?: string
+          performance_metrics?: Json | null
+          project_id?: string
+          results?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optimization_results_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          project_type: string | null
+          settings: Json | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          project_type?: string | null
+          settings?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          project_type?: string | null
+          settings?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -135,12 +425,241 @@ export type Database = {
           },
         ]
       }
+      simulation_scenarios: {
+        Row: {
+          created_at: string | null
+          id: string
+          parameters: Json
+          project_id: string
+          results: Json | null
+          scenario_name: string
+          scenario_type: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          parameters: Json
+          project_id: string
+          results?: Json | null
+          scenario_name: string
+          scenario_type?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          parameters?: Json
+          project_id?: string
+          results?: Json | null
+          scenario_name?: string
+          scenario_type?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_scenarios_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supply_nodes: {
+        Row: {
+          capacity: number | null
+          created_at: string | null
+          demand: number | null
+          fixed_cost: number | null
+          id: string
+          is_editable: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          node_type: string | null
+          project_id: string
+          properties: Json | null
+          service_level: number | null
+          updated_at: string | null
+          user_id: string
+          variable_cost: number | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string | null
+          demand?: number | null
+          fixed_cost?: number | null
+          id?: string
+          is_editable?: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          node_type?: string | null
+          project_id: string
+          properties?: Json | null
+          service_level?: number | null
+          updated_at?: string | null
+          user_id: string
+          variable_cost?: number | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string | null
+          demand?: number | null
+          fixed_cost?: number | null
+          id?: string
+          is_editable?: boolean | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          node_type?: string | null
+          project_id?: string
+          properties?: Json | null
+          service_level?: number | null
+          updated_at?: string | null
+          user_id?: string
+          variable_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_nodes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supply_routes: {
+        Row: {
+          capacity: number | null
+          cost_per_unit: number | null
+          created_at: string | null
+          destination_id: string | null
+          distance: number | null
+          id: string
+          is_active: boolean | null
+          origin_id: string | null
+          project_id: string
+          properties: Json | null
+          route_type: string | null
+          transit_time: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          capacity?: number | null
+          cost_per_unit?: number | null
+          created_at?: string | null
+          destination_id?: string | null
+          distance?: number | null
+          id?: string
+          is_active?: boolean | null
+          origin_id?: string | null
+          project_id: string
+          properties?: Json | null
+          route_type?: string | null
+          transit_time?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          capacity?: number | null
+          cost_per_unit?: number | null
+          created_at?: string | null
+          destination_id?: string | null
+          distance?: number | null
+          id?: string
+          is_active?: boolean | null
+          origin_id?: string | null
+          project_id?: string
+          properties?: Json | null
+          route_type?: string | null
+          transit_time?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_routes_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "supply_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_routes_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "supply_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_routes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          company: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          plan_tier: string | null
+          updated_at: string | null
+          usage_quota: Json | null
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          plan_tier?: string | null
+          updated_at?: string | null
+          usage_quota?: Json | null
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          plan_tier?: string | null
+          updated_at?: string | null
+          usage_quota?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_center_of_gravity: {
+        Args: { project_uuid: string }
+        Returns: {
+          latitude: number
+          longitude: number
+          total_weight: number
+        }[]
+      }
+      calculate_distance: {
+        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
