@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Download, Upload, Save } from "lucide-react";
 import { Node } from "@/components/NetworkMap";
 
@@ -17,6 +17,8 @@ export const CogDataOperations = ({
   onAddWarehouse,
   optimized,
 }: CogDataOperationsProps) => {
+  const { toast } = useToast();
+
   const handleExport = () => {
     if (nodes.length === 0) {
       toast({

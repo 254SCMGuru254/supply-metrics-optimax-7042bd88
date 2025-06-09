@@ -34,5 +34,3 @@ export function useToast() {
 
   return { toast, toasts, dismiss }
 }
-
-export { toast } from "@/hooks/use-toast"

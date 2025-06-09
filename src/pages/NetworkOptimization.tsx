@@ -1,5 +1,4 @@
-
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
@@ -16,7 +15,26 @@ import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { ModelValueMetrics } from "@/components/business-value/ModelValueMetrics";
 
 const NetworkOptimization = () => {
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodes] = useState<Node[]>([
+    {
+      id: crypto.randomUUID(),
+      type: "warehouse",
+      name: "Nairobi Central",
+      latitude: -1.2921,
+      longitude: 36.8219,
+      capacity: 1000,
+      ownership: "owned"
+    },
+    {
+      id: crypto.randomUUID(),
+      type: "distribution",
+      name: "Mombasa Hub",
+      latitude: -4.0435,
+      longitude: 39.6682,
+      capacity: 800,
+      ownership: "owned"
+    }
+  ]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [isOptimized, setIsOptimized] = useState(false);
   const [costReduction, setCostReduction] = useState<number | null>(null);

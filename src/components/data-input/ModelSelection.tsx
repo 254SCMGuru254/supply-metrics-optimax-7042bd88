@@ -1,4 +1,3 @@
-
 import { 
   LayoutDashboard, 
   Package, 
@@ -17,112 +16,109 @@ import {
 import { ModelSelectionButton } from "./ModelSelectionButton";
 
 interface ModelSelectionProps {
-  activeModel: string;
-  setActiveModel: (model: string) => void;
+  selectedModel: string;
+  onModelSelect: (model: string) => void;
 }
 
-export const ModelSelection = ({
-  activeModel,
-  setActiveModel,
-}: ModelSelectionProps) => {
+export function ModelSelection({ selectedModel, onModelSelect }: ModelSelectionProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
       <ModelSelectionButton
         title="Comprehensive"
         description="Detailed data for all models"
-        isActive={activeModel === "comprehensive"}
-        onClick={() => setActiveModel("comprehensive")}
+        isActive={selectedModel === "comprehensive"}
+        onClick={() => onModelSelect("comprehensive")}
         icon={LayoutDashboard}
       />
       <ModelSelectionButton
         title="General"
         description="Basic supply chain data"
-        isActive={activeModel === "general"}
-        onClick={() => setActiveModel("general")}
+        isActive={selectedModel === "general"}
+        onClick={() => onModelSelect("general")}
         icon={Package}
       />
       <ModelSelectionButton
         title="Center of Gravity"
         description="Location data for CoG analysis"
-        isActive={activeModel === "cog"}
-        onClick={() => setActiveModel("cog")}
+        isActive={selectedModel === "cog"}
+        onClick={() => onModelSelect("cog")}
         icon={MapPin}
       />
       <ModelSelectionButton
         title="Network Flow"
         description="Data for network optimization"
-        isActive={activeModel === "network"}
-        onClick={() => setActiveModel("network")}
+        isActive={selectedModel === "network"}
+        onClick={() => onModelSelect("network")}
         icon={Network}
       />
       <ModelSelectionButton
         title="Simulation"
         description="Data for supply chain simulation"
-        isActive={activeModel === "simulation"}
-        onClick={() => setActiveModel("simulation")}
+        isActive={selectedModel === "simulation"}
+        onClick={() => onModelSelect("simulation")}
         icon={BarChart3}
       />
       <ModelSelectionButton
         title="Heuristic"
         description="Data for heuristic analysis"
-        isActive={activeModel === "heuristic"}
-        onClick={() => setActiveModel("heuristic")}
+        isActive={selectedModel === "heuristic"}
+        onClick={() => onModelSelect("heuristic")}
         icon={Calculator}
       />
       <ModelSelectionButton
         title="Isohedron"
         description="Data for isohedron modeling"
-        isActive={activeModel === "isohedron"}
-        onClick={() => setActiveModel("isohedron")}
+        isActive={selectedModel === "isohedron"}
+        onClick={() => onModelSelect("isohedron")}
         icon={Hexagon}
       />
       <ModelSelectionButton
         title="MILP"
         description="Mixed-Integer Linear Programming"
-        isActive={activeModel === "milp"}
-        onClick={() => setActiveModel("milp")}
+        isActive={selectedModel === "milp"}
+        onClick={() => onModelSelect("milp")}
         icon={Calculator}
       />
       <ModelSelectionButton
         title="Fleet Management"
         description="Vehicle fleet optimization"
-        isActive={activeModel === "fleet"}
-        onClick={() => setActiveModel("fleet")}
+        isActive={selectedModel === "fleet"}
+        onClick={() => onModelSelect("fleet")}
         icon={Truck}
       />
       <ModelSelectionButton
         title="Warehouse Network"
         description="Warehouse location & configuration"
-        isActive={activeModel === "warehouse"}
-        onClick={() => setActiveModel("warehouse")}
+        isActive={selectedModel === "warehouse"}
+        onClick={() => onModelSelect("warehouse")}
         icon={Building}
       />
       <ModelSelectionButton
         title="Route Optimization"
         description="Advanced multi-modal routing"
-        isActive={activeModel === "route"}
-        onClick={() => setActiveModel("route")}
+        isActive={selectedModel === "route"}
+        onClick={() => onModelSelect("route")}
         icon={Route}
       />
       <ModelSelectionButton
         title="Cost Modeling"
         description="TCO & cost scenario analysis"
-        isActive={activeModel === "cost"}
-        onClick={() => setActiveModel("cost")}
+        isActive={selectedModel === "cost"}
+        onClick={() => onModelSelect("cost")}
         icon={DollarSign}
       />
       <ModelSelectionButton
         title="Inventory Optimization"
         description="EOQ & ABC Analysis"
-        isActive={activeModel === "inventory"}
-        onClick={() => setActiveModel("inventory")}
+        isActive={selectedModel === "inventory"}
+        onClick={() => onModelSelect("inventory")}
         icon={Package2}
       />
       <ModelSelectionButton
         title="Suitability Questionnaire"
         description="Find the right optimization model"
-        isActive={activeModel === "suitability"}
-        onClick={() => setActiveModel("suitability")}
+        isActive={selectedModel === "suitability"}
+        onClick={() => onModelSelect("suitability")}
         icon={FileQuestion}
       />
     </div>

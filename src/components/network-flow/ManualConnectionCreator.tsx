@@ -10,10 +10,10 @@ import type { Node, Route } from "@/components/map/MapTypes";
 
 interface ManualConnectionCreatorProps {
   nodes: Node[];
-  onAddRoute: (route: Omit<Route, "id">) => void;
+  onCreateConnection: (fromId: string, toId: string, capacity: number, mode: "rail" | "truck" | "air" | "ship") => void;
 }
 
-export function ManualConnectionCreator({ nodes, onAddRoute }: ManualConnectionCreatorProps) {
+export function ManualConnectionCreator({ nodes, onCreateConnection }: ManualConnectionCreatorProps) {
   const [fromNode, setFromNode] = useState<string>("");
   const [toNode, setToNode] = useState<string>("");
   const [volume, setVolume] = useState<number>(50);
@@ -49,7 +49,7 @@ export function ManualConnectionCreator({ nodes, onAddRoute }: ManualConnectionC
       ownership: 'owned'
     };
 
-    onAddRoute(newRoute);
+    onCreateConnection(fromNode, toNode, volume, mode);
     toast({
       title: "Connection created",
       description: "New network connection has been added successfully"
