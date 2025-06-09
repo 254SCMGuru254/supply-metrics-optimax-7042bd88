@@ -1,8 +1,9 @@
+
 import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ModelWalkthrough } from "@/components/ModelWalkthrough";
 import { NetworkMetrics } from "@/components/network-optimization/NetworkMetrics";
 import { 
@@ -65,11 +66,12 @@ const NetworkOptimization = () => {
   const handleMapClick = (lat: number, lng: number) => {
     const newNode: Node = {
       id: crypto.randomUUID(),
-      type: Math.random() > 0.5 ? "warehouse" : "distribution", // Randomly assign node types
+      type: Math.random() > 0.5 ? "warehouse" : "distribution",
       name: `Node ${nodes.length + 1}`,
       latitude: lat,
       longitude: lng,
-      capacity: Math.floor(Math.random() * 1000) + 500, // Random capacity
+      capacity: Math.floor(Math.random() * 1000) + 500,
+      ownership: 'owned'
     };
 
     const updatedNodes = [...nodes, newNode];
@@ -155,10 +157,8 @@ const NetworkOptimization = () => {
         </div>
         <div className="flex gap-2">
           <ExportPdfButton 
-            networkName="Supply Chain Network"
-            optimizationType="Network Flow Optimization"
-            results={optimizationResults}
             fileName="network-optimization-results"
+            results={optimizationResults}
             isOptimized={isOptimized}
           />
           <Button onClick={handleOptimize} disabled={nodes.length < 2}>
