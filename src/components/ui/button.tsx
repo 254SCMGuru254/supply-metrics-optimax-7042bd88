@@ -35,10 +35,15 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
   children?: React.ReactNode
+  className?: string
+  disabled?: boolean
+  type?: "button" | "submit" | "reset"
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

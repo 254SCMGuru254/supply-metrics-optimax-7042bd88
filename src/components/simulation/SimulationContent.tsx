@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
-import { Play, Pause, RotateCcw, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
+import { Play, Circle, RefreshCcw, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 
 interface SimulationParams {
@@ -177,7 +177,7 @@ export const SimulationContent = () => {
                   {isRunning ? "Running..." : "Start Simulation"}
                 </Button>
                 <Button variant="outline" onClick={resetSimulation}>
-                  <RotateCcw className="h-4 w-4 mr-2" />
+                  <RefreshCcw className="h-4 w-4 mr-2" />
                   Reset
                 </Button>
               </div>
