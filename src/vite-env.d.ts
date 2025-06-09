@@ -24,12 +24,18 @@ declare module 'react' {
   export type RefObject<T> = React.RefObject<T>;
   export type CSSProperties = React.CSSProperties;
   export type HTMLAttributes<T> = React.HTMLAttributes<T>;
+  export type ButtonHTMLAttributes<T> = React.ButtonHTMLAttributes<T>;
+  export type InputHTMLAttributes<T> = React.InputHTMLAttributes<T>;
   export type TextareaHTMLAttributes<T> = React.TextareaHTMLAttributes<T>;
   export type DetailedHTMLProps<E, T> = React.DetailedHTMLProps<E, T>;
   export type KeyboardEventHandler<T = Element> = React.KeyboardEventHandler<T>;
   export type MouseEventHandler<T = Element> = React.MouseEventHandler<T>;
   export type ElementRef<T> = React.ElementRef<T>;
   export type ComponentPropsWithoutRef<T> = React.ComponentPropsWithoutRef<T>;
+  export type ComponentProps<T> = React.ComponentProps<T>;
+  export type ComponentPropsWithRef<T> = React.ComponentPropsWithRef<T>;
+  export type ThHTMLAttributes<T> = React.ThHTMLAttributes<T>;
+  export type TdHTMLAttributes<T> = React.TdHTMLAttributes<T>;
 }
 
 // Enhanced Lucide React type definitions with ALL required icons
@@ -140,6 +146,11 @@ declare module 'lucide-react' {
   export const FileDown: LucideIcon;
   export const Lightbulb: LucideIcon;
   export const Edit: LucideIcon;
+  export const MoreHorizontal: LucideIcon;
+  export const Menu: LucideIcon;
+  export const PanelLeft: LucideIcon;
+  export const Circle: LucideIcon;
+  export const Search: LucideIcon;
   
   // Icon aliases
   export { Warehouse as WarehouseIcon };
@@ -164,6 +175,7 @@ declare module '@/components/ui/button' {
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
     asChild?: boolean;
+    ref?: React.Ref<HTMLButtonElement>;
   }
   
   export const Button: ComponentType<ButtonProps>;
@@ -192,6 +204,17 @@ declare module 'recharts' {
   }
   
   export interface BarChartProps {
+    data?: any[];
+    margin?: {
+      top?: number;
+      right?: number;
+      left?: number;
+      bottom?: number;
+    };
+    children?: ReactNode;
+  }
+  
+  export interface PieChartProps {
     data?: any[];
     margin?: {
       top?: number;
@@ -231,6 +254,19 @@ declare module 'recharts' {
     name?: string;
   }
   
+  export interface PieProps {
+    dataKey?: string;
+    cx?: number | string;
+    cy?: number | string;
+    outerRadius?: number;
+    fill?: string;
+    children?: ReactNode;
+  }
+  
+  export interface CellProps {
+    fill?: string;
+  }
+  
   export interface CartesianGridProps {
     strokeDasharray?: string;
   }
@@ -240,6 +276,7 @@ declare module 'recharts' {
   export const ResponsiveContainer: ComponentType<ResponsiveContainerProps>;
   export const LineChart: ComponentType<LineChartProps>;
   export const BarChart: ComponentType<BarChartProps>;
+  export const PieChart: ComponentType<PieChartProps>;
   export const XAxis: ComponentType<XAxisProps>;
   export const YAxis: ComponentType<YAxisProps>;
   export const CartesianGrid: ComponentType<CartesianGridProps>;
@@ -247,6 +284,8 @@ declare module 'recharts' {
   export const Legend: ComponentType<LegendProps>;
   export const Line: ComponentType<LineProps>;
   export const Bar: ComponentType<BarProps>;
+  export const Pie: ComponentType<PieProps>;
+  export const Cell: ComponentType<CellProps>;
 }
 
 // Enhanced HTML element interfaces

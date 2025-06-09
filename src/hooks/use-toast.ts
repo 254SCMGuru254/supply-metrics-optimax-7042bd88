@@ -2,22 +2,37 @@
 import { useState } from "react"
 
 interface Toast {
-  title: string
+  id?: string
+  title?: string
   description?: string
   variant?: "default" | "destructive"
+  action?: React.ReactNode
 }
+
+let toastCounter = 0
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const toast = (toast: Toast) => {
-    setToasts(prev => [...prev, toast])
+  const toast = ({ id, ...toastData }: Toast) => {
+    const toastId = id || `toast-${++toastCounter}`
+    const newToast = { id: toastId, ...toastData }
+    
+    setToasts(prev => [...prev, newToast])
     
     // Auto-remove after 3 seconds
     setTimeout(() => {
-      setToasts(prev => prev.slice(1))
+      setToasts(prev => prev.filter(t => t.id !== toastId))
     }, 3000)
+    
+    return toastId
   }
 
-  return { toast, toasts }
+  const dismiss = (toastId: string) => {
+    setToasts(prev => prev.filter(t => t.id !== toastId))
+  }
+
+  return { toast, toasts, dismiss }
 }
+
+export { toast } from "@/hooks/use-toast"

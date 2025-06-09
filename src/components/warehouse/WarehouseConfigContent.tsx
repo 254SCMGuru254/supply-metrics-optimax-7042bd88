@@ -1,124 +1,151 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { useToast } from "@/components/ui/use-toast";
-import type { Node } from "@/components/map/MapTypes";
+import { Warehouse, Building } from "lucide-react";
+import { Node } from "@/components/map/MapTypes";
+import { useState } from "react";
 
 interface WarehouseConfigProps {
   nodes: Node[];
   setNodes: (nodes: Node[]) => void;
 }
 
-// Leaflet icon configuration
-if (typeof window !== 'undefined') {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
-  });
-}
-
-function LocationPicker({ onLocationSelect }: { onLocationSelect: (location: { lat: number; lng: number }) => void }) {
-  useMapEvents({
-    click: (e) => {
-      onLocationSelect({ lat: e.latlng.lat, lng: e.latlng.lng });
-    },
-  });
-  return null;
-}
-
-export const WarehouseConfigContent = ({ nodes, setNodes }: WarehouseConfigProps) => {
-  const { toast } = useToast();
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+export function WarehouseConfigContent({ nodes, setNodes }: WarehouseConfigProps) {
   const [warehouseName, setWarehouseName] = useState("");
+  const [capacity, setCapacity] = useState("");
+  const [location, setLocation] = useState({ lat: "", lng: "" });
 
-  const handleLocationSelect = (location: { lat: number; lng: number }) => {
-    setSelectedLocation(location);
-    setWarehouseName(`Warehouse ${nodes.length + 1}`);
+  const addWarehouse = () => {
+    if (!warehouseName || !capacity || !location.lat || !location.lng) {
+      return;
+    }
+
+    const newWarehouse: Node = {
+      id: crypto.randomUUID(),
+      name: warehouseName,
+      type: "warehouse",
+      latitude: parseFloat(location.lat),
+      longitude: parseFloat(location.lng),
+      capacity: parseInt(capacity),
+      ownership: 'owned'
+    };
+
+    setNodes([...nodes, newWarehouse]);
+    
+    // Reset form
+    setWarehouseName("");
+    setCapacity("");
+    setLocation({ lat: "", lng: "" });
   };
 
-  const handleCreateWarehouse = () => {
-    if (selectedLocation) {
-      const newNode: Node = {
-        id: crypto.randomUUID(),
-        type: "warehouse",
-        name: `Warehouse ${nodes.length + 1}`,
-        latitude: selectedLocation.lat,
-        longitude: selectedLocation.lng,
-        capacity: 10000,
-        ownership: 'owned'
-      };
-      
-      setNodes([...nodes, newNode]);
-      setSelectedLocation(null);
-      
-      toast({
-        title: "Warehouse Created",
-        description: `Created warehouse at [${selectedLocation.lat.toFixed(4)}, ${selectedLocation.lng.toFixed(4)}]`,
-      });
-    }
+  const removeWarehouse = (id: string) => {
+    setNodes(nodes.filter(node => node.id !== id));
   };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Warehouse Configuration</CardTitle>
-          <CardDescription>Add and configure warehouses in your supply chain network</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Warehouse className="h-5 w-5" />
+            Add Warehouse
+          </CardTitle>
+          <CardDescription>
+            Configure warehouse locations and capacities
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="warehouseName">Warehouse Name</Label>
+              <Label htmlFor="warehouse-name">Warehouse Name</Label>
               <Input
-                type="text"
-                id="warehouseName"
-                placeholder="Enter warehouse name"
+                id="warehouse-name"
                 value={warehouseName}
                 onChange={(e) => setWarehouseName(e.target.value)}
+                placeholder="Enter warehouse name"
               />
             </div>
             <div>
-              <Label>Select Location</Label>
-              {selectedLocation ? (
-                <p className="text-sm text-muted-foreground">
-                  Selected Location: [{selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}]
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground">Click on the map to select a location</p>
-              )}
+              <Label htmlFor="capacity">Capacity</Label>
+              <Input
+                id="capacity"
+                type="number"
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                placeholder="Storage capacity"
+              />
             </div>
           </div>
-          
-          <div className="h-[400px] border rounded-md overflow-hidden">
-            <MapContainer
-              center={[-1.2921, 36.8219]}
-              zoom={6}
-              style={{ height: "100%", width: "100%" }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="latitude">Latitude</Label>
+              <Input
+                id="latitude"
+                type="number"
+                step="any"
+                value={location.lat}
+                onChange={(e) => setLocation({ ...location, lat: e.target.value })}
+                placeholder="e.g., -1.2921"
               />
-              <LocationPicker onLocationSelect={handleLocationSelect} />
-              {selectedLocation && (
-                <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
-              )}
-            </MapContainer>
+            </div>
+            <div>
+              <Label htmlFor="longitude">Longitude</Label>
+              <Input
+                id="longitude"
+                type="number"
+                step="any"
+                value={location.lng}
+                onChange={(e) => setLocation({ ...location, lng: e.target.value })}
+                placeholder="e.g., 36.8219"
+              />
+            </div>
           </div>
-          
-          <Button onClick={handleCreateWarehouse} disabled={!selectedLocation}>
-            Create Warehouse
+          <Button onClick={addWarehouse} className="w-full">
+            Add Warehouse
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Configured Warehouses
+          </CardTitle>
+          <CardDescription>
+            Currently configured warehouse locations
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {nodes.filter(node => node.type === 'warehouse').length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              No warehouses configured. Add your first warehouse above.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {nodes.filter(node => node.type === 'warehouse').map((warehouse) => (
+                <div key={warehouse.id} className="flex items-center justify-between p-3 border rounded">
+                  <div>
+                    <h4 className="font-medium">{warehouse.name}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Capacity: {warehouse.capacity} | Location: [{warehouse.latitude.toFixed(4)}, {warehouse.longitude.toFixed(4)}]
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => removeWarehouse(warehouse.id)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
-};
+}

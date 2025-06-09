@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Node, Route } from '@/components/map/MapTypes';
 import { NetworkMap } from "@/components/NetworkMap";
 import { 
@@ -188,7 +188,8 @@ const NetworkDesign = () => {
         name: factory.name,
         latitude: factory.latitude,
         longitude: factory.longitude,
-        type: 'factory' as const
+        type: 'factory' as const,
+        ownership: 'owned' as const
       })),
       ...networkModel.depots.map(depot => ({
         id: depot.id,
@@ -196,15 +197,17 @@ const NetworkDesign = () => {
         latitude: depot.latitude,
         longitude: depot.longitude,
         type: 'warehouse' as const,
-        throughput: depot.throughput
+        throughput: depot.throughput,
+        ownership: 'owned' as const
       })),
       ...networkModel.customers.map(customer => ({
         id: customer.id,
         name: customer.name,
         latitude: customer.latitude,
         longitude: customer.longitude,
-        type: 'custom' as const,
-        demand: customer.demand
+        type: 'retail' as const,
+        demand: customer.demand,
+        ownership: 'owned' as const
       }))
     ];
   };
@@ -223,7 +226,8 @@ const NetworkDesign = () => {
             from: factory.id,
             to: depot.id,
             volume: depot.throughput,
-            type: 'road'
+            type: 'road',
+            ownership: 'owned'
           });
         }
       }
@@ -239,7 +243,8 @@ const NetworkDesign = () => {
             from: depot.id,
             to: customer.id,
             volume: customer.demand,
-            type: 'road'
+            type: 'road',
+            ownership: 'owned'
           });
         }
       }
@@ -260,16 +265,14 @@ const NetworkDesign = () => {
         <div className="flex gap-2">
           <Button onClick={handleAnalyzeNetwork}>Calculate Network Costs</Button>
           <ExportPdfButton
-            networkName="Physical Network Design"
-            optimizationType="Location-Allocation Analysis"
-            results={costAnalysis}
+            title="Physical Network Design"
+            exportId="network-design-content"
             fileName="network-design-results"
-            isOptimized={!!costAnalysis}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="network-design-content">
         <Card className="lg:col-span-2 p-4">
           <NetworkMap
             nodes={getMapNodes()}

@@ -1,438 +1,280 @@
-import { useState, useEffect } from "react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
-  LayoutDashboard, 
   BarChart3, 
-  MapPin, 
-  Settings, 
-  AlertCircle,
-  CheckCircle,
+  TrendingUp, 
+  TrendingDown, 
+  Activity, 
+  CircleDollarSign, 
+  Package, 
+  Truck, 
   Clock,
-  TrendingUp,
-  Package,
-  Network,
-  Calculator,
-  Truck,
-  Factory,
-  Store,
-  Hexagon,
-  Activity
+  LayoutDashboard,
+  LineChart
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { 
+  ResponsiveContainer, 
+  LineChart as RechartsLineChart, 
+  BarChart, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  Line, 
+  Bar
+} from "recharts";
 
 const Dashboard = () => {
-  const [activeProjects, setActiveProjects] = useState([
-    {
-      id: 1,
-      name: "Kenya Tea Distribution Network",
-      model: "Center of Gravity + Network Flow",
-      status: "Running",
-      progress: 85,
-      lastUpdated: "15 minutes ago",
-      estimatedCompletion: "2 hours",
-      costSavings: "22.5%"
-    },
-    {
-      id: 2,
-      name: "Nairobi-Mombasa Route Optimization", 
-      model: "Vehicle Routing Problem (VRP)",
-      status: "Completed",
-      progress: 100,
-      lastUpdated: "3 hours ago",
-      estimatedCompletion: "Completed",
-      costSavings: "18.3%"
-    },
-    {
-      id: 3,
-      name: "Coffee Supply Chain Multi-Echelon",
-      model: "Multi-Echelon Inventory Optimization",
-      status: "Queued",
-      progress: 0,
-      lastUpdated: "1 hour ago",
-      estimatedCompletion: "Pending",
-      costSavings: "Est. 25%"
-    }
-  ]);
-
-  const [systemMetrics, setSystemMetrics] = useState({
-    totalProjects: 12,
-    activeOptimizations: 3,
-    completedThisMonth: 8,
-    avgCostSavings: 19.7,
-    totalLocationsOptimized: 247,
-    systemUptime: 99.8,
-    apiResponseTime: 1.2,
-    optimizationAccuracy: 99.4
-  });
-
+  // Mock data for charts
   const performanceData = [
-    { month: 'Jan', savings: 15.2, projects: 5 },
-    { month: 'Feb', savings: 18.7, projects: 7 },
-    { month: 'Mar', savings: 22.1, projects: 9 },
-    { month: 'Apr', savings: 19.8, projects: 12 },
-    { month: 'May', savings: 21.5, projects: 15 },
-    { month: 'Jun', savings: 19.7, projects: 12 }
+    { month: 'Jan', optimization: 85, traditional: 65 },
+    { month: 'Feb', optimization: 89, traditional: 67 },
+    { month: 'Mar', optimization: 92, traditional: 69 },
+    { month: 'Apr', optimization: 88, traditional: 71 },
+    { month: 'May', optimization: 95, traditional: 73 },
+    { month: 'Jun', optimization: 97, traditional: 75 },
   ];
 
-  const modelUsageData = [
-    { name: 'Center of Gravity', value: 35, projects: 12 },
-    { name: 'Network Optimization', value: 25, projects: 8 },
-    { name: 'Route Optimization', value: 20, projects: 6 },
-    { name: 'Inventory Management', value: 12, projects: 4 },
-    { name: 'Other Models', value: 8, projects: 2 }
+  const costSavingsData = [
+    { category: 'Transportation', savings: 24000 },
+    { category: 'Inventory', savings: 18500 },
+    { category: 'Warehousing', savings: 15200 },
+    { category: 'Distribution', savings: 12800 },
   ];
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "Running":
-        return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />;
-      case "Completed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "Queued":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case "Error":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Running":
-        return "bg-blue-100 text-blue-800";
-      case "Completed":
-        return "bg-green-100 text-green-800";
-      case "Queued":
-        return "bg-yellow-100 text-yellow-800";
-      case "Error":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <LayoutDashboard className="h-8 w-8" />
             Supply Chain Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Monitor optimization projects, track performance, and manage your supply chain operations
+          </h2>
+          <p className="text-muted-foreground">
+            Monitor your optimization performance and key metrics
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild>
-            <Link to="/data-input">
-              <Package className="h-4 w-4 mr-2" />
-              New Project
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/analytics">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
-            </Link>
+        <div className="flex items-center space-x-2">
+          <Button>
+            Generate Report
           </Button>
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.activeOptimizations}</div>
-            <p className="text-xs text-muted-foreground">
-              +{systemMetrics.completedThisMonth - 5} from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Cost Savings</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.avgCostSavings}%</div>
-            <p className="text-xs text-muted-foreground">
-              Across all optimization models
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Locations Optimized</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.totalLocationsOptimized}</div>
-            <p className="text-xs text-muted-foreground">
-              Across Kenya and East Africa
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Performance</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.optimizationAccuracy}%</div>
-            <p className="text-xs text-muted-foreground">
-              Model accuracy rate
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="projects" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="projects">Active Projects</TabsTrigger>
-          <TabsTrigger value="analytics">Performance Analytics</TabsTrigger>
-          <TabsTrigger value="models">Optimization Models</TabsTrigger>
-          <TabsTrigger value="system">System Status</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="projects" className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            {activeProjects.map((project) => (
-              <Card key={project.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{project.name}</CardTitle>
-                      <CardDescription>
-                        Model: {project.model} • Cost Savings: {project.costSavings}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(project.status)}
-                      <Badge className={getStatusColor(project.status)}>
-                        {project.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span>{project.progress}%</span>
-                      </div>
-                      <Progress value={project.progress} className="h-2" />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-                      <div>
-                        <span className="font-medium">Last Updated:</span> {project.lastUpdated}
-                      </div>
-                      <div>
-                        <span className="font-medium">Completion:</span> {project.estimatedCompletion}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        View Details
-                      </Button>
-                      {project.status === "Running" && (
-                        <Button size="sm" variant="outline">
-                          Pause
-                        </Button>
-                      )}
-                      {project.status === "Completed" && (
-                        <Button size="sm">
-                          Download Report
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+
+        <TabsContent value="overview" className="space-y-4">
+          {/* Key Metrics Cards */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Cost Savings</CardTitle>
+                <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">$70,500</div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="text-green-600 flex items-center">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +12.5%
+                  </span>
+                  from last month
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Delivery Efficiency</CardTitle>
+                <Truck className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">97.2%</div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="text-green-600 flex items-center">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +2.3%
+                  </span>
+                  from last month
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Inventory Turnover</CardTitle>
+                <Package className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">8.4x</div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="text-green-600 flex items-center">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +0.7x
+                  </span>
+                  from last month
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Lead Time</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">3.2 days</div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="text-green-600 flex items-center">
+                    <TrendingDown className="h-3 w-3 mr-1" />
+                    -0.8 days
+                  </span>
+                  from last month
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Charts */}
+          <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Cost Savings Trend</CardTitle>
-                <CardDescription>Monthly cost savings percentage and project count</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <LineChart className="h-5 w-5" />
+                  Performance Comparison
+                </CardTitle>
+                <CardDescription>
+                  Optimized vs Traditional Methods
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={performanceData}>
+                  <RechartsLineChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="savings" stroke="#8884d8" name="Cost Savings %" />
-                  </LineChart>
+                    <Line 
+                      type="monotone" 
+                      dataKey="optimization" 
+                      stroke="#8884d8" 
+                      name="Optimized" 
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="traditional" 
+                      stroke="#82ca9d" 
+                      name="Traditional" 
+                    />
+                  </RechartsLineChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
-                <CardTitle>Projects by Month</CardTitle>
-                <CardDescription>Number of optimization projects completed</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Cost Savings by Category
+                </CardTitle>
+                <CardDescription>
+                  Monthly savings breakdown
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={performanceData}>
+                  <BarChart data={costSavingsData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="category" />
                     <YAxis />
                     <Tooltip />
-                    <Legend />
-                    <Bar dataKey="projects" fill="#82ca9d" name="Projects Completed" />
+                    <Bar dataKey="savings" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Model Usage Distribution</CardTitle>
-                <CardDescription>Distribution of optimization models used in projects</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={modelUsageData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="projects" fill="#8884d8" name="Projects" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
           </div>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>
+                Access your most used optimization tools
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-2 md:grid-cols-4">
+              <Button variant="outline" className="justify-start">
+                <Package className="mr-2 h-4 w-4" />
+                Inventory Optimization
+              </Button>
+              <Button variant="outline" className="justify-start">
+                <Truck className="mr-2 h-4 w-4" />
+                Route Optimization
+              </Button>
+              <Button variant="outline" className="justify-start">
+                <Activity className="mr-2 h-4 w-4" />
+                Network Analysis
+              </Button>
+              <Button variant="outline" className="justify-start">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Demand Forecasting
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
-        
-        <TabsContent value="models" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Center of Gravity
-                </CardTitle>
-                <CardDescription>8+ mathematical formulas with ML integration</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Accuracy:</span>
-                    <Badge variant="secondary">99.97%</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Projects:</span>
-                    <span>35 completed</span>
-                  </div>
-                  <Button className="w-full mt-4" asChild>
-                    <Link to="/center-of-gravity">Open Model</Link>
-                  </Button>
+
+        <TabsContent value="performance" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Metrics</CardTitle>
+              <CardDescription>
+                Detailed performance analysis and trends
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span>Overall Efficiency</span>
+                  <Badge variant="secondary">94.7%</Badge>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Network className="h-5 w-5" />
-                  Network Optimization
-                </CardTitle>
-                <CardDescription>Advanced network flow optimization</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Accuracy:</span>
-                    <Badge variant="secondary">99.98%</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Projects:</span>
-                    <span>25 completed</span>
-                  </div>
-                  <Button className="w-full mt-4" asChild>
-                    <Link to="/network-optimization">Open Model</Link>
-                  </Button>
+                <div className="flex items-center justify-between">
+                  <span>Cost Reduction</span>
+                  <Badge variant="secondary">-15.3%</Badge>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Truck className="h-5 w-5" />
-                  Route Optimization
-                </CardTitle>
-                <CardDescription>Vehicle routing and logistics optimization</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Accuracy:</span>
-                    <Badge variant="secondary">99.95%</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Projects:</span>
-                    <span>18 completed</span>
-                  </div>
-                  <Button className="w-full mt-4" asChild>
-                    <Link to="/route-optimization">Open Model</Link>
-                  </Button>
+                <div className="flex items-center justify-between">
+                  <span>Service Level</span>
+                  <Badge variant="secondary">99.1%</Badge>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
-        
-        <TabsContent value="system" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">System Health</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Uptime:</span>
-                    <Badge variant="secondary">{systemMetrics.systemUptime}%</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Response Time:</span>
-                    <span>{systemMetrics.apiResponseTime}s</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Active Models:</span>
-                    <span>12</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Advanced Analytics</CardTitle>
+              <CardDescription>
+                Deep insights and predictive analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Advanced analytics features coming soon...
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
