@@ -1,3 +1,4 @@
+
 import { CostAnalysis } from "./types/NetworkDesign";
 
 interface CostBreakdownProps {
@@ -8,9 +9,9 @@ export function CostBreakdown({ costAnalysis }: CostBreakdownProps) {
   return (
     <div>
       <h3>Cost Breakdown</h3>
-      <p>Fixed Costs: ${costAnalysis.fixedCosts}</p>
-      <p>Variable Costs: ${costAnalysis.variableCosts}</p>
-      <p>Total Costs: ${costAnalysis.totalCosts}</p>
+      <p>Fixed Costs: ${costAnalysis.depotCost}</p>
+      <p>Variable Costs: ${costAnalysis.deliveryCost}</p>
+      <p>Total Costs: ${costAnalysis.totalCost}</p>
     </div>
   );
 }

@@ -205,7 +205,6 @@ export const RouteOptimizationContent = () => {
       
       <div className="flex justify-end mb-4">
         <ExportPdfButton 
-          title="Route Optimization Report"
           exportId="route-optimization-content"
           fileName="route_optimization_analysis"
         />
@@ -269,7 +268,7 @@ export const RouteOptimizationContent = () => {
               <CardTitle>Vehicle Fleet Configuration</CardTitle>
             </CardHeader>
             <CardContent>
-              <VehicleFleetConfig vehicles={vehicles} onChange={setVehicles} />
+              <VehicleFleetConfig vehicles={vehicles} onVehiclesChange={setVehicles} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,6 +1,7 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, X } from "lucide-react";
 
 const Pricing = () => {
   return (
@@ -36,7 +37,7 @@ const Pricing = () => {
                 Basic optimization algorithms
               </li>
               <li className="flex items-center gap-2">
-                <XCircle className="text-red-500 w-5 h-5" />
+                <X className="text-red-500 w-5 h-5" />
                 Limited support
               </li>
             </ul>

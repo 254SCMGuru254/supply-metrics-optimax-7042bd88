@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,12 @@ export interface Vehicle {
 
 interface VehicleFleetConfigProps {
   vehicles: Vehicle[];
-  onVehiclesChange: (vehicles: Vehicle[]) => void;
+  onChange?: (vehicles: Vehicle[]) => void;
+  onVehiclesChange?: (vehicles: Vehicle[]) => void;
 }
 
-export function VehicleFleetConfig({ vehicles, onVehiclesChange }: VehicleFleetConfigProps) {
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+export function VehicleFleetConfig({ vehicles, onChange, onVehiclesChange }: VehicleFleetConfigProps) {
+  const handleVehicleChange = onChange || onVehiclesChange || (() => {});
 
   const addVehicle = () => {
     const newVehicle: Vehicle = {
@@ -32,16 +34,16 @@ export function VehicleFleetConfig({ vehicles, onVehiclesChange }: VehicleFleetC
       costPerKm: 2.5,
       fuelEfficiency: 8.0
     };
-    onVehiclesChange([...vehicles, newVehicle]);
+    handleVehicleChange([...vehicles, newVehicle]);
   };
 
   const updateVehicle = (id: string, updates: Partial<Vehicle>) => {
     const updated = vehicles.map(v => v.id === id ? { ...v, ...updates } : v);
-    onVehiclesChange(updated);
+    handleVehicleChange(updated);
   };
 
   const removeVehicle = (id: string) => {
-    onVehiclesChange(vehicles.filter(v => v.id !== id));
+    handleVehicleChange(vehicles.filter(v => v.id !== id));
   };
 
   return (

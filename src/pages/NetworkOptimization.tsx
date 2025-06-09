@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
@@ -15,24 +15,43 @@ import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { ModelValueMetrics } from "@/components/business-value/ModelValueMetrics";
 
 const NetworkOptimization = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [nodes, setNodes] = useState<Node[]>([
     {
       id: crypto.randomUUID(),
       type: "warehouse",
-      name: "Nairobi Central",
+      name: "Nairobi Distribution Center",
       latitude: -1.2921,
       longitude: 36.8219,
-      capacity: 1000,
-      ownership: "owned"
+      capacity: 10000,
+      ownership: 'owned'
     },
     {
       id: crypto.randomUUID(),
       type: "distribution",
-      name: "Mombasa Hub",
+      name: "Mombasa Regional Hub",
       latitude: -4.0435,
       longitude: 39.6682,
-      capacity: 800,
-      ownership: "owned"
+      capacity: 8000,
+      ownership: 'owned'
+    },
+    {
+      id: crypto.randomUUID(),
+      type: "warehouse",
+      name: "Kisumu Service Center",
+      latitude: -0.0917,
+      longitude: 34.7578,
+      capacity: 5000,
+      ownership: 'owned'
+    },
+    {
+      id: crypto.randomUUID(),
+      type: "distribution",
+      name: "Nakuru Outlet",
+      latitude: -0.2833,
+      longitude: 36.0667,
+      capacity: 3000,
+      ownership: 'owned'
     }
   ]);
   const [routes, setRoutes] = useState<Route[]>([]);
