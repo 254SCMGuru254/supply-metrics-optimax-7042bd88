@@ -1,86 +1,100 @@
 
-import { Node, Route } from "@/components/NetworkMap";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calculator, MapPin, TrendingUp } from "lucide-react";
+import type { Node } from "@/components/map/MapTypes";
+import { calculateTotalDistance, calculateTotalCost } from "./CogUtils";
 
-type CogMetricsProps = {
-  nodes: Node[];
-  totalWeight: number;
-  isOptimized: boolean;
-  optimalLocation: { lat: number; lng: number } | null;
-  distanceReduction: number | null;
-  calculationType: 'euclidean' | 'haversine';
-};
+export interface CogMetricsProps {
+  demandNodes: Node[];
+  cogResult: { lat: number; lng: number } | null;
+  selectedFormula: string;
+}
 
-export const CogMetrics = ({
-  nodes,
-  totalWeight,
-  isOptimized,
-  optimalLocation,
-  distanceReduction,
-  calculationType,
-}: CogMetricsProps) => {
-  const customerNodes = nodes.filter(n => n.type === "customer");
-  const warehouseNodes = nodes.filter(n => n.type === "warehouse" && !n.isOptimal);
-  const hasExistingWarehouse = warehouseNodes.length > 0;
-  
+export function CogMetrics({ 
+  demandNodes, 
+  cogResult, 
+  selectedFormula 
+}: CogMetricsProps) {
+  if (!cogResult) {
+    return (
+      <div className="text-center py-8">
+        <Calculator className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+        <p className="text-muted-foreground">Add demand points to calculate center of gravity</p>
+      </div>
+    );
+  }
+
+  const totalDistance = calculateTotalDistance(demandNodes, cogResult);
+  const totalCost = calculateTotalCost(demandNodes, cogResult, selectedFormula);
+  const avgDistance = totalDistance / demandNodes.length;
+
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-sm text-muted-foreground">Total Demand Points</p>
-        <p className="text-2xl font-semibold">{customerNodes.length}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">COG Coordinates</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {cogResult.lat.toFixed(4)}, {cogResult.lng.toFixed(4)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Optimal facility location
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Distance</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalDistance.toFixed(2)} km</div>
+            <p className="text-xs text-muted-foreground">
+              Sum of all distances
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Weighted Cost</CardTitle>
+            <Calculator className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalCost.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
+              Distance × demand weight
+            </p>
+          </CardContent>
+        </Card>
       </div>
-      
-      {hasExistingWarehouse && (
-        <div>
-          <p className="text-sm text-muted-foreground">Existing Warehouses</p>
-          <p className="text-2xl font-semibold">{warehouseNodes.length}</p>
+
+      <div className="space-y-2">
+        <h4 className="font-medium">Calculation Details</h4>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex justify-between">
+            <span>Formula Used:</span>
+            <Badge variant="secondary">{selectedFormula}</Badge>
+          </div>
+          <div className="flex justify-between">
+            <span>Demand Points:</span>
+            <span>{demandNodes.length}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Average Distance:</span>
+            <span>{avgDistance.toFixed(2)} km</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Total Demand:</span>
+            <span>{demandNodes.reduce((sum, node) => sum + (node.weight || 0), 0)}</span>
+          </div>
         </div>
-      )}
-      
-      <div>
-        <p className="text-sm text-muted-foreground">Total Demand Weight</p>
-        <p className="text-2xl font-semibold">{totalWeight.toLocaleString()}</p>
       </div>
-      
-      <div>
-        <p className="text-sm text-muted-foreground">Distance Calculation</p>
-        <p className="text-lg font-medium">{calculationType === 'haversine' ? 'Haversine' : 'Euclidean'}</p>
-        <p className="text-xs text-muted-foreground">
-          {calculationType === 'haversine' 
-            ? 'Accounts for Earth curvature, more accurate for long distances' 
-            : 'Straight-line distance, simpler approximation'}
-        </p>
-      </div>
-      
-      {isOptimized && optimalLocation && (
-        <>
-          <div>
-            <p className="text-sm text-muted-foreground">Optimal Location</p>
-            <p className="text-lg font-medium">[{optimalLocation.lat.toFixed(4)}, {optimalLocation.lng.toFixed(4)}]</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-muted-foreground">Distance Reduction</p>
-            <p className="text-2xl font-semibold text-primary">{distanceReduction?.toFixed(1)}%</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-muted-foreground">Potential Cost Savings</p>
-            <p className="text-lg font-medium">
-              {(distanceReduction || 0) < 5 ? 'Minimal' : 
-               (distanceReduction || 0) < 15 ? 'Moderate' :
-               (distanceReduction || 0) < 30 ? 'Significant' : 'Substantial'}
-            </p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-muted-foreground">Calculation Approach</p>
-            <p className="text-lg font-medium">Center of Gravity</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Weighted average location that minimizes the sum of transportation costs
-            </p>
-          </div>
-        </>
-      )}
     </div>
   );
-};
+}

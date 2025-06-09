@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough";
 import { HeuristicMetrics } from "@/components/heuristic/HeuristicMetrics";
 import { HeuristicParameters } from "@/components/heuristic/HeuristicParameters";
@@ -51,6 +51,7 @@ const Heuristic = () => {
       latitude: lat,
       longitude: lng,
       capacity: Math.floor(Math.random() * 1000) + 500,
+      ownership: 'owned' // Add missing ownership property
     };
 
     const updatedNodes = [...nodes, newNode];

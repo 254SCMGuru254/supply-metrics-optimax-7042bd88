@@ -1,50 +1,26 @@
 
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Download, Loader2 } from "lucide-react";
-import { exportToPdf } from "@/utils/exportToPdf";
+import { Button } from "@/components/ui/button"
+import { FileDown } from "lucide-react"
 
 interface ExportPdfButtonProps {
-  title: string;
-  exportId: string;
-  disabled?: boolean;
-  fileName?: string;
+  title: string
+  exportId: string
+  fileName: string
 }
 
-export function ExportPdfButton({ title, exportId, disabled, fileName }: ExportPdfButtonProps) {
-  const [isExporting, setIsExporting] = useState(false);
-
-  const handleExport = async () => {
-    if (!exportId) return;
-    
-    setIsExporting(true);
-    try {
-      await exportToPdf(exportId, fileName || title.replace(/\s+/g, '_'));
-    } catch (error) {
-      console.error('Export failed:', error);
-    } finally {
-      setIsExporting(false);
+export function ExportPdfButton({ title, exportId, fileName }: ExportPdfButtonProps) {
+  const handleExport = () => {
+    // Simple implementation - in a real app you'd use a PDF library
+    const element = document.getElementById(exportId)
+    if (element) {
+      window.print()
     }
-  };
-  
+  }
+
   return (
-    <Button
-      onClick={handleExport}
-      disabled={disabled || isExporting}
-      variant="default" 
-      size="default"
-    >
-      {isExporting ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Exporting...
-        </>
-      ) : (
-        <>
-          <Download className="mr-2 h-4 w-4" />
-          Export PDF
-        </>
-      )}
+    <Button onClick={handleExport} variant="outline">
+      <FileDown className="h-4 w-4 mr-2" />
+      Export PDF
     </Button>
-  );
+  )
 }

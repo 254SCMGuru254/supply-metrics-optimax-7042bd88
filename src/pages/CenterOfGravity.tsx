@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CogApplicationSelector } from "@/components/cog/CogApplicationSelector";
 import { CogFormulaSelector } from "@/components/cog/CogFormulaSelector";
@@ -8,7 +9,7 @@ import { CogInstructions } from "@/components/cog/CogInstructions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { BookOpen, Target, Calculator, BarChart3 } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
