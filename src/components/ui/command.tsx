@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { Command as CommandPrimitive } from "cmdk"
@@ -21,7 +20,7 @@ const Command = React.forwardRef<
 ))
 Command.displayName = CommandPrimitive.displayName
 
-interface CommandDialogProps extends React.ComponentProps<typeof Dialog> {
+interface CommandDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {
   children?: React.ReactNode
 }
 
