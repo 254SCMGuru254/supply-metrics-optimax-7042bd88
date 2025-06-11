@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calculator, MapPin, TrendingUp } from "lucide-react";
@@ -25,7 +24,7 @@ export function CogMetrics({
     );
   }
 
-  const totalDistance = calculateTotalDistance(demandNodes, cogResult);
+  const totalDistance = calculateTotalDistance(demandNodes, cogResult, selectedFormula);
   const totalCost = calculateTotalCost(demandNodes, cogResult, selectedFormula);
   const avgDistance = totalDistance / demandNodes.length;
 

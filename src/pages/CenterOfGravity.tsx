@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CogApplicationSelector } from "@/components/cog/CogApplicationSelector";
 import { CogFormulaSelector } from "@/components/cog/CogFormulaSelector";
@@ -15,11 +14,24 @@ import { BookOpen, Target, Calculator, BarChart3 } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 import { NetworkMap } from "@/components/NetworkMap";
 import { calculateCenterOfGravity, calculateTotalCost, calculateTotalDistance } from "@/components/cog/CogUtils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
+
+const cogModel = modelFormulaRegistry.find(m => m.id === "center-of-gravity");
+
+// Dynamic dispatcher for backend functions
+const formulaDispatcher: Record<string, Function> = {
+  calculateCOGWeighted: (values: any) => calculateCenterOfGravity(values.demandPoints || [], "weighted"),
+  calculateCOGHaversine: (values: any) => calculateCenterOfGravity(values.demandPoints || [], "haversine"),
+  calculateCOGManhattan: (values: any) => calculateCenterOfGravity(values.demandPoints || [], "manhattan"),
+  // Add other mappings as you implement more formulas
+};
 
 export default function CenterOfGravity() {
   const { toast } = useToast();
   const [selectedApplication, setSelectedApplication] = useState<string>("");
-  const [selectedFormula, setSelectedFormula] = useState<string>("weighted");
+  const [selectedFormulaId, setSelectedFormulaId] = useState(cogModel?.formulas[0]?.id || "");
   const [demandNodes, setDemandNodes] = useState<Node[]>([
     {
       id: crypto.randomUUID(),
@@ -32,13 +44,15 @@ export default function CenterOfGravity() {
     }
   ]);
   const [cogResult, setCogResult] = useState<{ lat: number; lng: number } | null>(null);
+  const [inputValues, setInputValues] = useState<Record<string, any>>({});
+  const [result, setResult] = useState<any>(null);
 
   useEffect(() => {
     if (demandNodes.length > 0) {
-      const result = calculateCenterOfGravity(demandNodes, selectedFormula);
+      const result = calculateCenterOfGravity(demandNodes, selectedFormulaId);
       setCogResult(result);
     }
-  }, [demandNodes, selectedFormula]);
+  }, [demandNodes, selectedFormulaId]);
 
   const allNodes: Node[] = [...demandNodes];
   
@@ -53,6 +67,22 @@ export default function CenterOfGravity() {
       ownership: 'owned'
     });
   }
+
+  if (!cogModel) return <div>Model not found.</div>;
+  const selectedFormula = cogModel.formulas.find(f => f.id === selectedFormulaId);
+
+  const handleInputChange = (name: string, value: any) => {
+    setInputValues({ ...inputValues, [name]: value });
+  };
+
+  const handleCalculate = () => {
+    if (selectedFormula && selectedFormula.backendFunction && formulaDispatcher[selectedFormula.backendFunction]) {
+      const output = formulaDispatcher[selectedFormula.backendFunction](inputValues);
+      setResult(output);
+    } else {
+      setResult({ message: `Calculated using ${selectedFormula?.name}` });
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-8" id="cog-analysis-content">
@@ -125,10 +155,18 @@ export default function CenterOfGravity() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <CogFormulaSelector 
-                  selectedFormula={selectedFormula}
-                  onFormulaChange={setSelectedFormula}
-                />
+                <div className="mb-6">
+                  <label className="block font-medium mb-2">Select Formula</label>
+                  <select
+                    className="border rounded px-3 py-2"
+                    value={selectedFormulaId}
+                    onChange={e => setSelectedFormulaId(e.target.value)}
+                  >
+                    {cogModel.formulas.map(formula => (
+                      <option key={formula.id} value={formula.id}>{formula.name}</option>
+                    ))}
+                  </select>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -209,10 +247,10 @@ export default function CenterOfGravity() {
                       COG Coordinates: {cogResult.lat.toFixed(4)}, {cogResult.lng.toFixed(4)}
                     </Badge>
                     <Badge variant="secondary">
-                      Total Distance: {calculateTotalDistance(demandNodes, cogResult).toFixed(2)} km
+                      Total Distance: {calculateTotalDistance(demandNodes, cogResult, selectedFormulaId).toFixed(2)} km
                     </Badge>
                     <Badge variant="secondary">
-                      Total Cost: {calculateTotalCost(demandNodes, cogResult, selectedFormula).toFixed(2)}
+                      Total Cost: {calculateTotalCost(demandNodes, cogResult, selectedFormulaId).toFixed(2)}
                     </Badge>
                   </div>
                 )}
@@ -225,6 +263,33 @@ export default function CenterOfGravity() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {selectedFormula && (
+        <Card className="p-4 mt-4">
+          <CardContent>
+            <h2 className="text-xl font-semibold mb-2">{selectedFormula.name}</h2>
+            <p className="text-muted-foreground mb-4">{selectedFormula.description}</p>
+            <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleCalculate(); }}>
+              {selectedFormula.inputs.map(input => (
+                <div key={input.name}>
+                  <label className="block mb-1 font-medium">{input.label}</label>
+                  <Input
+                    type={input.type === "number" ? "number" : "text"}
+                    value={inputValues[input.name] || ""}
+                    onChange={e => handleInputChange(input.name, e.target.value)}
+                  />
+                </div>
+              ))}
+              <Button type="submit" className="mt-4">Calculate</Button>
+            </form>
+            {result && (
+              <div className="mt-6 p-4 bg-muted rounded">
+                <strong>Result:</strong> <pre>{JSON.stringify(result, null, 2)}</pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

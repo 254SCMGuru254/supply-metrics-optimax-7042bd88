@@ -1,9 +1,8 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
-export type CogFormula = "weighted" | "geometric" | "economic" | "euclidean";
+export type CogFormula = "weighted" | "geometric" | "economic" | "euclidean" | "haversine" | "manhattan" | "road-network" | "multi-criteria" | "seasonal-dynamic" | "risk-adjusted";
 
 interface CogFormulaSelectorProps {
   selectedFormula: string;
@@ -16,9 +15,15 @@ export function CogFormulaSelector({
 }: CogFormulaSelectorProps) {
   const formulas = [
     { id: "weighted", label: "Weighted Average", description: "Standard demand-weighted calculation" },
-    { id: "geometric", label: "Geometric Median", description: "Minimizes total distance" },
-    { id: "economic", label: "Economic Center", description: "Cost-optimized location" },
-    { id: "euclidean", label: "Euclidean Distance", description: "Straight-line distance optimization" }
+    { id: "geometric", label: "Geometric Median", description: "Minimizes total distance (robust to outliers)" },
+    { id: "economic", label: "Economic Center", description: "Cost-optimized location (cost-weighted)" },
+    { id: "euclidean", label: "Euclidean Distance", description: "Straight-line distance optimization" },
+    { id: "haversine", label: "Haversine (Great Circle)", description: "Accounts for Earth curvature (global)" },
+    { id: "manhattan", label: "Manhattan Distance", description: "Grid-based (urban/city logistics)" },
+    { id: "road-network", label: "Road Network", description: "Real road network distances (traffic-aware)" },
+    { id: "multi-criteria", label: "Multi-Criteria", description: "Considers cost, time, capacity, environment" },
+    { id: "seasonal-dynamic", label: "Dynamic Seasonal", description: "Adjusts for seasonal/temporal demand" },
+    { id: "risk-adjusted", label: "Risk-Adjusted", description: "Incorporates risk factors (political, economic)" }
   ];
 
   return (

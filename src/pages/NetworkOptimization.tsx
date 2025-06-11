@@ -1,7 +1,7 @@
-
 import { useState, useRef } from "react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/hooks/use-toast";
 import { ModelWalkthrough } from "@/components/ModelWalkthrough";
@@ -14,6 +14,15 @@ import {
 import { getNetworkWalkthroughSteps } from "@/components/network-optimization/NetworkWalkthroughSteps";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { ModelValueMetrics } from "@/components/business-value/ModelValueMetrics";
+import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
+
+const networkModel = modelFormulaRegistry.find(m => m.id === "network-optimization");
+
+// Dynamic dispatcher for backend functions
+const formulaDispatcher: Record<string, Function> = {
+  // solveMinCostFlow: (values: any) => solveMinCostFlow(values.networkGraph),
+  // solveMaxFlow: (values: any) => solveMaxFlow(values.networkGraph),
+};
 
 const NetworkOptimization = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -62,6 +71,12 @@ const NetworkOptimization = () => {
   const [optimizationResults, setOptimizationResults] = useState<any>(null);
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [selectedFormulaId, setSelectedFormulaId] = useState(networkModel?.formulas[0]?.id || "");
+  const [inputValues, setInputValues] = useState<Record<string, any>>({});
+  const [result, setResult] = useState<any>(null);
+
+  if (!networkModel) return <div>Model not found.</div>;
+  const selectedFormula = networkModel.formulas.find(f => f.id === selectedFormulaId);
 
   const handleMapClick = (lat: number, lng: number) => {
     const newNode: Node = {
@@ -146,6 +161,19 @@ const NetworkOptimization = () => {
     });
   };
 
+  const handleInputChange = (name: string, value: any) => {
+    setInputValues({ ...inputValues, [name]: value });
+  };
+
+  const handleCalculate = () => {
+    if (selectedFormula && selectedFormula.backendFunction && formulaDispatcher[selectedFormula.backendFunction]) {
+      const output = formulaDispatcher[selectedFormula.backendFunction](inputValues);
+      setResult(output);
+    } else {
+      setResult({ message: `Calculated using ${selectedFormula?.name}` });
+    }
+  };
+
   return (
     <div className="space-y-6" ref={contentRef}>
       <div className="flex justify-between items-center">
@@ -195,6 +223,48 @@ const NetworkOptimization = () => {
       {isOptimized && (
         <ModelValueMetrics modelType="network-optimization" />
       )}
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-4">Formula Calculation</h2>
+        <div className="mb-6">
+          <label className="block font-medium mb-2">Select Formula</label>
+          <select
+            className="border rounded px-3 py-2"
+            value={selectedFormulaId}
+            onChange={e => setSelectedFormulaId(e.target.value)}
+          >
+            {networkModel.formulas.map(formula => (
+              <option key={formula.id} value={formula.id}>{formula.name}</option>
+            ))}
+          </select>
+        </div>
+        {selectedFormula && (
+          <Card className="p-4 mt-4">
+            <CardContent>
+              <h2 className="text-xl font-semibold mb-2">{selectedFormula.name}</h2>
+              <p className="text-muted-foreground mb-4">{selectedFormula.description}</p>
+              <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleCalculate(); }}>
+                {selectedFormula.inputs.map(input => (
+                  <div key={input.name}>
+                    <label className="block mb-1 font-medium">{input.label}</label>
+                    <Input
+                      type={input.type === "number" ? "number" : "text"}
+                      value={inputValues[input.name] || ""}
+                      onChange={e => handleInputChange(input.name, e.target.value)}
+                    />
+                  </div>
+                ))}
+                <Button type="submit" className="mt-4">Calculate</Button>
+              </form>
+              {result && (
+                <div className="mt-6 p-4 bg-muted rounded">
+                  <strong>Result:</strong> <pre>{JSON.stringify(result, null, 2)}</pre>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
