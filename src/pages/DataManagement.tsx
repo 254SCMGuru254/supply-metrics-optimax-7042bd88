@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,7 +7,7 @@ import { AdvancedDataImportExport } from '@/components/data-management/AdvancedD
 import { EnhancedKenyaFeatures } from '@/components/kenya/EnhancedKenyaFeatures';
 import { AdvancedBusinessValueCalculator } from '@/components/business-value/AdvancedBusinessValueCalculator';
 import { ProjectManager } from '@/components/project-management/ProjectManager';
-import { Database, Globe, Calculator, FolderOpen } from 'lucide-react';
+import { Database, Globe, Calculator, Folder } from 'lucide-react';
 
 const DataManagement = () => {
   const [selectedProject, setSelectedProject] = useState<string>("");
@@ -40,7 +39,7 @@ const DataManagement = () => {
             Business Value
           </TabsTrigger>
           <TabsTrigger value="project-management" className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" />
+            <Folder className="h-4 w-4" />
             Project Management
           </TabsTrigger>
         </TabsList>

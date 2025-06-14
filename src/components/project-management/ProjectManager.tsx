@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Edit, Calendar, FolderOpen } from 'lucide-react';
+import { Plus, Trash2, Edit, Calendar, Folder } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -141,7 +140,7 @@ export function ProjectManager() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FolderOpen className="h-5 w-5" />
+            <Folder className="h-5 w-5" />
             Create New Project
           </CardTitle>
         </CardHeader>
