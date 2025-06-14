@@ -9,18 +9,47 @@ import { CogInstructions } from "@/components/cog/CogInstructions";
 import { CogApplicationSelector } from "@/components/cog/CogApplicationSelector";
 import { CogDemandWeights } from "@/components/cog/CogDemandWeights";
 import { CogRecommendations } from "@/components/cog/CogRecommendations";
+import { CompleteCogCalculation, CogCalculationResult } from "@/components/cog/CompleteCogCalculation";
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
 import { Badge } from "@/components/ui/badge";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { Calculator, TrendingUp, Target } from "lucide-react";
+import type { Node } from "@/components/map/MapTypes";
 
 const CenterOfGravity = () => {
   const [selectedModel, setSelectedModel] = useState("center-of-gravity");
   const [selectedFormulaId, setSelectedFormulaId] = useState("");
   const [selectedApplicationId, setSelectedApplicationId] = useState("");
-  const [demandPoints, setDemandPoints] = useState([]);
-  const [cogResult, setCogResult] = useState(null);
-  const [metrics, setMetrics] = useState(null);
+  const [demandPoints, setDemandPoints] = useState<Node[]>([
+    {
+      id: "1",
+      type: "retail",
+      name: "Nairobi Customer Zone",
+      latitude: -1.2921,
+      longitude: 36.8219,
+      weight: 500,
+      ownership: 'customer'
+    },
+    {
+      id: "2", 
+      type: "retail",
+      name: "Mombasa Customer Zone",
+      latitude: -4.0435,
+      longitude: 39.6682,
+      weight: 300,
+      ownership: 'customer'
+    },
+    {
+      id: "3",
+      type: "retail", 
+      name: "Kisumu Customer Zone",
+      latitude: -0.0917,
+      longitude: 34.7680,
+      weight: 200,
+      ownership: 'customer'
+    }
+  ]);
+  const [cogResult, setCogResult] = useState<CogCalculationResult | null>(null);
 
   const model = modelFormulaRegistry.find(m => m.id === selectedModel);
 
@@ -31,6 +60,16 @@ const CenterOfGravity = () => {
   }, [selectedModel, model]);
 
   const selectedFormula = model?.formulas.find(f => f.id === selectedFormulaId);
+
+  const handleResultsCalculated = (results: CogCalculationResult) => {
+    setCogResult(results);
+  };
+
+  const cogMetrics = cogResult ? {
+    totalDistance: cogResult.totalDistance,
+    totalCost: cogResult.totalCost,
+    efficiencyScore: cogResult.efficiencyScore
+  } : null;
 
   if (!model) {
     return <div>Model not found</div>;
@@ -44,7 +83,7 @@ const CenterOfGravity = () => {
           Center of Gravity Analysis
         </h1>
         <p className="text-muted-foreground">
-          Find the optimal location for facilities, warehouses, or distribution centers using center of gravity calculations.
+          Find the optimal location for facilities, warehouses, or distribution centers using advanced center of gravity calculations.
         </p>
       </div>
 
@@ -89,15 +128,21 @@ const CenterOfGravity = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Weight Configuration</CardTitle>
+                  <CardTitle>Demand Points Configuration</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CogDemandWeights 
                     points={demandPoints}
-                    onPointsChange={(points) => setDemandPoints(points)}
+                    onPointsChange={setDemandPoints}
                   />
                 </CardContent>
               </Card>
+
+              <CompleteCogCalculation
+                demandPoints={demandPoints}
+                selectedFormula={selectedFormulaId}
+                onResultsCalculated={handleResultsCalculated}
+              />
             </div>
 
             <div className="space-y-6">
@@ -114,25 +159,27 @@ const CenterOfGravity = () => {
                       <div className="text-center p-4 bg-blue-50 rounded-lg">
                         <p className="text-sm text-muted-foreground">Center of Gravity</p>
                         <p className="text-lg font-bold">
-                          {cogResult.latitude?.toFixed(6)}, {cogResult.longitude?.toFixed(6)}
+                          {cogResult.latitude.toFixed(6)}°, {cogResult.longitude.toFixed(6)}°
                         </p>
                       </div>
-                      {metrics && (
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Total Distance:</span>
-                            <Badge variant="outline">{metrics.totalDistance?.toFixed(2)} km</Badge>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Weighted Cost:</span>
-                            <Badge variant="outline">KES {metrics.weightedCost?.toLocaleString()}</Badge>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Efficiency Score:</span>
-                            <Badge variant="default">{metrics.efficiencyScore?.toFixed(1)}%</Badge>
-                          </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Total Distance:</span>
+                          <Badge variant="outline">{cogResult.totalDistance.toFixed(2)} km</Badge>
                         </div>
-                      )}
+                        <div className="flex justify-between">
+                          <span className="text-sm">Total Cost:</span>
+                          <Badge variant="outline">KES {cogResult.totalCost.toLocaleString()}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Efficiency Score:</span>
+                          <Badge variant="default">{cogResult.efficiencyScore.toFixed(1)}%</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Algorithm:</span>
+                          <Badge variant="secondary">{cogResult.algorithmUsed}</Badge>
+                        </div>
+                      </div>
                       <ExportPdfButton
                         title="Center of Gravity Analysis Report"
                         fileName="cog-analysis-report"
@@ -145,7 +192,7 @@ const CenterOfGravity = () => {
                     </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
-                      Calculate COG to see metrics
+                      Configure parameters and calculate COG to see metrics
                     </div>
                   )}
                 </CardContent>
@@ -157,7 +204,7 @@ const CenterOfGravity = () => {
         <TabsContent value="data">
           <CogDataOperations 
             nodes={demandPoints}
-            onImport={(points) => setDemandPoints(points)}
+            onImport={setDemandPoints}
             onAddWarehouse={() => {}}
             optimized={false}
           />
@@ -166,13 +213,13 @@ const CenterOfGravity = () => {
         <TabsContent value="results">
           <div className="space-y-6">
             <CogMetrics 
-              result={cogResult}
-              metrics={metrics}
+              result={cogResult ? { latitude: cogResult.latitude, longitude: cogResult.longitude } : null}
+              metrics={cogMetrics}
               selectedFormula={selectedFormula?.name || ""}
             />
             <CogRecommendations 
-              cogResult={cogResult}
-              metrics={metrics}
+              cogResult={cogResult ? { latitude: cogResult.latitude, longitude: cogResult.longitude } : null}
+              metrics={cogMetrics}
               applicationContext={selectedApplicationId}
             />
           </div>

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Edit, Calendar, FolderOpen } from 'lucide-react';
+import { Plus, Trash2, Edit, Calendar, Folder } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -66,13 +66,25 @@ export function ProjectManager() {
     }
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in to create projects.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('projects')
         .insert({
           name: newProject.name,
           description: newProject.description,
           project_type: newProject.project_type,
-          status: 'active'
+          status: 'active',
+          user_id: user.id
         })
         .select()
         .single();
@@ -129,7 +141,7 @@ export function ProjectManager() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FolderOpen className="h-5 w-5" />
+            <Folder className="h-5 w-5" />
             Create New Project
           </CardTitle>
         </CardHeader>
@@ -155,6 +167,7 @@ export function ProjectManager() {
                     <SelectItem value="simulation">Simulation Analysis</SelectItem>
                     <SelectItem value="forecasting">Demand Forecasting</SelectItem>
                     <SelectItem value="inventory">Inventory Management</SelectItem>
+                    <SelectItem value="cog">Center of Gravity</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
