@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RealSimulationEngine } from '@/components/simulation/RealSimulationEngine';
+import { NodeConfigurationSystem } from '@/components/simulation/NodeConfigurationSystem';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, Play, FolderOpen } from 'lucide-react';
+import { BarChart3, Play, Folder, Settings } from 'lucide-react';
 
 const Simulation = () => {
   const [simulationHistory, setSimulationHistory] = useState([
@@ -42,14 +43,32 @@ const Simulation = () => {
       </div>
 
       <Tabs defaultValue="engine" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="engine">Monte Carlo Engine</TabsTrigger>
+          <TabsTrigger value="nodes">Node Configuration</TabsTrigger>
           <TabsTrigger value="scenarios">Scenario Manager</TabsTrigger>
           <TabsTrigger value="results">Results History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="engine">
           <RealSimulationEngine />
+        </TabsContent>
+
+        <TabsContent value="nodes">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Supply Chain Node Specification
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Define every node in your supply chain network with detailed parameters for comprehensive simulation analysis.
+              </p>
+              <NodeConfigurationSystem />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="scenarios">
@@ -110,7 +129,7 @@ const Simulation = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="h-5 w-5" />
+                <Folder className="h-5 w-5" />
                 Simulation Results History
               </CardTitle>
             </CardHeader>
