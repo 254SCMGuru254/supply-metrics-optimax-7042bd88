@@ -7,14 +7,12 @@ import { CogMetrics } from "@/components/cog/CogMetrics";
 import { CogDataOperations } from "@/components/cog/CogDataOperations";
 import { CogInstructions } from "@/components/cog/CogInstructions";
 import { CogApplicationSelector } from "@/components/cog/CogApplicationSelector";
-import { CenterOfGravityCalculationModel } from "@/components/cog/CenterOfGravityCalculationModel";
 import { CogDemandWeights } from "@/components/cog/CogDemandWeights";
 import { CogRecommendations } from "@/components/cog/CogRecommendations";
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
-import { MapPin, Calculator, TrendingUp, Target } from "lucide-react";
+import { Calculator, TrendingUp, Target } from "lucide-react";
 
 const CenterOfGravity = () => {
   const [selectedModel, setSelectedModel] = useState("center-of-gravity");
@@ -33,12 +31,6 @@ const CenterOfGravity = () => {
   }, [selectedModel, model]);
 
   const selectedFormula = model?.formulas.find(f => f.id === selectedFormulaId);
-  const selectedApplication = model?.applications?.find(a => a.id === selectedApplicationId);
-
-  const handleResultCalculated = (result, calculatedMetrics) => {
-    setCogResult(result);
-    setMetrics(calculatedMetrics);
-  };
 
   if (!model) {
     return <div>Model not found</div>;
@@ -48,7 +40,7 @@ const CenterOfGravity = () => {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <MapPin className="h-8 w-8 text-blue-600" />
+          <span className="text-2xl">📍</span>
           Center of Gravity Analysis
         </h1>
         <p className="text-muted-foreground">
@@ -76,7 +68,7 @@ const CenterOfGravity = () => {
                 </CardHeader>
                 <CardContent>
                   <CogFormulaSelector
-                    model={model}
+                    formulas={model.formulas}
                     selectedFormulaId={selectedFormulaId}
                     onFormulaChange={setSelectedFormulaId}
                   />
@@ -89,8 +81,7 @@ const CenterOfGravity = () => {
                 </CardHeader>
                 <CardContent>
                   <CogApplicationSelector
-                    applications={model.applications || []}
-                    selectedApplicationId={selectedApplicationId}
+                    selectedApplication={selectedApplicationId}
                     onApplicationChange={setSelectedApplicationId}
                   />
                 </CardContent>
@@ -102,8 +93,8 @@ const CenterOfGravity = () => {
                 </CardHeader>
                 <CardContent>
                   <CogDemandWeights 
-                    demandPoints={demandPoints}
-                    onWeightsChange={(points) => setDemandPoints(points)}
+                    points={demandPoints}
+                    onPointsChange={(points) => setDemandPoints(points)}
                   />
                 </CardContent>
               </Card>
@@ -159,39 +150,16 @@ const CenterOfGravity = () => {
                   )}
                 </CardContent>
               </Card>
-
-              {selectedApplication && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      Application Context
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Badge variant="secondary">{selectedApplication.name}</Badge>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedApplication.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
           </div>
-
-          <CenterOfGravityCalculationModel
-            selectedFormula={selectedFormula}
-            demandPoints={demandPoints}
-            onResultCalculated={handleResultCalculated}
-          />
         </TabsContent>
 
         <TabsContent value="data">
           <CogDataOperations 
-            onDataLoaded={(points) => setDemandPoints(points)}
-            demandPoints={demandPoints}
+            nodes={demandPoints}
+            onImport={(points) => setDemandPoints(points)}
+            onAddWarehouse={() => {}}
+            optimized={false}
           />
         </TabsContent>
 
@@ -200,18 +168,21 @@ const CenterOfGravity = () => {
             <CogMetrics 
               result={cogResult}
               metrics={metrics}
-              selectedFormula={selectedFormula}
+              selectedFormula={selectedFormula?.name || ""}
             />
             <CogRecommendations 
-              result={cogResult}
+              cogResult={cogResult}
               metrics={metrics}
-              selectedApplication={selectedApplication}
+              applicationContext={selectedApplicationId}
             />
           </div>
         </TabsContent>
 
         <TabsContent value="instructions">
-          <CogInstructions />
+          <CogInstructions 
+            selectedApplication={selectedApplicationId}
+            selectedFormula={selectedFormula?.name || ""}
+          />
         </TabsContent>
       </Tabs>
     </div>
