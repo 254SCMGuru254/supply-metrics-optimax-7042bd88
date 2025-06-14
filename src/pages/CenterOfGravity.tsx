@@ -28,7 +28,7 @@ const CenterOfGravity = () => {
       latitude: -1.2921,
       longitude: 36.8219,
       weight: 500,
-      ownership: 'customer'
+      ownership: 'owned'
     },
     {
       id: "2", 
@@ -37,7 +37,7 @@ const CenterOfGravity = () => {
       latitude: -4.0435,
       longitude: 39.6682,
       weight: 300,
-      ownership: 'customer'
+      ownership: 'owned'
     },
     {
       id: "3",
@@ -46,7 +46,7 @@ const CenterOfGravity = () => {
       latitude: -0.0917,
       longitude: 34.7680,
       weight: 200,
-      ownership: 'customer'
+      ownership: 'owned'
     }
   ]);
   const [cogResult, setCogResult] = useState<CogCalculationResult | null>(null);
