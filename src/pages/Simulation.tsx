@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RealSimulationEngine } from '@/components/simulation/RealSimulationEngine';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, Play, Folder } from 'lucide-react';
+import { BarChart3, Play, FolderOpen } from 'lucide-react';
 
 const Simulation = () => {
   const [simulationHistory, setSimulationHistory] = useState([
@@ -109,7 +110,7 @@ const Simulation = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Folder className="h-5 w-5" />
+                <FolderOpen className="h-5 w-5" />
                 Simulation Results History
               </CardTitle>
             </CardHeader>

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Play, Square, RotateCcw, Download } from 'lucide-react';
+import { Play, StopCircle, RotateCcw, Download } from 'lucide-react';
 
 interface SimulationParameters {
   iterations: number;
@@ -211,7 +211,7 @@ export const RealSimulationEngine = () => {
           
           <div className="flex gap-3 mt-6">
             <Button onClick={runSimulation} disabled={isRunning}>
-              {isRunning ? <Square className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
+              {isRunning ? <StopCircle className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
               {isRunning ? 'Running...' : 'Run Simulation'}
             </Button>
             
