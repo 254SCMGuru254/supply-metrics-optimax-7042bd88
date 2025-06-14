@@ -6,8 +6,8 @@ import Index from "@/pages/Index";
 import RouteOptimization from "@/pages/RouteOptimization";
 import NetworkOptimization from "@/pages/NetworkOptimization";
 import CenterOfGravity from "@/pages/CenterOfGravity";
-import HeuristicOptimization from "@/pages/HeuristicOptimization";
-import IsohedronAnalysis from "@/pages/IsohedronAnalysis";
+import Heuristic from "@/pages/Heuristic";
+import Isohedron from "@/pages/Isohedron";
 import BusinessValue from "@/pages/BusinessValue";
 import Simulation from "@/pages/Simulation";
 import InventoryManagement from "@/pages/InventoryManagement";
@@ -23,8 +23,8 @@ function App() {
         <Route path="/route-optimization" element={<RouteOptimization />} />
         <Route path="/network-optimization" element={<NetworkOptimization />} />
         <Route path="/center-of-gravity" element={<CenterOfGravity />} />
-        <Route path="/heuristic-optimization" element={<HeuristicOptimization />} />
-        <Route path="/isohedron-analysis" element={<IsohedronAnalysis />} />
+        <Route path="/heuristic-optimization" element={<Heuristic />} />
+        <Route path="/isohedron-analysis" element={<Isohedron />} />
         <Route path="/business-value" element={<BusinessValue />} />
         <Route path="/simulation" element={<Simulation />} />
         <Route path="/inventory-management" element={<InventoryManagement />} />
