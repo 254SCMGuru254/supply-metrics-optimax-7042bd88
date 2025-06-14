@@ -6,20 +6,24 @@ import { CheckCircle, AlertTriangle, Info } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 
 export interface CogRecommendationsProps {
-  selectedApplication: string;
-  cogResult: { lat: number; lng: number } | null;
-  demandNodes: Node[];
+  cogResult: { latitude: number; longitude: number } | null;
+  metrics: {
+    totalDistance: number;
+    totalCost: number;
+    efficiencyScore: number;
+  } | null;
+  applicationContext: string;
 }
 
 export function CogRecommendations({ 
-  selectedApplication, 
   cogResult, 
-  demandNodes 
+  metrics,
+  applicationContext 
 }: CogRecommendationsProps) {
   if (!cogResult) return null;
 
   const getApplicationRecommendations = () => {
-    switch (selectedApplication) {
+    switch (applicationContext) {
       case "warehouse":
         return {
           title: "Warehouse Location Recommendations",
@@ -106,14 +110,18 @@ export function CogRecommendations({
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Demand Points:</span>
-                <Badge variant="secondary">{demandNodes.length}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span>Coverage Area:</span>
-                <Badge variant="secondary">Regional</Badge>
-              </div>
+              {metrics && (
+                <>
+                  <div className="flex justify-between">
+                    <span>Total Distance:</span>
+                    <Badge variant="secondary">{metrics.totalDistance.toFixed(1)} km</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Efficiency Score:</span>
+                    <Badge variant="secondary">{metrics.efficiencyScore.toFixed(1)}%</Badge>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between">
                 <span>Optimization:</span>
                 <Badge variant="secondary">Distance-based</Badge>

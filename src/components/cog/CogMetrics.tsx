@@ -1,21 +1,25 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calculator, MapPin, TrendingUp } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
-import { calculateTotalDistance, calculateTotalCost } from "./CogUtils";
 
 export interface CogMetricsProps {
-  demandNodes: Node[];
-  cogResult: { lat: number; lng: number } | null;
+  result: { latitude: number; longitude: number } | null;
+  metrics: {
+    totalDistance: number;
+    totalCost: number;
+    efficiencyScore: number;
+  } | null;
   selectedFormula: string;
 }
 
 export function CogMetrics({ 
-  demandNodes, 
-  cogResult, 
+  result, 
+  metrics, 
   selectedFormula 
 }: CogMetricsProps) {
-  if (!cogResult) {
+  if (!result) {
     return (
       <div className="text-center py-8">
         <Calculator className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
@@ -23,10 +27,6 @@ export function CogMetrics({
       </div>
     );
   }
-
-  const totalDistance = calculateTotalDistance(demandNodes, cogResult, selectedFormula);
-  const totalCost = calculateTotalCost(demandNodes, cogResult, selectedFormula);
-  const avgDistance = totalDistance / demandNodes.length;
 
   return (
     <div className="space-y-4">
@@ -38,7 +38,7 @@ export function CogMetrics({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {cogResult.lat.toFixed(4)}, {cogResult.lng.toFixed(4)}
+              {result.latitude?.toFixed(4)}, {result.longitude?.toFixed(4)}
             </div>
             <p className="text-xs text-muted-foreground">
               Optimal facility location
@@ -46,31 +46,35 @@ export function CogMetrics({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Distance</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalDistance.toFixed(2)} km</div>
-            <p className="text-xs text-muted-foreground">
-              Sum of all distances
-            </p>
-          </CardContent>
-        </Card>
+        {metrics && (
+          <>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Distance</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metrics.totalDistance.toFixed(2)} km</div>
+                <p className="text-xs text-muted-foreground">
+                  Sum of all distances
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Weighted Cost</CardTitle>
-            <Calculator className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalCost.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              Distance × demand weight
-            </p>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Efficiency Score</CardTitle>
+                <Calculator className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metrics.efficiencyScore.toFixed(1)}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Optimization efficiency
+                </p>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -80,18 +84,12 @@ export function CogMetrics({
             <span>Formula Used:</span>
             <Badge variant="secondary">{selectedFormula}</Badge>
           </div>
-          <div className="flex justify-between">
-            <span>Demand Points:</span>
-            <span>{demandNodes.length}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Average Distance:</span>
-            <span>{avgDistance.toFixed(2)} km</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Total Demand:</span>
-            <span>{demandNodes.reduce((sum, node) => sum + (node.weight || 0), 0)}</span>
-          </div>
+          {metrics && (
+            <div className="flex justify-between">
+              <span>Total Cost:</span>
+              <span>{metrics.totalCost.toFixed(2)}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

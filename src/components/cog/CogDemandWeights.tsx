@@ -8,35 +8,33 @@ import { Plus, Trash2 } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 
 export interface CogDemandWeightsProps {
-  demandNodes: Node[];
-  setDemandNodes: (nodes: Node[]) => void;
-  selectedFormula: string;
+  points: Node[];
+  onPointsChange: (points: Node[]) => void;
 }
 
 export function CogDemandWeights({ 
-  demandNodes, 
-  setDemandNodes, 
-  selectedFormula 
+  points, 
+  onPointsChange 
 }: CogDemandWeightsProps) {
   const addNode = () => {
     const newNode: Node = {
       id: crypto.randomUUID(),
       type: "retail",
-      name: `Location ${demandNodes.length + 1}`,
+      name: `Location ${points.length + 1}`,
       latitude: -1.2921 + (Math.random() - 0.5) * 2,
       longitude: 36.8219 + (Math.random() - 0.5) * 2,
       weight: 100,
       ownership: 'owned'
     };
-    setDemandNodes([...demandNodes, newNode]);
+    onPointsChange([...points, newNode]);
   };
 
   const removeNode = (id: string) => {
-    setDemandNodes(demandNodes.filter(node => node.id !== id));
+    onPointsChange(points.filter(node => node.id !== id));
   };
 
   const updateNode = (id: string, field: keyof Node, value: any) => {
-    setDemandNodes(demandNodes.map(node => 
+    onPointsChange(points.map(node => 
       node.id === id ? { ...node, [field]: value } : node
     ));
   };
@@ -52,7 +50,7 @@ export function CogDemandWeights({
       </div>
       
       <div className="space-y-3">
-        {demandNodes.map((node) => (
+        {points.map((node) => (
           <Card key={node.id}>
             <CardContent className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
@@ -98,7 +96,7 @@ export function CogDemandWeights({
                     variant="outline" 
                     size="sm"
                     onClick={() => removeNode(node.id)}
-                    disabled={demandNodes.length <= 1}
+                    disabled={points.length <= 1}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

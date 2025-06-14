@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Play, Square } from 'lucide-react';
+import { Play, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -127,7 +128,7 @@ export const SimulationEngine = () => {
             </div>
             <Progress value={progress} />
             <Button variant="destructive" onClick={stopSimulation}>
-              <Square className="h-4 w-4 mr-2" />
+              <X className="h-4 w-4 mr-2" />
               Stop Simulation
             </Button>
           </div>
