@@ -7,6 +7,7 @@ import { VehicleFleetConfig, Vehicle } from "./VehicleFleetConfig";
 import { ConstraintsForm } from "@/components/data-input/ConstraintsForm";
 import { OptimizationControls } from "./OptimizationControls";
 import { OptimizationResults } from "./OptimizationResults";
+import { ProductionDashboard } from "./ProductionDashboard";
 import { useOptimizationEngine } from "./OptimizationEngine";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import type { Node, Route } from "@/components/map/MapTypes";
@@ -18,7 +19,8 @@ import {
   DollarSign, 
   Package, 
   Clock, 
-  Settings 
+  Settings,
+  Shield
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -121,11 +123,16 @@ export const RouteOptimizationContent = () => {
 
   const {
     optimizeRoutes,
+    cancelOptimization,
     isOptimizing,
     optimizationResult,
     error,
+    optimizationProgress,
+    currentStage,
     clearResult,
-    clearError
+    clearError,
+    getPerformanceReport,
+    getErrorHistory
   } = useOptimizationEngine();
 
   useEffect(() => {
@@ -182,7 +189,7 @@ export const RouteOptimizationContent = () => {
 
   const handleOptimize = async (params: any) => {
     clearError();
-    toast.info("Starting route optimization...");
+    toast.info("Starting production-grade route optimization...");
     
     const optimizationParams = {
       ...params,
@@ -204,6 +211,11 @@ export const RouteOptimizationContent = () => {
     clearResult();
   };
 
+  const handleStopOptimization = () => {
+    cancelOptimization();
+    toast.info("Optimization cancelled by user");
+  };
+
   const currentRoutes = optimizationResult?.optimizedRoutes || routes;
   const totalCost = currentRoutes.reduce((sum, route) => sum + route.cost, 0);
   const totalVolume = currentRoutes.reduce((sum, route) => sum + route.volume, 0);
@@ -217,9 +229,9 @@ export const RouteOptimizationContent = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Gauge className="h-5 w-5" />
-            Live Route Optimization Engine
+            Production Route Optimization Engine
             <Badge variant={isOptimizing ? "default" : "secondary"}>
-              {isOptimizing ? "Optimizing" : "Ready"}
+              {isOptimizing ? `${optimizationProgress}% - ${currentStage}` : "Ready"}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -263,12 +275,12 @@ export const RouteOptimizationContent = () => {
       <div className="flex justify-end mb-4">
         <ExportPdfButton 
           exportId="route-optimization-content"
-          fileName="route_optimization_analysis"
+          fileName="production_route_optimization_analysis"
         />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 lg:grid-cols-5">
+        <TabsList className="grid grid-cols-2 lg:grid-cols-6">
           <TabsTrigger value="optimization" className="flex items-center gap-2">
             <Gauge className="h-4 w-4" />
             Live Optimization
@@ -276,6 +288,10 @@ export const RouteOptimizationContent = () => {
           <TabsTrigger value="results" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             Results
+          </TabsTrigger>
+          <TabsTrigger value="production" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Production Dashboard
           </TabsTrigger>
           <TabsTrigger value="network" className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
@@ -295,6 +311,7 @@ export const RouteOptimizationContent = () => {
           <OptimizationControls
             onOptimize={handleOptimize}
             isOptimizing={isOptimizing}
+            onStop={handleStopOptimization}
           />
         </TabsContent>
 
@@ -303,8 +320,12 @@ export const RouteOptimizationContent = () => {
             results={optimizationResult}
             originalRoutes={routes}
             onApplyRoutes={handleApplyRoutes}
-            onExportResults={() => toast.info("Export functionality coming soon!")}
+            onExportResults={() => toast.info("Export functionality available in Production Dashboard")}
           />
+        </TabsContent>
+
+        <TabsContent value="production" className="space-y-4">
+          <ProductionDashboard />
         </TabsContent>
         
         <TabsContent value="network" className="space-y-4">
