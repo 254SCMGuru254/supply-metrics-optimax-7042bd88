@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ export const ErrorsTab = ({ errorSummary, errorHandler }: ErrorsTabProps) => {
       code: e.code,
       message: e.message,
       severity: e.severity,
-      timestamp: e.timestamp.toISOString(),
+      timestamp: e.timestamp instanceof Date ? e.timestamp.toISOString() : String(e.timestamp),
     }));
     const csv = Papa.unparse(rows);
     const blob = new Blob([csv], { type: "text/csv" });

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -23,7 +22,6 @@ export const InventoryOptimizationContent = () => {
           <p className="text-gray-600 mt-1">Industry-standard mathematical models for optimal inventory management</p>
         </div>
         <ExportPdfButton 
-          title="Inventory Optimization Report"
           exportId="inventory-optimization-content"
           fileName="inventory_optimization_report"
         />
