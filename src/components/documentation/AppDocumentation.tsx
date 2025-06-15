@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Calculator, Play, Settings } from 'lucide-react';
+import { BookOpen, Calculator, Play, Settings, Building2, BarChart3, TrendingUp, Shield, DollarSign } from 'lucide-react';
 
 export function AppDocumentation() {
   const models = [
@@ -74,7 +75,7 @@ export function AppDocumentation() {
     {
       id: 'route',
       name: 'Route Optimization',
-      icon: Factory,
+      icon: Building2,
       description: 'Minimize transportation costs and improve delivery efficiency',
       formulas: [
         {
@@ -153,7 +154,7 @@ export function AppDocumentation() {
     {
       id: 'network',
       name: 'Network Optimization',
-      icon: Factory,
+      icon: Building2,
       description: 'Optimize flow through supply chain networks',
       formulas: [
         {
@@ -246,7 +247,7 @@ export function AppDocumentation() {
     {
       id: 'facility-location',
       name: 'Facility Location',
-      icon: Factory,
+      icon: Building2,
       description: 'Determine optimal locations for warehouses, distribution centers, and facilities',
       formulas: [
         {
