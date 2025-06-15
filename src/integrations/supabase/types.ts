@@ -56,6 +56,44 @@ export type Database = {
           },
         ]
       }
+      demand_event_logs: {
+        Row: {
+          event_data: Json | null
+          event_type: string | null
+          handled: boolean | null
+          id: string
+          node_id: string | null
+          severity: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          event_data?: Json | null
+          event_type?: string | null
+          handled?: boolean | null
+          id?: string
+          node_id?: string | null
+          severity?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          event_data?: Json | null
+          event_type?: string | null
+          handled?: boolean | null
+          id?: string
+          node_id?: string | null
+          severity?: string | null
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_event_logs_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "supply_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demand_points: {
         Row: {
           created_at: string | null
@@ -211,6 +249,47 @@ export type Database = {
           },
         ]
       }
+      inventory_scenarios: {
+        Row: {
+          created_at: string | null
+          id: string
+          parameters: Json | null
+          project_id: string | null
+          results: Json | null
+          scenario_name: string
+          scenario_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          parameters?: Json | null
+          project_id?: string | null
+          results?: Json | null
+          scenario_name: string
+          scenario_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          parameters?: Json | null
+          project_id?: string | null
+          results?: Json | null
+          scenario_name?: string
+          scenario_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_scenarios_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       model_constraints: {
         Row: {
           constraint_name: string
@@ -334,6 +413,47 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perishable_inventory: {
+        Row: {
+          alert: boolean | null
+          batch_code: string | null
+          expiry_date: string | null
+          id: string
+          item_id: string | null
+          quantity: number
+          received_date: string | null
+          status: string | null
+        }
+        Insert: {
+          alert?: boolean | null
+          batch_code?: string | null
+          expiry_date?: string | null
+          id?: string
+          item_id?: string | null
+          quantity: number
+          received_date?: string | null
+          status?: string | null
+        }
+        Update: {
+          alert?: boolean | null
+          batch_code?: string | null
+          expiry_date?: string | null
+          id?: string
+          item_id?: string | null
+          quantity?: number
+          received_date?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perishable_inventory_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
             referencedColumns: ["id"]
           },
         ]
