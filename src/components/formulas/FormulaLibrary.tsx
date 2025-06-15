@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calculator, TrendingUp, MapPin, Package, Bolt, Network } from 'lucide-react';
+import { Calculator, TrendingUp, MapPin, Package, Zap, Network } from 'lucide-react';
 
 interface Formula {
   id: string;
@@ -229,11 +229,11 @@ export const FormulaLibrary = () => {
       case 'Inventory': return <Package className="h-4 w-4" />;
       case 'Routing': return <MapPin className="h-4 w-4" />;
       case 'Location': return <MapPin className="h-4 w-4" />;
-      case 'Simulation': return <Bolt className="h-4 w-4" />;
+      case 'Simulation': return <Zap className="h-4 w-4" />;
       case 'Forecasting': return <TrendingUp className="h-4 w-4" />;
       case 'Analysis': return <Calculator className="h-4 w-4" />;
       case 'Network': return <Network className="h-4 w-4" />;
-      case 'Optimization': return <Bolt className="h-4 w-4" />;
+      case 'Optimization': return <Zap className="h-4 w-4" />;
       default: return <Calculator className="h-4 w-4" />;
     }
   };

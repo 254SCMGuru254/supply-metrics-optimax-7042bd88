@@ -11,7 +11,7 @@ import {
   TrendingUp, 
   Network, 
   Calculator, 
-  Bolt,
+  Zap,
   Activity,
   ArrowRight,
   CheckCircle,
@@ -63,7 +63,7 @@ const Dashboard = () => {
     },
     {
       name: 'Network Flow',
-      icon: <Bolt className="h-6 w-6" />,
+      icon: <Zap className="h-6 w-6" />,
       href: '/network-flow',
       description: 'Minimum cost flow optimization for material movement',
       savings: '12-18%',
@@ -193,7 +193,7 @@ const Dashboard = () => {
           <Card className="shadow-lg bg-gradient-to-br from-blue-50 to-purple-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bolt className="h-5 w-5 text-blue-600" />
+                <Zap className="h-5 w-5 text-blue-600" />
                 AI-Powered Analytics
               </CardTitle>
             </CardHeader>
