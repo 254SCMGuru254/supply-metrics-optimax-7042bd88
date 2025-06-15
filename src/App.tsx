@@ -13,6 +13,17 @@ import Dashboard from "./pages/Dashboard";
 import Pricing from "./pages/Pricing";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import DataInput from "./pages/DataInput";
+import RouteOptimization from "./pages/RouteOptimization";
+import InventoryManagement from "./pages/InventoryManagement";
+import NetworkOptimization from "./pages/NetworkOptimization";
+import CenterOfGravity from "./pages/CenterOfGravity";
+import Heuristic from "./pages/Heuristic";
+import Simulation from "./pages/Simulation";
+import FleetManagement from "./pages/FleetManagement";
+import CostModeling from "./pages/CostModeling";
+import KenyaSupplyChain from "./pages/KenyaSupplyChain";
+import BusinessValue from "./pages/BusinessValue";
+import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +81,94 @@ const App = () => {
                   <ProtectedRoute>
                     <Layout>
                       <DataInput />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/route-optimization" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <RouteOptimization />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/inventory-management" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <InventoryManagement />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/network-optimization" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <NetworkOptimization />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/center-of-gravity" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <CenterOfGravity />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/heuristic" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Heuristic />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/simulation" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Simulation />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/fleet-management" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <FleetManagement />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/cost-modeling" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <CostModeling />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/kenya-supply-chain" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <KenyaSupplyChain />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/business-value" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <BusinessValue />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/documentation" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Documentation />
                     </Layout>
                   </ProtectedRoute>
                 } />
