@@ -1,20 +1,22 @@
 import { useState, useRef } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NetworkMap, Node, Route } from "@/components/NetworkMap";
 import { useToast } from "@/hooks/use-toast";
 import { ModelWalkthrough } from "@/components/ModelWalkthrough";
 import { NetworkMetrics } from "@/components/network-optimization/NetworkMetrics";
-import { 
-  createInitialNetwork, 
-  optimizeNetworkFlow, 
-  calculateFlowEfficiency 
+import { ModelFormulas } from "@/components/shared/ModelFormulas";
+import {
+  createInitialNetwork,
+  optimizeNetworkFlow,
+  calculateFlowEfficiency
 } from "@/components/network-optimization/NetworkOptimizationUtils";
 import { getNetworkWalkthroughSteps } from "@/components/network-optimization/NetworkWalkthroughSteps";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { ModelValueMetrics } from "@/components/business-value/ModelValueMetrics";
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const networkModel = modelFormulaRegistry.find(m => m.id === "network-optimization");
 
@@ -26,25 +28,8 @@ const formulaDispatcher: Record<string, Function> = {
 
 const NetworkOptimization = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<Node[]>([
-    {
-      id: crypto.randomUUID(),
-      type: "warehouse",
-      name: "Nairobi Distribution Center",
-      latitude: -1.2921,
-      longitude: 36.8219,
-      capacity: 10000,
-      ownership: 'owned'
-    },
-    {
-      id: crypto.randomUUID(),
-      type: "distribution",
-      name: "Mombasa Regional Hub",
-      latitude: -4.0435,
-      longitude: 39.6682,
-      capacity: 8000,
-      ownership: 'owned'
-    },
     {
       id: crypto.randomUUID(),
       type: "warehouse",
@@ -70,7 +55,6 @@ const NetworkOptimization = () => {
   const [flowEfficiency, setFlowEfficiency] = useState<number | null>(null);
   const [optimizationResults, setOptimizationResults] = useState<any>(null);
   const { toast } = useToast();
-  const contentRef = useRef<HTMLDivElement>(null);
   const [selectedFormulaId, setSelectedFormulaId] = useState(networkModel?.formulas[0]?.id || "");
   const [inputValues, setInputValues] = useState<Record<string, any>>({});
   const [result, setResult] = useState<any>(null);
@@ -184,7 +168,7 @@ const NetworkOptimization = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <ExportPdfButton 
+          <ExportPdfButton
             fileName="network-optimization-results"
             results={optimizationResults}
             isOptimized={isOptimized}
@@ -195,30 +179,48 @@ const NetworkOptimization = () => {
         </div>
       </div>
 
-      <ModelWalkthrough steps={getNetworkWalkthroughSteps()} />
+      <ModelWalkthrough steps={getNetworkWalkthroughSteps()} />      <NetworkMap
+        nodes={nodes}
+        routes={routes}
+        onNodesChange={setNodes}
+        onRoutesChange={setRoutes}
+      />
+      
+      <NetworkMetrics
+        nodes={nodes}
+        routes={routes}
+        optimizationResults={optimizationResults}
+        isOptimized={isOptimized}
+        costReduction={costReduction}
+        flowEfficiency={flowEfficiency}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 p-4">
-          <NetworkMap
-            nodes={nodes}
-            routes={routes}
-            onNodeClick={handleNodeClick}
-            onMapClick={handleMapClick}
-            isOptimized={isOptimized}
-          />
-        </Card>
+      <ModelFormulas modelId="network-optimization" />
 
-        <Card className="p-4">
-          <h2 className="text-xl font-semibold mb-4">Network Metrics</h2>
-          <NetworkMetrics 
-            nodes={nodes}
-            routes={routes}
-            isOptimized={isOptimized}
-            costReduction={costReduction}
-            flowEfficiency={flowEfficiency}
-          />
-        </Card>
-      </div>
+      {/* Add Formula Display Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Available Optimization Formulas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {networkModel?.formulas.map((formula) => (
+              <Card key={formula.id} className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold">{formula.name}</h3>
+                  <Badge variant="outline">{formula.complexity}</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">{formula.description}</p>
+                {formula.formula && (
+                  <div className="bg-muted p-3 rounded-md">
+                    <code className="text-sm">{formula.formula}</code>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {isOptimized && (
         <ModelValueMetrics modelType="network-optimization" />

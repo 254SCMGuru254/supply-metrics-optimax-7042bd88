@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -27,7 +27,8 @@ export interface NetworkMapProps {
   isOptimized?: boolean;
   highlightNodes?: string[];
   selectable?: boolean;
-  onNodeSelect?: (nodes: string[]) => void;
+  onNodeSelect?: (nodes: string[]) => void;  onNodesChange?: (nodes: Node[]) => void;
+  onRoutesChange?: (routes: Route[]) => void;
   disruptionData?: any;
   resilienceMetrics?: any;
   airportNodes?: any[];

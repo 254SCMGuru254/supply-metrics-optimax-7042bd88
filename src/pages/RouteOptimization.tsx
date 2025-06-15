@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { optimizationService } from "@/services/OptimizationService";
 import { useToast } from "@/hooks/use-toast";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { AdvancedConstraintSolver } from "@/components/constraints/AdvancedConstraintSolver";
+import { ModelFormulas } from "@/components/shared/ModelFormulas";
 import { Truck, MapPin, Clock, DollarSign, TrendingUp } from "lucide-react";
 
 const routeModel = modelFormulaRegistry.find(m => m.id === "route-optimization");
@@ -65,13 +65,18 @@ const RouteOptimization = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Route Optimization</h1>
-        <p className="text-muted-foreground">
-          Optimize delivery routes using advanced algorithms with real-time backend processing.
-        </p>
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Route Optimization</h1>
+          <p className="text-muted-foreground">
+            Optimize delivery routes to minimize distance and costs while satisfying constraints.
+          </p>
+        </div>
+        <ExportPdfButton fileName="route-optimization" results={result} />
       </div>
+
+      <ModelFormulas modelId="route-optimization" />
 
       <Tabs defaultValue="optimization" className="space-y-6">
         <TabsList>

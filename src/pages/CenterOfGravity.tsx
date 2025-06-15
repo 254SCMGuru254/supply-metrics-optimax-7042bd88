@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +12,7 @@ import { CompleteCogCalculation, CogCalculationResult } from "@/components/cog/C
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
 import { Badge } from "@/components/ui/badge";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
+import { ModelFormulas } from "@/components/shared/ModelFormulas";
 import { Calculator, TrendingUp, Target } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 
@@ -79,13 +79,15 @@ const CenterOfGravity = () => {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <span className="text-2xl">📍</span>
+          <Target className="h-8 w-8" />
           Center of Gravity Analysis
         </h1>
         <p className="text-muted-foreground">
-          Find the optimal location for facilities, warehouses, or distribution centers using advanced center of gravity calculations.
+          Find optimal facility locations using weighted demand points and advanced distance formulas.
         </p>
       </div>
+
+      <ModelFormulas modelId="center-of-gravity" />
 
       <Tabs defaultValue="calculation" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">

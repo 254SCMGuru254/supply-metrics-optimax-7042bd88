@@ -4,9 +4,10 @@ import { Node, Route } from "@/components/NetworkMap";
 type NetworkMetricsProps = {
   nodes: Node[];
   routes: Route[];
-  isOptimized: boolean;
-  costReduction: number | null;
-  flowEfficiency: number | null;
+  isOptimized?: boolean;
+  costReduction?: number | null;
+  flowEfficiency?: number | null;
+  optimizationResults?: any;
 };
 
 export const NetworkMetrics = ({

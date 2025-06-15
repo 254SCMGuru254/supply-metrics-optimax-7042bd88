@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { ModelWalkthrough, WalkthroughStep } from "@/components/ModelWalkthrough
 import { HeuristicMetrics } from "@/components/heuristic/HeuristicMetrics";
 import { HeuristicParameters } from "@/components/heuristic/HeuristicParameters";
 import { HeuristicInstructions } from "@/components/heuristic/HeuristicInstructions";
+import { ModelFormulas } from "@/components/shared/ModelFormulas";
 import { createInitialRoutes, runSimulatedAnnealing } from "@/components/heuristic/HeuristicUtils";
 
 const Heuristic = () => {
@@ -120,7 +120,18 @@ const Heuristic = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Heuristic Optimization</h1>
+          <p className="text-muted-foreground">
+            Use advanced heuristic algorithms to solve complex supply chain problems.
+          </p>
+        </div>
+      </div>
+
+      <ModelFormulas modelId="heuristic-optimization" />
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Heuristic Optimization</h1>

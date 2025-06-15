@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
+import { ModelFormulas } from "@/components/shared/ModelFormulas";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   TrendingUp, FileInput, BarChart3, LineChart, Calendar, Upload, 
@@ -139,23 +139,22 @@ const DemandForecasting = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <TrendingUp className="h-8 w-8" />
-            Demand Forecasting
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Predict future demand using advanced time-series analysis
+          <h1 className="text-3xl font-bold mb-2">Demand Forecasting</h1>
+          <p className="text-muted-foreground">
+            Advanced forecasting models to predict future demand patterns.
           </p>
         </div>
-
-        <Button onClick={handleImportData}>
-          <Upload className="mr-2 h-4 w-4" />
-          Import Historical Data
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => {}}>
+            <Download className="w-4 h-4 mr-2" /> Download Report
+          </Button>
+        </div>
       </div>
+
+      <ModelFormulas modelId="demand-forecasting" />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 mb-8">

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Package, Boxes, Truck, Database, LineChart, BarChart3, Upload, Download, CalculatorIcon, Settings, FileText, TrendingUp } from "lucide-react";
 import { InventoryOptimizationContent } from "@/components/inventory-optimization/InventoryOptimizationContent";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
+import { ModelFormulas } from "@/components/shared/ModelFormulas";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";

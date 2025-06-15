@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,6 +5,7 @@ import { RealSimulationEngine } from '@/components/simulation/RealSimulationEngi
 import { NodeConfigurationSystem } from '@/components/simulation/NodeConfigurationSystem';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ModelFormulas } from '@/components/shared/ModelFormulas';
 import { BarChart3, Play, Settings, Factory } from 'lucide-react';
 
 const Simulation = () => {
@@ -41,6 +41,8 @@ const Simulation = () => {
           Run Monte Carlo simulations to test scenarios, optimize inventory policies, and predict supply chain performance under uncertainty.
         </p>
       </div>
+
+      <ModelFormulas modelId="simulation" />
 
       <Tabs defaultValue="engine" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
