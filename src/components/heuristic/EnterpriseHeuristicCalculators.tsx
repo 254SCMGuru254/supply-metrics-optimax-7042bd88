@@ -1,8 +1,9 @@
-
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Settings } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const formulas = [
   {
@@ -48,21 +49,32 @@ export function EnterpriseHeuristicCalculators() {
   const [inputs, setInputs] = useState({});
   const [result, setResult] = useState(null);
 
+  // Fetch data from Supabase (e.g., demand_points or nodes depending on context)
+  const { data: demandPoints, refetch } = useQuery({
+    queryKey: ['demand_points'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("demand_points").select("*");
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 60000,
+  });
+
   const handleInputChange = (id, value) => {
     setInputs(inputs => ({ ...inputs, [id]: value }));
   };
 
-  // Dummy result generator (replace with real backend/logic)
   const handleRun = () => {
     setResult({
       status: "success",
       message: "Heuristic run complete.",
-      output: { ...inputs }
+      output: { ...inputs, demandPoints }
     });
   };
 
   return (
     <div>
+      {/* show demandPoints somewhere in UI if required */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 lg:grid-cols-4">
           {formulas.map(f => (

@@ -8,7 +8,7 @@ const AppSidebar = () => {
       <div className="px-6 py-4">
         <Link to="/" className="flex items-center space-x-2">
           <img src="/logo.png" alt="Logo" className="h-8 w-8" />
-          <span className="text-lg font-bold">Supply Chain OS</span>
+          <span className="text-lg font-bold">Chain.io</span>
         </Link>
       </div>
 

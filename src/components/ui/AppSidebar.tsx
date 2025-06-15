@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Home, LayoutDashboard, Settings, Package, Truck, LineChart, BarChart3, FileText, HelpCircle, CircleDollarSign, TrendingUp, Activity, Hexagon, Shield } from "lucide-react";
 
@@ -7,7 +8,7 @@ const AppSidebar = () => {
       <div className="px-6 py-4">
         <Link to="/" className="flex items-center space-x-2">
           <img src="/logo.png" alt="Logo" className="h-8 w-8" />
-          <span className="text-lg font-bold">Supply Chain OS</span>
+          <span className="text-lg font-bold">Chain.io</span>
         </Link>
       </div>
 
