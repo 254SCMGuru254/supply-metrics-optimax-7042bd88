@@ -19,7 +19,7 @@ const Pricing = () => {
     {
       name: "Starter",
       price: "Ksh 3,000",
-      usdPrice: "USD 23.53",
+      usdPrice: "USD 25",
       period: "month",
       description: "Perfect for small businesses getting started with supply chain optimization.",
       features: [
@@ -35,7 +35,7 @@ const Pricing = () => {
     {
       name: "Business",
       price: "Ksh 7,500",
-      usdPrice: "USD 58.82",
+      usdPrice: "USD 60",
       period: "month",
       description: "For growing companies needing advanced features and analytics.",
       features: [
@@ -54,7 +54,7 @@ const Pricing = () => {
     {
       name: "Enterprise",
       price: "Ksh 15,000",
-      usdPrice: "USD 117.65",
+      usdPrice: "USD 120",
       period: "month",
       description: "For large enterprises requiring comprehensive supply chain solutions.",
       features: [
@@ -113,17 +113,17 @@ const Pricing = () => {
               <div className="text-center">
                 <p className="font-semibold">Starter International</p>
                 <p className="text-2xl">Ksh 90,000</p>
-                <p className="text-sm text-muted-foreground">(USD 705.88)</p>
+                <p className="text-sm text-muted-foreground">(USD 705)</p>
               </div>
               <div className="text-center">
                 <p className="font-semibold">Business International</p>
                 <p className="text-2xl">Ksh 250,000</p>
-                <p className="text-sm text-muted-foreground">(USD 1960.78)</p>
+                <p className="text-sm text-muted-foreground">(USD 1960)</p>
               </div>
               <div className="text-center">
                 <p className="font-semibold">Enterprise International</p>
                 <p className="text-2xl">Ksh 600,000</p>
-                <p className="text-sm text-muted-foreground">(USD 4705.88)</p>
+                <p className="text-sm text-muted-foreground">(USD 4705)</p>
               </div>
             </div>
             <p className="text-sm mt-4 text-muted-foreground">

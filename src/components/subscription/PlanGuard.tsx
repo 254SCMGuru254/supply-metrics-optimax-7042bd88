@@ -4,7 +4,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Lock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { LockKeyhole, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface PlanGuardProps {
@@ -60,7 +60,7 @@ export const PlanGuard: React.FC<PlanGuardProps> = ({
     <Card className="max-w-2xl mx-auto">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center mb-2">
-          <Lock className="h-8 w-8 text-orange-500" />
+          <LockKeyhole className="h-8 w-8 text-orange-500" />
         </div>
         <CardTitle className="flex items-center justify-center gap-2">
           Premium Feature
