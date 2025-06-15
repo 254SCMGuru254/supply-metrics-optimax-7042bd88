@@ -1,10 +1,9 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Package, TrendingUp, zap, DollarSign, BarChart3, bolt } from "lucide-react";
+import { AlertTriangle, Package, TrendingUp, Zap, DollarSign, BarChart3, Bolt } from "lucide-react";
 import { InventoryOptimizationContent } from "@/components/inventory-optimization/InventoryOptimizationContent";
 import { EOQCalculator } from "@/components/inventory-optimization/EOQCalculator";
 import { SafetyStockCalculator } from "@/components/inventory-optimization/SafetyStockCalculator";
@@ -74,7 +73,7 @@ const InventoryManagement = () => {
             fileName="inventory-optimization-analysis"
           />
           <Button onClick={handleOptimizationComplete}>
-            <bolt className="h-4 w-4 mr-2" />
+            <Bolt className="h-4 w-4 mr-2" />
             Run Optimization
           </Button>
         </div>
