@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -61,6 +62,9 @@ const App = () => {
                     </Layout>
                   </ProtectedRoute>
                 } />
+                
+                {/* Redirect old onboarding routes to data-input */}
+                <Route path="/onboarding/*" element={<Navigate to="/data-input" replace />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

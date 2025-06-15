@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,20 +15,17 @@ serve(async (req) => {
   try {
     // Get PayPal configuration from Supabase secrets
     const paypalClientId = Deno.env.get('PAYPAL_CLIENT_ID')
-    const starterPlanId = Deno.env.get('P-9AE64506NG041543SNBHQ6RY')
-    const businessPlanId = Deno.env.get('P-81M148047K685451FNBHRAJQ')
-    const enterprisePlanId = Deno.env.get('P-27P56345UX5890405NBHRB2Y')
 
-    if (!paypalClientId || !starterPlanId || !businessPlanId || !enterprisePlanId) {
-      throw new Error('Missing PayPal configuration')
+    if (!paypalClientId) {
+      throw new Error('Missing PayPal Client ID configuration')
     }
 
     const config = {
       clientId: paypalClientId,
       planIds: {
-        starter: starterPlanId,
-        business: businessPlanId,
-        enterprise: enterprisePlanId
+        starter: 'P-9AE64506NG041543SNBHQ6RY',
+        business: 'P-81M148047K685451FNBHRAJQ',
+        enterprise: 'P-27P56345UX5890405NBHRB2Y'
       }
     }
 
