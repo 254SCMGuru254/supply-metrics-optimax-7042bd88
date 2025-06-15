@@ -11,6 +11,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Pricing from "./pages/Pricing";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import DataInput from "./pages/DataInput";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +57,23 @@ const App = () => {
                     </Layout>
                   </ProtectedRoute>
                 } />
+                
+                <Route path="/analytics-dashboard" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <AnalyticsDashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/data-input" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <DataInput />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                
                 <Route path="/pricing" element={
                   <ProtectedRoute>
                     <Layout>
