@@ -22,7 +22,7 @@ import Dashboard from "@/pages/Dashboard";
 import Introduction from "@/pages/Introduction";
 import BusinessValue from "@/pages/BusinessValue";
 import Analytics from "@/pages/Analytics";
-import { AnalyticsDashboard } from "@/pages/AnalyticsDashboard";
+import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import FleetManagement from "@/pages/FleetManagement";
 import DemandForecasting from "@/pages/DemandForecasting";
 import NetworkDesign from "@/pages/NetworkDesign";

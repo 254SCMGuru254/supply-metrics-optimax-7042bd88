@@ -5,7 +5,7 @@ import { EnhancedMapbox } from "@/components/maps/EnhancedMapbox";
 import { EditableMapPoints } from "@/components/interactive-editing/EditableMapPoints";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Calculator, Zap, Activity } from "lucide-react";
+import { MapPin, Calculator, Activity } from "lucide-react";
 
 const RouteOptimization = () => {
   return (
@@ -34,7 +34,7 @@ const RouteOptimization = () => {
             Interactive Maps
           </TabsTrigger>
           <TabsTrigger value="editor" className="flex items-center gap-2">
-            <Zap className="h-4 w-4" />
+            <Activity className="h-4 w-4" />
             Map Editor
           </TabsTrigger>
         </TabsList>
@@ -65,7 +65,7 @@ const RouteOptimization = () => {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
+                <Activity className="h-5 w-5" />
                 Interactive Map Editor
               </CardTitle>
             </CardHeader>

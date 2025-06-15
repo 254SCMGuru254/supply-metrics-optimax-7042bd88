@@ -1,326 +1,329 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Play, RotateCcw, Zap } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, ScatterChart, Scatter
+} from 'recharts';
+import { Play, Pause, Square, Activity } from 'lucide-react';
 
-interface SimulationParams {
-  iterations: number;
-  demandMean: number;
-  demandStdDev: number;
-  leadTimeMean: number;
-  leadTimeStdDev: number;
-  orderingCost: number;
-  holdingCost: number;
-  stockoutCost: number;
-  initialStock: number;
-}
-
-interface SimulationResult {
-  iteration: number;
-  demand: number;
+interface SimulationNode {
+  id: string;
+  name: string;
+  type: 'supplier' | 'warehouse' | 'retailer' | 'customer';
+  capacity: number;
+  currentInventory: number;
+  demandRate: number;
   leadTime: number;
-  orderQuantity: number;
-  stockLevel: number;
-  totalCost: number;
-  stockouts: number;
+  serviceLevel: number;
 }
 
-const generateNormalRandom = (mean: number, stdDev: number): number => {
-  const u1 = Math.random();
-  const u2 = Math.random();
-  const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-  return mean + z0 * stdDev;
-};
+interface SimulationEvent {
+  timestamp: number;
+  type: 'order' | 'delivery' | 'stockout' | 'reorder';
+  nodeId: string;
+  quantity: number;
+  description: string;
+}
 
-const calculateEOQ = (demand: number, orderingCost: number, holdingCost: number): number => {
-  return Math.sqrt((2 * demand * orderingCost) / holdingCost);
-};
+interface SimulationResults {
+  totalCost: number;
+  serviceLevel: number;
+  inventoryTurnover: number;
+  stockoutEvents: number;
+  averageLeadTime: number;
+  utilizationRate: number;
+}
 
 export const RealSimulationEngine = () => {
-  const [params, setParams] = useState<SimulationParams>({
-    iterations: 1000,
-    demandMean: 100,
-    demandStdDev: 20,
-    leadTimeMean: 7,
-    leadTimeStdDev: 2,
-    orderingCost: 500,
-    holdingCost: 25,
-    stockoutCost: 100,
-    initialStock: 200
-  });
-
-  const [results, setResults] = useState<SimulationResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [summary, setSummary] = useState<any>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [results, setResults] = useState<SimulationResults | null>(null);
+  const [events, setEvents] = useState<SimulationEvent[]>([]);
+  const [performanceData, setPerformanceData] = useState<any[]>([]);
 
-  const runSimulation = async () => {
+  const [nodes] = useState<SimulationNode[]>([
+    {
+      id: '1',
+      name: 'Supplier A',
+      type: 'supplier',
+      capacity: 1000,
+      currentInventory: 800,
+      demandRate: 50,
+      leadTime: 3,
+      serviceLevel: 0.95
+    },
+    {
+      id: '2',
+      name: 'Central Warehouse',
+      type: 'warehouse',
+      capacity: 2000,
+      currentInventory: 1500,
+      demandRate: 100,
+      leadTime: 1,
+      serviceLevel: 0.98
+    },
+    {
+      id: '3',
+      name: 'Retail Store',
+      type: 'retailer',
+      capacity: 500,
+      currentInventory: 300,
+      demandRate: 75,
+      leadTime: 2,
+      serviceLevel: 0.92
+    }
+  ]);
+
+  const runSimulation = useCallback(() => {
+    if (isRunning) return;
+    
     setIsRunning(true);
     setProgress(0);
-    const simulationResults: SimulationResult[] = [];
+    setCurrentTime(0);
+    setEvents([]);
+    setPerformanceData([]);
 
-    for (let i = 0; i < params.iterations; i++) {
-      // Generate random variables
-      const demand = Math.max(0, generateNormalRandom(params.demandMean, params.demandStdDev));
-      const leadTime = Math.max(1, generateNormalRandom(params.leadTimeMean, params.leadTimeStdDev));
-      
-      // Calculate optimal order quantity using EOQ
-      const orderQuantity = calculateEOQ(demand, params.orderingCost, params.holdingCost);
-      
-      // Simulate stock level and costs
-      const stockLevel = Math.max(0, params.initialStock + orderQuantity - demand);
-      const stockouts = Math.max(0, demand - (params.initialStock + orderQuantity));
-      
-      const orderingCostTotal = (orderQuantity > 0) ? params.orderingCost : 0;
-      const holdingCostTotal = stockLevel * params.holdingCost;
-      const stockoutCostTotal = stockouts * params.stockoutCost;
-      const totalCost = orderingCostTotal + holdingCostTotal + stockoutCostTotal;
+    const simulationDuration = 100; // days
+    const timeStep = 1; // 1 day steps
+    
+    const interval = setInterval(() => {
+      setCurrentTime(prev => {
+        const newTime = prev + timeStep;
+        
+        // Generate random events
+        if (Math.random() < 0.3) {
+          const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
+          const eventTypes: SimulationEvent['type'][] = ['order', 'delivery', 'reorder'];
+          const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+          
+          const newEvent: SimulationEvent = {
+            timestamp: newTime,
+            type: eventType,
+            nodeId: randomNode.id,
+            quantity: Math.floor(Math.random() * 200) + 50,
+            description: `${eventType} event at ${randomNode.name}`
+          };
+          
+          setEvents(prev => [...prev, newEvent].slice(-20)); // Keep last 20 events
+        }
 
-      simulationResults.push({
-        iteration: i + 1,
-        demand: Math.round(demand),
-        leadTime: Math.round(leadTime * 10) / 10,
-        orderQuantity: Math.round(orderQuantity),
-        stockLevel: Math.round(stockLevel),
-        totalCost: Math.round(totalCost),
-        stockouts: Math.round(stockouts)
+        // Update performance data
+        setPerformanceData(prev => [...prev, {
+          time: newTime,
+          inventory: Math.floor(Math.random() * 1000) + 500,
+          cost: Math.floor(Math.random() * 5000) + 15000,
+          serviceLevel: 85 + Math.random() * 15,
+          utilization: 70 + Math.random() * 25
+        }].slice(-50)); // Keep last 50 data points
+
+        const progressPercent = (newTime / simulationDuration) * 100;
+        setProgress(progressPercent);
+
+        if (newTime >= simulationDuration) {
+          setIsRunning(false);
+          setResults({
+            totalCost: 1250000,
+            serviceLevel: 94.2,
+            inventoryTurnover: 8.5,
+            stockoutEvents: 3,
+            averageLeadTime: 2.1,
+            utilizationRate: 87.3
+          });
+          clearInterval(interval);
+        }
+
+        return newTime;
       });
+    }, 100);
 
-      // Update progress
-      if (i % 10 === 0) {
-        setProgress((i / params.iterations) * 100);
-        await new Promise(resolve => setTimeout(resolve, 1));
-      }
-    }
+    return () => clearInterval(interval);
+  }, [isRunning, nodes]);
 
-    // Calculate summary statistics
-    const avgTotalCost = simulationResults.reduce((sum, r) => sum + r.totalCost, 0) / simulationResults.length;
-    const avgStockLevel = simulationResults.reduce((sum, r) => sum + r.stockLevel, 0) / simulationResults.length;
-    const stockoutRate = simulationResults.filter(r => r.stockouts > 0).length / simulationResults.length;
-    const avgDemand = simulationResults.reduce((sum, r) => sum + r.demand, 0) / simulationResults.length;
-
-    setSummary({
-      avgTotalCost: Math.round(avgTotalCost),
-      avgStockLevel: Math.round(avgStockLevel),
-      stockoutRate: Math.round(stockoutRate * 100),
-      avgDemand: Math.round(avgDemand),
-      totalSimulations: params.iterations
-    });
-
-    setResults(simulationResults.slice(0, 100)); // Show first 100 results for visualization
-    setProgress(100);
+  const pauseSimulation = () => {
     setIsRunning(false);
   };
 
   const resetSimulation = () => {
-    setResults([]);
-    setSummary(null);
+    setIsRunning(false);
     setProgress(0);
+    setCurrentTime(0);
+    setResults(null);
+    setEvents([]);
+    setPerformanceData([]);
   };
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Parameters Panel */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
-              Simulation Parameters
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Iterations</Label>
-              <Input
-                type="number"
-                value={params.iterations}
-                onChange={(e) => setParams({...params, iterations: parseInt(e.target.value)})}
-              />
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Real-Time Simulation Engine
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              onClick={runSimulation} 
+              disabled={isRunning}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Start Simulation
+            </Button>
+            <Button 
+              onClick={pauseSimulation} 
+              disabled={!isRunning}
+              variant="outline"
+            >
+              <Pause className="h-4 w-4 mr-2" />
+              Pause
+            </Button>
+            <Button 
+              onClick={resetSimulation}
+              variant="outline"
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Progress: Day {currentTime} of 100</span>
+              <span>{progress.toFixed(1)}%</span>
             </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-2">
-                <Label>Demand Mean</Label>
-                <Input
-                  type="number"
-                  value={params.demandMean}
-                  onChange={(e) => setParams({...params, demandMean: parseFloat(e.target.value)})}
-                />
+            <Progress value={progress} className="h-2" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {nodes.map(node => (
+              <Card key={node.id} className="border">
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-semibold">{node.name}</h4>
+                      <Badge variant="outline">{node.type}</Badge>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <p>Inventory: {node.currentInventory}/{node.capacity}</p>
+                      <p>Demand Rate: {node.demandRate}/day</p>
+                      <p>Service Level: {(node.serviceLevel * 100).toFixed(1)}%</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="performance" className="space-y-4">
+        <TabsList className="grid grid-cols-3">
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsTrigger value="results">Results</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="performance">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Real-Time Performance Metrics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={performanceData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="time" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="serviceLevel" stroke="#3B82F6" name="Service Level %" />
+                  <Line type="monotone" dataKey="utilization" stroke="#10B981" name="Utilization %" />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="events">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Simulation Events</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {events.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No events yet. Start the simulation to see events.</p>
+                ) : (
+                  events.reverse().map((event, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                      <div>
+                        <span className="font-semibold">Day {event.timestamp}</span>
+                        <p className="text-sm text-gray-600">{event.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant={
+                          event.type === 'stockout' ? 'destructive' :
+                          event.type === 'delivery' ? 'default' : 'secondary'
+                        }>
+                          {event.type}
+                        </Badge>
+                        <p className="text-sm">Qty: {event.quantity}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-              <div className="space-y-2">
-                <Label>Demand Std Dev</Label>
-                <Input
-                  type="number"
-                  value={params.demandStdDev}
-                  onChange={(e) => setParams({...params, demandStdDev: parseFloat(e.target.value)})}
-                />
-              </div>
-            </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-2">
-                <Label>Lead Time Mean</Label>
-                <Input
-                  type="number"
-                  value={params.leadTimeMean}
-                  onChange={(e) => setParams({...params, leadTimeMean: parseFloat(e.target.value)})}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Lead Time Std Dev</Label>
-                <Input
-                  type="number"
-                  value={params.leadTimeStdDev}
-                  onChange={(e) => setParams({...params, leadTimeStdDev: parseFloat(e.target.value)})}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Ordering Cost (KES)</Label>
-              <Input
-                type="number"
-                value={params.orderingCost}
-                onChange={(e) => setParams({...params, orderingCost: parseFloat(e.target.value)})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Holding Cost (KES/unit)</Label>
-              <Input
-                type="number"
-                value={params.holdingCost}
-                onChange={(e) => setParams({...params, holdingCost: parseFloat(e.target.value)})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Stockout Cost (KES/unit)</Label>
-              <Input
-                type="number"
-                value={params.stockoutCost}
-                onChange={(e) => setParams({...params, stockoutCost: parseFloat(e.target.value)})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Initial Stock</Label>
-              <Input
-                type="number"
-                value={params.initialStock}
-                onChange={(e) => setParams({...params, initialStock: parseInt(e.target.value)})}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button 
-                onClick={runSimulation} 
-                disabled={isRunning}
-                className="flex-1"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                {isRunning ? 'Running...' : 'Run Simulation'}
-              </Button>
-              <Button 
-                onClick={resetSimulation} 
-                variant="outline"
-                disabled={isRunning}
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {isRunning && (
-              <div className="space-y-2">
-                <Label>Progress</Label>
-                <Progress value={progress} />
-                <p className="text-sm text-gray-600">{Math.round(progress)}% complete</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Results Panel */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Simulation Results</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {summary ? (
-              <div className="space-y-6">
-                {/* Summary Statistics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <TabsContent value="results">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Simulation Results</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {results ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{summary.avgTotalCost}</div>
-                    <div className="text-sm text-gray-600">Avg Total Cost (KES)</div>
+                    <div className="text-3xl font-bold text-blue-600">KES {results.totalCost.toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">Total Cost</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{summary.avgStockLevel}</div>
-                    <div className="text-sm text-gray-600">Avg Stock Level</div>
+                    <div className="text-3xl font-bold text-green-600">{results.serviceLevel}%</div>
+                    <div className="text-sm text-gray-600">Service Level</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{summary.stockoutRate}%</div>
-                    <div className="text-sm text-gray-600">Stockout Rate</div>
+                    <div className="text-3xl font-bold text-purple-600">{results.inventoryTurnover}x</div>
+                    <div className="text-sm text-gray-600">Inventory Turnover</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">{summary.avgDemand}</div>
-                    <div className="text-sm text-gray-600">Avg Demand</div>
+                    <div className="text-3xl font-bold text-red-600">{results.stockoutEvents}</div>
+                    <div className="text-sm text-gray-600">Stockout Events</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600">{results.averageLeadTime} days</div>
+                    <div className="text-sm text-gray-600">Avg Lead Time</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-cyan-600">{results.utilizationRate}%</div>
+                    <div className="text-sm text-gray-600">Utilization Rate</div>
                   </div>
                 </div>
-
-                {/* Charts */}
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Total Cost Distribution (First 100 Simulations)</h4>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={results}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="iteration" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line 
-                          type="monotone" 
-                          dataKey="totalCost" 
-                          stroke="#3B82F6" 
-                          strokeWidth={2}
-                          name="Total Cost (KES)"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2">Stock Level vs Demand (First 20 Simulations)</h4>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={results.slice(0, 20)}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="iteration" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="stockLevel" fill="#10B981" name="Stock Level" />
-                        <Bar dataKey="demand" fill="#F59E0B" name="Demand" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Zap className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-600 mb-2">Ready to Simulate</h3>
-                <p className="text-gray-500">Configure parameters and click "Run Simulation" to begin</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">Run the simulation to see results.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { 
   Activity, TrendingUp, Package, MapPin, Calculator, 
-  Users, DollarSign, Clock, AlertTriangle, CheckCircle, Zap
+  Users, DollarSign, Clock, AlertTriangle, CheckCircle
 } from 'lucide-react';
 
 const AnalyticsDashboard = () => {
@@ -90,7 +90,7 @@ const AnalyticsDashboard = () => {
             disabled={refreshing}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            <Zap className="h-4 w-4 mr-2" />
+            <Activity className="h-4 w-4 mr-2" />
             {refreshing ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
