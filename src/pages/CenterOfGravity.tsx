@@ -10,11 +10,12 @@ import { CogApplicationSelector } from "@/components/cog/CogApplicationSelector"
 import { CogDemandWeights } from "@/components/cog/CogDemandWeights";
 import { CogRecommendations } from "@/components/cog/CogRecommendations";
 import { CompleteCogCalculation, CogCalculationResult } from "@/components/cog/CompleteCogCalculation";
+import { EnterpriseCogCalculators } from "@/components/cog/EnterpriseCogCalculators";
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
 import { Badge } from "@/components/ui/badge";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { ModelFormulas } from "@/components/shared/ModelFormulas";
-import { Calculator, TrendingUp, Target } from "lucide-react";
+import { Calculator, TrendingUp, Target, Building2 } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 
 const CenterOfGravity = () => {
@@ -81,22 +82,40 @@ const CenterOfGravity = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
           <Target className="h-8 w-8" />
-          Center of Gravity Analysis
+          Center of Gravity Analysis - Enterprise Grade
         </h1>
         <p className="text-muted-foreground">
-          Find optimal facility locations using weighted demand points and advanced distance formulas.
+          Complete facility location optimization suite with advanced algorithms and real-world applications.
         </p>
       </div>
 
       <ModelFormulas modelId="center-of-gravity" />
 
-      <Tabs defaultValue="calculation" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="enterprise-calculators" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="enterprise-calculators">
+            <Building2 className="h-4 w-4 mr-2" />
+            Enterprise Suite
+          </TabsTrigger>
           <TabsTrigger value="calculation">Calculation</TabsTrigger>
           <TabsTrigger value="data">Data Management</TabsTrigger>
           <TabsTrigger value="results">Results & Metrics</TabsTrigger>
           <TabsTrigger value="instructions">Help & Guide</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="enterprise-calculators" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-6 w-6" />
+                Enterprise Center of Gravity Calculators
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EnterpriseCogCalculators />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="calculation" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

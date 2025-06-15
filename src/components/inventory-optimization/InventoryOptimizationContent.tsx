@@ -7,19 +7,20 @@ import { MultiEchelonVisualization } from "./MultiEchelonVisualization";
 import { HorticulturalEOQCalculator } from "./HorticulturalEOQCalculator";
 import { ColdChainOptimizer } from "./ColdChainOptimizer";
 import { RetailSupplyChainOptimizer } from "./RetailSupplyChainOptimizer";
+import { EnterpriseEOQCalculators } from "./EnterpriseEOQCalculators";
 import { SupplyChainReportGenerator } from "@/components/ai-design-assistant/SupplyChainReportGenerator";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
-import { Calculator, BarChart3, Network, Package, Thermometer, Store, FileText } from "lucide-react";
+import { Calculator, BarChart3, Network, Package, Thermometer, Store, FileText, Building2 } from "lucide-react";
 
 export const InventoryOptimizationContent = () => {
-  const [activeTab, setActiveTab] = useState<string>("eoq");
+  const [activeTab, setActiveTab] = useState<string>("enterprise-suite");
 
   return (
     <div className="space-y-6" id="inventory-optimization-content">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Inventory Optimization Tools</h2>
-          <p className="text-gray-600 mt-1">Industry-standard mathematical models for optimal inventory management</p>
+          <h2 className="text-2xl font-bold">Enterprise Inventory Optimization Suite</h2>
+          <p className="text-gray-600 mt-1">Complete mathematical models for optimal inventory management</p>
         </div>
         <ExportPdfButton 
           exportId="inventory-optimization-content"
@@ -29,7 +30,14 @@ export const InventoryOptimizationContent = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="bg-white rounded-lg shadow-sm p-1 mb-6">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-7 w-full h-auto p-1 bg-transparent gap-1">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-8 w-full h-auto p-1 bg-transparent gap-1">
+            <TabsTrigger 
+              value="enterprise-suite" 
+              className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
+            >
+              <Building2 className="h-4 w-4" />
+              <span className="text-xs font-medium">Enterprise</span>
+            </TabsTrigger>
             <TabsTrigger 
               value="eoq" 
               className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all"
@@ -81,6 +89,19 @@ export const InventoryOptimizationContent = () => {
             </TabsTrigger>
           </TabsList>
         </div>
+
+        <TabsContent value="enterprise-suite" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Building2 className="h-6 w-6 text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Enterprise Inventory Optimization Suite</h3>
+                <p className="text-gray-600">Complete collection of inventory management formulas and calculators</p>
+              </div>
+            </div>
+            <EnterpriseEOQCalculators />
+          </Card>
+        </TabsContent>
 
         <TabsContent value="eoq" className="space-y-4">
           <Card className="p-6">
@@ -176,19 +197,39 @@ export const InventoryOptimizationContent = () => {
 
       {/* Mathematical Models Summary */}
       <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
-        <h3 className="text-lg font-bold mb-4 text-gray-900">Implemented Mathematical Models</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h3 className="text-lg font-bold mb-4 text-gray-900">Enterprise Mathematical Models Implemented</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-lg shadow-sm">
-            <h4 className="font-semibold text-blue-700 mb-2">Wilson EOQ Formula</h4>
-            <p className="text-sm text-gray-600">√(2DS/H) where D=demand, S=setup cost, H=holding cost</p>
+            <h4 className="font-semibold text-blue-700 mb-2">Basic EOQ</h4>
+            <p className="text-sm text-gray-600">√(2DS/H) - Wilson's formula</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm">
-            <h4 className="font-semibold text-green-700 mb-2">Safety Stock Model</h4>
-            <p className="text-sm text-gray-600">Z × σ_LT where Z=service factor, σ=demand std dev</p>
+            <h4 className="font-semibold text-green-700 mb-2">Quantity Discounts</h4>
+            <p className="text-sm text-gray-600">Piecewise EOQ optimization</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm">
-            <h4 className="font-semibold text-purple-700 mb-2">ABC Classification</h4>
-            <p className="text-sm text-gray-600">Pareto principle: 80% value from 20% items</p>
+            <h4 className="font-semibold text-purple-700 mb-2">Newsvendor Model</h4>
+            <p className="text-sm text-gray-600">Q* = F⁻¹(p/(p+h))</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-orange-700 mb-2">Base Stock Policy</h4>
+            <p className="text-sm text-gray-600">S = μ_LT + SS</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-red-700 mb-2">Safety Stock</h4>
+            <p className="text-sm text-gray-600">Z × σ_LT × √LT</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-indigo-700 mb-2">ABC Analysis</h4>
+            <p className="text-sm text-gray-600">Pareto classification</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-pink-700 mb-2">Multi-Echelon</h4>
+            <p className="text-sm text-gray-600">Network-wide optimization</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <h4 className="font-semibold text-teal-700 mb-2">EPQ Model</h4>
+            <p className="text-sm text-gray-600">Production batch sizing</p>
           </div>
         </div>
       </Card>
