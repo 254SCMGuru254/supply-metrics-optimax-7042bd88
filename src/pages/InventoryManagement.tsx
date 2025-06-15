@@ -3,9 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Package, TrendingUp, DollarSign, BarChart3, Bolt } from "lucide-react";
+import { AlertTriangle, Package, TrendingUp, DollarSign, BarChart3 } from "lucide-react";
+import { bolt as Bolt } from "lucide-react";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import { useToast } from "@/hooks/use-toast";
+
+// Add missing component imports
+import { InventoryOptimizationContent } from "@/components/inventory-optimization/InventoryOptimizationContent";
+import { EOQCalculator } from "@/components/inventory-optimization/EOQCalculator";
+import { SafetyStockCalculator } from "@/components/inventory-optimization/SafetyStockCalculator";
+import { ABCAnalysis } from "@/components/inventory-optimization/ABCAnalysis";
+import { MultiEchelonVisualization } from "@/components/inventory-optimization/MultiEchelonVisualization";
+import { ColdChainOptimizer } from "@/components/inventory-optimization/ColdChainOptimizer";
+import { RetailSupplyChainOptimizer } from "@/components/inventory-optimization/RetailSupplyChainOptimizer";
+import { HorticulturalEOQCalculator } from "@/components/inventory-optimization/HorticulturalEOQCalculator";
 
 const InventoryManagement = () => {
   const [activeTab, setActiveTab] = useState("overview");
