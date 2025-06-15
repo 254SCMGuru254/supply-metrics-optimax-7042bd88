@@ -404,7 +404,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "p", label: "Number of Facilities", type: "number" }
         ],
         outputs: [
-          { name: "selectedFacilities", label: "Optimal Facilities", type: "array" },
+          { name: "selectedFacilities", label: "Optimal Facilities" },
           { name: "totalDistance", label: "Total Distance", unit: "km" }
         ]
       },
@@ -423,7 +423,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "capacities", label: "Facility Capacities", type: "array" }
         ],
         outputs: [
-          { name: "allocation", label: "Allocation", type: "array" },
+          { name: "allocation", label: "Allocation" },
           { name: "totalCost", label: "Total Cost", unit: "KES" }
         ]
       },
@@ -441,7 +441,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "hubCandidates", label: "Hub Candidates", type: "array" }
         ],
         outputs: [
-          { name: "selectedHubs", label: "Optimal Hubs", type: "array" }
+          { name: "selectedHubs", label: "Optimal Hubs" }
         ]
       },
       {
@@ -459,7 +459,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "costs", label: "Warehouse Costs", type: "array" }
         ],
         outputs: [
-          { name: "selectedWarehouses", label: "Optimal Warehouses", type: "array" },
+          { name: "selectedWarehouses", label: "Optimal Warehouses" },
           { name: "totalCost", label: "Total Cost", unit: "KES" }
         ]
       },
@@ -477,7 +477,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "riskScores", label: "Risk Scores", type: "array" }
         ],
         outputs: [
-          { name: "allocation", label: "Risk-Optimal Allocation", type: "array" }
+          { name: "allocation", label: "Risk-Optimal Allocation" }
         ]
       }
     ]
@@ -519,7 +519,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "scenarios", label: "Scenarios", type: "array" }
         ],
         outputs: [
-          { name: "riskDistribution", label: "Risk Distribution", type: "object" }
+          { name: "riskDistribution", label: "Risk Distribution" }
         ]
       }
     ]
@@ -606,7 +606,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "vehicles", label: "Vehicles", type: "array" }
         ],
         outputs: [
-          { name: "assignments", label: "Assignment Grid", type: "array" }
+          { name: "assignments", label: "Assignment Grid" }
         ]
       },
       {
@@ -623,7 +623,7 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
           { name: "maintenanceWindows", label: "Maintenance Windows", type: "array" }
         ],
         outputs: [
-          { name: "maintenancePlan", label: "Maintenance Plan", type: "object" }
+          { name: "maintenancePlan", label: "Maintenance Plan" }
         ]
       },
       {
