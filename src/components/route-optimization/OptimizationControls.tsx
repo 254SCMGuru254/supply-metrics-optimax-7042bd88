@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Play, StopCircle, Settings, Zap } from "lucide-react";
+import { Play, StopCircle, Settings, Activity } from "lucide-react";
 
 interface OptimizationControlsProps {
   onOptimize: (params: any) => void;
@@ -117,7 +117,7 @@ export const OptimizationControls = ({ onOptimize, isOptimizing, onStop }: Optim
           >
             {isOptimizing ? (
               <>
-                <Zap className="h-4 w-4 mr-2 animate-spin" />
+                <Activity className="h-4 w-4 mr-2 animate-spin" />
                 Optimizing...
               </>
             ) : (
