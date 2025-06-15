@@ -809,6 +809,48 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          monthly_price: number
+          next_billing_date: string | null
+          paypal_subscription_id: string | null
+          plan_tier: string
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          monthly_price: number
+          next_billing_date?: string | null
+          paypal_subscription_id?: string | null
+          plan_tier: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          monthly_price?: number
+          next_billing_date?: string | null
+          paypal_subscription_id?: string | null
+          plan_tier?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       supply_nodes: {
         Row: {
           capacity: number | null
@@ -986,6 +1028,36 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_tracking: {
+        Row: {
+          created_at: string | null
+          feature_type: string
+          id: string
+          reset_date: string | null
+          updated_at: string | null
+          usage_count: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature_type: string
+          id?: string
+          reset_date?: string | null
+          updated_at?: string | null
+          usage_count?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feature_type?: string
+          id?: string
+          reset_date?: string | null
+          updated_at?: string | null
+          usage_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           company: string | null
@@ -1065,6 +1137,15 @@ export type Database = {
       calculate_distance: {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
+      }
+      check_feature_access: {
+        Args: { feature_name: string; current_usage?: number }
+        Returns: {
+          has_access: boolean
+          current_plan: string
+          usage_limit: number
+          current_usage_count: number
+        }[]
       }
     }
     Enums: {

@@ -4,11 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingTable } from "@/components/pricing/PricingTable";
 import { PricingEngine } from "@/components/pricing/PricingEngine";
+import { PayPalSubscriptionButton } from "@/components/subscription/PayPalSubscriptionButton";
 import { Check, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const Pricing = () => {
   const [projectId] = useState('demo-project-pricing');
+  const { subscription, loading } = useSubscription();
+  const { user } = useAuth();
 
   const pricingTiers = [
     {
@@ -19,12 +24,12 @@ const Pricing = () => {
       features: [
         "Route optimization (up to 20 stops)",
         "Basic analytics and reporting",
-        // Removed "M-Pesa payment integration"
         "Email support",
         "Up to 500 data points",
         "Basic optimization algorithms"
       ],
-      paymentIntegrated: true
+      planTier: "starter" as const,
+      monthlyPrice: 25000
     },
     {
       name: "Business",
@@ -36,13 +41,13 @@ const Pricing = () => {
         "Network optimization",
         "Center of gravity analysis",
         "Advanced analytics and forecasting",
-        // Removed "M-Pesa payment integration"
         "Priority email and chat support",
         "Up to 5,000 data points",
         "Multi-echelon inventory optimization"
       ],
       popular: true,
-      paymentIntegrated: true
+      planTier: "business" as const,
+      monthlyPrice: 75000
     },
     {
       name: "Enterprise",
@@ -60,7 +65,8 @@ const Pricing = () => {
         "24/7 priority support",
         "Advanced AI and machine learning"
       ],
-      paymentIntegrated: true
+      planTier: "enterprise" as const,
+      monthlyPrice: 200000
     }
   ];
 
@@ -74,13 +80,26 @@ const Pricing = () => {
       </div>
 
       <Tabs defaultValue="plans" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+          <TabsTrigger value="subscribe">Subscribe</TabsTrigger>
           <TabsTrigger value="calculator">Pricing Calculator</TabsTrigger>
         </TabsList>
 
         <TabsContent value="plans">
           <PricingTable tiers={pricingTiers} region="kenya" />
+
+          {subscription && (
+            <div className="mt-8 bg-green-50 p-6 rounded-lg border border-green-200">
+              <h3 className="font-semibold mb-2 flex items-center text-green-800">
+                <Check className="h-5 w-5 mr-2" />
+                Current Subscription: {subscription.plan_tier.charAt(0).toUpperCase() + subscription.plan_tier.slice(1)}
+              </h3>
+              <p className="text-sm text-green-700">
+                Your subscription is active and all features are available according to your plan.
+              </p>
+            </div>
+          )}
 
           <div className="mt-12 bg-muted p-6 rounded-lg">
             <h3 className="text-xl font-semibold mb-4">International vs. Local Pricing Comparison</h3>
@@ -109,18 +128,34 @@ const Pricing = () => {
               making enterprise-grade supply chain optimization accessible to Kenyan businesses.
             </p>
           </div>
+        </TabsContent>
 
-          <div className="mt-8 bg-green-50 p-6 rounded-lg border border-green-200">
-            <h3 className="font-semibold mb-2 flex items-center text-green-800">
-              <Check className="h-5 w-5 mr-2" />
-              Advanced Pricing Models Available
-            </h3>
-            <p className="text-sm text-green-700">
-              Our platform now includes sophisticated pricing optimization models including cost-plus, 
-              value-based, competitive, dynamic, penetration, and skimming strategies with real-time 
-              market analysis and recommendations.
-            </p>
-          </div>
+        <TabsContent value="subscribe">
+          {!user ? (
+            <Card className="max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle>Authentication Required</CardTitle>
+                <CardDescription>Please log in to subscribe to a plan</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" asChild>
+                  <a href="/auth">Sign In / Register</a>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {pricingTiers.map((tier) => (
+                <PayPalSubscriptionButton
+                  key={tier.planTier}
+                  planTier={tier.planTier}
+                  planPrice={tier.monthlyPrice}
+                  planName={tier.name}
+                  onSuccess={() => window.location.reload()}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="calculator">
