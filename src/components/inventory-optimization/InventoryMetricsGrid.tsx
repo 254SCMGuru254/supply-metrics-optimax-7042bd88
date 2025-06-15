@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,14 +11,14 @@ import {
   Target 
 } from "lucide-react";
 
-interface MetricCardProps {
+type Metric = {
   title: string;
   value: string | number;
   change?: string;
   trend?: "up" | "down" | "stable";
   icon: React.ComponentType<any>;
   color?: string;
-}
+};
 
 const metrics: Metric[] = [
   {

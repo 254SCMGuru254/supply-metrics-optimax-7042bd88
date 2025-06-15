@@ -1,4 +1,3 @@
-
 import React, { useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryHeader } from "@/components/inventory-optimization/InventoryHeader";
@@ -18,7 +17,7 @@ const InventoryManagement = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8" ref={contentRef}>
-      <InventoryHeader onRunOptimization={handleOptimizationComplete} />
+      <InventoryHeader />
       <InventoryMetricsGrid />
       <InventoryTabsContent />
     </div>
