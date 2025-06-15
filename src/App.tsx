@@ -1,39 +1,45 @@
 
-import { Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Navbar } from "@/components/Navbar";
-import Index from "@/pages/Index";
-import RouteOptimization from "@/pages/RouteOptimization";
-import NetworkOptimization from "@/pages/NetworkOptimization";
-import CenterOfGravity from "@/pages/CenterOfGravity";
-import Heuristic from "@/pages/Heuristic";
-import Isohedron from "@/pages/Isohedron";
-import BusinessValue from "@/pages/BusinessValue";
-import Simulation from "@/pages/Simulation";
-import InventoryManagement from "@/pages/InventoryManagement";
-import Pricing from "@/pages/Pricing";
-import DataManagement from "@/pages/DataManagement";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Navbar } from "./components/layout/Navbar";
+import Index from "./pages/Index";
+import RouteOptimization from "./pages/RouteOptimization";
+import InventoryOptimization from "./pages/InventoryOptimization";
+import CenterOfGravity from "./pages/CenterOfGravity";
+import NetworkOptimization from "./pages/NetworkOptimization";
+import Heuristic from "./pages/Heuristic";
+import Simulation from "./pages/Simulation";
+import DataManagement from "./pages/DataManagement";
+import Documentation from "./pages/Documentation";
 
-function App() {
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/route-optimization" element={<RouteOptimization />} />
-        <Route path="/network-optimization" element={<NetworkOptimization />} />
-        <Route path="/center-of-gravity" element={<CenterOfGravity />} />
-        <Route path="/heuristic-optimization" element={<Heuristic />} />
-        <Route path="/isohedron-analysis" element={<Isohedron />} />
-        <Route path="/business-value" element={<BusinessValue />} />
-        <Route path="/simulation" element={<Simulation />} />
-        <Route path="/inventory-management" element={<InventoryManagement />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/data-management" element={<DataManagement />} />
-      </Routes>
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
       <Toaster />
-    </div>
-  );
-}
+      <Sonner />
+      <BrowserRouter>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/route-optimization" element={<RouteOptimization />} />
+            <Route path="/inventory-optimization" element={<InventoryOptimization />} />
+            <Route path="/center-of-gravity" element={<CenterOfGravity />} />
+            <Route path="/network-optimization" element={<NetworkOptimization />} />
+            <Route path="/heuristic" element={<Heuristic />} />
+            <Route path="/simulation" element={<Simulation />} />
+            <Route path="/data-management" element={<DataManagement />} />
+            <Route path="/documentation" element={<Documentation />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
