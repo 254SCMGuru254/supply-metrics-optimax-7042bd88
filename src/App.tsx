@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/Layout";
+import { Outlet } from "react-router-dom";
 
 // Import pages
 import Index from "@/pages/Index";
@@ -44,7 +45,7 @@ function App() {
       <TooltipProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Layout />}>
+            <Route path="/" element={<Layout><Outlet /></Layout>}>
               <Route index element={<Index />} />
               <Route path="route-optimization" element={<RouteOptimization />} />
               <Route path="inventory-management" element={<InventoryManagement />} />

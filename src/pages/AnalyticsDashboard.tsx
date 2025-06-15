@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Package, Truck, MapPin, Activity, Download, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Package, Truck, MapPin, Activity, Download, RefreshCcw } from 'lucide-react';
 
 const analyticsData = {
   kpis: [
@@ -72,7 +72,7 @@ export const AnalyticsDashboard = () => {
               disabled={isRefreshing}
               className="flex items-center gap-2"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh Data
             </Button>
             <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
@@ -130,11 +130,9 @@ export const AnalyticsDashboard = () => {
                     <LineChart data={analyticsData.performanceTrends}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
+                      <YAxis />
                       <Tooltip />
                       <Line 
-                        yAxisId="left"
                         type="monotone" 
                         dataKey="cost" 
                         stroke="#3B82F6" 
@@ -142,7 +140,6 @@ export const AnalyticsDashboard = () => {
                         name="Cost (KES)"
                       />
                       <Line 
-                        yAxisId="right"
                         type="monotone" 
                         dataKey="service" 
                         stroke="#10B981" 
@@ -166,12 +163,12 @@ export const AnalyticsDashboard = () => {
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
+                        data={analyticsData.costBreakdown}
                         cx="50%"
                         cy="50%"
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {analyticsData.costBreakdown.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
