@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+// CHANGED: import { Bolt } with upper case B
 import { Bolt } from "lucide-react";
 
 const formulas = [
