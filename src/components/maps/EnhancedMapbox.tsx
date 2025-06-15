@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MapPin, Layers, Filter, Download } from 'lucide-react';
+import { MapPin, Layers, Search, Download } from 'lucide-react';
 
 interface MapboxLocation {
   id: string;
@@ -21,6 +21,7 @@ export const EnhancedMapbox = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any>(null);
   const [mapboxToken, setMapboxToken] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState<MapboxLocation | null>(null);
   const [locations, setLocations] = useState<MapboxLocation[]>([
     {
       id: 'nairobi-hub',
@@ -91,6 +92,11 @@ export const EnhancedMapbox = () => {
           justify-content: center;
         `;
 
+        // Add click handler to marker
+        markerElement.addEventListener('click', () => {
+          setSelectedLocation(location);
+        });
+
         // Add marker
         new mapboxgl.default.Marker(markerElement)
           .setLngLat([location.longitude, location.latitude])
@@ -102,6 +108,7 @@ export const EnhancedMapbox = () => {
                   <p class="text-sm text-gray-600">${location.type}</p>
                   ${location.volume ? `<p class="text-sm">Volume: ${location.volume.toLocaleString()} units</p>` : ''}
                   ${location.efficiency ? `<p class="text-sm">Efficiency: ${location.efficiency}%</p>` : ''}
+                  <button onclick="editLocation('${location.id}')" class="mt-2 px-2 py-1 bg-blue-500 text-white rounded text-xs">Edit</button>
                 </div>
               `)
           )
@@ -120,6 +127,18 @@ export const EnhancedMapbox = () => {
       case 'supplier': return '#8B5CF6';
       case 'distribution': return '#F59E0B';
       default: return '#6B7280';
+    }
+  };
+
+  const updateLocation = (updatedLocation: MapboxLocation) => {
+    setLocations(prev => 
+      prev.map(loc => loc.id === updatedLocation.id ? updatedLocation : loc)
+    );
+    setSelectedLocation(null);
+    // Reinitialize map with updated data
+    if (map.current) {
+      map.current.remove();
+      initializeMap();
     }
   };
 
@@ -180,62 +199,129 @@ export const EnhancedMapbox = () => {
         </Card>
       ) : (
         <>
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Supply Chain Network Map
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Layers className="h-4 w-4 mr-2" />
-                    Layers
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filter
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div ref={mapContainer} className="w-full h-[500px] rounded-b-lg" />
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      Interactive Supply Chain Network Map
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Layers className="h-4 w-4 mr-2" />
+                        Layers
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Search className="h-4 w-4 mr-2" />
+                        Search
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export
+                      </Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div ref={mapContainer} className="w-full h-[600px] rounded-b-lg" />
+                </CardContent>
+              </Card>
+            </div>
 
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Location Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {locations.map((location) => (
-                  <div key={location.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold">{location.name}</h3>
-                      <Badge variant="outline" style={{ color: getMarkerColor(location.type) }}>
-                        {location.type}
-                      </Badge>
+            <div className="space-y-6">
+              {selectedLocation && (
+                <Card className="shadow-lg border-blue-500">
+                  <CardHeader>
+                    <CardTitle>Edit Location Data</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Name</Label>
+                      <Input 
+                        value={selectedLocation.name}
+                        onChange={(e) => setSelectedLocation({
+                          ...selectedLocation, 
+                          name: e.target.value
+                        })}
+                      />
                     </div>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      <div>Coordinates: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}</div>
-                      {location.volume && (
-                        <div>Volume: {location.volume.toLocaleString()} units</div>
-                      )}
-                      {location.efficiency && (
-                        <div>Efficiency: {location.efficiency}%</div>
-                      )}
+                    <div>
+                      <Label>Volume</Label>
+                      <Input 
+                        type="number"
+                        value={selectedLocation.volume || 0}
+                        onChange={(e) => setSelectedLocation({
+                          ...selectedLocation, 
+                          volume: parseInt(e.target.value)
+                        })}
+                      />
                     </div>
+                    <div>
+                      <Label>Efficiency (%)</Label>
+                      <Input 
+                        type="number"
+                        value={selectedLocation.efficiency || 0}
+                        onChange={(e) => setSelectedLocation({
+                          ...selectedLocation, 
+                          efficiency: parseInt(e.target.value)
+                        })}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => updateLocation(selectedLocation)}
+                        className="flex-1"
+                      >
+                        Save Changes
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => setSelectedLocation(null)}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle>Location Analytics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {locations.map((location) => (
+                      <div 
+                        key={location.id} 
+                        className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => setSelectedLocation(location)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold">{location.name}</h3>
+                          <Badge variant="outline" style={{ color: getMarkerColor(location.type) }}>
+                            {location.type}
+                          </Badge>
+                        </div>
+                        <div className="space-y-1 text-sm text-gray-600">
+                          <div>Coordinates: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}</div>
+                          {location.volume && (
+                            <div>Volume: {location.volume.toLocaleString()} units</div>
+                          )}
+                          {location.efficiency && (
+                            <div>Efficiency: {location.efficiency}%</div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </>
       )}
     </div>

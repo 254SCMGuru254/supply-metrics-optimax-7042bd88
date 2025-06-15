@@ -63,6 +63,7 @@
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "localforage": "^1.10.0",
     "lucide-react": "^0.506.0",
+    "mapbox-gl": "^3.12.0",
     "next-themes": "^0.2.1",
     "pako": "^2.1.0",
     "react": "^18.2.0",

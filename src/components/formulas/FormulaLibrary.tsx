@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Calculator, Search, BookOpen, Target, Zap } from 'lucide-react';
+import { Calculator, Search, BookOpen, Target, TrendingUp } from 'lucide-react';
 
 interface Formula {
   id: string;
