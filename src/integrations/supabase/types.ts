@@ -374,6 +374,85 @@ export type Database = {
         }
         Relationships: []
       }
+      route_event_logs: {
+        Row: {
+          event_data: Json | null
+          event_type: string | null
+          handled: boolean | null
+          id: string
+          route_id: string | null
+          severity: string | null
+          timestamp: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          event_data?: Json | null
+          event_type?: string | null
+          handled?: boolean | null
+          id?: string
+          route_id?: string | null
+          severity?: string | null
+          timestamp?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          event_data?: Json | null
+          event_type?: string | null
+          handled?: boolean | null
+          id?: string
+          route_id?: string | null
+          severity?: string | null
+          timestamp?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_event_logs_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "supply_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_exceptions: {
+        Row: {
+          end_time: string | null
+          exception_type: string | null
+          id: string
+          notes: string | null
+          route_id: string | null
+          severity: string | null
+          start_time: string | null
+        }
+        Insert: {
+          end_time?: string | null
+          exception_type?: string | null
+          id?: string
+          notes?: string | null
+          route_id?: string | null
+          severity?: string | null
+          start_time?: string | null
+        }
+        Update: {
+          end_time?: string | null
+          exception_type?: string | null
+          id?: string
+          notes?: string | null
+          route_id?: string | null
+          severity?: string | null
+          start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_exceptions_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "supply_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routes: {
         Row: {
           cost_per_unit: number | null
@@ -540,49 +619,64 @@ export type Database = {
       supply_routes: {
         Row: {
           capacity: number | null
+          co2_emissions: number | null
           cost_per_unit: number | null
           created_at: string | null
           destination_id: string | null
           distance: number | null
+          estimated_arrival: string | null
           id: string
           is_active: boolean | null
+          live_status: string | null
           origin_id: string | null
           project_id: string
           properties: Json | null
+          risk_score: number | null
           route_type: string | null
           transit_time: number | null
+          transport_mode: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           capacity?: number | null
+          co2_emissions?: number | null
           cost_per_unit?: number | null
           created_at?: string | null
           destination_id?: string | null
           distance?: number | null
+          estimated_arrival?: string | null
           id?: string
           is_active?: boolean | null
+          live_status?: string | null
           origin_id?: string | null
           project_id: string
           properties?: Json | null
+          risk_score?: number | null
           route_type?: string | null
           transit_time?: number | null
+          transport_mode?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           capacity?: number | null
+          co2_emissions?: number | null
           cost_per_unit?: number | null
           created_at?: string | null
           destination_id?: string | null
           distance?: number | null
+          estimated_arrival?: string | null
           id?: string
           is_active?: boolean | null
+          live_status?: string | null
           origin_id?: string | null
           project_id?: string
           properties?: Json | null
+          risk_score?: number | null
           route_type?: string | null
           transit_time?: number | null
+          transport_mode?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -609,6 +703,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transport_modes: {
+        Row: {
+          co2_factor: number | null
+          description: string | null
+          id: number
+          mode_name: string
+          speed_avg: number | null
+        }
+        Insert: {
+          co2_factor?: number | null
+          description?: string | null
+          id?: number
+          mode_name: string
+          speed_avg?: number | null
+        }
+        Update: {
+          co2_factor?: number | null
+          description?: string | null
+          id?: number
+          mode_name?: string
+          speed_avg?: number | null
+        }
+        Relationships: []
       }
       user_profiles: {
         Row: {
@@ -640,6 +758,36 @@ export type Database = {
           updated_at?: string | null
           usage_quota?: Json | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      vehicle_locations: {
+        Row: {
+          event: Json | null
+          id: string
+          latitude: number
+          longitude: number
+          status: string | null
+          timestamp: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          event?: Json | null
+          id?: string
+          latitude: number
+          longitude: number
+          status?: string | null
+          timestamp?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          event?: Json | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          status?: string | null
+          timestamp?: string | null
+          vehicle_id?: string
         }
         Relationships: []
       }
