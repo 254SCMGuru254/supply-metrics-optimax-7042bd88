@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 const Auth = () => {
   const { user, signIn, signUp, loading } = useAuth();
@@ -211,9 +211,9 @@ const Auth = () => {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOffIcon className="h-4 w-4" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <EyeIcon className="h-4 w-4" />
                         )}
                       </Button>
                     </div>
@@ -304,9 +304,9 @@ const Auth = () => {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOffIcon className="h-4 w-4" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <EyeIcon className="h-4 w-4" />
                         )}
                       </Button>
                     </div>
