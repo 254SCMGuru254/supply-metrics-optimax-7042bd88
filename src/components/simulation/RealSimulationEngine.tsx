@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -139,64 +140,68 @@ export const RealSimulationEngine = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Play className="h-5 w-5" />
-            Monte Carlo Simulation Engine
+      <Card className="border-l-4 border-l-blue-500 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Play className="h-6 w-6 text-blue-600" />
+            Advanced Monte Carlo Simulation Engine
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Label>Iterations</Label>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Iterations</Label>
               <Input
                 type="number"
                 value={parameters.iterations}
                 onChange={(e) => setParameters({...parameters, iterations: parseInt(e.target.value) || 1000})}
                 disabled={isRunning}
+                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
-            <div>
-              <Label>Duration (days)</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Duration (days)</Label>
               <Input
                 type="number"
                 value={parameters.duration}
                 onChange={(e) => setParameters({...parameters, duration: parseInt(e.target.value) || 365})}
                 disabled={isRunning}
+                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
-            <div>
-              <Label>Volatility</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Volatility</Label>
               <Input
                 type="number"
                 step="0.01"
                 value={parameters.volatility}
                 onChange={(e) => setParameters({...parameters, volatility: parseFloat(e.target.value) || 0.15})}
                 disabled={isRunning}
+                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
-            <div>
-              <Label>Target Service Level (%)</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Target Service Level (%)</Label>
               <Input
                 type="number"
                 value={parameters.serviceLevel}
                 onChange={(e) => setParameters({...parameters, serviceLevel: parseInt(e.target.value) || 95})}
                 disabled={isRunning}
+                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
-            <div>
-              <Label>Scenario Type</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Scenario Type</Label>
               <Select 
                 value={parameters.scenarioType} 
                 onValueChange={(value) => setParameters({...parameters, scenarioType: value})}
                 disabled={isRunning}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-500">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -209,10 +214,23 @@ export const RealSimulationEngine = () => {
             </div>
           </div>
           
-          <div className="flex gap-3 mt-6">
-            <Button onClick={runSimulation} disabled={isRunning}>
-              {isRunning ? <Square className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-              {isRunning ? 'Running...' : 'Run Simulation'}
+          <div className="flex gap-3 mt-8">
+            <Button 
+              onClick={runSimulation} 
+              disabled={isRunning}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
+              {isRunning ? (
+                <>
+                  <Square className="h-4 w-4 mr-2" />
+                  Running...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Run Simulation
+                </>
+              )}
             </Button>
             
             <Button variant="outline" onClick={resetSimulation} disabled={isRunning}>
@@ -229,53 +247,53 @@ export const RealSimulationEngine = () => {
           </div>
           
           {isRunning && (
-            <div className="mt-4">
-              <Label>Progress</Label>
-              <Progress value={progress} className="mt-2" />
-              <p className="text-sm text-muted-foreground mt-1">{progress.toFixed(1)}% complete</p>
+            <div className="mt-6 space-y-2">
+              <Label className="text-sm font-medium">Progress</Label>
+              <Progress value={progress} className="h-3" />
+              <p className="text-sm text-muted-foreground">{progress.toFixed(1)}% complete</p>
             </div>
           )}
         </CardContent>
       </Card>
 
       {results && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Simulation Results</CardTitle>
+        <Card className="border-l-4 border-l-green-500 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+            <CardTitle className="text-xl text-green-800">Simulation Results Dashboard</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Average Total Cost</p>
-                <p className="text-2xl font-bold text-blue-600">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                <p className="text-sm text-blue-600 font-medium">Average Total Cost</p>
+                <p className="text-3xl font-bold text-blue-800 mt-2">
                   KES {results.totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </p>
               </div>
               
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Service Level</p>
-                <p className="text-2xl font-bold text-green-600">{results.serviceLevel.toFixed(1)}%</p>
+              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+                <p className="text-sm text-green-600 font-medium">Service Level</p>
+                <p className="text-3xl font-bold text-green-800 mt-2">{results.serviceLevel.toFixed(1)}%</p>
               </div>
               
-              <div className="text-center p-4 bg-red-50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Stockout Events</p>
-                <p className="text-2xl font-bold text-red-600">{results.stockouts}</p>
+              <div className="text-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200">
+                <p className="text-sm text-red-600 font-medium">Stockout Events</p>
+                <p className="text-3xl font-bold text-red-800 mt-2">{results.stockouts}</p>
               </div>
               
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Efficiency Score</p>
-                <p className="text-2xl font-bold text-purple-600">{results.efficiency.toFixed(1)}%</p>
+              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                <p className="text-sm text-purple-600 font-medium">Efficiency Score</p>
+                <p className="text-3xl font-bold text-purple-800 mt-2">{results.efficiency.toFixed(1)}%</p>
               </div>
             </div>
             
-            <div className="mt-4 flex gap-2">
-              <Badge variant="outline">
+            <div className="mt-6 flex gap-3 flex-wrap">
+              <Badge variant="outline" className="px-3 py-1">
                 {results.iterations.toLocaleString()} iterations
               </Badge>
-              <Badge variant="outline">
+              <Badge variant="outline" className="px-3 py-1">
                 {results.convergenceTime}ms execution time
               </Badge>
-              <Badge variant={results.serviceLevel >= parameters.serviceLevel ? 'default' : 'destructive'}>
+              <Badge variant={results.serviceLevel >= parameters.serviceLevel ? 'default' : 'destructive'} className="px-3 py-1">
                 {results.serviceLevel >= parameters.serviceLevel ? 'Target Met' : 'Below Target'}
               </Badge>
             </div>

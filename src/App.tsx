@@ -14,6 +14,8 @@ import Heuristic from "./pages/Heuristic";
 import Simulation from "./pages/Simulation";
 import DataManagement from "./pages/DataManagement";
 import Documentation from "./pages/Documentation";
+import Dashboard from "./pages/Dashboard";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => {
           <Navbar />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/route-optimization" element={<RouteOptimization />} />
             <Route path="/inventory-optimization" element={<InventoryManagement />} />
             <Route path="/center-of-gravity" element={<CenterOfGravity />} />
