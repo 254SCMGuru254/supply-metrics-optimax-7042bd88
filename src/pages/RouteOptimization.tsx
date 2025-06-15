@@ -1,7 +1,7 @@
 
 import { RouteOptimizationContent } from "@/components/route-optimization/RouteOptimizationContent";
 import { RouteFormulas } from "@/components/route-optimization/RouteFormulas";
-import { EnhancedMapbox } from "@/components/maps/EnhancedMapbox";
+import { LeafletMapbox } from "@/components/maps/LeafletMapbox";
 import { EditableMapPoints } from "@/components/interactive-editing/EditableMapPoints";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ const RouteOptimization = () => {
           Route Optimization Suite
         </h1>
         <p className="text-gray-600 max-w-3xl mx-auto">
-          Complete route optimization with TSP, VRP, path algorithms, and real-time analysis
+          Complete route optimization with TSP, VRP, path algorithms, and real-time analysis using free, open-source mapping
         </p>
       </div>
 
@@ -29,9 +29,9 @@ const RouteOptimization = () => {
             <Activity className="h-4 w-4" />
             Live Optimization
           </TabsTrigger>
-          <TabsTrigger value="mapbox" className="flex items-center gap-2">
+          <TabsTrigger value="leaflet" className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
-            Interactive Maps
+            Free Maps (Leaflet)
           </TabsTrigger>
           <TabsTrigger value="editor" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
@@ -47,16 +47,16 @@ const RouteOptimization = () => {
           <RouteOptimizationContent />
         </TabsContent>
 
-        <TabsContent value="mapbox">
+        <TabsContent value="leaflet">
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                Enhanced Mapbox Integration
+                Free Open Source Mapping (Leaflet + OpenStreetMap)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <EnhancedMapbox />
+              <LeafletMapbox />
             </CardContent>
           </Card>
         </TabsContent>

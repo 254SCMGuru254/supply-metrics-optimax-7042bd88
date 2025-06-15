@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -254,7 +253,7 @@ export const RealSimulationEngine = () => {
                 <LineChart data={results.slice(-100)}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="iteration" />
-                  <YAxis domain={[0.8, 1]} />
+                  <YAxis />
                   <Tooltip />
                   <Legend />
                   <Line type="monotone" dataKey="serviceLevel" stroke="#10B981" strokeWidth={2} />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,8 +5,6 @@ import { Progress } from '@/components/ui/progress';
 import { 
   LineChart, 
   Line, 
-  AreaChart, 
-  Area, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -116,13 +113,13 @@ const AnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={performanceData}>
+                <LineChart data={performanceData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Area type="monotone" dataKey="cost" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
-                </AreaChart>
+                  <Line type="monotone" dataKey="cost" stroke="#3B82F6" strokeWidth={3} fill="#3B82F6" />
+                </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -139,7 +136,7 @@ const AnalyticsDashboard = () => {
                 <LineChart data={performanceData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
-                  <YAxis domain={[80, 100]} />
+                  <YAxis />
                   <Tooltip />
                   <Line type="monotone" dataKey="efficiency" stroke="#10B981" strokeWidth={3} />
                 </LineChart>
@@ -196,12 +193,12 @@ const AnalyticsDashboard = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
+                    data={costBreakdown}
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
-                    nameKey="name"
                   >
                     {costBreakdown.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
