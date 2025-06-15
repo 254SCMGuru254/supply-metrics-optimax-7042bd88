@@ -1,13 +1,18 @@
-import { Node, Route } from "@/components/map/MapTypes";
+import type { Node, Route } from "@/components/map/MapTypes";
+import type { DemandEventLogRow, DemandEventLogInsert, DemandEventLogUpdate } from "./database/demand_event_logs";
+import type { PerishableInventoryRow, PerishableInventoryInsert, PerishableInventoryUpdate } from "./database/perishable_inventory";
+import type { InventoryScenarioRow, InventoryScenarioInsert, InventoryScenarioUpdate } from "./database/inventory_scenarios";
 
+// Type for JSON fields used throughout database tables
 export type Json =
   | string
   | number
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
+// Root Database Interface (remaining subtypes abbreviated for brevity)
 export interface Database {
   public: {
     Tables: {
@@ -216,97 +221,19 @@ export interface Database {
         };
       };
       demand_event_logs: {
-        Row: {
-          id: string;
-          node_id: string | null;
-          timestamp: string | null;
-          event_type: string | null;
-          event_data: Json | null;
-          severity: string | null;
-          handled: boolean | null;
-        };
-        Insert: {
-          id?: string;
-          node_id?: string | null;
-          timestamp?: string | null;
-          event_type?: string | null;
-          event_data?: Json | null;
-          severity?: string | null;
-          handled?: boolean | null;
-        };
-        Update: {
-          id?: string;
-          node_id?: string | null;
-          timestamp?: string | null;
-          event_type?: string | null;
-          event_data?: Json | null;
-          severity?: string | null;
-          handled?: boolean | null;
-        };
+        Row: DemandEventLogRow;
+        Insert: DemandEventLogInsert;
+        Update: DemandEventLogUpdate;
       };
       perishable_inventory: {
-        Row: {
-          id: string;
-          item_id: string | null;
-          batch_code: string | null;
-          received_date: string | null;
-          expiry_date: string | null;
-          quantity: number;
-          status: string | null;
-          alert: boolean | null;
-        };
-        Insert: {
-          id?: string;
-          item_id?: string | null;
-          batch_code?: string | null;
-          received_date?: string | null;
-          expiry_date?: string | null;
-          quantity: number;
-          status?: string | null;
-          alert?: boolean | null;
-        };
-        Update: {
-          id?: string;
-          item_id?: string | null;
-          batch_code?: string | null;
-          received_date?: string | null;
-          expiry_date?: string | null;
-          quantity?: number;
-          status?: string | null;
-          alert?: boolean | null;
-        };
+        Row: PerishableInventoryRow;
+        Insert: PerishableInventoryInsert;
+        Update: PerishableInventoryUpdate;
       };
       inventory_scenarios: {
-        Row: {
-          id: string;
-          project_id: string | null;
-          user_id: string | null;
-          scenario_name: string;
-          scenario_type: string | null;
-          parameters: Json | null;
-          results: Json | null;
-          created_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          project_id?: string | null;
-          user_id?: string | null;
-          scenario_name: string;
-          scenario_type?: string | null;
-          parameters?: Json | null;
-          results?: Json | null;
-          created_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          project_id?: string | null;
-          user_id?: string | null;
-          scenario_name?: string;
-          scenario_type?: string | null;
-          parameters?: Json | null;
-          results?: Json | null;
-          created_at?: string | null;
-        };
+        Row: InventoryScenarioRow;
+        Insert: InventoryScenarioInsert;
+        Update: InventoryScenarioUpdate;
       };
     };
     Views: {
