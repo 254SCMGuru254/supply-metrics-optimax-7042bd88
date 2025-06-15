@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,7 +9,7 @@ import {
   CheckCircle, 
   Clock, 
   TrendingUp, 
-  Zap,
+  zap,
   Shield,
   BarChart3
 } from "lucide-react";
@@ -155,7 +154,7 @@ export const ProductionDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
+                  <zap className="h-5 w-5" />
                   Optimization Recommendations
                 </CardTitle>
               </CardHeader>

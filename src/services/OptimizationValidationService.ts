@@ -1,4 +1,3 @@
-
 import type { Node, Route } from "@/components/map/MapTypes";
 import { Vehicle } from "@/components/route-optimization/VehicleFleetConfig";
 
@@ -95,11 +94,11 @@ export class OptimizationValidationService {
     }
 
     // Check for depot/warehouse
-    const depots = nodes.filter(n => n.type === 'warehouse' || n.type === 'depot');
+    const depots = nodes.filter(n => n.type === 'warehouse' || n.type === 'distribution' || n.type === 'factory');
     if (depots.length === 0) {
       errors.push({
         code: 'NO_DEPOT',
-        message: 'At least one depot or warehouse is required',
+        message: 'At least one warehouse, distribution center, or factory is required',
         severity: 'error'
       });
     }
