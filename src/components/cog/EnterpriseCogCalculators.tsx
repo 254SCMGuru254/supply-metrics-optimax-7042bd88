@@ -5,8 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calculator, TrendingUp } from "lucide-react";
-import { bolt as Bolt } from "lucide-react";
+import { MapPin, Calculator, TrendingUp, Bolt } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 
 interface CogPoint {
