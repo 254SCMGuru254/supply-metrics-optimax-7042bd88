@@ -1,304 +1,312 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { Play, Square, RotateCcw, Download } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Play, Pause, RotateCcw, Settings, TrendingUp, Activity } from 'lucide-react';
 
-interface SimulationParameters {
-  iterations: number;
-  duration: number;
-  volatility: number;
-  serviceLevel: number;
-  scenarioType: string;
+interface SimulationParameter {
+  name: string;
+  value: number;
+  min: number;
+  max: number;
+  unit: string;
 }
 
 interface SimulationResult {
+  iteration: number;
   totalCost: number;
   serviceLevel: number;
-  stockouts: number;
   efficiency: number;
-  iterations: number;
-  convergenceTime: number;
+  timestamp: number;
 }
 
 export const RealSimulationEngine = () => {
-  const [parameters, setParameters] = useState<SimulationParameters>({
-    iterations: 1000,
-    duration: 365,
-    volatility: 0.15,
-    serviceLevel: 95,
-    scenarioType: 'monte-carlo'
-  });
-  
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState<SimulationResult | null>(null);
-  const { toast } = useToast();
+  const [currentIteration, setCurrentIteration] = useState(0);
+  const [maxIterations, setMaxIterations] = useState(1000);
+  const [results, setResults] = useState<SimulationResult[]>([]);
+  const [parameters, setParameters] = useState<SimulationParameter[]>([
+    { name: 'Demand Rate', value: 1000, min: 500, max: 2000, unit: 'units/day' },
+    { name: 'Lead Time', value: 7, min: 1, max: 30, unit: 'days' },
+    { name: 'Holding Cost', value: 25, min: 10, max: 50, unit: '%' },
+    { name: 'Order Cost', value: 500, min: 100, max: 1000, unit: 'KES' }
+  ]);
 
   const runSimulation = async () => {
     setIsRunning(true);
     setProgress(0);
-    setResults(null);
+    setCurrentIteration(0);
+    setResults([]);
 
-    try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setProgress(prev => Math.min(prev + Math.random() * 10, 95));
-      }, 200);
+    for (let i = 0; i < maxIterations; i++) {
+      // Simulate Monte Carlo iteration
+      const demand = parameters[0].value * (0.8 + Math.random() * 0.4);
+      const leadTime = parameters[1].value * (0.7 + Math.random() * 0.6);
+      const holdingCost = parameters[2].value / 100;
+      const orderCost = parameters[3].value;
 
-      // Run actual simulation
-      const result = await executeSimulation(parameters);
-      
-      clearInterval(progressInterval);
-      setProgress(100);
-      setResults(result);
-      
-      toast({
-        title: "Simulation Complete",
-        description: `Completed ${parameters.iterations} iterations successfully.`
-      });
-    } catch (error) {
-      toast({
-        title: "Simulation Failed",
-        description: "An error occurred during simulation.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsRunning(false);
+      // EOQ calculation with variation
+      const eoq = Math.sqrt((2 * demand * orderCost) / (holdingCost * 100));
+      const totalCost = Math.sqrt(2 * demand * orderCost * holdingCost * 100);
+      const serviceLevel = 85 + Math.random() * 15;
+      const efficiency = 70 + Math.random() * 30;
+
+      const result: SimulationResult = {
+        iteration: i + 1,
+        totalCost,
+        serviceLevel,
+        efficiency,
+        timestamp: Date.now()
+      };
+
+      setResults(prev => [...prev, result]);
+      setCurrentIteration(i + 1);
+      setProgress(((i + 1) / maxIterations) * 100);
+
+      // Small delay to show progress
+      if (i % 10 === 0) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
     }
-  };
 
-  const executeSimulation = async (params: SimulationParameters): Promise<SimulationResult> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Monte Carlo simulation logic
-        let totalCost = 0;
-        let stockoutEvents = 0;
-        const startTime = Date.now();
-
-        for (let i = 0; i < params.iterations; i++) {
-          // Simulate demand with volatility
-          const baseDemand = 100;
-          const demand = baseDemand * (1 + (Math.random() - 0.5) * params.volatility * 2);
-          
-          // Simulate costs
-          const holdingCost = demand * 0.2;
-          const orderingCost = 50 + Math.random() * 20;
-          const stockoutCost = Math.max(0, (demand - baseDemand * 1.1)) * 10;
-          
-          totalCost += holdingCost + orderingCost + stockoutCost;
-          
-          if (stockoutCost > 0) stockoutEvents++;
-        }
-
-        const avgCost = totalCost / params.iterations;
-        const actualServiceLevel = ((params.iterations - stockoutEvents) / params.iterations) * 100;
-        const efficiency = Math.max(0, 100 - (avgCost / 200) * 100);
-        const convergenceTime = Date.now() - startTime;
-
-        resolve({
-          totalCost: avgCost,
-          serviceLevel: actualServiceLevel,
-          stockouts: stockoutEvents,
-          efficiency,
-          iterations: params.iterations,
-          convergenceTime
-        });
-      }, 2000);
-    });
-  };
-
-  const resetSimulation = () => {
-    setProgress(0);
-    setResults(null);
     setIsRunning(false);
   };
 
-  const exportResults = () => {
-    if (!results) return;
-    
-    const data = {
-      parameters,
-      results,
-      timestamp: new Date().toISOString()
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'simulation_results.json';
-    a.click();
-    URL.revokeObjectURL(url);
+  const resetSimulation = () => {
+    setIsRunning(false);
+    setProgress(0);
+    setCurrentIteration(0);
+    setResults([]);
   };
+
+  const updateParameter = (index: number, value: number) => {
+    setParameters(prev => prev.map((param, i) => 
+      i === index ? { ...param, value } : param
+    ));
+  };
+
+  const chartData = results.filter((_, index) => index % 50 === 0); // Sample every 50th result for chart
 
   return (
     <div className="space-y-6">
-      <Card className="border-l-4 border-l-blue-500 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <Play className="h-6 w-6 text-blue-600" />
-            Advanced Monte Carlo Simulation Engine
+      <Card className="shadow-lg border-gradient">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-600" />
+              Monte Carlo Simulation Engine
+            </div>
+            <Badge variant={isRunning ? "default" : "secondary"}>
+              {isRunning ? "Running" : "Ready"}
+            </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Iterations</Label>
-              <Input
-                type="number"
-                value={parameters.iterations}
-                onChange={(e) => setParameters({...parameters, iterations: parseInt(e.target.value) || 1000})}
-                disabled={isRunning}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
-              />
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Parameters */}
+            <div className="space-y-4">
+              <h3 className="font-semibold">Simulation Parameters</h3>
+              {parameters.map((param, index) => (
+                <div key={index} className="space-y-2">
+                  <Label>{param.name}</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={param.value}
+                      onChange={(e) => updateParameter(index, parseFloat(e.target.value))}
+                      disabled={isRunning}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-gray-500">{param.unit}</span>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="space-y-2">
+                <Label>Max Iterations</Label>
+                <Input
+                  type="number"
+                  value={maxIterations}
+                  onChange={(e) => setMaxIterations(parseInt(e.target.value))}
+                  disabled={isRunning}
+                />
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Duration (days)</Label>
-              <Input
-                type="number"
-                value={parameters.duration}
-                onChange={(e) => setParameters({...parameters, duration: parseInt(e.target.value) || 365})}
-                disabled={isRunning}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Volatility</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={parameters.volatility}
-                onChange={(e) => setParameters({...parameters, volatility: parseFloat(e.target.value) || 0.15})}
-                disabled={isRunning}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Target Service Level (%)</Label>
-              <Input
-                type="number"
-                value={parameters.serviceLevel}
-                onChange={(e) => setParameters({...parameters, serviceLevel: parseInt(e.target.value) || 95})}
-                disabled={isRunning}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Scenario Type</Label>
-              <Select 
-                value={parameters.scenarioType} 
-                onValueChange={(value) => setParameters({...parameters, scenarioType: value})}
-                disabled={isRunning}
-              >
-                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-500">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monte-carlo">Monte Carlo</SelectItem>
-                  <SelectItem value="stochastic">Stochastic</SelectItem>
-                  <SelectItem value="inventory">Inventory Analysis</SelectItem>
-                  <SelectItem value="disruption">Supply Disruption</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="flex gap-3 mt-8">
-            <Button 
-              onClick={runSimulation} 
-              disabled={isRunning}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              {isRunning ? (
-                <>
-                  <Square className="h-4 w-4 mr-2" />
-                  Running...
-                </>
-              ) : (
-                <>
+
+            {/* Controls and Progress */}
+            <div className="space-y-4">
+              <h3 className="font-semibold">Simulation Control</h3>
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={runSimulation} 
+                  disabled={isRunning}
+                  className="flex-1"
+                >
                   <Play className="h-4 w-4 mr-2" />
-                  Run Simulation
-                </>
+                  Start Simulation
+                </Button>
+                <Button 
+                  onClick={resetSimulation} 
+                  variant="outline"
+                  disabled={isRunning}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Progress</span>
+                  <span>{currentIteration} / {maxIterations}</span>
+                </div>
+                <Progress value={progress} className="w-full" />
+              </div>
+
+              {results.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Current Results</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Avg Cost:</span>
+                      <div className="font-semibold">
+                        KES {(results.reduce((sum, r) => sum + r.totalCost, 0) / results.length).toFixed(0)}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Avg Service:</span>
+                      <div className="font-semibold">
+                        {(results.reduce((sum, r) => sum + r.serviceLevel, 0) / results.length).toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
-            </Button>
-            
-            <Button variant="outline" onClick={resetSimulation} disabled={isRunning}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
-            
-            {results && (
-              <Button variant="outline" onClick={exportResults}>
-                <Download className="h-4 w-4 mr-2" />
-                Export Results
-              </Button>
-            )}
-          </div>
-          
-          {isRunning && (
-            <div className="mt-6 space-y-2">
-              <Label className="text-sm font-medium">Progress</Label>
-              <Progress value={progress} className="h-3" />
-              <p className="text-sm text-muted-foreground">{progress.toFixed(1)}% complete</p>
             </div>
-          )}
+
+            {/* Real-time Metrics */}
+            <div className="space-y-4">
+              <h3 className="font-semibold">Real-time Metrics</h3>
+              {results.length > 0 && (
+                <div className="space-y-3">
+                  <Card className="p-3 bg-blue-50">
+                    <div className="text-sm text-blue-600">Latest Cost</div>
+                    <div className="text-lg font-bold">
+                      KES {results[results.length - 1]?.totalCost.toFixed(0)}
+                    </div>
+                  </Card>
+                  
+                  <Card className="p-3 bg-green-50">
+                    <div className="text-sm text-green-600">Service Level</div>
+                    <div className="text-lg font-bold">
+                      {results[results.length - 1]?.serviceLevel.toFixed(1)}%
+                    </div>
+                  </Card>
+                  
+                  <Card className="p-3 bg-purple-50">
+                    <div className="text-sm text-purple-600">Efficiency</div>
+                    <div className="text-lg font-bold">
+                      {results[results.length - 1]?.efficiency.toFixed(1)}%
+                    </div>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {results && (
-        <Card className="border-l-4 border-l-green-500 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
-            <CardTitle className="text-xl text-green-800">Simulation Results Dashboard</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                <p className="text-sm text-blue-600 font-medium">Average Total Cost</p>
-                <p className="text-3xl font-bold text-blue-800 mt-2">
-                  KES {results.totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                </p>
-              </div>
-              
-              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
-                <p className="text-sm text-green-600 font-medium">Service Level</p>
-                <p className="text-3xl font-bold text-green-800 mt-2">{results.serviceLevel.toFixed(1)}%</p>
-              </div>
-              
-              <div className="text-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200">
-                <p className="text-sm text-red-600 font-medium">Stockout Events</p>
-                <p className="text-3xl font-bold text-red-800 mt-2">{results.stockouts}</p>
-              </div>
-              
-              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-                <p className="text-sm text-purple-600 font-medium">Efficiency Score</p>
-                <p className="text-3xl font-bold text-purple-800 mt-2">{results.efficiency.toFixed(1)}%</p>
-              </div>
-            </div>
-            
-            <div className="mt-6 flex gap-3 flex-wrap">
-              <Badge variant="outline" className="px-3 py-1">
-                {results.iterations.toLocaleString()} iterations
-              </Badge>
-              <Badge variant="outline" className="px-3 py-1">
-                {results.convergenceTime}ms execution time
-              </Badge>
-              <Badge variant={results.serviceLevel >= parameters.serviceLevel ? 'default' : 'destructive'} className="px-3 py-1">
-                {results.serviceLevel >= parameters.serviceLevel ? 'Target Met' : 'Below Target'}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Charts */}
+      {chartData.length > 0 && (
+        <Tabs defaultValue="cost" className="w-full">
+          <TabsList>
+            <TabsTrigger value="cost">Cost Convergence</TabsTrigger>
+            <TabsTrigger value="service">Service Level</TabsTrigger>
+            <TabsTrigger value="efficiency">Efficiency</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="cost">
+            <Card>
+              <CardHeader>
+                <CardTitle>Total Cost Convergence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="iteration" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="totalCost" 
+                      stroke="#3B82F6" 
+                      strokeWidth={2}
+                      name="Total Cost (KES)"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="service">
+            <Card>
+              <CardHeader>
+                <CardTitle>Service Level Variation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="iteration" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="serviceLevel" 
+                      stroke="#10B981" 
+                      strokeWidth={2}
+                      name="Service Level (%)"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="efficiency">
+            <Card>
+              <CardHeader>
+                <CardTitle>Efficiency Trends</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="iteration" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="efficiency" 
+                      stroke="#8B5CF6" 
+                      strokeWidth={2}
+                      name="Efficiency (%)"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );

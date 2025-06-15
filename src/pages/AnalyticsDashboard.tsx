@@ -5,350 +5,289 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  DollarSign, 
-  Package, 
-  Truck,
-  BarChart3,
-  Target,
-  Clock,
-  Users
-} from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, TrendingDown, DollarSign, Package, Truck, MapPin, Activity, Download, RefreshCw } from 'lucide-react';
 
-export default function AnalyticsDashboard() {
-  const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
-  const [activeMetrics, setActiveMetrics] = useState('overview');
+const analyticsData = {
+  kpis: [
+    { name: 'Total Cost Reduction', value: '24%', trend: 'up', color: 'text-green-600' },
+    { name: 'Service Level', value: '96.8%', trend: 'up', color: 'text-blue-600' },
+    { name: 'Inventory Turnover', value: '8.2x', trend: 'up', color: 'text-purple-600' },
+    { name: 'Transport Efficiency', value: '89%', trend: 'down', color: 'text-orange-600' }
+  ],
+  costBreakdown: [
+    { name: 'Transportation', value: 45, color: '#3B82F6' },
+    { name: 'Warehousing', value: 25, color: '#10B981' },
+    { name: 'Inventory Holding', value: 20, color: '#F59E0B' },
+    { name: 'Administrative', value: 10, color: '#8B5CF6' }
+  ],
+  performanceTrends: [
+    { month: 'Jan', cost: 120000, service: 94, efficiency: 85 },
+    { month: 'Feb', cost: 115000, service: 95, efficiency: 87 },
+    { month: 'Mar', cost: 108000, service: 96, efficiency: 89 },
+    { month: 'Apr', cost: 102000, service: 97, efficiency: 91 },
+    { month: 'May', cost: 98000, service: 96, efficiency: 89 },
+    { month: 'Jun', cost: 94000, service: 97, efficiency: 92 }
+  ],
+  routeOptimization: [
+    { route: 'Nairobi-Mombasa', distance: 485, cost: 15000, efficiency: 92 },
+    { route: 'Nairobi-Kisumu', distance: 345, cost: 12000, efficiency: 89 },
+    { route: 'Mombasa-Nakuru', distance: 520, cost: 18000, efficiency: 87 },
+    { route: 'Kisumu-Eldoret', distance: 210, cost: 8000, efficiency: 94 }
+  ],
+  inventoryMetrics: [
+    { product: 'Tea', stock: 850, demand: 1000, turnover: 8.5 },
+    { product: 'Coffee', stock: 450, demand: 500, turnover: 9.2 },
+    { product: 'Flowers', stock: 200, demand: 250, turnover: 12.1 },
+    { product: 'Vegetables', stock: 300, demand: 400, turnover: 15.3 }
+  ]
+};
 
-  // Sample data for different charts
-  const performanceData = [
-    { name: 'Jan', efficiency: 85, cost: 120000, volume: 450 },
-    { name: 'Feb', efficiency: 88, cost: 115000, volume: 480 },
-    { name: 'Mar', efficiency: 92, cost: 108000, volume: 520 },
-    { name: 'Apr', efficiency: 89, cost: 112000, volume: 510 },
-    { name: 'May', efficiency: 94, cost: 105000, volume: 580 },
-    { name: 'Jun', efficiency: 96, cost: 98000, volume: 620 }
-  ];
+export const AnalyticsDashboard = () => {
+  const [activeMetric, setActiveMetric] = useState('overview');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const distributionData = [
-    { name: 'Road Transport', value: 45, color: '#3B82F6' },
-    { name: 'Rail Transport', value: 25, color: '#10B981' },
-    { name: 'Air Transport', value: 15, color: '#F59E0B' },
-    { name: 'Sea Transport', value: 15, color: '#8B5CF6' }
-  ];
-
-  const kpiData = [
-    {
-      title: 'Total Cost Savings',
-      value: 'KES 2.4M',
-      change: '+12.5%',
-      trend: 'up',
-      icon: DollarSign,
-      description: 'Month over month improvement'
-    },
-    {
-      title: 'Supply Chain Efficiency',
-      value: '94.2%',
-      change: '+3.8%',
-      trend: 'up',
-      icon: Activity,
-      description: 'Overall network performance'
-    },
-    {
-      title: 'Inventory Turnover',
-      value: '8.4x',
-      change: '+0.6x',
-      trend: 'up',
-      icon: Package,
-      description: 'Annual turnover rate'
-    },
-    {
-      title: 'Delivery Performance',
-      value: '98.1%',
-      change: '-0.3%',
-      trend: 'down',
-      icon: Truck,
-      description: 'On-time delivery rate'
-    }
-  ];
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    // Simulate data refresh
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsRefreshing(false);
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Analytics Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Real-time insights and performance metrics for your supply chain optimization
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {['24h', '7d', '30d', '90d'].map((range) => (
-            <Button
-              key={range}
-              variant={selectedTimeRange === range ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedTimeRange(range)}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Analytics Dashboard
+            </h1>
+            <p className="text-gray-600 mt-2">Real-time supply chain performance insights</p>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              onClick={refreshData} 
+              variant="outline"
+              disabled={isRefreshing}
+              className="flex items-center gap-2"
             >
-              {range}
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh Data
             </Button>
-          ))}
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpiData.map((kpi, index) => {
-          const Icon = kpi.icon;
-          return (
-            <Card key={index} className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {analyticsData.kpis.map((kpi, index) => (
+            <Card key={index} className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
-                    <p className="text-3xl font-bold">{kpi.value}</p>
-                    <div className="flex items-center gap-2">
-                      {kpi.trend === 'up' ? (
-                        <TrendingUp className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-red-500" />
-                      )}
-                      <span className={`text-sm font-medium ${
-                        kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                      }`}>
-                        {kpi.change}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{kpi.description}</p>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">{kpi.name}</p>
+                    <p className={`text-3xl font-bold ${kpi.color}`}>{kpi.value}</p>
                   </div>
-                  <div className="h-12 w-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center">
-                    <Icon className="h-6 w-6 text-blue-600" />
+                  <div className={`p-3 rounded-full ${kpi.trend === 'up' ? 'bg-green-100' : 'bg-red-100'}`}>
+                    {kpi.trend === 'up' ? (
+                      <TrendingUp className="h-6 w-6 text-green-600" />
+                    ) : (
+                      <TrendingDown className="h-6 w-6 text-red-600" />
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
-      </div>
+          ))}
+        </div>
 
-      {/* Main Analytics Tabs */}
-      <Tabs value={activeMetrics} onValueChange={setActiveMetrics}>
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="distribution">Distribution</TabsTrigger>
-          <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
-        </TabsList>
+        {/* Main Analytics Tabs */}
+        <Tabs value={activeMetric} onValueChange={setActiveMetric} className="space-y-6">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="costs">Cost Analysis</TabsTrigger>
+            <TabsTrigger value="routes">Route Performance</TabsTrigger>
+            <TabsTrigger value="inventory">Inventory Metrics</TabsTrigger>
+            <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Performance Trends */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-blue-600" />
+                    Performance Trends
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={analyticsData.performanceTrends}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip />
+                      <Line 
+                        yAxisId="left"
+                        type="monotone" 
+                        dataKey="cost" 
+                        stroke="#3B82F6" 
+                        strokeWidth={3}
+                        name="Cost (KES)"
+                      />
+                      <Line 
+                        yAxisId="right"
+                        type="monotone" 
+                        dataKey="service" 
+                        stroke="#10B981" 
+                        strokeWidth={3}
+                        name="Service Level (%)"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Cost Breakdown */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-green-600" />
+                    Cost Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {analyticsData.costBreakdown.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="costs" className="space-y-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Supply Chain Performance Trends
-                </CardTitle>
+                <CardTitle>Detailed Cost Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={performanceData}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={analyticsData.performanceTrends}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="efficiency" 
-                      stroke="#3B82F6" 
-                      strokeWidth={3}
-                      name="Efficiency %"
-                    />
-                  </LineChart>
+                    <Bar dataKey="cost" fill="#3B82F6" name="Total Cost (KES)" />
+                  </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+          </TabsContent>
 
+          <TabsContent value="routes" className="space-y-6">
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Transport Mode Distribution
+                  <Truck className="h-5 w-5 text-orange-600" />
+                  Route Performance Metrics
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={distributionData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {distributionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-3">Route</th>
+                        <th className="text-left p-3">Distance (km)</th>
+                        <th className="text-left p-3">Cost (KES)</th>
+                        <th className="text-left p-3">Efficiency</th>
+                        <th className="text-left p-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData.routeOptimization.map((route, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-3 font-medium">{route.route}</td>
+                          <td className="p-3">{route.distance}</td>
+                          <td className="p-3">{route.cost.toLocaleString()}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <Progress value={route.efficiency} className="w-20" />
+                              <span className="text-sm">{route.efficiency}%</span>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <Badge variant={route.efficiency > 90 ? "default" : "secondary"}>
+                              {route.efficiency > 90 ? "Optimal" : "Good"}
+                            </Badge>
+                          </td>
+                        </tr>
                       ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                    </tbody>
+                  </table>
+                </div>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="performance" className="space-y-6">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Detailed Performance Metrics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="volume" fill="#3B82F6" name="Volume (units)" />
-                  <Bar dataKey="efficiency" fill="#10B981" name="Efficiency %" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="distribution" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <TabsContent value="inventory" className="space-y-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Regional Performance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[
-                  { region: 'Nairobi Region', performance: 96, change: '+2.1%' },
-                  { region: 'Mombasa Region', performance: 92, change: '+1.8%' },
-                  { region: 'Kisumu Region', performance: 88, change: '+0.5%' },
-                  { region: 'Nakuru Region', performance: 85, change: '-0.3%' }
-                ].map((region, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{region.region}</span>
-                      <span className="text-sm text-muted-foreground">{region.change}</span>
-                    </div>
-                    <Progress value={region.performance} className="h-2" />
-                    <div className="text-right text-sm font-medium">{region.performance}%</div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Cost Analysis</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5 text-purple-600" />
+                  Inventory Performance
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={performanceData}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={analyticsData.inventoryMetrics}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="product" />
                     <YAxis />
                     <Tooltip />
-                    <Line 
-                      type="monotone" 
-                      dataKey="cost" 
-                      stroke="#F59E0B" 
-                      strokeWidth={3}
-                      name="Cost (KES)"
-                    />
-                  </LineChart>
+                    <Bar dataKey="turnover" fill="#8B5CF6" name="Turnover Rate" />
+                  </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="forecasting" className="space-y-6">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Demand Forecasting Models
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {[
-                  { model: 'ARIMA', accuracy: '94.2%', mape: '5.8%' },
-                  { model: 'LSTM Neural Network', accuracy: '96.1%', mape: '3.9%' },
-                  { model: 'Prophet', accuracy: '92.7%', mape: '7.3%' }
-                ].map((model, index) => (
-                  <Card key={index} className="border-l-4 border-l-green-500">
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold">{model.model}</h3>
-                      <div className="mt-2 space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Accuracy:</span>
-                          <span className="font-medium">{model.accuracy}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">MAPE:</span>
-                          <span className="font-medium">{model.mape}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="volume" 
-                    stroke="#3B82F6" 
-                    strokeWidth={3}
-                    name="Actual Volume"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="efficiency" 
-                    stroke="#10B981" 
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    name="Forecasted Efficiency"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="forecasting" className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>Demand Forecasting</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <TrendingUp className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">Advanced Forecasting Models</h3>
+                  <p className="text-gray-500">AI-powered demand forecasting coming soon</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
-}
+};
