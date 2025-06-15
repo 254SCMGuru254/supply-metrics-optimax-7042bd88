@@ -19,7 +19,7 @@ const Pricing = () => {
       features: [
         "Route optimization (up to 20 stops)",
         "Basic analytics and reporting",
-        "M-Pesa payment integration",
+        // Removed "M-Pesa payment integration"
         "Email support",
         "Up to 500 data points",
         "Basic optimization algorithms"
@@ -36,7 +36,7 @@ const Pricing = () => {
         "Network optimization",
         "Center of gravity analysis",
         "Advanced analytics and forecasting",
-        "M-Pesa payment integration",
+        // Removed "M-Pesa payment integration"
         "Priority email and chat support",
         "Up to 5,000 data points",
         "Multi-echelon inventory optimization"
