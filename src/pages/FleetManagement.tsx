@@ -1,14 +1,14 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { FleetManagementContent } from "@/components/fleet-management/FleetManagementContent";
+import { ComprehensiveFleetManagement } from "@/components/fleet-management/ComprehensiveFleetManagement";
 import { Truck, TrendingUp, Settings, BarChart3, FileText, Upload } from "lucide-react";
 
 const FleetManagement = () => {
-  const [activeTab, setActiveTab] = useState("management");
+  const [activeTab, setActiveTab] = useState("optimization");
   const { toast } = useToast();
 
   const handleImportData = () => {
@@ -38,8 +38,9 @@ const FleetManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-8">
+        <TabsList className="grid grid-cols-5 mb-8">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="optimization">Fleet Optimization</TabsTrigger>
           <TabsTrigger value="management">Fleet Management</TabsTrigger>
           <TabsTrigger value="analytics">Fleet Analytics</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
@@ -133,6 +134,10 @@ const FleetManagement = () => {
               </div>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="optimization">
+          <ComprehensiveFleetManagement />
         </TabsContent>
 
         <TabsContent value="management">
