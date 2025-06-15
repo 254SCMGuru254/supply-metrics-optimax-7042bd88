@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Play, Square, Settings, Activity } from "lucide-react";
+import { Play, Settings, Activity } from "lucide-react";
 
 interface OptimizationControlsProps {
   onOptimize: (params: any) => void;
@@ -129,7 +130,7 @@ export const OptimizationControls = ({ onOptimize, isOptimizing, onStop }: Optim
           
           {isOptimizing && onStop && (
             <Button variant="outline" onClick={onStop}>
-              <Square className="h-4 w-4 mr-2" />
+              <div className="h-4 w-4 mr-2 bg-current"></div>
               Stop
             </Button>
           )}
