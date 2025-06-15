@@ -1,9 +1,9 @@
+
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calculator } from "lucide-react";
-import { bolt as Bolt } from "lucide-react";
+import { MapPin, Calculator, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CogDemandPointsGrid } from "./CogDemandPointsGrid";

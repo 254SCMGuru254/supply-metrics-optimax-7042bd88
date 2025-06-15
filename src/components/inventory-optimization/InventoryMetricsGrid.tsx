@@ -1,15 +1,24 @@
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { 
+  TrendingUp, 
+  AlertTriangle, 
+  DollarSign, 
+  Package, 
+  Clock, 
+  Target 
+} from "lucide-react";
 
-interface Metric {
+interface MetricCardProps {
   title: string;
-  value: string;
-  change: string;
-  icon: React.ElementType;
-  trend: "up" | "down";
+  value: string | number;
+  change?: string;
+  trend?: "up" | "down" | "stable";
+  icon: React.ComponentType<any>;
+  color?: string;
 }
 
 const metrics: Metric[] = [
