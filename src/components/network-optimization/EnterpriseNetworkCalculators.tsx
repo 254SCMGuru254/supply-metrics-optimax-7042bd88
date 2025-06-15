@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Zap } from "lucide-react";
+import { Network } from "lucide-react";
 
 const formulas = [
   {
@@ -87,7 +88,7 @@ export function EnterpriseNetworkCalculators() {
             <Card className="my-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
+                  <Network className="h-5 w-5" />
                   {formula.name}
                 </CardTitle>
               </CardHeader>

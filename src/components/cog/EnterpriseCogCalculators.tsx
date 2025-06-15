@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calculator, Zap, Bolt } from "lucide-react";
+import { MapPin, Calculator, Settings, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CogDemandPointsGrid } from "./CogDemandPointsGrid";
@@ -331,7 +331,7 @@ export const EnterpriseCogCalculators = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bolt className="h-5 w-5" />
+                <Settings className="h-5 w-5" />
                 Weighted Average Center of Gravity
               </CardTitle>
             </CardHeader>
@@ -363,7 +363,7 @@ export const EnterpriseCogCalculators = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bolt className="h-5 w-5" />
+                <Activity className="h-5 w-5" />
                 Economic Center of Gravity
               </CardTitle>
             </CardHeader>
