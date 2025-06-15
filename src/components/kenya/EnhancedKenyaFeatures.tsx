@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { TreePine, Coffee, Flower, Factory, Truck, MapPin } from 'lucide-react';
+import { Zap, Factory, Truck, MapPin } from 'lucide-react';
 
 interface IndustryAnalysis {
   industry: string;
@@ -76,21 +77,21 @@ export function EnhancedKenyaFeatures() {
     { 
       id: 'tea', 
       name: 'Tea Industry', 
-      icon: TreePine, 
+      icon: Zap, 
       exportValue: 'KES 181.69B',
       challenges: ['Quality consistency', 'Price volatility', 'Logistics efficiency']
     },
     { 
       id: 'coffee', 
       name: 'Coffee Industry', 
-      icon: Coffee, 
+      icon: Zap, 
       exportValue: 'KES 31.48B',
       challenges: ['Climate change', 'Market access', 'Aging farmers']
     },
     { 
       id: 'floriculture', 
       name: 'Floriculture Industry', 
-      icon: Flower, 
+      icon: Zap, 
       exportValue: 'KES 108.76B',
       challenges: ['Pest control', 'Cold chain logistics', 'Market competition']
     },
