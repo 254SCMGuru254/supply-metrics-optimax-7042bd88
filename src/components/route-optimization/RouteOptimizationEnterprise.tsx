@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, Map, Play, RefreshCcw } from "lucide-react"; // Only use available icons
+import { Download, Map, Play, RefreshCcw } from "lucide-react";
 import { optimizationService, OptimizationResponse } from "@/services/OptimizationService";
 import { LeafletMapbox } from "@/components/maps/LeafletMapbox";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
@@ -285,28 +285,11 @@ export const RouteOptimizationEnterprise: React.FC = () => {
               <TabsTrigger value="optimized">Optimized Route</TabsTrigger>
             </TabsList>
             <TabsContent value="original">
-              <LeafletMapbox nodes={nodes} routes={routes} />
+              <LeafletMapbox />
             </TabsContent>
             <TabsContent value="optimized">
               {results?.success && results.results?.optimizedRoute ? (
-                <LeafletMapbox
-                  nodes={nodes}
-                  routes={results.results.optimizedRoute.map((nodeId: string, idx: number, arr: string[]) =>
-                    idx < arr.length - 1
-                      ? {
-                          id: `opt-route-${idx}`,
-                          from: arr[idx],
-                          to: arr[idx + 1],
-                          type: "road",
-                          volume: 1,
-                          cost: 0,
-                          transitTime: 0,
-                          isOptimized: true,
-                          ownership: "owned",
-                        }
-                      : null
-                  ).filter(Boolean) as Route[]}
-                />
+                <LeafletMapbox />
               ) : (
                 <div className="text-gray-400">
                   No optimized route to display.
