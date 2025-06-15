@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +10,8 @@ import { LeafletMapbox } from "@/components/maps/LeafletMapbox";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
 import Papa from "papaparse";
 import type { Node, Route } from "@/components/map/MapTypes";
+import { ErrorsTab } from "@/components/route-optimization/ErrorsTab";
+import { ErrorHandlingService } from "@/services/ErrorHandlingService";
 
 const ROUTE_ALGORITHMS = [
   {
@@ -58,15 +59,16 @@ export const RouteOptimizationEnterprise: React.FC = () => {
   const [projectId, setProjectId] = useState<string>("route-optimization-project");
   const [mapTab, setMapTab] = useState<"original" | "optimized">("optimized");
 
-  // Fetch route and node data (stub: in prod, replace with real integration)
+  const errorHandler = ErrorHandlingService.getInstance();
+
+  // Fetch route and node data (add ownership for Node)
   useEffect(() => {
-    // TODO: Load from db/api for real enterprise use
     setNodes([
-      { id: "nairobi-hub", name: "Nairobi Hub", type: "warehouse", latitude: -1.2921, longitude: 36.8219 },
-      { id: "mombasa-port", name: "Mombasa Port", type: "port", latitude: -4.0435, longitude: 39.6682 },
-      { id: "kisumu-customer", name: "Kisumu Customer", type: "customer", latitude: -0.0917, longitude: 34.7578 },
-      { id: "nakuru-retail", name: "Nakuru Retail", type: "retail", latitude: -0.2833, longitude: 36.0667 },
-      { id: "eldoret-customer", name: "Eldoret Customer", type: "customer", latitude: 0.5167, longitude: 35.2667 },
+      { id: "nairobi-hub", name: "Nairobi Hub", type: "warehouse", latitude: -1.2921, longitude: 36.8219, ownership: "owned" },
+      { id: "mombasa-port", name: "Mombasa Port", type: "port", latitude: -4.0435, longitude: 39.6682, ownership: "owned" },
+      { id: "kisumu-customer", name: "Kisumu Customer", type: "customer", latitude: -0.0917, longitude: 34.7578, ownership: "owned" },
+      { id: "nakuru-retail", name: "Nakuru Retail", type: "retail", latitude: -0.2833, longitude: 36.0667, ownership: "owned" },
+      { id: "eldoret-customer", name: "Eldoret Customer", type: "customer", latitude: 0.5167, longitude: 35.2667, ownership: "owned" },
     ]);
     setRoutes([
       { id: "route-1", from: "nairobi-hub", to: "mombasa-port", type: "road", volume: 120, cost: 15000, transitTime: 8, isOptimized: false, ownership: "owned" },
@@ -178,85 +180,97 @@ export const RouteOptimizationEnterprise: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex gap-3 items-center">
-            <Play className="w-5 h-5" /> Enterprise Route Optimization Suite
+            <Play className="w-5 h-5" />
+            Enterprise Route Optimization Suite
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1">
-              <Tabs defaultValue={activeAlgo} onValueChange={setActiveAlgo}>
-                <TabsList>
-                  {ROUTE_ALGORITHMS.map(algo => (
-                    <TabsTrigger key={algo.id} value={algo.id}>{algo.name}</TabsTrigger>
-                  ))}
-                </TabsList>
-                {ROUTE_ALGORITHMS.map(algo => (
-                  <TabsContent key={algo.id} value={algo.id}>
-                    <form
-                      className="space-y-4"
-                      onSubmit={e => {
-                        e.preventDefault();
-                        handleOptimize();
-                      }}
-                    >
-                      {algo.params.map(param => (
-                        <div key={param.name}>
-                          <Label>{param.label}</Label>
-                          <Input
-                            type={param.type}
-                            value={params[param.name]}
-                            onChange={e => handleParamChange(param.name, param.type === "number" ? Number(e.target.value) : e.target.value)}
-                          />
-                        </div>
+          <Tabs defaultValue="optimize" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="optimize">Optimization</TabsTrigger>
+              <TabsTrigger value="errors">Errors</TabsTrigger>
+            </TabsList>
+            <TabsContent value="optimize">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-1">
+                  <Tabs defaultValue={activeAlgo} onValueChange={setActiveAlgo}>
+                    <TabsList>
+                      {ROUTE_ALGORITHMS.map(algo => (
+                        <TabsTrigger key={algo.id} value={algo.id}>{algo.name}</TabsTrigger>
                       ))}
-                      <Button type="submit" className="mt-2" disabled={isOptimizing}>
-                        <Play className="inline w-4 h-4 mr-1" />
-                        {isOptimizing ? "Optimizing..." : "Run Optimization"}
-                      </Button>
-                    </form>
-                  </TabsContent>
-                ))}
-              </Tabs>
-              <div className="mt-4 flex gap-3">
-                <Button variant="outline" onClick={exportCsv} disabled={!results}>
-                  <Download className="w-4 h-4 mr-1" /> Export CSV
-                </Button>
-                <Button variant="outline" onClick={exportResultJson} disabled={!results}>
-                  <ClipboardCopy className="w-4 h-4 mr-1" /> Export JSON
-                </Button>
-                <ExportPdfButton exportId="routeopt-report" fileName={`route_optimization_${activeAlgo}`} />
+                    </TabsList>
+                    {ROUTE_ALGORITHMS.map(algo => (
+                      <TabsContent key={algo.id} value={algo.id}>
+                        <form
+                          className="space-y-4"
+                          onSubmit={e => {
+                            e.preventDefault();
+                            handleOptimize();
+                          }}
+                        >
+                          {algo.params.map(param => (
+                            <div key={param.name}>
+                              <Label>{param.label}</Label>
+                              <Input
+                                type={param.type}
+                                value={params[param.name]}
+                                onChange={e => handleParamChange(param.name, param.type === "number" ? Number(e.target.value) : e.target.value)}
+                              />
+                            </div>
+                          ))}
+                          <Button type="submit" className="mt-2" disabled={isOptimizing}>
+                            <Play className="inline w-4 h-4 mr-1" />
+                            {isOptimizing ? "Optimizing..." : "Run Optimization"}
+                          </Button>
+                        </form>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                  <div className="mt-4 flex gap-3">
+                    <Button variant="outline" onClick={exportCsv} disabled={!results}>
+                      <Download className="w-4 h-4 mr-1" /> Export CSV
+                    </Button>
+                    <Button variant="outline" onClick={exportResultJson} disabled={!results}>
+                      <ClipboardCopy className="w-4 h-4 mr-1" /> Export JSON
+                    </Button>
+                    <ExportPdfButton exportId="routeopt-report" fileName={`route_optimization_${activeAlgo}`} />
+                  </div>
+                </div>
+                <div className="flex-1" id="routeopt-report">
+                  <Card className="border border-blue-300 bg-blue-50">
+                    <CardHeader>
+                      <CardTitle className="flex gap-3 items-center">
+                        <List className="w-4 h-4" />
+                        Optimization Results
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {results?.success && results.results?.optimizedRoute
+                        ? (
+                          <div>
+                            <h4 className="font-semibold mt-2 mb-1">Optimized Route Sequence</h4>
+                            <ol className="list-decimal ml-5">
+                              {results.results.optimizedRoute.map((nodeId: string, idx: number) =>
+                                <li key={nodeId + idx}>{nodes.find(n => n.id === nodeId)?.name || nodeId}</li>
+                              )}
+                            </ol>
+                            <div className="mt-2">
+                              <span className="block">Total Distance: <b>{results.results.totalDistance ?? "--"}</b> km</span>
+                              <span className="block">Total Cost: <b>{results.results.totalCost ?? "--"}</b></span>
+                              <span className="block">Service Level: <b>{results.results.metrics?.serviceLevel ?? "--"}</b></span>
+                            </div>
+                          </div>
+                        ) : <div className="text-gray-500">{results ? "No valid results. Try running an optimization." : "Results will appear here..."}</div>
+                      }
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </div>
-            <div className="flex-1" id="routeopt-report">
-              <Card className="border border-blue-300 bg-blue-50">
-                <CardHeader>
-                  <CardTitle className="flex gap-3 items-center">
-                    <List className="w-4 h-4" />
-                    Optimization Results
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {results?.success && results.results?.optimizedRoute
-                    ? (
-                      <div>
-                        <h4 className="font-semibold mt-2 mb-1">Optimized Route Sequence</h4>
-                        <ol className="list-decimal ml-5">
-                          {results.results.optimizedRoute.map((nodeId: string, idx: number) =>
-                            <li key={nodeId + idx}>{nodes.find(n => n.id === nodeId)?.name || nodeId}</li>
-                          )}
-                        </ol>
-                        <div className="mt-2">
-                          <span className="block">Total Distance: <b>{results.results.totalDistance ?? "--"}</b> km</span>
-                          <span className="block">Total Cost: <b>{results.results.totalCost ?? "--"}</b></span>
-                          <span className="block">Service Level: <b>{results.results.metrics?.serviceLevel ?? "--"}</b></span>
-                        </div>
-                      </div>
-                    ) : <div className="text-gray-500">{results ? "No valid results. Try running an optimization." : "Results will appear here..."}</div>
-                  }
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+            </TabsContent>
+            <TabsContent value="errors">
+              <ErrorsTab errorSummary={errorHandler.getErrorSummary()} errorHandler={errorHandler} />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
