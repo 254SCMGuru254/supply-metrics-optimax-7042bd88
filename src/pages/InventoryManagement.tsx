@@ -1,12 +1,10 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-// REMOVED: import { AlertTriangle, Package, TrendingUp, Zap, DollarSign, BarChart3, Bolt } from "lucide-react";
-// REPLACED with import only the icons actually used and valid
-import { AlertTriangle, Package, TrendingUp, DollarSign, BarChart3, Bolt } from "lucide-react";
+import { AlertTriangle, Package, TrendingUp, DollarSign, BarChart3 } from "lucide-react";
+import { bolt as Bolt } from "lucide-react";
 import { InventoryOptimizationContent } from "@/components/inventory-optimization/InventoryOptimizationContent";
 import { EOQCalculator } from "@/components/inventory-optimization/EOQCalculator";
 import { SafetyStockCalculator } from "@/components/inventory-optimization/SafetyStockCalculator";
