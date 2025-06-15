@@ -30,7 +30,7 @@ export const PayPalSubscriptionButton: React.FC<PayPalSubscriptionButtonProps> =
   const { toast } = useToast();
 
   const initialOptions = {
-    "client-id": "YOUR_PAYPAL_CLIENT_ID", // This should be set as a Supabase secret
+    clientId: "YOUR_PAYPAL_CLIENT_ID", // This should be set as a Supabase secret
     currency: "USD",
     intent: "subscription",
     vault: true

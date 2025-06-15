@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PricingTable } from "@/components/pricing/PricingTable";
 import { PricingEngine } from "@/components/pricing/PricingEngine";
 import { PayPalSubscriptionButton } from "@/components/subscription/PayPalSubscriptionButton";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -18,7 +18,7 @@ const Pricing = () => {
   const pricingTiers = [
     {
       name: "Starter",
-      price: "Ksh 25,000",
+      price: "Ksh 3,000",
       period: "month",
       description: "Perfect for small businesses getting started with supply chain optimization.",
       features: [
@@ -29,11 +29,11 @@ const Pricing = () => {
         "Basic optimization algorithms"
       ],
       planTier: "starter" as const,
-      monthlyPrice: 25000
+      monthlyPrice: 3000
     },
     {
       name: "Business",
-      price: "Ksh 75,000",
+      price: "Ksh 7,500",
       period: "month",
       description: "For growing companies needing advanced features and analytics.",
       features: [
@@ -47,11 +47,11 @@ const Pricing = () => {
       ],
       popular: true,
       planTier: "business" as const,
-      monthlyPrice: 75000
+      monthlyPrice: 7500
     },
     {
       name: "Enterprise",
-      price: "Ksh 200,000",
+      price: "Ksh 15,000",
       period: "month",
       description: "For large enterprises requiring comprehensive supply chain solutions.",
       features: [
@@ -66,7 +66,7 @@ const Pricing = () => {
         "Advanced AI and machine learning"
       ],
       planTier: "enterprise" as const,
-      monthlyPrice: 200000
+      monthlyPrice: 15000
     }
   ];
 
@@ -124,7 +124,7 @@ const Pricing = () => {
               </div>
             </div>
             <p className="text-sm mt-4 text-muted-foreground">
-              Our local pricing represents a 60-75% discount compared to international rates, 
+              Our local pricing represents a 90-98% discount compared to international rates, 
               making enterprise-grade supply chain optimization accessible to Kenyan businesses.
             </p>
           </div>
