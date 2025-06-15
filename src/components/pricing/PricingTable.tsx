@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 interface PricingTier {
   name: string;
   price: string;
+  usdPrice?: string;
   period?: string;
   description: string;
   features: string[];
@@ -44,9 +45,14 @@ export const PricingTable = ({ tiers, region = 'standard' }: PricingTableProps) 
                 </span>
               )}
             </CardTitle>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold">{tier.price}</span>
-              {tier.period && <span className="text-muted-foreground">/{tier.period}</span>}
+            <div className="flex flex-col items-start gap-1">
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-bold">{tier.price}</span>
+                {tier.period && <span className="text-muted-foreground">/{tier.period}</span>}
+              </div>
+              {tier.usdPrice && (
+                <span className="text-sm text-muted-foreground">({tier.usdPrice})</span>
+              )}
             </div>
             <CardDescription>{tier.description}</CardDescription>
           </CardHeader>

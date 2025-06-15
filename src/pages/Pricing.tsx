@@ -19,6 +19,7 @@ const Pricing = () => {
     {
       name: "Starter",
       price: "Ksh 3,000",
+      usdPrice: "USD 23.53",
       period: "month",
       description: "Perfect for small businesses getting started with supply chain optimization.",
       features: [
@@ -34,6 +35,7 @@ const Pricing = () => {
     {
       name: "Business",
       price: "Ksh 7,500",
+      usdPrice: "USD 58.82",
       period: "month",
       description: "For growing companies needing advanced features and analytics.",
       features: [
@@ -52,6 +54,7 @@ const Pricing = () => {
     {
       name: "Enterprise",
       price: "Ksh 15,000",
+      usdPrice: "USD 117.65",
       period: "month",
       description: "For large enterprises requiring comprehensive supply chain solutions.",
       features: [
