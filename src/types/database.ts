@@ -1,4 +1,3 @@
-
 import { Node, Route } from "@/components/map/MapTypes";
 
 export type Json =
@@ -214,6 +213,99 @@ export interface Database {
           usage_quota?: Json;
           created_at?: string | null;
           updated_at?: string | null;
+        };
+      };
+      demand_event_logs: {
+        Row: {
+          id: string;
+          node_id: string | null;
+          timestamp: string | null;
+          event_type: string | null;
+          event_data: Json | null;
+          severity: string | null;
+          handled: boolean | null;
+        };
+        Insert: {
+          id?: string;
+          node_id?: string | null;
+          timestamp?: string | null;
+          event_type?: string | null;
+          event_data?: Json | null;
+          severity?: string | null;
+          handled?: boolean | null;
+        };
+        Update: {
+          id?: string;
+          node_id?: string | null;
+          timestamp?: string | null;
+          event_type?: string | null;
+          event_data?: Json | null;
+          severity?: string | null;
+          handled?: boolean | null;
+        };
+      };
+      perishable_inventory: {
+        Row: {
+          id: string;
+          item_id: string | null;
+          batch_code: string | null;
+          received_date: string | null;
+          expiry_date: string | null;
+          quantity: number;
+          status: string | null;
+          alert: boolean | null;
+        };
+        Insert: {
+          id?: string;
+          item_id?: string | null;
+          batch_code?: string | null;
+          received_date?: string | null;
+          expiry_date?: string | null;
+          quantity: number;
+          status?: string | null;
+          alert?: boolean | null;
+        };
+        Update: {
+          id?: string;
+          item_id?: string | null;
+          batch_code?: string | null;
+          received_date?: string | null;
+          expiry_date?: string | null;
+          quantity?: number;
+          status?: string | null;
+          alert?: boolean | null;
+        };
+      };
+      inventory_scenarios: {
+        Row: {
+          id: string;
+          project_id: string | null;
+          user_id: string | null;
+          scenario_name: string;
+          scenario_type: string | null;
+          parameters: Json | null;
+          results: Json | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          project_id?: string | null;
+          user_id?: string | null;
+          scenario_name: string;
+          scenario_type?: string | null;
+          parameters?: Json | null;
+          results?: Json | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          project_id?: string | null;
+          user_id?: string | null;
+          scenario_name?: string;
+          scenario_type?: string | null;
+          parameters?: Json | null;
+          results?: Json | null;
+          created_at?: string | null;
         };
       };
     };
