@@ -13,11 +13,11 @@ interface PayPalSubscriptionButtonProps {
   onSuccess?: () => void;
 }
 
-// PayPal Plan IDs (these would be created in your PayPal dashboard)
+// PayPal Plan IDs - REPLACE THESE WITH YOUR ACTUAL PAYPAL PLAN WEB LINKS
 const PAYPAL_PLAN_IDS = {
-  starter: 'P-2UF78835G6983425MML7KH3A', // Replace with actual plan ID
-  business: 'P-3VG89946H7994536NNM8LI4B', // Replace with actual plan ID
-  enterprise: 'P-4WH01057I8105647OON9MJ5C' // Replace with actual plan ID
+  starter: 'YOUR_STARTER_PLAN_WEB_LINK_HERE', // Replace with your PayPal starter plan web link
+  business: 'YOUR_BUSINESS_PLAN_WEB_LINK_HERE', // Replace with your PayPal business plan web link
+  enterprise: 'YOUR_ENTERPRISE_PLAN_WEB_LINK_HERE' // Replace with your PayPal enterprise plan web link
 };
 
 export const PayPalSubscriptionButton: React.FC<PayPalSubscriptionButtonProps> = ({
