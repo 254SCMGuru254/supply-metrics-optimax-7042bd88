@@ -1,11 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calculator, TrendingUp, bolt as Bolt } from "lucide-react";
+import { MapPin, Calculator, TrendingUp, Bolt } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 
 interface CogPoint {
