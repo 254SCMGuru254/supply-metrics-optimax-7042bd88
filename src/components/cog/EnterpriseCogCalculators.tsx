@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Navigation, Calculator, TrendingUp } from "lucide-react";
+import { MapPin, navigation, Calculator, TrendingUp } from "lucide-react";
 import type { Node } from "@/components/map/MapTypes";
 
 interface CogPoint {
@@ -327,7 +326,7 @@ export const EnterpriseCogCalculators = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Navigation className="h-5 w-5" />
+                <navigation className="h-5 w-5" />
                 Weighted Average Center of Gravity
               </CardTitle>
             </CardHeader>
