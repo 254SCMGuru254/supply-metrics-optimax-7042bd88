@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -115,7 +116,6 @@ export const SimulationContent = () => {
           <p className="text-gray-600 mt-1">Monte Carlo simulation for demand and supply variability analysis</p>
         </div>
         <ExportPdfButton 
-          title="Supply Chain Simulation Report"
           exportId="simulation-content"
           fileName="simulation_analysis_report"
         />

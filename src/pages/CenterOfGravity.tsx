@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -183,13 +184,8 @@ const CenterOfGravity = () => {
                         </div>
                       </div>
                       <ExportPdfButton
-                        title="Center of Gravity Analysis Report"
+                        exportId="cog-calculation-results"
                         fileName="cog-analysis-report"
-                        data={cogResult}
-                        isOptimized={true}
-                        optimizationType="Center of Gravity"
-                        results={cogResult}
-                        aiPrompt="Analyze this center of gravity calculation and provide strategic recommendations for facility location in Kenya, considering logistics costs, market access, and operational efficiency."
                       />
                     </div>
                   ) : (

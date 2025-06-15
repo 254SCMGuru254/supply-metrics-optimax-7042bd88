@@ -265,7 +265,6 @@ const NetworkDesign = () => {
         <div className="flex gap-2">
           <Button onClick={handleAnalyzeNetwork}>Calculate Network Costs</Button>
           <ExportPdfButton
-            title="Physical Network Design"
             exportId="network-design-content"
             fileName="network-design-results"
           />

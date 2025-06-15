@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -169,9 +170,8 @@ const NetworkOptimization = () => {
         </div>
         <div className="flex gap-2">
           <ExportPdfButton
+            exportId="network-optimization-content"
             fileName="network-optimization-results"
-            results={optimizationResults}
-            isOptimized={isOptimized}
           />
           <Button onClick={handleOptimize} disabled={nodes.length < 2}>
             Run Optimization
@@ -179,93 +179,97 @@ const NetworkOptimization = () => {
         </div>
       </div>
 
-      <ModelWalkthrough steps={getNetworkWalkthroughSteps()} />      <NetworkMap
-        nodes={nodes}
-        routes={routes}
-        onNodesChange={setNodes}
-        onRoutesChange={setRoutes}
-      />
-      
-      <NetworkMetrics
-        nodes={nodes}
-        routes={routes}
-        optimizationResults={optimizationResults}
-        isOptimized={isOptimized}
-        costReduction={costReduction}
-        flowEfficiency={flowEfficiency}
-      />
+      <div id="network-optimization-content">
+        <ModelWalkthrough steps={getNetworkWalkthroughSteps()} />
+        
+        <NetworkMap
+          nodes={nodes}
+          routes={routes}
+          onNodesChange={setNodes}
+          onRoutesChange={setRoutes}
+        />
+        
+        <NetworkMetrics
+          nodes={nodes}
+          routes={routes}
+          optimizationResults={optimizationResults}
+          isOptimized={isOptimized}
+          costReduction={costReduction}
+          flowEfficiency={flowEfficiency}
+        />
 
-      <ModelFormulas modelId="network-optimization" />
+        <ModelFormulas modelId="network-optimization" />
 
-      {/* Add Formula Display Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Available Optimization Formulas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {networkModel?.formulas.map((formula) => (
-              <Card key={formula.id} className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">{formula.name}</h3>
-                  <Badge variant="outline">{formula.complexity}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">{formula.description}</p>
-                {formula.formula && (
-                  <div className="bg-muted p-3 rounded-md">
-                    <code className="text-sm">{formula.formula}</code>
+        {/* Add Formula Display Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Optimization Formulas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {networkModel?.formulas.map((formula) => (
+                <Card key={formula.id} className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">{formula.name}</h3>
+                    <Badge variant="outline">{formula.complexity}</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">{formula.description}</p>
+                  {formula.formula && (
+                    <div className="bg-muted p-3 rounded-md">
+                      <code className="text-sm">{formula.formula}</code>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {isOptimized && (
+          <ModelValueMetrics modelType="network-optimization" />
+        )}
+
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-4">Formula Calculation</h2>
+          <div className="mb-6">
+            <label className="block font-medium mb-2">Select Formula</label>
+            <select
+              className="border rounded px-3 py-2"
+              value={selectedFormulaId}
+              onChange={e => setSelectedFormulaId(e.target.value)}
+            >
+              {networkModel.formulas.map(formula => (
+                <option key={formula.id} value={formula.id}>{formula.name}</option>
+              ))}
+            </select>
+          </div>
+          {selectedFormula && (
+            <Card className="p-4 mt-4">
+              <CardContent>
+                <h2 className="text-xl font-semibold mb-2">{selectedFormula.name}</h2>
+                <p className="text-muted-foreground mb-4">{selectedFormula.description}</p>
+                <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleCalculate(); }}>
+                  {selectedFormula.inputs.map(input => (
+                    <div key={input.name}>
+                      <label className="block mb-1 font-medium">{input.label}</label>
+                      <Input
+                        type={input.type === "number" ? "number" : "text"}
+                        value={inputValues[input.name] || ""}
+                        onChange={e => handleInputChange(input.name, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                  <Button type="submit" className="mt-4">Calculate</Button>
+                </form>
+                {result && (
+                  <div className="mt-6 p-4 bg-muted rounded">
+                    <strong>Result:</strong> <pre>{JSON.stringify(result, null, 2)}</pre>
                   </div>
                 )}
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {isOptimized && (
-        <ModelValueMetrics modelType="network-optimization" />
-      )}
-
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4">Formula Calculation</h2>
-        <div className="mb-6">
-          <label className="block font-medium mb-2">Select Formula</label>
-          <select
-            className="border rounded px-3 py-2"
-            value={selectedFormulaId}
-            onChange={e => setSelectedFormulaId(e.target.value)}
-          >
-            {networkModel.formulas.map(formula => (
-              <option key={formula.id} value={formula.id}>{formula.name}</option>
-            ))}
-          </select>
+              </CardContent>
+            </Card>
+          )}
         </div>
-        {selectedFormula && (
-          <Card className="p-4 mt-4">
-            <CardContent>
-              <h2 className="text-xl font-semibold mb-2">{selectedFormula.name}</h2>
-              <p className="text-muted-foreground mb-4">{selectedFormula.description}</p>
-              <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleCalculate(); }}>
-                {selectedFormula.inputs.map(input => (
-                  <div key={input.name}>
-                    <label className="block mb-1 font-medium">{input.label}</label>
-                    <Input
-                      type={input.type === "number" ? "number" : "text"}
-                      value={inputValues[input.name] || ""}
-                      onChange={e => handleInputChange(input.name, e.target.value)}
-                    />
-                  </div>
-                ))}
-                <Button type="submit" className="mt-4">Calculate</Button>
-              </form>
-              {result && (
-                <div className="mt-6 p-4 bg-muted rounded">
-                  <strong>Result:</strong> <pre>{JSON.stringify(result, null, 2)}</pre>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
