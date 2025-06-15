@@ -6,6 +6,12 @@ import { MapPin, Calculator } from "lucide-react";
 import { bolt as Bolt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { CogDemandPointsGrid } from "./CogDemandPointsGrid";
+import { CogWeightedResultCard } from "./CogWeightedResultCard";
+import { CogGeometricResultCard } from "./CogGeometricResultCard";
+import { CogEconomicResultCard } from "./CogEconomicResultCard";
+import { CogAdvancedResultsGrid } from "./CogAdvancedResultsGrid";
+import { CogResultsComparisonTable } from "./CogResultsComparisonTable";
 
 interface CogPoint {
   id: string;
@@ -332,50 +338,8 @@ export const EnterpriseCogCalculators = () => {
             <CardContent>
               <div className="space-y-4">
                 <h3 className="font-semibold">Demand Points (Kenya Examples)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {demandPoints.map((point, index) => (
-                    <Card key={point.id} className="p-4">
-                      <div className="space-y-2">
-                        <Label>Location {index + 1}: {point.name}</Label>
-                        <div className="text-sm space-y-1">
-                          <div>Lat: {point.latitude.toFixed(4)}</div>
-                          <div>Lng: {point.longitude.toFixed(4)}</div>
-                          <div>Weight: {point.weight}</div>
-                          <div>Cost: KES {point.cost}</div>
-                          <div>Risk: {((point.risk || 0) * 100).toFixed(1)}%</div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-
-                {cogResults.weighted && (
-                  <Card className="p-6 bg-blue-50">
-                    <div className="text-center">
-                      <h3 className="font-bold text-xl mb-4">Weighted COG Result</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Optimal Location</p>
-                          <p className="text-lg font-bold">
-                            {cogResults.weighted.latitude.toFixed(6)}°, {cogResults.weighted.longitude.toFixed(6)}°
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Total Distance</p>
-                          <p className="text-lg font-bold text-green-600">
-                            {cogResults.weighted.totalDistance?.toFixed(2)} km
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Efficiency Score</p>
-                          <Badge variant="default" className="text-lg">
-                            {cogResults.weighted.efficiencyScore}%
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                )}
+                <CogDemandPointsGrid demandPoints={demandPoints} />
+                <CogWeightedResultCard result={cogResults.weighted || null} />
               </div>
             </CardContent>
           </Card>
@@ -390,34 +354,7 @@ export const EnterpriseCogCalculators = () => {
               <p className="text-muted-foreground mb-4">
                 Minimizes total Euclidean distance to all points using iterative Weiszfeld algorithm.
               </p>
-              
-              {cogResults.geometric && (
-                <Card className="p-6 bg-green-50">
-                  <div className="text-center">
-                    <h3 className="font-bold text-xl mb-4">Geometric Median Result</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Optimal Location</p>
-                        <p className="text-lg font-bold">
-                          {cogResults.geometric.latitude.toFixed(6)}°, {cogResults.geometric.longitude.toFixed(6)}°
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Distance</p>
-                        <p className="text-lg font-bold text-green-600">
-                          {cogResults.geometric.totalDistance?.toFixed(2)} km
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Efficiency Score</p>
-                        <Badge variant="default" className="text-lg">
-                          {cogResults.geometric.efficiencyScore}%
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
+              <CogGeometricResultCard result={cogResults.geometric || null} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -426,7 +363,7 @@ export const EnterpriseCogCalculators = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
+                <Bolt className="h-5 w-5" />
                 Economic Center of Gravity
               </CardTitle>
             </CardHeader>
@@ -434,178 +371,26 @@ export const EnterpriseCogCalculators = () => {
               <p className="text-muted-foreground mb-4">
                 Optimizes location based on economic factors including transportation costs and demand weights.
               </p>
-              
-              {cogResults.economic && (
-                <Card className="p-6 bg-purple-50">
-                  <div className="text-center">
-                    <h3 className="font-bold text-xl mb-4">Economic COG Result</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Optimal Location</p>
-                        <p className="text-lg font-bold">
-                          {cogResults.economic.latitude.toFixed(6)}°, {cogResults.economic.longitude.toFixed(6)}°
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Cost</p>
-                        <p className="text-lg font-bold text-red-600">
-                          KES {cogResults.economic.totalCost?.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Efficiency Score</p>
-                        <Badge variant="default" className="text-lg">
-                          {cogResults.economic.efficiencyScore}%
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
+              <CogEconomicResultCard result={cogResults.economic || null} />
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="advanced-methods" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Manhattan COG */}
-            {cogResults.manhattan && (
-              <Card className="p-4">
-                <CardHeader>
-                  <CardTitle className="text-lg">Manhattan COG</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm">
-                      <strong>Location:</strong> {cogResults.manhattan.latitude.toFixed(4)}°, {cogResults.manhattan.longitude.toFixed(4)}°
-                    </div>
-                    <div className="text-sm">
-                      <strong>Distance:</strong> {cogResults.manhattan.totalDistance?.toFixed(2)} km
-                    </div>
-                    <Badge variant="outline">
-                      Efficiency: {cogResults.manhattan.efficiencyScore}%
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Multi-Criteria COG */}
-            {cogResults.multiCriteria && (
-              <Card className="p-4">
-                <CardHeader>
-                  <CardTitle className="text-lg">Multi-Criteria COG</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm">
-                      <strong>Location:</strong> {cogResults.multiCriteria.latitude.toFixed(4)}°, {cogResults.multiCriteria.longitude.toFixed(4)}°
-                    </div>
-                    <div className="text-sm">
-                      <strong>Criteria:</strong> Weight (40%), Cost (30%), Risk (30%)
-                    </div>
-                    <Badge variant="outline">
-                      Efficiency: {cogResults.multiCriteria.efficiencyScore}%
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Risk-Adjusted COG */}
-            {cogResults.riskAdjusted && (
-              <Card className="p-4">
-                <CardHeader>
-                  <CardTitle className="text-lg">Risk-Adjusted COG</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm">
-                      <strong>Location:</strong> {cogResults.riskAdjusted.latitude.toFixed(4)}°, {cogResults.riskAdjusted.longitude.toFixed(4)}°
-                    </div>
-                    <div className="text-sm">
-                      <strong>Risk Factors:</strong> Supply chain resilience optimized
-                    </div>
-                    <Badge variant="outline">
-                      Efficiency: {cogResults.riskAdjusted.efficiencyScore}%
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Seasonal COG Results */}
-            {seasonalPoints.map(season => {
-              const result = cogResults[season.season];
-              return result ? (
-                <Card key={season.season} className="p-4">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Seasonal COG - {season.season}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="text-sm">
-                        <strong>Location:</strong> {result.latitude.toFixed(4)}°, {result.longitude.toFixed(4)}°
-                      </div>
-                      <div className="text-sm">
-                        <strong>Total Weight:</strong> {result.totalWeight}
-                      </div>
-                      <Badge variant="outline">
-                        Efficiency: {result.efficiencyScore}%
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : null;
-            })}
-          </div>
+          <CogAdvancedResultsGrid
+            manhattan={cogResults.manhattan}
+            multiCriteria={cogResults.multiCriteria}
+            riskAdjusted={cogResults.riskAdjusted}
+            seasonalPoints={seasonalPoints}
+            cogResults={cogResults}
+          />
         </TabsContent>
       </Tabs>
 
       {/* Comparison Table */}
-      {Object.keys(cogResults).length > 0 && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>COG Methods Comparison</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="border border-gray-300 p-2 text-left">Method</th>
-                    <th className="border border-gray-300 p-2 text-left">Latitude</th>
-                    <th className="border border-gray-300 p-2 text-left">Longitude</th>
-                    <th className="border border-gray-300 p-2 text-left">Efficiency</th>
-                    <th className="border border-gray-300 p-2 text-left">Best For</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(cogResults).map(([key, result]) => (
-                    <tr key={key}>
-                      <td className="border border-gray-300 p-2 font-semibold">{result.algorithm}</td>
-                      <td className="border border-gray-300 p-2">{result.latitude.toFixed(4)}</td>
-                      <td className="border border-gray-300 p-2">{result.longitude.toFixed(4)}</td>
-                      <td className="border border-gray-300 p-2">
-                        <Badge variant="outline">{result.efficiencyScore}%</Badge>
-                      </td>
-                      <td className="border border-gray-300 p-2 text-sm">
-                        {key === 'weighted' && 'Simple demand weighting'}
-                        {key === 'geometric' && 'Minimizing travel distance'}
-                        {key === 'economic' && 'Cost optimization'}
-                        {key === 'manhattan' && 'Grid-based logistics'}
-                        {key === 'multiCriteria' && 'Multiple objectives'}
-                        {key === 'riskAdjusted' && 'Risk management'}
-                        {key.includes('Season') && 'Seasonal planning'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <CogResultsComparisonTable cogResults={cogResults} />
     </div>
   );
 };
+
+export default EnterpriseCogCalculators;
