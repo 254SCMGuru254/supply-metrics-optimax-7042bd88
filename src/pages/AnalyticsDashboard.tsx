@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Package, Truck, MapPin, Activity, Download, RefreshCcw } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Package, Truck, MapPin, Activity, Download, RotateCcw } from 'lucide-react';
 
 const analyticsData = {
   kpis: [
@@ -72,7 +71,7 @@ export const AnalyticsDashboard = () => {
               disabled={isRefreshing}
               className="flex items-center gap-2"
             >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RotateCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh Data
             </Button>
             <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
@@ -169,6 +168,7 @@ export const AnalyticsDashboard = () => {
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"
+                        nameKey="name"
                       >
                         {analyticsData.costBreakdown.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
