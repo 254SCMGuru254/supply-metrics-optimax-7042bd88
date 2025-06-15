@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Play, Square, RotateCw, Download } from 'lucide-react';
+import { Play, Square, RotateCcw, Download } from 'lucide-react';
 
 interface SimulationParameters {
   iterations: number;
@@ -216,7 +216,7 @@ export const RealSimulationEngine = () => {
             </Button>
             
             <Button variant="outline" onClick={resetSimulation} disabled={isRunning}>
-              <RotateCw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
             

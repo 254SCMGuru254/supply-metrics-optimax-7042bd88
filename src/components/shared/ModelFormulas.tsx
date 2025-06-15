@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +29,8 @@ export function ModelFormulas({ modelId }: ModelFormulasProps) {
 
   return (
     <Card className="mt-6">
-      <CardHeader>        <CardTitle className="flex items-center justify-between">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
           <div>Available Formulas</div>
           <BadgeWithText variant="outline">{model.formulas.length} formulas</BadgeWithText>
         </CardTitle>
@@ -79,11 +81,6 @@ export function ModelFormulas({ modelId }: ModelFormulasProps) {
                       </li>
                     ))}
                   </ul>
-                </div>
-              )}
-              {formula.realWorldExample && (
-                <div className="mt-3 text-sm text-muted-foreground">
-                  <span className="font-medium">Example:</span> {formula.realWorldExample}
                 </div>
               )}
             </Card>
