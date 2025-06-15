@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -13,13 +13,6 @@ interface PayPalSubscriptionButtonProps {
   onSuccess?: () => void;
 }
 
-// PayPal Plan IDs - REPLACE THESE WITH YOUR ACTUAL PAYPAL PLAN WEB LINKS
-const PAYPAL_PLAN_IDS = {
-  starter: 'YOUR_STARTER_PLAN_WEB_LINK_HERE', // Replace with your PayPal starter plan web link
-  business: 'YOUR_BUSINESS_PLAN_WEB_LINK_HERE', // Replace with your PayPal business plan web link
-  enterprise: 'YOUR_ENTERPRISE_PLAN_WEB_LINK_HERE' // Replace with your PayPal enterprise plan web link
-};
-
 export const PayPalSubscriptionButton: React.FC<PayPalSubscriptionButtonProps> = ({
   planTier,
   planPrice,
@@ -28,17 +21,49 @@ export const PayPalSubscriptionButton: React.FC<PayPalSubscriptionButtonProps> =
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [paypalConfig, setPaypalConfig] = useState<{
+    clientId: string;
+    planIds: Record<string, string>;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const initialOptions = {
-    clientId: "YOUR_PAYPAL_CLIENT_ID", // This should be set as a Supabase secret
-    currency: "USD",
-    intent: "subscription",
-    vault: true
-  };
+  useEffect(() => {
+    const loadPayPalConfig = async () => {
+      try {
+        // Get PayPal configuration from Supabase edge function
+        const { data, error } = await supabase.functions.invoke('get-paypal-config');
+        
+        if (error) {
+          console.error('Error loading PayPal config:', error);
+          toast({
+            title: "Configuration Error",
+            description: "Unable to load payment configuration. Please try again later.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        setPaypalConfig(data);
+      } catch (error) {
+        console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize payment system.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPayPalConfig();
+  }, [toast]);
 
   const createSubscription = (data: any, actions: any) => {
+    if (!paypalConfig) return;
+    
     return actions.subscription.create({
-      plan_id: PAYPAL_PLAN_IDS[planTier]
+      plan_id: paypalConfig.planIds[planTier]
     });
   };
 
@@ -100,6 +125,38 @@ export const PayPalSubscriptionButton: React.FC<PayPalSubscriptionButtonProps> =
       description: "There was an error processing your payment. Please try again.",
       variant: "destructive"
     });
+  };
+
+  if (loading) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!paypalConfig) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Payment Configuration Error</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Payment system is currently unavailable. Please try again later.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const initialOptions = {
+    clientId: paypalConfig.clientId,
+    currency: "USD",
+    intent: "subscription",
+    vault: true
   };
 
   return (

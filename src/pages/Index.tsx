@@ -1,24 +1,43 @@
-import Hero from "@/components/home/Hero";
-import FeatureGrid from "@/components/home/FeatureGrid";
-import CallToAction from "@/components/home/CallToAction";
-import Footer from "@/components/home/Footer";
-import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
+
+import { Hero } from "@/components/home/Hero";
+import { FeatureGrid } from "@/components/home/FeatureGrid";
+import { CallToAction } from "@/components/home/CallToAction";
+import { Footer } from "@/components/home/Footer";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const Index = () => {
+  const { user } = useAuth();
+
   return (
-    <div className="container py-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Navigation */}
+      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
+        <div className="text-2xl font-bold text-primary">
+          Supply Metrics Optimax
+        </div>
+        <div className="flex gap-4">
+          {user ? (
+            <Link to="/dashboard">
+              <Button>Go to Dashboard</Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="outline">Sign In</Button>
+              </Link>
+              <Link to="/auth">
+                <Button>Get Started</Button>
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
+
       <Hero />
       <FeatureGrid />
       <CallToAction />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-        {modelFormulaRegistry.map(model => (
-          <div key={model.id} className="bg-white rounded-lg shadow p-6 flex flex-col items-start">
-            <div className="mb-2 text-2xl font-bold">{model.name}</div>
-            <div className="mb-4 text-muted-foreground">{model.description}</div>
-            <a href={`/${model.id.replace(/-/g, "")}`} className="mt-auto btn btn-primary">Analyze</a>
-          </div>
-        ))}
-      </div>
       <Footer />
     </div>
   );
