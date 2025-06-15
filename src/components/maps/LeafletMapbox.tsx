@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MapPin, Layers, Search, Download, Navigation } from 'lucide-react';
+import { MapPin, Layers, Search, Download, Compass } from 'lucide-react';
 
 interface MapboxLocation {
   id: string;
@@ -226,7 +225,7 @@ export const LeafletMapbox = () => {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Navigation className="h-5 w-5" />
+                <Compass className="h-5 w-5" />
                 Map Benefits
               </CardTitle>
             </CardHeader>

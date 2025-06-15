@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -118,7 +119,7 @@ const AnalyticsDashboard = () => {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="cost" stroke="#3B82F6" strokeWidth={3} fill="#3B82F6" />
+                  <Line type="monotone" dataKey="cost" stroke="#3B82F6" strokeWidth={3} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -191,9 +192,8 @@ const AnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
+                <PieChart data={costBreakdown}>
                   <Pie
-                    data={costBreakdown}
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
