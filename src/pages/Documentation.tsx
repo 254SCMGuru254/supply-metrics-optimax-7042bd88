@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppDocumentation } from '@/components/documentation/AppDocumentation';
 import { FormulaDropdownSelector } from '@/components/documentation/FormulaDropdownSelector';
-import { Zap, Calculator, FileText } from 'lucide-react';
+import { Calculator, FileText, Factory } from 'lucide-react';
 
 const Documentation = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
-          <Zap className="h-8 w-8 text-blue-600" />
+          <Factory className="h-8 w-8 text-blue-600" />
           Supply Chain Optimization Documentation
         </h1>
         <p className="text-xl text-muted-foreground">
@@ -29,7 +29,7 @@ const Documentation = () => {
             Formula Selector
           </TabsTrigger>
           <TabsTrigger value="implementation" className="flex items-center gap-2">
-            <Zap className="h-4 w-4" />
+            <Factory className="h-4 w-4" />
             Implementation Guide
           </TabsTrigger>
         </TabsList>

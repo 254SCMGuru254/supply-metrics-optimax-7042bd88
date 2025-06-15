@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Factory, Truck, MapPin } from 'lucide-react';
+import { Factory, Truck, MapPin } from 'lucide-react';
 
 interface IndustryAnalysis {
   industry: string;
@@ -77,21 +77,21 @@ export function EnhancedKenyaFeatures() {
     { 
       id: 'tea', 
       name: 'Tea Industry', 
-      icon: Zap, 
+      icon: Factory, 
       exportValue: 'KES 181.69B',
       challenges: ['Quality consistency', 'Price volatility', 'Logistics efficiency']
     },
     { 
       id: 'coffee', 
       name: 'Coffee Industry', 
-      icon: Zap, 
+      icon: Factory, 
       exportValue: 'KES 31.48B',
       challenges: ['Climate change', 'Market access', 'Aging farmers']
     },
     { 
       id: 'floriculture', 
       name: 'Floriculture Industry', 
-      icon: Zap, 
+      icon: Factory, 
       exportValue: 'KES 108.76B',
       challenges: ['Pest control', 'Cold chain logistics', 'Market competition']
     },
