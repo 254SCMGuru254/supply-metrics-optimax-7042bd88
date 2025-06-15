@@ -130,6 +130,99 @@ export type Database = {
         }
         Relationships: []
       }
+      facility_locations: {
+        Row: {
+          created_at: string | null
+          demand_points: Json | null
+          dynamic_plan: Json | null
+          facilities: Json | null
+          id: string
+          optimization_params: Json | null
+          optimization_results: Json | null
+          project_id: string
+          risk_factors: Json | null
+          scenario_name: string
+          scenario_type: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          demand_points?: Json | null
+          dynamic_plan?: Json | null
+          facilities?: Json | null
+          id?: string
+          optimization_params?: Json | null
+          optimization_results?: Json | null
+          project_id: string
+          risk_factors?: Json | null
+          scenario_name: string
+          scenario_type?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          demand_points?: Json | null
+          dynamic_plan?: Json | null
+          facilities?: Json | null
+          id?: string
+          optimization_params?: Json | null
+          optimization_results?: Json | null
+          project_id?: string
+          risk_factors?: Json | null
+          scenario_name?: string
+          scenario_type?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      fleet_management: {
+        Row: {
+          created_at: string | null
+          fleet_config: Json
+          fuel_metrics: Json | null
+          id: string
+          maintenance_schedule: Json | null
+          optimization_params: Json | null
+          optimization_results: Json | null
+          project_id: string
+          routing_solution: Json | null
+          telematics: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          fleet_config: Json
+          fuel_metrics?: Json | null
+          id?: string
+          maintenance_schedule?: Json | null
+          optimization_params?: Json | null
+          optimization_results?: Json | null
+          project_id: string
+          routing_solution?: Json | null
+          telematics?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          fleet_config?: Json
+          fuel_metrics?: Json | null
+          id?: string
+          maintenance_schedule?: Json | null
+          optimization_params?: Json | null
+          optimization_results?: Json | null
+          project_id?: string
+          routing_solution?: Json | null
+          telematics?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       inventory_items: {
         Row: {
           abc_classification: string | null
@@ -330,6 +423,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      network_optimizations: {
+        Row: {
+          as_is_snapshot: Json | null
+          created_at: string | null
+          id: string
+          metrics: Json | null
+          multi_echelon_settings: Json | null
+          network_graph: Json
+          optimization_params: Json | null
+          optimized_snapshot: Json | null
+          project_id: string
+          resilience_metrics: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          as_is_snapshot?: Json | null
+          created_at?: string | null
+          id?: string
+          metrics?: Json | null
+          multi_echelon_settings?: Json | null
+          network_graph: Json
+          optimization_params?: Json | null
+          optimized_snapshot?: Json | null
+          project_id: string
+          resilience_metrics?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          as_is_snapshot?: Json | null
+          created_at?: string | null
+          id?: string
+          metrics?: Json | null
+          multi_echelon_settings?: Json | null
+          network_graph?: Json
+          optimization_params?: Json | null
+          optimized_snapshot?: Json | null
+          project_id?: string
+          resilience_metrics?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       nodes: {
         Row: {

@@ -3,6 +3,11 @@ import type { DemandEventLogRow, DemandEventLogInsert, DemandEventLogUpdate } fr
 import type { PerishableInventoryRow, PerishableInventoryInsert, PerishableInventoryUpdate } from "./database/perishable_inventory";
 import type { InventoryScenarioRow, InventoryScenarioInsert, InventoryScenarioUpdate } from "./database/inventory_scenarios";
 
+// Newly added advanced enterprise types:
+import type { NetworkOptimizationRow, NetworkOptimizationInsert, NetworkOptimizationUpdate } from "./database/network_optimizations";
+import type { FacilityLocationRow, FacilityLocationInsert, FacilityLocationUpdate } from "./database/facility_locations";
+import type { FleetManagementRow, FleetManagementInsert, FleetManagementUpdate } from "./database/fleet_management";
+
 // Type for JSON fields used throughout database tables
 export type Json =
   | string
@@ -234,6 +239,21 @@ export interface Database {
         Row: InventoryScenarioRow;
         Insert: InventoryScenarioInsert;
         Update: InventoryScenarioUpdate;
+      };
+      network_optimizations: {
+        Row: NetworkOptimizationRow;
+        Insert: NetworkOptimizationInsert;
+        Update: NetworkOptimizationUpdate;
+      };
+      facility_locations: {
+        Row: FacilityLocationRow;
+        Insert: FacilityLocationInsert;
+        Update: FacilityLocationUpdate;
+      };
+      fleet_management: {
+        Row: FleetManagementRow;
+        Insert: FleetManagementInsert;
+        Update: FleetManagementUpdate;
       };
     };
     Views: {
