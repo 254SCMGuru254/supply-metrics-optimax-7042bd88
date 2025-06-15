@@ -4,10 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Navbar } from "./components/layout/Navbar";
+import { Navbar } from "./components/Navbar";
 import Index from "./pages/Index";
 import RouteOptimization from "./pages/RouteOptimization";
-import InventoryOptimization from "./pages/InventoryOptimization";
+import InventoryManagement from "./pages/InventoryManagement";
 import CenterOfGravity from "./pages/CenterOfGravity";
 import NetworkOptimization from "./pages/NetworkOptimization";
 import Heuristic from "./pages/Heuristic";
@@ -28,7 +28,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/route-optimization" element={<RouteOptimization />} />
-            <Route path="/inventory-optimization" element={<InventoryOptimization />} />
+            <Route path="/inventory-optimization" element={<InventoryManagement />} />
             <Route path="/center-of-gravity" element={<CenterOfGravity />} />
             <Route path="/network-optimization" element={<NetworkOptimization />} />
             <Route path="/heuristic" element={<Heuristic />} />
