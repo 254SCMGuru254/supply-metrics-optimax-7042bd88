@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
 import { Globe } from "lucide-react";
-import { Market } from "@/components/icons/market";
 
 const Footer = () => {
   return (
@@ -18,10 +17,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link to="/introduction" className="text-muted-foreground hover:text-primary">Introduction</Link></li>
+              <li><Link to="/documentation" className="text-muted-foreground hover:text-primary">Documentation</Link></li>
               <li><Link to="/data-input" className="text-muted-foreground hover:text-primary">Data Input</Link></li>
-              <li><Link to="/analytics" className="text-muted-foreground hover:text-primary">Analytics</Link></li>
-              <li><Link to="/onboarding" className="text-muted-foreground hover:text-primary">Onboarding</Link></li>
+              <li><Link to="/analytics-dashboard" className="text-muted-foreground hover:text-primary">Analytics</Link></li>
+              <li><Link to="/dashboard" className="text-muted-foreground hover:text-primary">Dashboard</Link></li>
+              <li><Link to="/kenya-supply-chain" className="text-muted-foreground hover:text-primary">Kenya Supply Chain</Link></li>
             </ul>
           </div>
           <div>
