@@ -1,5 +1,6 @@
-
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,13 +42,16 @@ interface SeasonalData {
 export const EnterpriseCogCalculators = () => {
   const [activeTab, setActiveTab] = useState("weighted-cog");
   
-  // Sample data points for Kenya
-  const [demandPoints, setDemandPoints] = useState<CogPoint[]>([
-    { id: "1", name: "Nairobi", latitude: -1.2921, longitude: 36.8219, weight: 500, cost: 1000, risk: 0.1 },
-    { id: "2", name: "Mombasa", latitude: -4.0435, longitude: 39.6682, weight: 300, cost: 800, risk: 0.2 },
-    { id: "3", name: "Kisumu", latitude: -0.0917, longitude: 34.7680, weight: 200, cost: 600, risk: 0.15 },
-    { id: "4", name: "Nakuru", latitude: -0.3031, longitude: 36.0800, weight: 150, cost: 500, risk: 0.1 }
-  ]);
+  // Fetch demand points from Supabase (dynamic, not hardcoded)
+  const { data: demandPoints, refetch } = useQuery({
+    queryKey: ['demand_points'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("demand_points").select("*");
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 60000,
+  });
 
   const [seasonalPoints] = useState<SeasonalData[]>([
     {
@@ -337,8 +341,8 @@ export const EnterpriseCogCalculators = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <h3 className="font-semibold">Demand Points (Kenya Examples)</h3>
-                <CogDemandPointsGrid demandPoints={demandPoints} />
+                <h3 className="font-semibold">Demand Points (Your Real Data)</h3>
+                <CogDemandPointsGrid demandPoints={demandPoints || []} />
                 <CogWeightedResultCard result={cogResults.weighted || null} />
               </div>
             </CardContent>
