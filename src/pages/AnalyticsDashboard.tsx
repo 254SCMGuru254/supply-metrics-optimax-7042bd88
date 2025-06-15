@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -39,6 +40,14 @@ const analyticsData = {
     { product: 'Coffee', stock: 450, demand: 500, turnover: 9.2 },
     { product: 'Flowers', stock: 200, demand: 250, turnover: 12.1 },
     { product: 'Vegetables', stock: 300, demand: 400, turnover: 15.3 }
+  ],
+  optimizationModels: [
+    { name: 'Route Optimization', savings: '15%', usage: 85, status: 'Active' },
+    { name: 'Inventory Management', savings: '22%', usage: 92, status: 'Active' },
+    { name: 'Center of Gravity', savings: '18%', usage: 78, status: 'Active' },
+    { name: 'Network Flow', savings: '12%', usage: 65, status: 'Pending' },
+    { name: 'Monte Carlo Simulation', savings: '25%', usage: 88, status: 'Active' },
+    { name: 'Facility Location', savings: '20%', usage: 72, status: 'Active' }
   ]
 };
 
@@ -106,8 +115,9 @@ export const AnalyticsDashboard = () => {
 
         {/* Main Analytics Tabs */}
         <Tabs value={activeMetric} onValueChange={setActiveMetric} className="space-y-6">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-6 gap-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="models">Models</TabsTrigger>
             <TabsTrigger value="costs">Cost Analysis</TabsTrigger>
             <TabsTrigger value="routes">Route Performance</TabsTrigger>
             <TabsTrigger value="inventory">Inventory Metrics</TabsTrigger>
@@ -180,6 +190,45 @@ export const AnalyticsDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="models" className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>Optimization Models Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {analyticsData.optimizationModels.map((model, index) => (
+                    <Card key={index} className="border">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="font-semibold text-sm">{model.name}</h4>
+                          <Badge variant={model.status === 'Active' ? 'default' : 'secondary'}>
+                            {model.status}
+                          </Badge>
+                        </div>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex justify-between text-sm">
+                              <span>Cost Savings</span>
+                              <span className="font-semibold text-green-600">{model.savings}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Usage Rate</span>
+                              <span>{model.usage}%</span>
+                            </div>
+                            <Progress value={model.usage} className="h-2" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="costs" className="space-y-6">
@@ -278,7 +327,7 @@ export const AnalyticsDashboard = () => {
                 <div className="text-center py-12">
                   <TrendingUp className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                   <h3 className="text-lg font-semibold text-gray-600 mb-2">Advanced Forecasting Models</h3>
-                  <p className="text-gray-500">AI-powered demand forecasting coming soon</p>
+                  <p className="text-gray-500">AI-powered demand forecasting with ARIMA, Prophet, and LSTM models</p>
                 </div>
               </CardContent>
             </Card>

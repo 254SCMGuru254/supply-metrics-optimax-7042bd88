@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import {
   NavigationMenuTrigger 
 } from "@/components/ui/navigation-menu";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Activity, MapPin, Package, TrendingUp, Calculator, Network, Zap } from "lucide-react";
+import { Menu, X, Activity, MapPin, Package, TrendingUp, Calculator, Network, Bolt } from "lucide-react";
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,7 +34,7 @@ export const Navbar = () => {
         { title: "Inventory Management", href: "/inventory-management", icon: <Package className="h-4 w-4" /> },
         { title: "Center of Gravity", href: "/center-of-gravity", icon: <TrendingUp className="h-4 w-4" /> },
         { title: "Network Optimization", href: "/network-optimization", icon: <Network className="h-4 w-4" /> },
-        { title: "Network Flow", href: "/network-flow", icon: <Zap className="h-4 w-4" /> },
+        { title: "Network Flow", href: "/network-flow", icon: <Bolt className="h-4 w-4" /> },
         { title: "Simulation", href: "/simulation", icon: <Calculator className="h-4 w-4" /> }
       ]
     },

@@ -1,282 +1,264 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Link } from 'react-router-dom';
 import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  CircleDollarSign, 
+  MapPin, 
   Package, 
-  Truck, 
+  TrendingUp, 
+  Network, 
+  Calculator, 
+  Bolt,
+  Activity,
+  ArrowRight,
+  CheckCircle,
   Clock,
-  LayoutDashboard,
-  LineChart
-} from "lucide-react";
-import { 
-  ResponsiveContainer, 
-  LineChart as RechartsLineChart, 
-  BarChart, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  Line, 
-  Bar
-} from "recharts";
+  AlertCircle
+} from 'lucide-react';
 
 const Dashboard = () => {
-  // Mock data for charts
-  const performanceData = [
-    { month: 'Jan', optimization: 85, traditional: 65 },
-    { month: 'Feb', optimization: 89, traditional: 67 },
-    { month: 'Mar', optimization: 92, traditional: 69 },
-    { month: 'Apr', optimization: 88, traditional: 71 },
-    { month: 'May', optimization: 95, traditional: 73 },
-    { month: 'Jun', optimization: 97, traditional: 75 },
+  const optimizationModels = [
+    {
+      name: 'Route Optimization',
+      icon: <MapPin className="h-6 w-6" />,
+      href: '/route-optimization',
+      description: 'Optimize delivery routes and reduce transportation costs',
+      savings: '15-25%',
+      status: 'Active',
+      usage: 85,
+      color: 'bg-blue-500'
+    },
+    {
+      name: 'Inventory Management',
+      icon: <Package className="h-6 w-6" />,
+      href: '/inventory-management',
+      description: 'Multi-echelon inventory optimization with EOQ and safety stock',
+      savings: '20-30%',
+      status: 'Active',
+      usage: 92,
+      color: 'bg-green-500'
+    },
+    {
+      name: 'Center of Gravity',
+      icon: <TrendingUp className="h-6 w-6" />,
+      href: '/center-of-gravity',
+      description: 'Find optimal facility locations based on demand weights',
+      savings: '18-22%',
+      status: 'Active',
+      usage: 78,
+      color: 'bg-purple-500'
+    },
+    {
+      name: 'Network Optimization',
+      icon: <Network className="h-6 w-6" />,
+      href: '/network-optimization',
+      description: 'Optimize entire supply chain network topology',
+      savings: '25-35%',
+      status: 'Active',
+      usage: 88,
+      color: 'bg-orange-500'
+    },
+    {
+      name: 'Network Flow',
+      icon: <Bolt className="h-6 w-6" />,
+      href: '/network-flow',
+      description: 'Minimum cost flow optimization for material movement',
+      savings: '12-18%',
+      status: 'Active',
+      usage: 65,
+      color: 'bg-cyan-500'
+    },
+    {
+      name: 'Monte Carlo Simulation',
+      icon: <Calculator className="h-6 w-6" />,
+      href: '/simulation',
+      description: 'Stochastic simulation for uncertainty analysis',
+      savings: '20-25%',
+      status: 'Active',
+      usage: 75,
+      color: 'bg-pink-500'
+    }
   ];
 
-  const costSavingsData = [
-    { category: 'Transportation', savings: 24000 },
-    { category: 'Inventory', savings: 18500 },
-    { category: 'Warehousing', savings: 15200 },
-    { category: 'Distribution', savings: 12800 },
+  const recentAnalytics = [
+    { metric: 'Total Cost Reduction', value: '24%', trend: 'up' },
+    { metric: 'Service Level', value: '96.8%', trend: 'up' },
+    { metric: 'Inventory Turnover', value: '8.2x', trend: 'up' },
+    { metric: 'Transport Efficiency', value: '89%', trend: 'stable' }
   ];
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <LayoutDashboard className="h-8 w-8" />
-            Supply Chain Dashboard
-          </h2>
-          <p className="text-muted-foreground">
-            Monitor your optimization performance and key metrics
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            Supply Chain Command Center
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Elite-grade optimization platform with advanced mathematical models, AI integration, and real-time analytics
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button>
-            Generate Report
-          </Button>
+
+        {/* Quick Analytics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {recentAnalytics.map((analytic, index) => (
+            <Card key={index} className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-2">{analytic.value}</div>
+                <div className="text-sm text-gray-600">{analytic.metric}</div>
+                <div className="flex items-center justify-center mt-2">
+                  {analytic.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500" />}
+                  {analytic.trend === 'stable' && <Activity className="h-4 w-4 text-blue-500" />}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
+        {/* Quick Actions */}
+        <div className="flex flex-wrap gap-4 justify-center mb-8">
+          <Link to="/analytics-dashboard">
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Activity className="h-4 w-4 mr-2" />
+              View Analytics Dashboard
+            </Button>
+          </Link>
+          <Link to="/kenya-supply-chain">
+            <Button variant="outline">
+              <MapPin className="h-4 w-4 mr-2" />
+              Kenya Supply Chain
+            </Button>
+          </Link>
+          <Link to="/business-value">
+            <Button variant="outline">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Business Value Calculator
+            </Button>
+          </Link>
+        </div>
 
-        <TabsContent value="overview" className="space-y-4">
-          {/* Key Metrics Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Cost Savings</CardTitle>
-                <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$70,500</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-600 flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +12.5%
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
+        {/* Optimization Models Grid */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6 text-center">Elite Optimization Models</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {optimizationModels.map((model, index) => (
+              <Card key={index} className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-lg ${model.color} text-white`}>
+                      {model.icon}
+                    </div>
+                    <Badge variant={model.status === 'Active' ? 'default' : 'secondary'}>
+                      {model.status}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-lg">{model.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-gray-600">{model.description}</p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Cost Savings</span>
+                      <span className="text-sm font-bold text-green-600">{model.savings}</span>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium">Usage Rate</span>
+                        <span className="text-sm">{model.usage}%</span>
+                      </div>
+                      <Progress value={model.usage} className="h-2" />
+                    </div>
+                  </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Delivery Efficiency</CardTitle>
-                <Truck className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">97.2%</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-600 flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +2.3%
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Inventory Turnover</CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">8.4x</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-600 flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +0.7x
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average Lead Time</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3.2 days</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-600 flex items-center">
-                    <TrendingDown className="h-3 w-3 mr-1" />
-                    -0.8 days
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
+                  <Link to={model.href}>
+                    <Button className="w-full mt-4 group">
+                      Launch Model
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        </div>
 
-          {/* Charts */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LineChart className="h-5 w-5" />
-                  Performance Comparison
-                </CardTitle>
-                <CardDescription>
-                  Optimized vs Traditional Methods
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RechartsLineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="optimization" 
-                      stroke="#8884d8" 
-                      name="Optimized" 
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="traditional" 
-                      stroke="#82ca9d" 
-                      name="Traditional" 
-                    />
-                  </RechartsLineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Cost Savings by Category
-                </CardTitle>
-                <CardDescription>
-                  Monthly savings breakdown
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={costSavingsData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="savings" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Actions */}
-          <Card>
+        {/* Advanced Features */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+          <Card className="shadow-lg bg-gradient-to-br from-blue-50 to-purple-50">
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                Access your most used optimization tools
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Bolt className="h-5 w-5 text-blue-600" />
+                AI-Powered Analytics
+              </CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-2 md:grid-cols-4">
-              <Button variant="outline" className="justify-start">
-                <Package className="mr-2 h-4 w-4" />
-                Inventory Optimization
-              </Button>
-              <Button variant="outline" className="justify-start">
-                <Truck className="mr-2 h-4 w-4" />
-                Route Optimization
-              </Button>
-              <Button variant="outline" className="justify-start">
-                <Activity className="mr-2 h-4 w-4" />
-                Network Analysis
-              </Button>
-              <Button variant="outline" className="justify-start">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Demand Forecasting
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="performance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription>
-                Detailed performance analysis and trends
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span>Overall Efficiency</span>
-                  <Badge variant="secondary">94.7%</Badge>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Machine Learning Demand Forecasting</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Cost Reduction</span>
-                  <Badge variant="secondary">-15.3%</Badge>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Real-time Performance Monitoring</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Service Level</span>
-                  <Badge variant="secondary">99.1%</Badge>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Predictive Risk Assessment</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-blue-500" />
+                  <span>Automated Report Generation</span>
                 </div>
               </div>
+              <Link to="/analytics-dashboard">
+                <Button className="w-full">
+                  Access AI Dashboard
+                </Button>
+              </Link>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4">
-          <Card>
+          <Card className="shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
             <CardHeader>
-              <CardTitle>Advanced Analytics</CardTitle>
-              <CardDescription>
-                Deep insights and predictive analysis
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Network className="h-5 w-5 text-green-600" />
+                Advanced Capabilities
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Advanced analytics features coming soon...
-              </p>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Multi-Echelon Network Optimization</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Stochastic Simulation Models</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Kenya-Specific Industry Solutions</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="h-5 w-5 text-orange-500" />
+                  <span>Enterprise-Grade Security</span>
+                </div>
+              </div>
+              <Link to="/documentation">
+                <Button variant="outline" className="w-full">
+                  View Documentation
+                </Button>
+              </Link>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

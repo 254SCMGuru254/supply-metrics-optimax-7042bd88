@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Play, RotateCcw, Zap } from 'lucide-react';
+import { Play, RotateCcw, Bolt } from 'lucide-react';
 
 interface SimulationParams {
   iterations: number;
@@ -131,7 +132,7 @@ export const RealSimulationEngine = () => {
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
+              <Bolt className="h-5 w-5" />
               Simulation Parameters
             </CardTitle>
           </CardHeader>
@@ -313,7 +314,7 @@ export const RealSimulationEngine = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Zap className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <Bolt className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-600 mb-2">Ready to Simulate</h3>
                 <p className="text-gray-500">Configure parameters and click "Run Simulation" to begin</p>
               </div>
