@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 const Auth = () => {
   const { user, signIn, signUp, loading } = useAuth();
@@ -157,7 +157,6 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <img src="/lovable-uploads/a2956ea1-b63b-41de-a08a-e2aea31c4533.png" alt="Chain.IO Logo" className="h-16 w-auto mx-auto mb-4" />
           <h2 className="text-3xl font-bold text-gray-900">Chain.IO</h2>
           <p className="mt-2 text-sm text-gray-600">
             Supply Chain 3.0: Outthink. Outmaneuver. Outperform
@@ -212,9 +211,9 @@ const Auth = () => {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOffIcon className="h-4 w-4" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <EyeIcon className="h-4 w-4" />
                         )}
                       </Button>
                     </div>
@@ -305,9 +304,9 @@ const Auth = () => {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOffIcon className="h-4 w-4" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <EyeIcon className="h-4 w-4" />
                         )}
                       </Button>
                     </div>
