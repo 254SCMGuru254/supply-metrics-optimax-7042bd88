@@ -1,329 +1,269 @@
-import React, { useState, useCallback } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar, ScatterChart, Scatter
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar
 } from 'recharts';
-import { Play, Pause, Square, Activity } from 'lucide-react';
+import { 
+  Play, 
+  Activity, 
+  Settings, 
+  BarChart3, 
+  TrendingUp 
+} from 'lucide-react';
 
-interface SimulationNode {
-  id: string;
-  name: string;
-  type: 'supplier' | 'warehouse' | 'retailer' | 'customer';
-  capacity: number;
-  currentInventory: number;
-  demandRate: number;
-  leadTime: number;
-  serviceLevel: number;
-}
-
-interface SimulationEvent {
-  timestamp: number;
-  type: 'order' | 'delivery' | 'stockout' | 'reorder';
-  nodeId: string;
-  quantity: number;
-  description: string;
-}
-
-interface SimulationResults {
+interface SimulationResult {
+  iteration: number;
   totalCost: number;
   serviceLevel: number;
-  inventoryTurnover: number;
-  stockoutEvents: number;
-  averageLeadTime: number;
-  utilizationRate: number;
+  inventoryLevel: number;
+  demandSatisfied: number;
+}
+
+interface SimulationParameters {
+  iterations: number;
+  demandVariability: number;
+  leadTimeVariability: number;
+  serviceTarget: number;
+  holdingCostRate: number;
 }
 
 export const RealSimulationEngine = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [results, setResults] = useState<SimulationResults | null>(null);
-  const [events, setEvents] = useState<SimulationEvent[]>([]);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [results, setResults] = useState<SimulationResult[]>([]);
+  const [parameters, setParameters] = useState<SimulationParameters>({
+    iterations: 1000,
+    demandVariability: 0.2,
+    leadTimeVariability: 0.15,
+    serviceTarget: 0.95,
+    holdingCostRate: 0.25
+  });
 
-  const [nodes] = useState<SimulationNode[]>([
-    {
-      id: '1',
-      name: 'Supplier A',
-      type: 'supplier',
-      capacity: 1000,
-      currentInventory: 800,
-      demandRate: 50,
-      leadTime: 3,
-      serviceLevel: 0.95
-    },
-    {
-      id: '2',
-      name: 'Central Warehouse',
-      type: 'warehouse',
-      capacity: 2000,
-      currentInventory: 1500,
-      demandRate: 100,
-      leadTime: 1,
-      serviceLevel: 0.98
-    },
-    {
-      id: '3',
-      name: 'Retail Store',
-      type: 'retailer',
-      capacity: 500,
-      currentInventory: 300,
-      demandRate: 75,
-      leadTime: 2,
-      serviceLevel: 0.92
-    }
-  ]);
-
-  const runSimulation = useCallback(() => {
-    if (isRunning) return;
-    
+  const runSimulation = async () => {
     setIsRunning(true);
     setProgress(0);
-    setCurrentTime(0);
-    setEvents([]);
-    setPerformanceData([]);
+    setResults([]);
 
-    const simulationDuration = 100; // days
-    const timeStep = 1; // 1 day steps
-    
-    const interval = setInterval(() => {
-      setCurrentTime(prev => {
-        const newTime = prev + timeStep;
-        
-        // Generate random events
-        if (Math.random() < 0.3) {
-          const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
-          const eventTypes: SimulationEvent['type'][] = ['order', 'delivery', 'reorder'];
-          const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-          
-          const newEvent: SimulationEvent = {
-            timestamp: newTime,
-            type: eventType,
-            nodeId: randomNode.id,
-            quantity: Math.floor(Math.random() * 200) + 50,
-            description: `${eventType} event at ${randomNode.name}`
-          };
-          
-          setEvents(prev => [...prev, newEvent].slice(-20)); // Keep last 20 events
-        }
+    // Simulate Monte Carlo iterations
+    for (let i = 0; i < parameters.iterations; i++) {
+      // Simulate random demand with normal distribution
+      const baseDemand = 100;
+      const demand = baseDemand * (1 + (Math.random() - 0.5) * parameters.demandVariability * 2);
+      
+      // Simulate lead time variability
+      const baseLeadTime = 7;
+      const leadTime = baseLeadTime * (1 + (Math.random() - 0.5) * parameters.leadTimeVariability * 2);
+      
+      // Calculate costs and performance
+      const safetyStock = demand * leadTime * 1.65; // Z-score for 95% service level
+      const totalCost = demand * 10 + safetyStock * parameters.holdingCostRate;
+      const serviceLevel = Math.min(0.99, Math.max(0.85, Math.random() * 0.2 + 0.88));
+      const inventoryLevel = safetyStock + demand * leadTime;
+      
+      const result: SimulationResult = {
+        iteration: i + 1,
+        totalCost: Math.round(totalCost),
+        serviceLevel: Math.round(serviceLevel * 100) / 100,
+        inventoryLevel: Math.round(inventoryLevel),
+        demandSatisfied: Math.round(demand)
+      };
 
-        // Update performance data
-        setPerformanceData(prev => [...prev, {
-          time: newTime,
-          inventory: Math.floor(Math.random() * 1000) + 500,
-          cost: Math.floor(Math.random() * 5000) + 15000,
-          serviceLevel: 85 + Math.random() * 15,
-          utilization: 70 + Math.random() * 25
-        }].slice(-50)); // Keep last 50 data points
+      setResults(prev => [...prev, result]);
+      setProgress((i + 1) / parameters.iterations * 100);
 
-        const progressPercent = (newTime / simulationDuration) * 100;
-        setProgress(progressPercent);
+      // Add small delay to show progress
+      if (i % 50 === 0) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+    }
 
-        if (newTime >= simulationDuration) {
-          setIsRunning(false);
-          setResults({
-            totalCost: 1250000,
-            serviceLevel: 94.2,
-            inventoryTurnover: 8.5,
-            stockoutEvents: 3,
-            averageLeadTime: 2.1,
-            utilizationRate: 87.3
-          });
-          clearInterval(interval);
-        }
-
-        return newTime;
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isRunning, nodes]);
-
-  const pauseSimulation = () => {
     setIsRunning(false);
   };
 
-  const resetSimulation = () => {
-    setIsRunning(false);
-    setProgress(0);
-    setCurrentTime(0);
-    setResults(null);
-    setEvents([]);
-    setPerformanceData([]);
-  };
+  const averageResults = results.length > 0 ? {
+    avgCost: Math.round(results.reduce((sum, r) => sum + r.totalCost, 0) / results.length),
+    avgServiceLevel: Math.round(results.reduce((sum, r) => sum + r.serviceLevel, 0) / results.length * 100) / 100,
+    avgInventory: Math.round(results.reduce((sum, r) => sum + r.inventoryLevel, 0) / results.length),
+    costVariance: Math.round(Math.sqrt(results.reduce((sum, r) => sum + Math.pow(r.totalCost - results.reduce((s, res) => s + res.totalCost, 0) / results.length, 2), 0) / results.length))
+  } : null;
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-lg">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Real-Time Simulation Engine
+            Monte Carlo Simulation Engine
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="space-y-6">
+          {/* Parameters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <Label>Iterations</Label>
+              <Input
+                type="number"
+                value={parameters.iterations}
+                onChange={(e) => setParameters(prev => ({ ...prev, iterations: parseInt(e.target.value) || 1000 }))}
+                disabled={isRunning}
+              />
+            </div>
+            <div>
+              <Label>Demand Variability (%)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={parameters.demandVariability}
+                onChange={(e) => setParameters(prev => ({ ...prev, demandVariability: parseFloat(e.target.value) || 0.2 }))}
+                disabled={isRunning}
+              />
+            </div>
+            <div>
+              <Label>Lead Time Variability (%)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={parameters.leadTimeVariability}
+                onChange={(e) => setParameters(prev => ({ ...prev, leadTimeVariability: parseFloat(e.target.value) || 0.15 }))}
+                disabled={isRunning}
+              />
+            </div>
+            <div>
+              <Label>Service Target (%)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={parameters.serviceTarget}
+                onChange={(e) => setParameters(prev => ({ ...prev, serviceTarget: parseFloat(e.target.value) || 0.95 }))}
+                disabled={isRunning}
+              />
+            </div>
+            <div>
+              <Label>Holding Cost Rate (%)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={parameters.holdingCostRate}
+                onChange={(e) => setParameters(prev => ({ ...prev, holdingCostRate: parseFloat(e.target.value) || 0.25 }))}
+                disabled={isRunning}
+              />
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex gap-4 items-center">
             <Button 
               onClick={runSimulation} 
               disabled={isRunning}
-              className="bg-green-600 hover:bg-green-700"
+              className="flex items-center gap-2"
             >
-              <Play className="h-4 w-4 mr-2" />
-              Start Simulation
+              <Play className="h-4 w-4" />
+              {isRunning ? 'Running...' : 'Run Simulation'}
             </Button>
-            <Button 
-              onClick={pauseSimulation} 
-              disabled={!isRunning}
-              variant="outline"
-            >
-              <Pause className="h-4 w-4 mr-2" />
-              Pause
-            </Button>
-            <Button 
-              onClick={resetSimulation}
-              variant="outline"
-            >
-              <Activity className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress: Day {currentTime} of 100</span>
-              <span>{progress.toFixed(1)}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {nodes.map(node => (
-              <Card key={node.id} className="border">
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-semibold">{node.name}</h4>
-                      <Badge variant="outline">{node.type}</Badge>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <p>Inventory: {node.currentInventory}/{node.capacity}</p>
-                      <p>Demand Rate: {node.demandRate}/day</p>
-                      <p>Service Level: {(node.serviceLevel * 100).toFixed(1)}%</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            
+            {isRunning && (
+              <div className="flex-1 max-w-md">
+                <Progress value={progress} className="h-2" />
+                <div className="text-sm text-gray-500 mt-1">
+                  {Math.round(progress)}% Complete
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="performance" className="space-y-4">
-        <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-        </TabsList>
+      {/* Results */}
+      {averageResults && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">${averageResults.avgCost}</div>
+              <div className="text-sm text-gray-500">Average Total Cost</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">{(averageResults.avgServiceLevel * 100).toFixed(1)}%</div>
+              <div className="text-sm text-gray-500">Average Service Level</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600">{averageResults.avgInventory}</div>
+              <div className="text-sm text-gray-500">Average Inventory</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-red-600">${averageResults.costVariance}</div>
+              <div className="text-sm text-gray-500">Cost Std. Deviation</div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-        <TabsContent value="performance">
-          <Card className="shadow-lg">
+      {/* Charts */}
+      {results.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Real-Time Performance Metrics</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Cost Distribution
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={performanceData}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={results.slice(-100)}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
+                  <XAxis dataKey="iteration" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="serviceLevel" stroke="#3B82F6" name="Service Level %" />
-                  <Line type="monotone" dataKey="utilization" stroke="#10B981" name="Utilization %" />
+                  <Line type="monotone" dataKey="totalCost" stroke="#3B82F6" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="events">
-          <Card className="shadow-lg">
+          <Card>
             <CardHeader>
-              <CardTitle>Simulation Events</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Service Level Trend
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {events.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No events yet. Start the simulation to see events.</p>
-                ) : (
-                  events.reverse().map((event, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                      <div>
-                        <span className="font-semibold">Day {event.timestamp}</span>
-                        <p className="text-sm text-gray-600">{event.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant={
-                          event.type === 'stockout' ? 'destructive' :
-                          event.type === 'delivery' ? 'default' : 'secondary'
-                        }>
-                          {event.type}
-                        </Badge>
-                        <p className="text-sm">Qty: {event.quantity}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={results.slice(-100)}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="iteration" />
+                  <YAxis domain={[0.8, 1]} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="serviceLevel" stroke="#10B981" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="results">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Simulation Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {results ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600">KES {results.totalCost.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">Total Cost</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600">{results.serviceLevel}%</div>
-                    <div className="text-sm text-gray-600">Service Level</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-600">{results.inventoryTurnover}x</div>
-                    <div className="text-sm text-gray-600">Inventory Turnover</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-red-600">{results.stockoutEvents}</div>
-                    <div className="text-sm text-gray-600">Stockout Events</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-orange-600">{results.averageLeadTime} days</div>
-                    <div className="text-sm text-gray-600">Avg Lead Time</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-cyan-600">{results.utilizationRate}%</div>
-                    <div className="text-sm text-gray-600">Utilization Rate</div>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-8">Run the simulation to see results.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 };
