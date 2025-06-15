@@ -12,7 +12,6 @@ interface Metric {
   trend: "up" | "down";
 }
 
-// The metrics grid, use only icons that exist in lucide-react.
 const metrics: Metric[] = [
   {
     title: "Total Inventory Value",

@@ -1,13 +1,11 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Bolt } from "lucide-react";
+import { bolt as Bolt } from "lucide-react";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
-
 interface InventoryHeaderProps {
   onRunOptimization: () => void;
 }
-
 export const InventoryHeader: React.FC<InventoryHeaderProps> = ({ onRunOptimization }) => {
   return (
     <div className="flex justify-between items-center">
