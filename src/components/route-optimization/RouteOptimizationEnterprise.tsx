@@ -4,11 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, Map, Play, Repeat, ClipboardCopy } from "lucide-react";
+import { Download, Map, Play, RefreshCcw } from "lucide-react"; // Only use available icons
 import { optimizationService, OptimizationResponse } from "@/services/OptimizationService";
 import { LeafletMapbox } from "@/components/maps/LeafletMapbox";
 import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
-import Papa from "paparse";
+import Papa from "papaparse";
 import type { Node, Route } from "@/components/map/MapTypes";
 import { ErrorsTab } from "@/components/route-optimization/ErrorsTab";
 import { ErrorHandlingService } from "@/services/ErrorHandlingService";
@@ -231,7 +231,7 @@ export const RouteOptimizationEnterprise: React.FC = () => {
                       <Download className="w-4 h-4 mr-1" /> Export CSV
                     </Button>
                     <Button variant="outline" onClick={exportResultJson} disabled={!results}>
-                      <ClipboardCopy className="w-4 h-4 mr-1" /> Export JSON
+                      <Download className="w-4 h-4 mr-1" /> Export JSON
                     </Button>
                     <ExportPdfButton exportId="routeopt-report" fileName={`route_optimization_${activeAlgo}`} />
                   </div>
@@ -240,7 +240,7 @@ export const RouteOptimizationEnterprise: React.FC = () => {
                   <Card className="border border-blue-300 bg-blue-50">
                     <CardHeader>
                       <CardTitle className="flex gap-3 items-center">
-                        <List className="w-4 h-4" />
+                        <Download className="w-4 h-4" />
                         Optimization Results
                       </CardTitle>
                     </CardHeader>
@@ -279,7 +279,7 @@ export const RouteOptimizationEnterprise: React.FC = () => {
           <CardTitle className="flex gap-2 items-center"><Map className="w-5 h-5" /> Route Map Visualization</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={mapTab} onValueChange={v => setMapTab(v as any)}>
+          <Tabs value={mapTab} onValueChange={(v) => setMapTab(v as any)}>
             <TabsList>
               <TabsTrigger value="original">Original Routes</TabsTrigger>
               <TabsTrigger value="optimized">Optimized Route</TabsTrigger>
@@ -288,26 +288,30 @@ export const RouteOptimizationEnterprise: React.FC = () => {
               <LeafletMapbox nodes={nodes} routes={routes} />
             </TabsContent>
             <TabsContent value="optimized">
-              {results?.success && results.results?.optimizedRoute
-                ? <LeafletMapbox
-                    nodes={nodes}
-                    routes={results.results.optimizedRoute.map((nodeId: string, idx: number, arr: string[]) =>
-                      idx < arr.length - 1
-                        ? {
-                            id: `opt-route-${idx}`,
-                            from: arr[idx],
-                            to: arr[idx + 1],
-                            type: "road",
-                            volume: 1,
-                            cost: 0,
-                            transitTime: 0,
-                            isOptimized: true,
-                            ownership: "owned"
-                          }
-                        : null
-                    ).filter(Boolean) as Route[]} />
-                : <div className="text-gray-400">No optimized route to display.</div>
-              }
+              {results?.success && results.results?.optimizedRoute ? (
+                <LeafletMapbox
+                  nodes={nodes}
+                  routes={results.results.optimizedRoute.map((nodeId: string, idx: number, arr: string[]) =>
+                    idx < arr.length - 1
+                      ? {
+                          id: `opt-route-${idx}`,
+                          from: arr[idx],
+                          to: arr[idx + 1],
+                          type: "road",
+                          volume: 1,
+                          cost: 0,
+                          transitTime: 0,
+                          isOptimized: true,
+                          ownership: "owned",
+                        }
+                      : null
+                  ).filter(Boolean) as Route[]}
+                />
+              ) : (
+                <div className="text-gray-400">
+                  No optimized route to display.
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -328,7 +332,7 @@ export const RouteOptimizationEnterprise: React.FC = () => {
                     Params: {Object.entries(scenario.parameters).map(([k, v]) => `${k}: ${v}`).join(', ')}
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setResults(scenario.result!)}><Repeat className="inline w-4 h-4 mr-1" />View Results</Button>
+                <Button variant="outline" size="sm" onClick={() => setResults(scenario.result!)}><RefreshCcw className="inline w-4 h-4 mr-1" />View Results</Button>
               </div>
             ))}
           </div>
