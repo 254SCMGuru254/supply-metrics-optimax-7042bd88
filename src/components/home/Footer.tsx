@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Globe } from "lucide-react";
 
@@ -10,8 +9,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">About Us</h3>
             <p className="text-muted-foreground">
-              Supply Metrics Optimax is an open-source platform dedicated to empowering 
-              Kenyan businesses with advanced supply chain optimization tools.
+              Chain.IO. For enterprises that prefer their advantage to speak for itself.
             </p>
           </div>
           <div>
