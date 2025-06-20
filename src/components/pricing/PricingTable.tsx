@@ -1,7 +1,7 @@
-
 import { Check, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { PayPalSubscriptionButton } from "@/components/subscription/PayPalSubscriptionButton";
 
 interface PricingTier {
   name: string;
@@ -67,14 +67,11 @@ export const PricingTable = ({ tiers, region = 'standard' }: PricingTableProps) 
             </ul>
           </CardContent>
           <CardFooter>
-            <Button 
-              className="w-full" 
-              variant={tier.popular ? "default" : "outline"}
-              onClick={() => handlePayment(tier)}
-            >
-              <CreditCard className="h-4 w-4 mr-2" />
-              {tier.paymentIntegrated ? 'Pay with PayPal' : 'PayPal Integration Soon'}
-            </Button>
+            <PayPalSubscriptionButton
+              planTier={tier.name.toLowerCase() as 'starter' | 'business' | 'enterprise'}
+              planName={tier.name}
+              planPrice={parseInt(tier.price.replace(/[^\d]/g, ""))}
+            />
           </CardFooter>
         </Card>
       ))}
