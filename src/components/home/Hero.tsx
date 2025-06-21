@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin, Compass } from "lucide-react";
@@ -6,16 +5,18 @@ import { MapPin, Compass } from "lucide-react";
 const Hero = () => {
   return (
     <div className="flex flex-col items-center text-center mb-12">
-      <h1 className="text-4xl font-bold mb-4">Chain.IO</h1>
-      <p className="text-xl text-muted-foreground max-w-2xl mb-6">
-        Supply Chain 3.0: Outthink. Outmaneuver. Outperform<br />
-        Transform Your Kenyan Business with Powerful, Open-Source Analytics.
+      <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">
+        Supply Chain Intelligence, Redefined.
+      </h1>
+      <p className="text-xl text-muted-foreground max-w-3xl mb-8">
+        Harness the power of enterprise-grade analytics to master your Kenyan supply chain.
+        Outthink complexity, outmaneuver disruption, and outperform your competition.
       </p>
       <div className="flex gap-4">
-        <Link to="/kenya-supply-chain">
-          <Button>
-            <MapPin className="mr-2 h-4 w-4" />
-            Explore Kenya Supply Chain
+        <Link to="/dashboard">
+          <Button size="lg">
+            <MapPin className="mr-2 h-5 w-5" />
+            Launch Strategic Dashboard
           </Button>
         </Link>
         <Link to="/data-input">
