@@ -156,7 +156,7 @@ const NewLandingPage = () => {
       <header>
         <div className="container">
           <nav>
-            <div className="logo">Chain.IO</div>
+            <div className="logo">Supply-Metrics Optimax</div>
             <ul className="nav-links">
               <li>
                 <a href="#features">Features</a>
@@ -171,8 +171,8 @@ const NewLandingPage = () => {
                 <a href="#support">Support</a>
               </li>
             </ul>
-            <a href="#" className="cta-button">
-              Launch Portal
+            <a href="/dashboard" className="cta-button">
+              Launch App
             </a>
           </nav>
         </div>
@@ -180,13 +180,13 @@ const NewLandingPage = () => {
 
       <section className="hero">
         <div className="container">
-          <h1>Chain.IO</h1>
-          <p>Tenderzville Portal - Your Gateway to the Decentralized Future</p>
+          <h1>Intelligent Supply Chain Optimization</h1>
+          <p>Harness the power of AI and advanced analytics to build a resilient, efficient, and sustainable supply chain.</p>
           <div className="hero-buttons">
-            <a href="#" className="btn-primary">
+            <a href="/dashboard" className="btn-primary">
               Enter Portal
             </a>
-            <a href="#" className="btn-secondary">
+            <a href="#features" className="btn-secondary">
               Explore Features
             </a>
           </div>
@@ -214,55 +214,34 @@ const NewLandingPage = () => {
 
       <section className="features" id="features">
         <div className="container">
-          <h2>Powerful Features</h2>
+          <h2>Powerful Optimization Features</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">⚡</div>
-              <h3>Lightning Fast</h3>
-              <p>
-                Experience blazing-fast transactions with our optimized
-                blockchain infrastructure. Sub-second confirmations for seamless
-                trading.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">🔒</div>
-              <h3>Ultra Secure</h3>
-              <p>
-                Military-grade encryption and multi-layer security protocols
-                protect your assets. Your funds are always safe with us.
-              </p>
-            </div>
-            <div className="feature-card">
               <div className="feature-icon">🌐</div>
-              <h3>Cross-Chain</h3>
+              <h3>Network Design</h3>
               <p>
-                Seamlessly interact with multiple blockchains through our
-                unified portal. Trade across networks without barriers.
+                Model your end-to-end supply chain. Find optimal facility locations and product flows with our advanced algorithms.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">📱</div>
-              <h3>Mobile Ready</h3>
+              <div className="feature-icon">📦</div>
+              <h3>Inventory Optimization</h3>
               <p>
-                Access your portfolio and trade on-the-go with our responsive
-                design. Full functionality on any device.
+                Balance service levels and costs. Utilize demand forecasting and multi-echelon inventory policies to hold the right amount of stock.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🤖</div>
-              <h3>AI-Powered</h3>
+              <div className="feature-icon">🚚</div>
+              <h3>Route Optimization</h3>
               <p>
-                Smart contract automation and AI-driven insights help you make
-                better trading decisions with confidence.
+                Minimize transport costs and delivery times. Our routing engine handles complex constraints including capacity, time windows, and more.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">💎</div>
-              <h3>DeFi Native</h3>
+              <div className="feature-icon">🌊</div>
+              <h3>Risk & Resilience Simulation</h3>
               <p>
-                Built for the decentralized future with native DeFi
-                integrations, yield farming, and liquidity mining options.
+                Test your supply chain against disruptions. Identify vulnerabilities and build a more resilient network with "what-if" scenario analysis.
               </p>
             </div>
           </div>

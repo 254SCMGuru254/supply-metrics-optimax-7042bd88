@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Layout from "./components/Layout";
-import NewLandingPage from "../NewLandingPage";
+import NewLandingPage from "./NewLandingPage";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Pricing from "./pages/Pricing";

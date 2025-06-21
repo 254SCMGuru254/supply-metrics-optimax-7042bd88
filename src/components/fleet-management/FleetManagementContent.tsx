@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
@@ -7,13 +7,98 @@ import { NetworkMap } from '@/components/NetworkMap';
 import { Node, Route } from '@/components/map/MapTypes';
 import { Truck, MapPin, Warehouse, User, Clock, Battery, Thermometer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { mockVehicles, mockFleetNodes, mockFleetRoutes } from '@/data/mock-fleet-data';
+import { supabase } from '@/integrations/supabase/client';
+import { Tables } from '@/types/database';
+
+type Vehicle = Tables<'supply_nodes'> & {
+  currentLocation: { lat: number; lng: number };
+  driver: string;
+  eta: string;
+  fuelLevel: number;
+  cargoTemp: number;
+  originId: string;
+  destinationId: string;
+};
 
 export const FleetManagementContent = () => {
-  const [vehicles] = useState(mockVehicles);
-  const [nodes] = useState<Node[]>(mockFleetNodes);
-  const [routes] = useState<Route[]>(mockFleetRoutes);
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(vehicles[0]?.id || null);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const { data: nodesData, error: nodesError } = await supabase
+          .from('supply_nodes')
+          .select('*');
+        
+        const { data: routesData, error: routesError } = await supabase
+          .from('supply_routes')
+          .select('*');
+
+        if (nodesError) throw nodesError;
+        if (routesError) throw routesError;
+
+        // Assuming 'vehicle' type nodes are our fleet
+        const fetchedVehicles: Vehicle[] = nodesData
+          ?.filter(n => n.node_type === 'vehicle' && n.latitude && n.longitude)
+          .map(n => ({
+            ...n,
+            id: n.id,
+            name: n.name,
+            status: n.properties?.status as 'on-route' | 'idle' | 'down' || 'idle',
+            currentLocation: { lat: n.latitude!, lng: n.longitude! },
+            driver: n.properties?.driver || 'N/A',
+            eta: 'N/A',
+            fuelLevel: n.properties?.fuelLevel || 100,
+            cargoTemp: n.properties?.cargoTemp || 0,
+            originId: '',
+            destinationId: ''
+          }));
+        
+        const regularNodes: Node[] = nodesData
+          ?.filter(n => n.node_type !== 'vehicle')
+          .map(n => ({
+            id: n.id,
+            name: n.name,
+            type: n.node_type || 'warehouse',
+            latitude: n.latitude,
+            longitude: n.longitude,
+            ownership: n.properties?.ownership || 'owned'
+          })) || [];
+
+        const fetchedRoutes: Route[] = routesData?.map(r => ({
+          id: r.id,
+          origin: r.origin_id || '',
+          destination: r.destination_id || '',
+          transportMode: r.transport_mode || 'truck',
+          // vehicleId: r.vehicle_id // This column doesn't exist on supply_routes
+        })) || [];
+
+        setVehicles(fetchedVehicles || []);
+        setNodes(regularNodes);
+        setRoutes(fetchedRoutes);
+
+      } catch (error) {
+        console.error("Error fetching fleet data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (vehicles.length > 0 && !selectedVehicleId) {
+      setSelectedVehicleId(vehicles[0].id);
+    }
+  }, [vehicles, selectedVehicleId]);
 
   const vehicleNodes: Node[] = useMemo(() => {
     return vehicles.map(v => ({
@@ -34,12 +119,24 @@ export const FleetManagementContent = () => {
 
   const selectedVehicleRoute = useMemo(() => {
     if (!selectedVehicle) return [];
-    return routes.filter(r => r.vehicleId === selectedVehicle.id);
+    // The logic for linking routes to vehicles needs to be determined
+    // as `vehicleId` is not on the `supply_routes` table.
+    // Returning all routes for now.
+    return routes;
   }, [selectedVehicle, routes]);
 
   const handleVehicleSelect = (vehicleId: string) => {
     setSelectedVehicleId(vehicleId);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[700px]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+        <p className="ml-4 text-lg">Loading Fleet Data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -96,8 +193,8 @@ export const FleetManagementContent = () => {
             <CardContent className="space-y-4">
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between"><span><User className="inline-block mr-2 h-4 w-4"/>Driver</span> <span>{selectedVehicle.driver}</span></div>
-                <div className="flex justify-between"><span><MapPin className="inline-block mr-2 h-4 w-4"/>Origin</span> <span>{nodes.find(n => n.id === selectedVehicle.originId)?.name}</span></div>
-                <div className="flex justify-between"><span><Warehouse className="inline-block mr-2 h-4 w-4"/>Destination</span> <span>{nodes.find(n => n.id === selectedVehicle.destinationId)?.name}</span></div>
+                <div className="flex justify-between"><span><MapPin className="inline-block mr-2 h-4 w-4"/>Origin</span> <span>{nodes.find(n => n.id === selectedVehicle.originId)?.name || 'N/A'}</span></div>
+                <div className="flex justify-between"><span><Warehouse className="inline-block mr-2 h-4 w-4"/>Destination</span> <span>{nodes.find(n => n.id === selectedVehicle.destinationId)?.name || 'N/A'}</span></div>
                 <div className="flex justify-between"><span><Clock className="inline-block mr-2 h-4 w-4"/>ETA</span> <span>{selectedVehicle.eta}</span></div>
                 <div className="flex justify-between"><span><Battery className="inline-block mr-2 h-4 w-4"/>Fuel</span> <span>{selectedVehicle.fuelLevel}%</span></div>
                 <div className="flex justify-between"><span><Thermometer className="inline-block mr-2 h-4 w-4"/>Cargo Temp.</span> <span>{selectedVehicle.cargoTemp}°C</span></div>
