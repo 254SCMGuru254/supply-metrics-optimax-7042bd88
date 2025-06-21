@@ -1,10 +1,10 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
+import Draggable from 'react-draggable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -98,51 +98,107 @@ const NodeEditDialog = ({
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Edit className="h-5 w-5" />
-            Edit Node: {editedNode.name}
-          </DialogTitle>
-          <DialogDescription>
-            Modify node properties, type, and ownership details
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="ownership">Ownership</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
-          </TabsList>
+    <Draggable handle=".drag-handle">
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto z-[1000]">
+          <DialogHeader className="drag-handle cursor-move">
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit Node: {editedNode.name}
+            </DialogTitle>
+            <DialogDescription>
+              Modify node properties, type, and ownership details
+            </DialogDescription>
+          </DialogHeader>
           
-          <TabsContent value="basic" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={editedNode.name}
-                  onChange={(e) => setEditedNode({ ...editedNode, name: e.target.value })}
-                />
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="basic">Basic Info</TabsTrigger>
+              <TabsTrigger value="ownership">Ownership</TabsTrigger>
+              <TabsTrigger value="details">Details</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="basic" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={editedNode.name}
+                    onChange={(e) => setEditedNode({ ...editedNode, name: e.target.value })}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="type">Node Type</Label>
+                  <Select
+                    value={editedNode.type}
+                    onValueChange={(value: NodeType) => setEditedNode({ ...editedNode, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {nodeTypeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center gap-2">
+                            {option.icon}
+                            {option.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="capacity">Capacity</Label>
+                  <Input
+                    id="capacity"
+                    type="number"
+                    value={editedNode.capacity || ''}
+                    onChange={(e) => setEditedNode({ ...editedNode, capacity: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="cost">Monthly Cost</Label>
+                  <Input
+                    id="cost"
+                    type="number"
+                    value={editedNode.cost || ''}
+                    onChange={(e) => setEditedNode({ ...editedNode, cost: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
               </div>
               
               <div>
-                <Label htmlFor="type">Node Type</Label>
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={editedNode.notes || ''}
+                  onChange={(e) => setEditedNode({ ...editedNode, notes: e.target.value })}
+                  placeholder="Additional notes about this node..."
+                />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="ownership" className="space-y-4">
+              <div>
+                <Label htmlFor="ownership">Ownership Type</Label>
                 <Select
-                  value={editedNode.type}
-                  onValueChange={(value: NodeType) => setEditedNode({ ...editedNode, type: value })}
+                  value={editedNode.ownership}
+                  onValueChange={(value: OwnershipType) => setEditedNode({ ...editedNode, ownership: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {nodeTypeOptions.map((option) => (
+                    {ownershipOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          {option.icon}
-                          {option.label}
+                        <div className="flex flex-col">
+                          <span className="font-medium">{option.label}</span>
+                          <span className="text-xs text-muted-foreground">{option.description}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -150,172 +206,118 @@ const NodeEditDialog = ({
                 </Select>
               </div>
               
-              <div>
-                <Label htmlFor="capacity">Capacity</Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  value={editedNode.capacity || ''}
-                  onChange={(e) => setEditedNode({ ...editedNode, capacity: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
+              {editedNode.ownership === 'hired' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="monthlyRent">Monthly Rent</Label>
+                    <Input
+                      id="monthlyRent"
+                      type="number"
+                      value={editedNode.monthlyRent || ''}
+                      onChange={(e) => setEditedNode({ ...editedNode, monthlyRent: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="contractDuration">Contract Duration (months)</Label>
+                    <Input
+                      id="contractDuration"
+                      type="number"
+                      value={editedNode.contractDuration || ''}
+                      onChange={(e) => setEditedNode({ ...editedNode, contractDuration: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                  
+                  <div className="col-span-2">
+                    <Label htmlFor="leaseTerms">Lease Terms</Label>
+                    <Textarea
+                      id="leaseTerms"
+                      value={editedNode.leaseTerms || ''}
+                      onChange={(e) => setEditedNode({ ...editedNode, leaseTerms: e.target.value })}
+                      placeholder="Lease terms and conditions..."
+                    />
+                  </div>
+                </div>
+              )}
               
-              <div>
-                <Label htmlFor="cost">Monthly Cost</Label>
-                <Input
-                  id="cost"
-                  type="number"
-                  value={editedNode.cost || ''}
-                  onChange={(e) => setEditedNode({ ...editedNode, cost: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
-            </div>
+              {editedNode.ownership === 'outsourced' && (
+                <div>
+                  <Label htmlFor="serviceProvider">Service Provider</Label>
+                  <Input
+                    id="serviceProvider"
+                    value={editedNode.serviceProvider || ''}
+                    onChange={(e) => setEditedNode({ ...editedNode, serviceProvider: e.target.value })}
+                    placeholder="Name of service provider..."
+                  />
+                </div>
+              )}
+            </TabsContent>
             
-            <div>
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={editedNode.notes || ''}
-                onChange={(e) => setEditedNode({ ...editedNode, notes: e.target.value })}
-                placeholder="Additional notes about this node..."
-              />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="ownership" className="space-y-4">
-            <div>
-              <Label htmlFor="ownership">Ownership Type</Label>
-              <Select
-                value={editedNode.ownership}
-                onValueChange={(value: OwnershipType) => setEditedNode({ ...editedNode, ownership: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ownershipOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{option.label}</span>
-                        <span className="text-xs text-muted-foreground">{option.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {editedNode.ownership === 'hired' && (
+            <TabsContent value="details" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="monthlyRent">Monthly Rent</Label>
+                  <Label htmlFor="floorArea">Floor Area (sq m)</Label>
                   <Input
-                    id="monthlyRent"
+                    id="floorArea"
                     type="number"
-                    value={editedNode.monthlyRent || ''}
-                    onChange={(e) => setEditedNode({ ...editedNode, monthlyRent: parseFloat(e.target.value) || 0 })}
+                    value={editedNode.floorArea || ''}
+                    onChange={(e) => setEditedNode({ ...editedNode, floorArea: parseFloat(e.target.value) || 0 })}
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="contractDuration">Contract Duration (months)</Label>
+                  <Label htmlFor="storageType">Storage Type</Label>
                   <Input
-                    id="contractDuration"
-                    type="number"
-                    value={editedNode.contractDuration || ''}
-                    onChange={(e) => setEditedNode({ ...editedNode, contractDuration: parseInt(e.target.value) || 0 })}
+                    id="storageType"
+                    value={editedNode.storageType || ''}
+                    onChange={(e) => setEditedNode({ ...editedNode, storageType: e.target.value })}
+                    placeholder="e.g., Cold storage, Dry storage..."
                   />
                 </div>
                 
-                <div className="col-span-2">
-                  <Label htmlFor="leaseTerms">Lease Terms</Label>
-                  <Textarea
-                    id="leaseTerms"
-                    value={editedNode.leaseTerms || ''}
-                    onChange={(e) => setEditedNode({ ...editedNode, leaseTerms: e.target.value })}
-                    placeholder="Lease terms and conditions..."
+                <div>
+                  <Label htmlFor="temperature">Temperature (°C)</Label>
+                  <Input
+                    id="temperature"
+                    type="number"
+                    value={editedNode.temperature || ''}
+                    onChange={(e) => setEditedNode({ ...editedNode, temperature: parseFloat(e.target.value) || 0 })}
                   />
                 </div>
+                
+                <div>
+                  <Label htmlFor="securityLevel">Security Level</Label>
+                  <Select
+                    value={editedNode.securityLevel || ''}
+                    onValueChange={(value) => setEditedNode({ ...editedNode, securityLevel: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select security level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="basic">Basic</SelectItem>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="high">High Security</SelectItem>
+                      <SelectItem value="maximum">Maximum Security</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            )}
-            
-            {editedNode.ownership === 'outsourced' && (
-              <div>
-                <Label htmlFor="serviceProvider">Service Provider</Label>
-                <Input
-                  id="serviceProvider"
-                  value={editedNode.serviceProvider || ''}
-                  onChange={(e) => setEditedNode({ ...editedNode, serviceProvider: e.target.value })}
-                  placeholder="Name of service provider..."
-                />
-              </div>
-            )}
-          </TabsContent>
+            </TabsContent>
+          </Tabs>
           
-          <TabsContent value="details" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="floorArea">Floor Area (sq m)</Label>
-                <Input
-                  id="floorArea"
-                  type="number"
-                  value={editedNode.floorArea || ''}
-                  onChange={(e) => setEditedNode({ ...editedNode, floorArea: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="storageType">Storage Type</Label>
-                <Input
-                  id="storageType"
-                  value={editedNode.storageType || ''}
-                  onChange={(e) => setEditedNode({ ...editedNode, storageType: e.target.value })}
-                  placeholder="e.g., Cold storage, Dry storage..."
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="temperature">Temperature (°C)</Label>
-                <Input
-                  id="temperature"
-                  type="number"
-                  value={editedNode.temperature || ''}
-                  onChange={(e) => setEditedNode({ ...editedNode, temperature: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="securityLevel">Security Level</Label>
-                <Select
-                  value={editedNode.securityLevel || ''}
-                  onValueChange={(value) => setEditedNode({ ...editedNode, securityLevel: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select security level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="standard">Standard</SelectItem>
-                    <SelectItem value="high">High Security</SelectItem>
-                    <SelectItem value="maximum">Maximum Security</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            <X className="h-4 w-4 mr-2" />
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose}>
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Draggable>
     </Dialog>
   );
 };

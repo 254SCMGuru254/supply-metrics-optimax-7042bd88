@@ -1,4 +1,3 @@
-
 import { LatLngExpression, PathOptions, MarkerOptions } from 'leaflet';
 
 export type NodeType = 'warehouse' | 'factory' | 'distribution' | 'supplier' | 'customer' | 'airport' | 'port' | 'railhub' | 'retail';
@@ -21,6 +20,38 @@ export interface Node {
   color?: string;
   notes?: string;
   ownership: OwnershipType; // Made required
+  
+  // Enhanced properties for advanced COG algorithms
+  // Economic COG properties
+  costPerUnit?: number; // Cost per unit per km
+  transportCost?: number; // Fixed transport cost
+  facilityCost?: number; // Fixed facility cost
+  
+  // Risk-adjusted COG properties
+  riskFactor?: number; // Risk factor (1-5, 1=low risk, 5=high risk)
+  supplyRisk?: number; // Supply chain disruption risk
+  demandRisk?: number; // Demand volatility risk
+  geographicRisk?: number; // Geographic/political risk
+  
+  // Multi-criteria COG properties
+  marketAccess?: number; // Market access score (1-10)
+  infrastructure?: number; // Infrastructure quality (1-10)
+  laborAvailability?: number; // Labor availability (1-10)
+  regulatoryEnvironment?: number; // Regulatory environment (1-10)
+  
+  // Seasonal COG properties
+  seasonalDemand?: {
+    [season: string]: number; // e.g., "Q1": 100, "Q2": 150
+  };
+  peakSeason?: string; // Peak demand season
+  seasonalVariation?: number; // Seasonal variation factor
+  
+  // Road network COG properties
+  roadDistance?: number; // Actual road distance (if known)
+  travelTime?: number; // Travel time in minutes
+  roadQuality?: number; // Road quality score (1-10)
+  congestionFactor?: number; // Traffic congestion factor
+  
   // Ownership-specific data
   monthlyRent?: number;
   contractDuration?: number;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,10 +54,13 @@ export function CompleteCogCalculation({
   const getDistanceFunction = (formula: string) => {
     switch (formula) {
       case 'euclidean':
+      case 'weighted-center-gravity':
         return calculateEuclideanDistance;
       case 'manhattan':
+      case 'manhattan-center-gravity':
         return calculateManhattanDistance;
       case 'haversine':
+      case 'haversine-center-gravity':
       case 'great-circle':
       default:
         return calculateHaversineDistance;
@@ -186,7 +188,335 @@ export function CompleteCogCalculation({
       totalDistance,
       totalCost,
       efficiencyScore,
-      algorithmUsed: `geometric-${selectedFormula}`
+      algorithmUsed: `geometric-median`
+    };
+  };
+
+  const calculateEconomicCenterOfGravity = (): CogCalculationResult => {
+    if (demandPoints.length === 0) {
+      throw new Error("No demand points provided");
+    }
+
+    let totalWeightedCost = 0;
+    let weightedLat = 0;
+    let weightedLng = 0;
+
+    demandPoints.forEach(point => {
+      const weight = point.weight || 1;
+      const costPerUnit = point.costPerUnit || 10;
+      const transportCost = point.transportCost || 0;
+      const facilityCost = point.facilityCost || 0;
+      
+      const totalCost = weight * costPerUnit + transportCost + facilityCost;
+      
+      totalWeightedCost += totalCost;
+      weightedLat += point.latitude * totalCost;
+      weightedLng += point.longitude * totalCost;
+    });
+
+    const cogLat = weightedLat / totalWeightedCost;
+    const cogLng = weightedLng / totalWeightedCost;
+
+    const distanceFunction = getDistanceFunction(selectedFormula);
+    let totalDistance = 0;
+    let totalCost = 0;
+
+    demandPoints.forEach(point => {
+      const distance = distanceFunction(point.latitude, point.longitude, cogLat, cogLng);
+      const weight = point.weight || 1;
+      const costPerUnit = point.costPerUnit || 10;
+      const transportCost = point.transportCost || 0;
+      const facilityCost = point.facilityCost || 0;
+      
+      totalDistance += distance;
+      totalCost += distance * weight * costPerUnit + transportCost + facilityCost;
+    });
+
+    const maxPossibleCost = totalWeightedCost * 100;
+    const efficiencyScore = Math.max(0, 100 - (totalCost / maxPossibleCost) * 100);
+
+    return {
+      latitude: cogLat,
+      longitude: cogLng,
+      totalDistance,
+      totalCost,
+      efficiencyScore,
+      algorithmUsed: `economic-center-gravity`
+    };
+  };
+
+  const calculateMultiCriteriaCOG = (): CogCalculationResult => {
+    if (demandPoints.length === 0) {
+      throw new Error("No demand points provided");
+    }
+
+    let totalWeightedScore = 0;
+    let weightedLat = 0;
+    let weightedLng = 0;
+
+    demandPoints.forEach(point => {
+      const weight = point.weight || 1;
+      const costPerUnit = point.costPerUnit || 10;
+      const marketAccess = point.marketAccess || 5;
+      const infrastructure = point.infrastructure || 5;
+      const laborAvailability = point.laborAvailability || 5;
+      const regulatoryEnvironment = point.regulatoryEnvironment || 5;
+      
+      const costScore = Math.max(0, 1 - (costPerUnit / 50));
+      const marketScore = marketAccess / 10;
+      const infraScore = infrastructure / 10;
+      const laborScore = laborAvailability / 10;
+      const regulatoryScore = regulatoryEnvironment / 10;
+      
+      const multiCriteriaScore = weight * (
+        0.3 * costScore + 
+        0.25 * marketScore + 
+        0.2 * infraScore + 
+        0.15 * laborScore + 
+        0.1 * regulatoryScore
+      );
+      
+      totalWeightedScore += multiCriteriaScore;
+      weightedLat += point.latitude * multiCriteriaScore;
+      weightedLng += point.longitude * multiCriteriaScore;
+    });
+
+    const cogLat = weightedLat / totalWeightedScore;
+    const cogLng = weightedLng / totalWeightedScore;
+
+    const distanceFunction = getDistanceFunction(selectedFormula);
+    let totalDistance = 0;
+    let totalCost = 0;
+
+    demandPoints.forEach(point => {
+      const distance = distanceFunction(point.latitude, point.longitude, cogLat, cogLng);
+      const weight = point.weight || 1;
+      const costPerUnit = point.costPerUnit || 10;
+      totalDistance += distance;
+      totalCost += distance * weight * costPerUnit;
+    });
+
+    const maxPossibleCost = totalWeightedScore * 100;
+    const efficiencyScore = Math.max(0, 100 - (totalCost / maxPossibleCost) * 100);
+
+    return {
+      latitude: cogLat,
+      longitude: cogLng,
+      totalDistance,
+      totalCost,
+      efficiencyScore,
+      algorithmUsed: `multi-criteria-cog`
+    };
+  };
+
+  const calculateRiskAdjustedCOG = (): CogCalculationResult => {
+    if (demandPoints.length === 0) {
+      throw new Error("No demand points provided");
+    }
+
+    let totalRiskAdjustedWeight = 0;
+    let weightedLat = 0;
+    let weightedLng = 0;
+
+    demandPoints.forEach(point => {
+      const weight = point.weight || 1;
+      const riskFactor = point.riskFactor || 1;
+      const supplyRisk = point.supplyRisk || 1;
+      const demandRisk = point.demandRisk || 1;
+      const geographicRisk = point.geographicRisk || 1;
+      
+      const combinedRisk = (riskFactor + supplyRisk + demandRisk + geographicRisk) / 4;
+      const riskAdjustedWeight = weight / Math.max(1, combinedRisk);
+      
+      totalRiskAdjustedWeight += riskAdjustedWeight;
+      weightedLat += point.latitude * riskAdjustedWeight;
+      weightedLng += point.longitude * riskAdjustedWeight;
+    });
+
+    const cogLat = weightedLat / totalRiskAdjustedWeight;
+    const cogLng = weightedLng / totalRiskAdjustedWeight;
+
+    const distanceFunction = getDistanceFunction(selectedFormula);
+    let totalDistance = 0;
+    let totalCost = 0;
+
+    demandPoints.forEach(point => {
+      const distance = distanceFunction(point.latitude, point.longitude, cogLat, cogLng);
+      const weight = point.weight || 1;
+      const riskFactor = point.riskFactor || 1;
+      const costPerUnit = point.costPerUnit || 10;
+      totalDistance += distance;
+      totalCost += distance * weight * costPerUnit * riskFactor;
+    });
+
+    const maxPossibleCost = totalRiskAdjustedWeight * 1000;
+    const efficiencyScore = Math.max(0, 100 - (totalCost / maxPossibleCost) * 100);
+
+    return {
+      latitude: cogLat,
+      longitude: cogLng,
+      totalDistance,
+      totalCost,
+      efficiencyScore,
+      algorithmUsed: `risk-adjusted-cog`
+    };
+  };
+
+  const calculateRoadNetworkCOG = (): CogCalculationResult => {
+    if (demandPoints.length === 0) {
+      throw new Error("No demand points provided");
+    }
+
+    let totalWeightedScore = 0;
+    let weightedLat = 0;
+    let weightedLng = 0;
+
+    demandPoints.forEach(point => {
+      const weight = point.weight || 1;
+      const roadDistance = point.roadDistance;
+      const travelTime = point.travelTime;
+      const roadQuality = point.roadQuality || 5;
+      const congestionFactor = point.congestionFactor || 1;
+      
+      let effectiveDistance = roadDistance;
+      if (!effectiveDistance) {
+        effectiveDistance = calculateHaversineDistance(
+          point.latitude, point.longitude, 
+          demandPoints[0].latitude, demandPoints[0].longitude
+        ) * 1.3;
+      }
+      
+      let effectiveTravelTime = travelTime;
+      if (!effectiveTravelTime) {
+        const avgSpeed = 50;
+        effectiveTravelTime = (effectiveDistance / avgSpeed) * 60;
+      }
+      
+      const distanceScore = Math.max(0, 1 - (effectiveDistance / 1000));
+      const timeScore = Math.max(0, 1 - (effectiveTravelTime / 480));
+      const qualityScore = roadQuality / 10;
+      const congestionScore = Math.max(0, 1 - (congestionFactor - 1) / 4);
+      
+      const roadNetworkScore = weight * (
+        0.4 * distanceScore + 
+        0.3 * timeScore + 
+        0.2 * qualityScore + 
+        0.1 * congestionScore
+      );
+      
+      totalWeightedScore += roadNetworkScore;
+      weightedLat += point.latitude * roadNetworkScore;
+      weightedLng += point.longitude * roadNetworkScore;
+    });
+
+    const cogLat = weightedLat / totalWeightedScore;
+    const cogLng = weightedLng / totalWeightedScore;
+
+    let totalDistance = 0;
+    let totalCost = 0;
+
+    demandPoints.forEach(point => {
+      let distance = point.roadDistance;
+      if (!distance) {
+        distance = calculateHaversineDistance(
+          point.latitude, point.longitude, cogLat, cogLng
+        ) * 1.3;
+      }
+      
+      const weight = point.weight || 1;
+      const costPerUnit = point.costPerUnit || 10;
+      totalDistance += distance;
+      totalCost += distance * weight * costPerUnit;
+    });
+
+    const maxPossibleCost = totalWeightedScore * 100;
+    const efficiencyScore = Math.max(0, 100 - (totalCost / maxPossibleCost) * 100);
+
+    return {
+      latitude: cogLat,
+      longitude: cogLng,
+      totalDistance,
+      totalCost,
+      efficiencyScore,
+      algorithmUsed: `road-network-cog`
+    };
+  };
+
+  const calculateSeasonalCOG = (): CogCalculationResult => {
+    if (demandPoints.length === 0) {
+      throw new Error("No demand points provided");
+    }
+
+    const getCurrentSeason = (): string => {
+      const month = new Date().getMonth();
+      if (month >= 0 && month <= 2) return 'Q1';
+      if (month >= 3 && month <= 5) return 'Q2';
+      if (month >= 6 && month <= 8) return 'Q3';
+      return 'Q4';
+    };
+
+    const currentSeason = getCurrentSeason();
+    let totalSeasonalWeight = 0;
+    let weightedLat = 0;
+    let weightedLng = 0;
+
+    demandPoints.forEach(point => {
+      const baseWeight = point.weight || 1;
+      const seasonalDemand = point.seasonalDemand || {};
+      const peakSeason = point.peakSeason || 'Q2';
+      const seasonalVariation = point.seasonalVariation || 1;
+      
+      let seasonalWeight = baseWeight;
+      if (seasonalDemand[currentSeason]) {
+        seasonalWeight = seasonalDemand[currentSeason];
+      } else if (currentSeason === peakSeason) {
+        seasonalWeight = baseWeight * seasonalVariation;
+      } else {
+        seasonalWeight = baseWeight / seasonalVariation;
+      }
+      
+      totalSeasonalWeight += seasonalWeight;
+      weightedLat += point.latitude * seasonalWeight;
+      weightedLng += point.longitude * seasonalWeight;
+    });
+
+    const cogLat = weightedLat / totalSeasonalWeight;
+    const cogLng = weightedLng / totalSeasonalWeight;
+
+    const distanceFunction = getDistanceFunction(selectedFormula);
+    let totalDistance = 0;
+    let totalCost = 0;
+
+    demandPoints.forEach(point => {
+      const distance = distanceFunction(point.latitude, point.longitude, cogLat, cogLng);
+      const baseWeight = point.weight || 1;
+      const seasonalDemand = point.seasonalDemand || {};
+      const seasonalVariation = point.seasonalVariation || 1;
+      
+      let seasonalWeight = baseWeight;
+      if (seasonalDemand[currentSeason]) {
+        seasonalWeight = seasonalDemand[currentSeason];
+      } else if (currentSeason === point.peakSeason) {
+        seasonalWeight = baseWeight * seasonalVariation;
+      } else {
+        seasonalWeight = baseWeight / seasonalVariation;
+      }
+      
+      const costPerUnit = point.costPerUnit || 10;
+      totalDistance += distance;
+      totalCost += distance * seasonalWeight * costPerUnit;
+    });
+
+    const maxPossibleCost = totalSeasonalWeight * 100;
+    const efficiencyScore = Math.max(0, 100 - (totalCost / maxPossibleCost) * 100);
+
+    return {
+      latitude: cogLat,
+      longitude: cogLng,
+      totalDistance,
+      totalCost,
+      efficiencyScore,
+      algorithmUsed: `seasonal-cog`
     };
   };
 
@@ -209,14 +539,29 @@ export function CompleteCogCalculation({
       let calculationResult: CogCalculationResult;
 
       switch (selectedFormula) {
-        case 'geometric':
+        case 'geometric-median':
           calculationResult = calculateGeometricMedian();
           break;
-        case 'weighted':
-        case 'euclidean':
-        case 'haversine':
-        case 'manhattan':
+        case 'economic-center-gravity':
+          calculationResult = calculateEconomicCenterOfGravity();
+          break;
+        case 'multi-criteria-cog':
+          calculationResult = calculateMultiCriteriaCOG();
+          break;
+        case 'risk-adjusted-cog':
+          calculationResult = calculateRiskAdjustedCOG();
+          break;
+        case 'road-network-cog':
+          calculationResult = calculateRoadNetworkCOG();
+          break;
+        case 'seasonal-cog':
+          calculationResult = calculateSeasonalCOG();
+          break;
+        case 'weighted-center-gravity':
+        case 'haversine-center-gravity':
+        case 'manhattan-center-gravity':
         default:
+          // For formulas that need specialized data, fall back to weighted COG
           calculationResult = calculateWeightedCenterOfGravity();
           break;
       }

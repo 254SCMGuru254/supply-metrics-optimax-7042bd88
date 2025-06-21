@@ -9,6 +9,12 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Papa from "papaparse";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TableDiff } from "@/components/shared/TableDiff";
 
 const formulas = [
   {
@@ -90,6 +96,12 @@ export function EnterpriseNetworkCalculators() {
   const commodityFileRef = useRef();
   const [loading, setLoading] = useState(false);
   const [optimizationResult, setOptimizationResult] = useState(null);
+  const [scenarios, setScenarios] = useState([]);
+  const [selectedScenarioId, setSelectedScenarioId] = useState("");
+  const [comparisonScenario, setComparisonScenario] = useState(null);
+  const [comparisonScenarioId, setComparisonScenarioId] = useState("");
+  const [showComparison, setShowComparison] = useState(false);
+  const [activeModel, setActiveModel] = useState("network-optimization");
 
   // Add/edit/remove logic for nodes
   const addNode = () => setNodes([...nodes, { id: `N${nodes.length+1}`, name: "", type: "source", capacity: 0, demand: 0, latitude: 0, longitude: 0 }]);
@@ -198,6 +210,28 @@ export function EnterpriseNetworkCalculators() {
       setError("Optimization failed: " + (err.message || err.toString()));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadScenarios = async () => {
+    const { data, error } = await supabase.from("network_optimizations").select("id, scenario_name");
+    if (data) setScenarios(data);
+  };
+  const loadScenarioDetails = async (id) => {
+    const { data, error } = await supabase.from("network_optimizations").select("*").eq("id", id).single();
+    if (data) {
+      setNodes(data.network_graph.nodes);
+      setEdges(data.network_graph.edges);
+      setCommodities(data.network_graph.commodities);
+      setScenarioName(data.scenario_name);
+    }
+  };
+
+  const loadComparisonScenario = async (id) => {
+    const { data, error } = await supabase.from("network_optimizations").select("*").eq("id", id).single();
+    if (data) {
+      setComparisonScenario(data);
+      setShowComparison(true);
     }
   };
 
@@ -336,12 +370,57 @@ export function EnterpriseNetworkCalculators() {
       </Card>
       {/* Advanced Options */}
       <Card className="mb-6">
-        <CardHeader><CardTitle>Advanced Options & Constraints</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Advanced Options, Constraints & Model Selection</CardTitle></CardHeader>
         <CardContent>
-          {/* Add fields for constraints, objectives, risk factors, etc. */}
-          <div className="text-muted-foreground text-xs">(Coming soon: advanced constraints, risk, sustainability, scenario sharing, etc.)</div>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="model-selection">
+              <AccordionTrigger>Select Optimization Model ({activeModel})</AccordionTrigger>
+              <AccordionContent>
+                <Select onValueChange={setActiveModel} defaultValue={activeModel}>
+                  <SelectTrigger><SelectValue placeholder="Select a model" /></SelectTrigger>
+                  <SelectContent>
+                    {modelFormulaRegistry.map(model => (
+                      <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="constraints">
+              <AccordionTrigger>Constraints</AccordionTrigger>
+              <AccordionContent>
+                {/* Dynamically render constraints based on selected model */}
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="risk-sustainability">
+              <AccordionTrigger>Risk & Sustainability</AccordionTrigger>
+              <AccordionContent>
+                {/* Add fields for risk factors, sustainability weights, etc. */}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
+      <div className="flex gap-2 mb-4">
+        <Select onValueChange={loadScenarioDetails} onOpenChange={loadScenarios}>
+          <SelectTrigger><SelectValue placeholder="Load Scenario" /></SelectTrigger>
+          <SelectContent>{scenarios.map(s => <SelectItem key={s.id} value={s.id}>{s.scenario_name}</SelectItem>)}</SelectContent>
+        </Select>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline">Compare</Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <div className="space-y-2">
+              <Label>Select scenario to compare:</Label>
+              <Select onValueChange={loadComparisonScenario} onOpenChange={loadScenarios}>
+                <SelectTrigger><SelectValue placeholder="Select Scenario" /></SelectTrigger>
+                <SelectContent>{scenarios.map(s => <SelectItem key={s.id} value={s.id}>{s.scenario_name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
       <Button className="mt-4" variant="default" onClick={runOptimization} disabled={loading}>
         {loading ? "Running..." : "Run Optimization"}
       </Button>
@@ -352,6 +431,9 @@ export function EnterpriseNetworkCalculators() {
             <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(optimizationResult, null, 2)}</pre>
           </CardContent>
         </Card>
+      )}
+      {showComparison && comparisonScenario && (
+        <TableDiff base={optimizationResult} compare={comparisonScenario.optimization_results} />
       )}
     </div>
   );
