@@ -8,11 +8,7 @@ const Hero = () => {
       <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">
         Supply Chain Intelligence, Redefined.
       </h1>
-      <p className="text-xl text-muted-foreground max-w-3xl mb-8">
-        Harness the power of enterprise-grade analytics to master your Kenyan supply chain.
-        Outthink complexity, outmaneuver disruption, and outperform your competition.
-      </p>
-      <div className="flex gap-4">
+      <div className="flex gap-4 mt-8">
         <Link to="/dashboard">
           <Button size="lg">
             <MapPin className="mr-2 h-5 w-5" />
