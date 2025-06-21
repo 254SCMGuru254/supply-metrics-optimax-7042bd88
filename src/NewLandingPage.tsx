@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import "../Landing.css";
+import "./Landing.css";
 
-const Index = () => {
+const NewLandingPage = () => {
   useEffect(() => {
     // Create animated particles
     function createParticles() {
@@ -334,4 +334,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default NewLandingPage; 

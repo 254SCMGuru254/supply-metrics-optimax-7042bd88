@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Layout from "./components/Layout";
-import Index from "./pages/Index";
+import NewLandingPage from "../NewLandingPage";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Pricing from "./pages/Pricing";
@@ -57,7 +56,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<NewLandingPage />} />
                 <Route path="/auth" element={<Auth />} />
                 
                 {/* Protected Routes */}
