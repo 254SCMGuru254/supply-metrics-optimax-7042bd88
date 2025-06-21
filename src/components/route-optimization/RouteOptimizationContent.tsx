@@ -1,359 +1,161 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { NetworkMap } from "@/components/NetworkMap";
-import { VehicleFleetConfig, Vehicle } from "./VehicleFleetConfig";
-import { ConstraintsForm } from "@/components/data-input/ConstraintsForm";
-import { OptimizationControls } from "./OptimizationControls";
-import { OptimizationResults } from "./OptimizationResults";
-import { ProductionDashboard } from "./ProductionDashboard";
-import { useOptimizationEngine } from "./OptimizationEngine";
-import { ExportPdfButton } from "@/components/ui/ExportPdfButton";
-import type { Node, Route } from "@/components/map/MapTypes";
-import { 
-  Truck, 
-  MapPin, 
-  Activity, 
-  Gauge, 
-  DollarSign, 
-  Package, 
-  Clock, 
-  Settings,
-  Shield
-} from "lucide-react";
-import { toast } from "sonner";
+import React, { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { NetworkMap } from '@/components/NetworkMap';
+import { Node, Route } from '@/components/map/MapTypes';
+import { Plus, Trash, Play } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+// Mock data
+const mockNodes: Node[] = [
+  { id: '1', name: 'Warehouse A', type: 'warehouse', latitude: -1.28, longitude: 36.82, ownership: 'owned' },
+  { id: '2', name: 'Customer 1', type: 'customer', latitude: -1.30, longitude: 36.85, ownership: 'owned', demand: 10 },
+  { id: '3', name: 'Customer 2', type: 'customer', latitude: -1.27, longitude: 36.80, ownership: 'owned', demand: 15 },
+  { id: '4', name: 'Customer 3', type: 'customer', latitude: -1.32, longitude: 36.78, ownership: 'owned', demand: 8 },
+];
 
 export const RouteOptimizationContent = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([
-    {
-      id: "vehicle-1",
-      name: "Delivery Truck 1",
-      type: "truck",
-      capacity: 5000,
-      costPerKm: 2.5,
-      fuelEfficiency: 8.0
-    }
-  ]);
-
-  const [nodes, setNodes] = useState<Node[]>([
-    {
-      id: "nairobi-hub",
-      name: "Nairobi Distribution Hub",
-      type: "warehouse",
-      latitude: -1.2921,
-      longitude: 36.8219,
-      ownership: 'owned',
-      metadata: {
-        demand: 0,
-        capacity: 50000,
-        restrictions: {
-          weightLimit: 40000,
-          heightLimit: 4.2,
-          environmentalZone: true
-        },
-        trafficFactor: 1.3,
-        tollCost: 500,
-        checkpointWaitTime: 0.5
-      }
-    },
-    {
-      id: "mombasa-port",
-      name: "Mombasa Port",
-      type: "port",
-      latitude: -4.0435,
-      longitude: 39.6682,
-      ownership: 'owned',
-      metadata: {
-        demand: 15000,
-        capacity: 30000,
-        quayCapacity: 50000,
-        maxDraft: 15.0,
-        craneAvailability: true
-      }
-    },
-    {
-      id: "kisumu-customer",
-      name: "Kisumu Customer Center",
-      type: "customer",
-      latitude: -0.0917,
-      longitude: 34.7578,
-      ownership: 'owned',
-      metadata: {
-        demand: 8000,
-        capacity: 10000,
-        customerFootfall: 5000,
-        peakHours: "10:00-16:00"
-      }
-    },
-    {
-      id: "nakuru-retail",
-      name: "Nakuru Retail Center",
-      type: "retail",
-      latitude: -0.2833,
-      longitude: 36.0667,
-      ownership: 'owned',
-      metadata: {
-        demand: 5000,
-        capacity: 8000,
-        storageCapacity: 10000,
-        customerFootfall: 5000,
-        peakHours: "10:00-16:00"
-      }
-    },
-    {
-      id: "eldoret-customer",
-      name: "Eldoret Customer Hub",
-      type: "customer",
-      latitude: 0.5167,
-      longitude: 35.2667,
-      ownership: 'owned',
-      metadata: {
-        demand: 6000,
-        capacity: 9000,
-        productionCapacity: 75000,
-        rawMaterialSupply: "Reliable",
-        wasteManagement: "ISO 14001"
-      }
-    }
-  ]);
-
+  const [nodes, setNodes] = useState<Node[]>(mockNodes);
   const [routes, setRoutes] = useState<Route[]>([]);
-  const [activeTab, setActiveTab] = useState("optimization");
+  const [isOptimized, setIsOptimized] = useState(false);
 
-  const {
-    optimizeRoutes,
-    cancelOptimization,
-    isOptimizing,
-    optimizationResult,
-    error,
-    optimizationProgress,
-    currentStage,
-    clearResult,
-    clearError,
-    getPerformanceReport,
-    getErrorHistory
-  } = useOptimizationEngine();
-
-  useEffect(() => {
-    // Initialize with basic routes
-    const initialRoutes = [
-      {
-        id: "route-1",
-        from: "nairobi-hub",
-        to: "mombasa-port",
-        type: "road" as const,
-        volume: 120,
-        cost: 15000,
-        transitTime: 8,
-        isOptimized: false,
-        ownership: 'owned' as const
-      },
-      {
-        id: "route-2",
-        from: "nairobi-hub",
-        to: "kisumu-customer",
-        type: "road" as const,
-        volume: 80,
-        cost: 12000,
-        transitTime: 6,
-        isOptimized: false,
-        ownership: 'owned' as const
-      },
-      {
-        id: "route-3",
-        from: "nairobi-hub",
-        to: "nakuru-retail",
-        type: "road" as const,
-        volume: 50,
-        cost: 8000,
-        transitTime: 3,
-        isOptimized: false,
-        ownership: 'owned' as const
-      },
-      {
-        id: "route-4",
-        from: "nairobi-hub",
-        to: "eldoret-customer",
-        type: "road" as const,
-        volume: 60,
-        cost: 10000,
-        transitTime: 4,
-        isOptimized: false,
-        ownership: 'owned' as const
-      }
-    ];
-    
-    setRoutes(initialRoutes);
-  }, []);
-
-  const handleOptimize = async (params: any) => {
-    clearError();
-    toast.info("Starting production-grade route optimization...");
-    
-    const optimizationParams = {
-      ...params,
-      vehicles
+  const handleAddNode = () => {
+    const newNodeId = (nodes.length + 1).toString();
+    const newNode: Node = {
+      id: newNodeId,
+      name: `Customer ${newNodeId}`,
+      type: 'customer',
+      latitude: -1.28 + (Math.random() - 0.5) * 0.1,
+      longitude: 36.82 + (Math.random() - 0.5) * 0.1,
+      demand: Math.floor(Math.random() * 20) + 5,
+      ownership: 'owned'
     };
-    
-    const result = await optimizeRoutes(nodes, routes, optimizationParams);
-    
-    if (result) {
-      toast.success(`Optimization completed! Cost savings: $${result.costSavings.toLocaleString()}`);
-    } else if (error) {
-      toast.error(`Optimization failed: ${error}`);
+    setNodes([...nodes, newNode]);
+  };
+
+  const handleRemoveNode = (nodeId: string) => {
+    setNodes(nodes.filter(n => n.id !== nodeId));
+  };
+  
+  const handleOptimize = () => {
+    // Basic TSP-like optimization (nearest neighbor)
+    const unvisited = [...nodes.filter(n => n.type === 'customer')];
+    const optimizedRoute: Node[] = [nodes.find(n => n.type === 'warehouse')!];
+    let currentNode = optimizedRoute[0];
+
+    while(unvisited.length > 0) {
+      let nearestNeighbor: Node | null = null;
+      let minDistance = Infinity;
+
+      unvisited.forEach(neighbor => {
+        const distance = Math.sqrt(
+          Math.pow(currentNode.latitude - neighbor.latitude, 2) + 
+          Math.pow(currentNode.longitude - neighbor.longitude, 2)
+        );
+        if(distance < minDistance) {
+          minDistance = distance;
+          nearestNeighbor = neighbor;
+        }
+      });
+
+      if(nearestNeighbor) {
+        optimizedRoute.push(nearestNeighbor);
+        currentNode = nearestNeighbor;
+        unvisited.splice(unvisited.indexOf(nearestNeighbor), 1);
+      }
     }
-  };
+    
+    // Create route segments
+    const newRoutes: Route[] = [];
+    for(let i=0; i < optimizedRoute.length - 1; i++) {
+        newRoutes.push({
+            id: `r-${i}`,
+            from: optimizedRoute[i].id,
+            to: optimizedRoute[i+1].id,
+            ownership: 'owned',
+            color: '#3b82f6'
+        });
+    }
+    // Add route back to warehouse
+    newRoutes.push({
+        id: 'r-final',
+        from: optimizedRoute[optimizedRoute.length - 1].id,
+        to: optimizedRoute[0].id,
+        ownership: 'owned',
+        color: '#a855f7'
+    });
 
-  const handleApplyRoutes = (optimizedRoutes: Route[]) => {
-    setRoutes(optimizedRoutes);
-    toast.success("Optimized routes applied successfully!");
-    clearResult();
+    setRoutes(newRoutes);
+    setIsOptimized(true);
   };
-
-  const handleStopOptimization = () => {
-    cancelOptimization();
-    toast.info("Optimization cancelled by user");
-  };
-
-  const currentRoutes = optimizationResult?.optimizedRoutes || routes;
-  const totalCost = currentRoutes.reduce((sum, route) => sum + route.cost, 0);
-  const totalVolume = currentRoutes.reduce((sum, route) => sum + route.volume, 0);
-  const averageTransitTime = currentRoutes.length > 0 
-    ? currentRoutes.reduce((sum, route) => sum + route.transitTime, 0) / currentRoutes.length 
-    : 0;
+  
+  const handleReset = () => {
+    setRoutes([]);
+    setIsOptimized(false);
+  }
 
   return (
-    <div className="space-y-6" id="route-optimization-content">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Gauge className="h-5 w-5" />
-            Production Route Optimization Engine
-            <Badge variant={isOptimizing ? "default" : "secondary"}>
-              {isOptimizing ? `${optimizationProgress}% - ${currentStage}` : "Ready"}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="flex flex-col items-center justify-center p-4">
-                <Truck className="h-6 w-6 text-blue-500 mb-2" />
-                <div className="text-2xl font-bold">{currentRoutes.filter(r => r.type === "road").length}</div>
-                <div className="text-sm text-gray-500">Road Routes</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-green-50 border-green-200">
-              <CardContent className="flex flex-col items-center justify-center p-4">
-                <DollarSign className="h-6 w-6 text-green-500 mb-2" />
-                <div className="text-2xl font-bold">${totalCost.toLocaleString()}</div>
-                <div className="text-sm text-gray-500">Total Cost</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-purple-50 border-purple-200">
-              <CardContent className="flex flex-col items-center justify-center p-4">
-                <Package className="h-6 w-6 text-purple-500 mb-2" />
-                <div className="text-2xl font-bold">{totalVolume.toLocaleString()}</div>
-                <div className="text-sm text-gray-500">Total Volume</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-orange-50 border-orange-200">
-              <CardContent className="flex flex-col items-center justify-center p-4">
-                <Clock className="h-6 w-6 text-orange-500 mb-2" />
-                <div className="text-2xl font-bold">{averageTransitTime.toFixed(1)}h</div>
-                <div className="text-sm text-gray-500">Avg Transit Time</div>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end mb-4">
-        <ExportPdfButton 
-          exportId="route-optimization-content"
-          fileName="production_route_optimization_analysis"
-        />
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="lg:col-span-3">
+        <Card className="h-[700px]">
+           <NetworkMap 
+            nodes={nodes}
+            routes={routes}
+          />
+        </Card>
       </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 lg:grid-cols-6">
-          <TabsTrigger value="optimization" className="flex items-center gap-2">
-            <Gauge className="h-4 w-4" />
-            Live Optimization
-          </TabsTrigger>
-          <TabsTrigger value="results" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Results
-          </TabsTrigger>
-          <TabsTrigger value="production" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Production Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="network" className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            Network Map
-          </TabsTrigger>
-          <TabsTrigger value="fleet" className="flex items-center gap-2">
-            <Truck className="h-4 w-4" />
-            Vehicle Fleet
-          </TabsTrigger>
-          <TabsTrigger value="constraints" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Constraints
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="optimization" className="space-y-4">
-          <OptimizationControls
-            onOptimize={handleOptimize}
-            isOptimizing={isOptimizing}
-            onStop={handleStopOptimization}
-          />
-        </TabsContent>
-
-        <TabsContent value="results" className="space-y-4">
-          <OptimizationResults
-            results={optimizationResult}
-            originalRoutes={routes}
-            onApplyRoutes={handleApplyRoutes}
-            onExportResults={() => toast.info("Export functionality available in Production Dashboard")}
-          />
-        </TabsContent>
-
-        <TabsContent value="production" className="space-y-4">
-          <ProductionDashboard />
-        </TabsContent>
-        
-        <TabsContent value="network" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Network Visualization</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <NetworkMap nodes={nodes} routes={currentRoutes} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="fleet" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Vehicle Fleet Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <VehicleFleetConfig vehicles={vehicles} onVehiclesChange={setVehicles} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="constraints" className="space-y-4">
-          <ConstraintsForm />
-        </TabsContent>
-      </Tabs>
+      <div className="lg:col-span-2 space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Controls</CardTitle>
+          </CardHeader>
+          <CardContent className="flex gap-2">
+            <Button onClick={handleOptimize} disabled={isOptimized}><Play className="mr-2 h-4 w-4"/> Optimize</Button>
+            <Button onClick={handleReset} variant="outline" disabled={!isOptimized}>Reset</Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Nodes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleAddNode} size="sm" className="mb-4"><Plus className="mr-2 h-4 w-4"/>Add Node</Button>
+            <div className="max-h-[480px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Demand</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {nodes.map(node => (
+                    <TableRow key={node.id}>
+                      <TableCell>{node.name}</TableCell>
+                      <TableCell>{node.type}</TableCell>
+                      <TableCell>{node.demand || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveNode(node.id)}>
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

@@ -15,6 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TableDiff } from "@/components/shared/TableDiff";
+import { OptimizationService } from '@/services/OptimizationService';
 
 const formulas = [
   {
@@ -83,7 +84,7 @@ const exampleCommodities = [
   { id: "C1", name: "Product A", source: "N1", sink: "N3", demand: 800 }
 ];
 
-export function EnterpriseNetworkCalculators() {
+export function NetworkCalculators() {
   const [activeTab, setActiveTab] = useState("network");
   const [nodes, setNodes] = useState(exampleNodes);
   const [edges, setEdges] = useState(exampleEdges);
@@ -236,8 +237,13 @@ export function EnterpriseNetworkCalculators() {
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-2">Enterprise Network Optimization Suite</h2>
+    <div className="space-y-8" id="network-optimization-calculators">
+      <div className="text-center">
+        <h2 className="text-xl font-bold mb-2">Network Optimization Suite</h2>
+        <p className="text-gray-500">
+          Define your supply chain network and run optimization scenarios.
+        </p>
+      </div>
       <div className="mb-4 flex gap-2 items-center">
         <Label htmlFor="scenarioName">Scenario Name:</Label>
         <Input id="scenarioName" value={scenarioName} onChange={e => setScenarioName(e.target.value)} placeholder="Enter scenario name" className="w-64" />
@@ -439,4 +445,4 @@ export function EnterpriseNetworkCalculators() {
   );
 }
 
-export default EnterpriseNetworkCalculators;
+export default NetworkCalculators;

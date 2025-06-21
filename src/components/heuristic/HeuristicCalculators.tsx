@@ -44,7 +44,7 @@ const formulas = [
   }
 ];
 
-export function EnterpriseHeuristicCalculators() {
+export function HeuristicCalculators() {
   const [activeTab, setActiveTab] = useState(formulas[0].id);
   const [inputs, setInputs] = useState({});
   const [result, setResult] = useState(null);
@@ -73,8 +73,8 @@ export function EnterpriseHeuristicCalculators() {
   };
 
   return (
-    <div>
-      {/* show demandPoints somewhere in UI if required */}
+    <div className="p-4">
+      {/* The main content is now inside the calculator components */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 lg:grid-cols-4">
           {formulas.map(f => (
@@ -128,4 +128,4 @@ export function EnterpriseHeuristicCalculators() {
   );
 }
 
-export default EnterpriseHeuristicCalculators;
+export default HeuristicCalculators;

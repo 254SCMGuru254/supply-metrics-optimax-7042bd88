@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +28,7 @@ interface NewsvendorResult {
   fillRate: number;
 }
 
-export const EnterpriseEOQCalculators = () => {
+export const AdvancedEOQCalculators = () => {
   const [activeTab, setActiveTab] = useState("basic-eoq");
   
   // Basic EOQ State
@@ -167,7 +166,7 @@ export const EnterpriseEOQCalculators = () => {
       <div className="flex items-center gap-3 mb-6">
         <Calculator className="h-8 w-8 text-primary" />
         <div>
-          <h2 className="text-2xl font-bold">Enterprise Inventory Optimization Calculators</h2>
+          <h2 className="text-2xl font-bold">Advanced Inventory Optimization Calculators</h2>
           <p className="text-muted-foreground">Complete suite of inventory management formulas and calculators</p>
         </div>
       </div>

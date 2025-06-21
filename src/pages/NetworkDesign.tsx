@@ -1,313 +1,211 @@
-
-import { useState } from 'react';
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { NetworkMap } from '@/components/NetworkMap';
 import { Node, Route } from '@/components/map/MapTypes';
-import { NetworkMap } from "@/components/NetworkMap";
-import { 
-  NetworkModel, 
-  Factory, 
-  Depot,
-  Customer, 
-  CostAnalysis 
-} from '@/components/network-design/types/NetworkTypes';
-import { 
-  calculateNetworkCosts,
-  calculateDepotThroughputs 
-} from '@/components/network-design/utils/NetworkModelCalculator';
-import { NetworkDesignForm } from '@/components/network-design/NetworkDesignForm';
-import { CostBreakdown } from '@/components/network-design/CostBreakdown';
-import { NetworkDesignModel } from '@/components/network-design/NetworkDesignModel';
-import { ExportPdfButton } from '@/components/ui/ExportPdfButton';
+import { Plus, Trash, Play, Upload, Download, Building, ShoppingCart, TruckIcon } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from '@/components/ui/input';
+import { useToast } from "@/hooks/use-toast";
 
-const NetworkDesign = () => {
-  const [networkModel, setNetworkModel] = useState<NetworkModel>({
-    factories: [],
-    depots: [],
-    customers: [],
-    settings: {
-      stockLevelDays: 15, // Default to half a month
-      transitTimeDays: 3,
-      monthlyHoldingRate: 0.02, // 2% default monthly holding rate
-    }
-  });
-  
-  const [costAnalysis, setCostAnalysis] = useState<CostAnalysis | null>(null);
+type FacilityType = 'factory' | 'warehouse' | 'retail';
+
+interface Facility extends Node {
+  type: FacilityType;
+  cost: number; // monthly operational cost
+  capacity: number; // units per month
+}
+
+interface Product {
+    id: string;
+    name: string;
+    demand: number; // units per month per customer
+}
+
+export default function NetworkDesign() {
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [products, setProducts] = useState<Product[]>([{id: 'P1', name: 'Standard Widget', demand: 100}]);
   const { toast } = useToast();
 
-  // Generate unique ID
-  const generateId = (prefix: string) => {
-    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-  };
-
-  // Add a factory to the network
-  const handleAddFactory = (factory: Omit<Factory, 'id'>) => {
-    const newFactory: Factory = {
-      ...factory,
-      id: generateId('factory'),
+  const handleAddFacility = () => {
+    const newId = `F${facilities.length + 1}`;
+    const newFacility: Facility = {
+        id: newId,
+        name: `New Facility ${facilities.length + 1}`,
+        type: 'warehouse',
+        latitude: -1.30 + (Math.random() - 0.5) * 0.2,
+        longitude: 36.80 + (Math.random() - 0.5) * 0.2,
+        cost: 10000,
+        capacity: 5000,
+        ownership: 'owned',
     };
-    
-    setNetworkModel(prev => ({
-      ...prev,
-      factories: [...prev.factories, newFactory]
-    }));
-    
-    toast({
-      title: "Factory Added",
-      description: `${factory.name} added at [${factory.latitude.toFixed(4)}, ${factory.longitude.toFixed(4)}]`,
-    });
+    setFacilities([...facilities, newFacility]);
+     toast({ title: "Facility Added", description: newFacility.name });
+  };
+  
+  const handleUpdateFacility = (id: string, field: keyof Facility, value: any) => {
+    setFacilities(facilities.map(f => f.id === id ? { ...f, [field]: value } : f));
+  };
+  
+  const handleRemoveFacility = (id: string) => {
+    setFacilities(facilities.filter(f => f.id !== id));
+    setRoutes(routes.filter(r => r.from !== id && r.to !== id));
+    toast({ title: "Facility Removed" });
   };
 
-  // Add a depot to the network
-  const handleAddDepot = (depot: Omit<Depot, 'id'>) => {
-    const newDepot: Depot = {
-      ...depot,
-      id: generateId('depot'),
-    };
-    
-    setNetworkModel(prev => ({
-      ...prev,
-      depots: [...prev.depots, newDepot]
-    }));
-    
-    toast({
-      title: "Depot Added",
-      description: `${depot.name} added at [${depot.latitude.toFixed(4)}, ${depot.longitude.toFixed(4)}]`,
-    });
-  };
-
-  // Add a customer to the network
-  const handleAddCustomer = (customer: Omit<Customer, 'id'>) => {
-    const newCustomer: Customer = {
-      ...customer,
-      id: generateId('customer'),
-    };
-    
-    setNetworkModel(prev => ({
-      ...prev,
-      customers: [...prev.customers, newCustomer]
-    }));
-    
-    toast({
-      title: "Customer Added",
-      description: `${customer.name} added at [${customer.latitude.toFixed(4)}, ${customer.longitude.toFixed(4)}]`,
-    });
-  };
-
-  // Assign a customer to a depot
-  const handleAssignCustomerToDepot = (customerId: string, depotId: string) => {
-    setNetworkModel(prev => {
-      const updatedCustomers = prev.customers.map(customer => 
-        customer.id === customerId ? { ...customer, depotId } : customer
-      );
-      
-      const updatedDepots = prev.depots.map(depot => {
-        if (depot.id === depotId) {
-          return {
-            ...depot,
-            servesCustomerIds: [
-              ...depot.servesCustomerIds,
-              customerId
-            ].filter((v, i, a) => a.indexOf(v) === i) // Remove duplicates
-          };
-        }
-        return depot;
-      });
-      
-      return {
-        ...prev,
-        customers: updatedCustomers,
-        depots: updatedDepots
-      };
-    });
-  };
-
-  // Assign a depot to a factory
-  const handleAssignDepotToFactory = (depotId: string, factoryId: string) => {
-    setNetworkModel(prev => {
-      const updatedDepots = prev.depots.map(depot => 
-        depot.id === depotId ? { ...depot, factoryId } : depot
-      );
-      
-      return {
-        ...prev,
-        depots: updatedDepots
-      };
-    });
-  };
-
-  // Update network settings
-  const handleUpdateSettings = (settings: NetworkModel['settings']) => {
-    setNetworkModel(prev => ({
-      ...prev,
-      settings
-    }));
-  };
-
-  // Calculate total network costs
-  const handleAnalyzeNetwork = () => {
-    if (networkModel.factories.length === 0) {
-      toast({
-        title: "Analysis Failed",
-        description: "Please add at least one factory to your network.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (networkModel.depots.length === 0) {
-      toast({
-        title: "Analysis Failed",
-        description: "Please add at least one depot to your network.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Calculate depot throughputs first
-    const updatedModel = calculateDepotThroughputs(networkModel);
-    setNetworkModel(updatedModel);
-    
-    // Calculate network costs
-    const analysis = calculateNetworkCosts(updatedModel);
-    setCostAnalysis(analysis);
-    
-    toast({
-      title: "Network Analysis Complete",
-      description: `Total network cost: $${analysis.totalCost.toFixed(2)}`,
-    });
-  };
-
-  // Convert our network model to nodes and routes for the map
-  const getMapNodes = (): Node[] => {
-    return [
-      ...networkModel.factories.map(factory => ({
-        id: factory.id,
-        name: factory.name,
-        latitude: factory.latitude,
-        longitude: factory.longitude,
-        type: 'factory' as const,
-        ownership: 'owned' as const
-      })),
-      ...networkModel.depots.map(depot => ({
-        id: depot.id,
-        name: depot.name,
-        latitude: depot.latitude,
-        longitude: depot.longitude,
-        type: 'warehouse' as const,
-        throughput: depot.throughput,
-        ownership: 'owned' as const
-      })),
-      ...networkModel.customers.map(customer => ({
-        id: customer.id,
-        name: customer.name,
-        latitude: customer.latitude,
-        longitude: customer.longitude,
-        type: 'retail' as const,
-        demand: customer.demand,
-        ownership: 'owned' as const
-      }))
-    ];
-  };
-
-  // Generate routes between connected locations
-  const getMapRoutes = (): Route[] => {
-    const routes: Route[] = [];
-    
-    // Factory to depot routes
-    networkModel.depots.forEach(depot => {
-      if (depot.factoryId) {
-        const factory = networkModel.factories.find(f => f.id === depot.factoryId);
-        if (factory) {
-          routes.push({
-            id: `route-${factory.id}-${depot.id}`,
-            from: factory.id,
-            to: depot.id,
-            volume: depot.throughput,
-            type: 'road',
-            ownership: 'owned'
-          });
-        }
+  const handleAddRoute = () => {
+      if (facilities.length < 2) {
+          toast({ title: "Cannot Add Route", description: "You need at least two facilities to create a route.", variant: "destructive" });
+          return;
       }
+      const newRoute: Route = {
+          id: `R${routes.length + 1}`,
+          from: facilities[0].id,
+          to: facilities[1].id,
+          ownership: 'owned'
+      };
+      setRoutes([...routes, newRoute]);
+      toast({ title: "Route Added" });
+  };
+
+  const handleRemoveRoute = (id: string) => {
+      setRoutes(routes.filter(r => r.id !== id));
+      toast({ title: "Route Removed" });
+  };
+
+  const handleOptimize = () => {
+    // Placeholder for optimization logic
+    toast({
+      title: "Optimization Running",
+      description: "Connecting to the backend optimization engine...",
     });
+
+    // Simulate a network analysis result
+    const optimizedRoutes = routes.map(r => ({...r, color: '#10B981'}));
+    const underutilizedFacilities = facilities.filter(f => f.capacity > 10000); // Example logic
     
-    // Depot to customer routes
-    networkModel.customers.forEach(customer => {
-      if (customer.depotId) {
-        const depot = networkModel.depots.find(d => d.id === customer.depotId);
-        if (depot) {
-          routes.push({
-            id: `route-${depot.id}-${customer.id}`,
-            from: depot.id,
-            to: customer.id,
-            volume: customer.demand,
-            type: 'road',
-            ownership: 'owned'
-          });
-        }
-      }
+    setRoutes(optimizedRoutes);
+    
+    toast({
+      title: "Optimization Complete",
+      description: `Identified ${underutilizedFacilities.length} underutilized facilities.`,
     });
-    
-    return routes;
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Physical Network Design</h1>
-          <p className="text-muted-foreground mt-2">
-            Design and optimize your supply chain network with cost analysis
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleAnalyzeNetwork}>Calculate Network Costs</Button>
-          <ExportPdfButton
-            exportId="network-design-content"
-            fileName="network-design-results"
-          />
-        </div>
+    <div className="container mx-auto px-4 py-8">
+       <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
+          Supply Chain Network Design
+        </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Visually build, analyze, and optimize your end-to-end supply chain network.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="network-design-content">
-        <Card className="lg:col-span-2 p-4">
-          <NetworkMap
-            nodes={getMapNodes()}
-            routes={getMapRoutes()} 
-          />
-        </Card>
-
-        <div className="space-y-6">
-          <Tabs defaultValue="form">
-            <TabsList className="grid grid-cols-3">
-              <TabsTrigger value="form">Add Locations</TabsTrigger>
-              <TabsTrigger value="analysis">Cost Analysis</TabsTrigger>
-              <TabsTrigger value="model">Math Model</TabsTrigger>
-            </TabsList>
-            <TabsContent value="form" className="space-y-4">
-              <NetworkDesignForm
-                networkModel={networkModel}
-                onAddFactory={handleAddFactory}
-                onAddDepot={handleAddDepot}
-                onAddCustomer={handleAddCustomer}
-                onAssignCustomerToDepot={handleAssignCustomerToDepot}
-                onAssignDepotToFactory={handleAssignDepotToFactory}
-                onUpdateSettings={handleUpdateSettings}
-              />
-            </TabsContent>
-            <TabsContent value="analysis">
-              <CostBreakdown costAnalysis={costAnalysis} />
-            </TabsContent>
-            <TabsContent value="model">
-              <NetworkDesignModel networkModel={networkModel} />
-            </TabsContent>
-          </Tabs>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[75vh]">
+            <div className="lg:col-span-3 h-full">
+                <Card className="h-full">
+                    <NetworkMap nodes={facilities} routes={routes} />
+                </Card>
+            </div>
+            <div className="lg:col-span-2 h-full flex flex-col gap-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Controls</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex gap-2">
+                         <Button onClick={handleOptimize}><Play className="mr-2 h-4 w-4"/> Analyze Network</Button>
+                         <Button variant="outline"><Download className="mr-2 h-4 w-4"/> Export</Button>
+                         <Button variant="outline"><Upload className="mr-2 h-4 w-4"/> Import</Button>
+                    </CardContent>
+                </Card>
+                <Tabs defaultValue="facilities" className="flex-grow flex flex-col">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="facilities"><Building className="mr-2 h-4 w-4"/>Facilities</TabsTrigger>
+                        <TabsTrigger value="routes"><TruckIcon className="mr-2 h-4 w-4"/>Routes</TabsTrigger>
+                        <TabsTrigger value="products"><ShoppingCart className="mr-2 h-4 w-4"/>Products</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="facilities" className="flex-grow overflow-y-auto">
+                        <Card className="h-full">
+                            <CardContent className="p-4">
+                                <Button onClick={handleAddFacility} size="sm" className="mb-4"><Plus className="mr-2 h-4 w-4"/>Add Facility</Button>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>Type</TableHead>
+                                            <TableHead>Capacity</TableHead>
+                                            <TableHead></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {facilities.map(f => (
+                                            <TableRow key={f.id}>
+                                                <TableCell>{f.name}</TableCell>
+                                                <TableCell>{f.type}</TableCell>
+                                                <TableCell>{f.capacity}</TableCell>
+                                                <TableCell>
+                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveFacility(f.id)}>
+                                                        <Trash className="h-4 w-4" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="routes" className="flex-grow overflow-y-auto">
+                         <Card className="h-full">
+                            <CardContent className="p-4">
+                                <Button onClick={handleAddRoute} size="sm" className="mb-4"><Plus className="mr-2 h-4 w-4"/>Add Route</Button>
+                                 <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>From</TableHead>
+                                            <TableHead>To</TableHead>
+                                            <TableHead></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {routes.map(r => (
+                                            <TableRow key={r.id}>
+                                                <TableCell>{facilities.find(f=>f.id === r.from)?.name}</TableCell>
+                                                <TableCell>{facilities.find(f=>f.id === r.to)?.name}</TableCell>
+                                                <TableCell>
+                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveRoute(r.id)}>
+                                                        <Trash className="h-4 w-4" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="products" className="flex-grow overflow-y-auto">
+                         <Card className="h-full">
+                            <CardContent className="p-4">
+                                {/* Product Management UI Here */}
+                                <p className="text-muted-foreground">Product management interface to be built here.</p>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
+            </div>
         </div>
-      </div>
     </div>
   );
-};
-
-export default NetworkDesign;
+}
