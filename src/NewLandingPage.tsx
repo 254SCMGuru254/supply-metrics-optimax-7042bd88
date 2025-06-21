@@ -59,44 +59,22 @@ const NewLandingPage = () => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
                 const stat = entry.target as HTMLElement;
-                const value = stat.textContent || '';
-                if (value.includes('M+')) {
-                    const num = parseFloat(value) * 1000000;
-                    stat.dataset.suffix = 'M+';
-                    stat.textContent = '0';
+                const value = stat.dataset.value || '';
+                const suffix = stat.dataset.suffix || '';
+                const num = parseFloat(value);
+
+                if(!isNaN(num)) {
+                    stat.textContent = '0' + suffix;
                     animateCounter(stat, num);
-                } else if (value.includes('K+')) {
-                    const num = parseFloat(value) * 1000;
-                    stat.dataset.suffix = 'K+';
-                    stat.textContent = '0';
-                    animateCounter(stat, num);
-                } else if (value.includes('%')) {
-                    const num = parseFloat(value);
-                    stat.dataset.suffix = '%';
-                    stat.textContent = '0%';
-                     let start = 0;
-                        const timer = setInterval(() => {
-                            start += 0.1;
-                            if (start >= num) {
-                                stat.textContent = value;
-                                clearInterval(timer);
-                            } else {
-                                stat.textContent = start.toFixed(1) + '%';
-                            }
-                        }, 20);
                 }
                 statsObserver.unobserve(stat);
             }
         });
     }, { threshold: 0.5 });
 
-
     document.querySelectorAll('.stat-number').forEach(stat => {
-        if(stat.textContent !== "24/7") {
-             statsObserver.observe(stat);
-        }
+        statsObserver.observe(stat);
     });
-
 
     // Intersection Observer for feature cards
     const cardObserver = new IntersectionObserver((entries) => {
@@ -156,7 +134,7 @@ const NewLandingPage = () => {
       <header>
         <div className="container">
           <nav>
-            <div className="logo">Supply-Metrics Optimax</div>
+            <div className="logo">Chain.IO</div>
             <ul className="nav-links">
               <li>
                 <a href="#features">Features</a>
@@ -181,7 +159,7 @@ const NewLandingPage = () => {
       <section className="hero">
         <div className="container">
           <h1>Intelligent Supply Chain Optimization</h1>
-          <p>Harness the power of AI and advanced analytics to build a resilient, efficient, and sustainable supply chain.</p>
+          <p>Supply Chain 3.0: Outthink. Outmaneuver. Outperform. Build a resilient, efficient, and sustainable supply chain.</p>
           <div className="hero-buttons">
             <a href="/dashboard" className="btn-primary">
               Enter Portal
@@ -193,20 +171,20 @@ const NewLandingPage = () => {
 
           <div className="stats">
             <div className="stat-item">
-              <span className="stat-number">10M+</span>
-              <span className="stat-label">Transactions</span>
+              <span className="stat-number" data-value="15" data-suffix="%">15%</span>
+              <span className="stat-label">Average Cost Reduction</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">50K+</span>
-              <span className="stat-label">Active Users</span>
+              <span className="stat-number" data-value="20" data-suffix="%">20%</span>
+              <span className="stat-label">Efficiency Gain</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">99.9%</span>
-              <span className="stat-label">Uptime</span>
+              <span className="stat-number" data-value="98.5" data-suffix="%">98.5%</span>
+              <span className="stat-label">On-Time Delivery</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">24/7</span>
-              <span className="stat-label">Support</span>
+              <span className="stat-number" data-value="1000" data-suffix="+">1000+</span>
+              <span className="stat-label">Scenarios Modelled</span>
             </div>
           </div>
         </div>
@@ -224,6 +202,13 @@ const NewLandingPage = () => {
               </p>
             </div>
             <div className="feature-card">
+              <div className="feature-icon">📈</div>
+              <h3>Demand Forecasting</h3>
+              <p>
+                Utilize advanced statistical models to accurately predict demand and reduce uncertainty in your planning.
+              </p>
+            </div>
+            <div className="feature-card">
               <div className="feature-icon">📦</div>
               <h3>Inventory Optimization</h3>
               <p>
@@ -238,11 +223,32 @@ const NewLandingPage = () => {
               </p>
             </div>
             <div className="feature-card">
+              <div className="feature-icon">📍</div>
+              <h3>Center of Gravity</h3>
+              <p>
+                Identify the ideal location for a new distribution center or facility based on demand points and shipping volumes.
+              </p>
+            </div>
+            <div className="feature-card">
               <div className="feature-icon">🌊</div>
               <h3>Risk & Resilience Simulation</h3>
               <p>
                 Test your supply chain against disruptions. Identify vulnerabilities and build a more resilient network with "what-if" scenario analysis.
               </p>
+            </div>
+            <div className="feature-card">
+                <div className="feature-icon">📊</div>
+                <h3>Cost-to-Serve Modeling</h3>
+                <p>
+                Analyze the total cost of serving each customer and product to identify opportunities for profitability improvement.
+                </p>
+            </div>
+            <div className="feature-card">
+                <div className="feature-icon">🛰️</div>
+                <h3>Fleet Management</h3>
+                <p>
+                Monitor your fleet in real-time, manage vehicle capacity, and optimize dispatching to improve asset utilization.
+                </p>
             </div>
           </div>
         </div>
@@ -253,59 +259,29 @@ const NewLandingPage = () => {
           <div className="footer-content">
             <div className="footer-section">
               <h3>Chain.IO</h3>
-              <p>
-                The future of decentralized finance is here. Join thousands of
-                users already trading on Tenderzville Portal.
-              </p>
+              <p>Supply Chain 3.0: Outthink. Outmaneuver. Outperform.</p>
             </div>
             <div className="footer-section">
               <h3>Quick Links</h3>
-              <p>
-                <a href="#">Documentation</a>
-              </p>
-              <p>
-                <a href="#">API Reference</a>
-              </p>
-              <p>
-                <a href="#">Tutorials</a>
-              </p>
-              <p>
-                <a href="#">Community</a>
-              </p>
+              <a href="/documentation">Documentation</a>
+              <a href="#features">Features</a>
+              <a href="/dashboard">Portal Login</a>
             </div>
             <div className="footer-section">
               <h3>Support</h3>
-              <p>
-                <a href="#">Help Center</a>
-              </p>
-              <p>
-                <a href="#">Contact Us</a>
-              </p>
-              <p>
-                <a href="#">Bug Reports</a>
-              </p>
-              <p>
-                <a href="#">Feature Requests</a>
-              </p>
+              <a href="#">Help Center</a>
+              <a href="#">Contact Us</a>
+              <a href="#">Bug Reports</a>
             </div>
             <div className="footer-section">
               <h3>Legal</h3>
-              <p>
-                <a href="#">Privacy Policy</a>
-              </p>
-              <p>
-                <a href="#">Terms of Service</a>
-              </p>
-              <p>
-                <a href="#">Cookie Policy</a>
-              </p>
-              <p>
-                <a href="#">Compliance</a>
-              </p>
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+              <a href="#">Cookie Policy</a>
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 Chain.IO - Tenderzville Portal. All rights reserved.</p>
+            <p>© 2025 Chain.IO. All rights reserved.</p>
           </div>
         </div>
       </footer>

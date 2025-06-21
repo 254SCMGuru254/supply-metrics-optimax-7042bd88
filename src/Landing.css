@@ -345,6 +345,7 @@ footer {
     text-decoration: none;
     line-height: 1.8;
     transition: color 0.3s ease;
+    display: block;
 }
 
 .footer-section a:hover {
