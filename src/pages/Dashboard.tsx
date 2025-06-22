@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,72 +14,54 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  PlusCircle
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { Tables } from '@/types/database';
+
+type ProjectModel = Tables<'projects'>;
+
+const modelMeta: { [key: string]: { icon: React.ReactNode; color: string; href: string } } = {
+  'Route Optimization': { icon: <MapPin className="h-6 w-6" />, color: 'bg-blue-500', href: '/route-optimization' },
+  'Inventory Management': { icon: <Package className="h-6 w-6" />, color: 'bg-green-500', href: '/inventory-management' },
+  'Center of Gravity': { icon: <TrendingUp className="h-6 w-6" />, color: 'bg-purple-500', href: '/center-of-gravity' },
+  'Network Optimization': { icon: <Network className="h-6 w-6" />, color: 'bg-orange-500', href: '/network-optimization' },
+  'Network Flow': { icon: <Activity className="h-6 w-6" />, color: 'bg-cyan-500', href: '/network-flow' },
+  'Simulation': { icon: <Calculator className="h-6 w-6" />, color: 'bg-pink-500', href: '/simulation' },
+  'Default': { icon: <Calculator className="h-6 w-6" />, color: 'bg-gray-500', href: '/dashboard' },
+};
 
 const Dashboard = () => {
-  const optimizationModels = [
-    {
-      name: 'Route Optimization',
-      icon: <MapPin className="h-6 w-6" />,
-      href: '/route-optimization',
-      description: 'Optimize delivery routes and reduce transportation costs',
-      savings: '15-25%',
-      status: 'Active',
-      usage: 85,
-      color: 'bg-blue-500'
-    },
-    {
-      name: 'Inventory Management',
-      icon: <Package className="h-6 w-6" />,
-      href: '/inventory-management',
-      description: 'Multi-echelon inventory optimization with EOQ and safety stock',
-      savings: '20-30%',
-      status: 'Active',
-      usage: 92,
-      color: 'bg-green-500'
-    },
-    {
-      name: 'Center of Gravity',
-      icon: <TrendingUp className="h-6 w-6" />,
-      href: '/center-of-gravity',
-      description: 'Find optimal facility locations based on demand weights',
-      savings: '18-22%',
-      status: 'Active',
-      usage: 78,
-      color: 'bg-purple-500'
-    },
-    {
-      name: 'Network Optimization',
-      icon: <Network className="h-6 w-6" />,
-      href: '/network-optimization',
-      description: 'Optimize entire supply chain network topology',
-      savings: '25-35%',
-      status: 'Active',
-      usage: 88,
-      color: 'bg-orange-500'
-    },
-    {
-      name: 'Network Flow',
-      icon: <Activity className="h-6 w-6" />,
-      href: '/network-flow',
-      description: 'Minimum cost flow optimization for material movement',
-      savings: '12-18%',
-      status: 'Active',
-      usage: 65,
-      color: 'bg-cyan-500'
-    },
-    {
-      name: 'Monte Carlo Simulation',
-      icon: <Calculator className="h-6 w-6" />,
-      href: '/simulation',
-      description: 'Stochastic simulation for uncertainty analysis',
-      savings: '20-25%',
-      status: 'Active',
-      usage: 75,
-      color: 'bg-pink-500'
-    }
-  ];
+  const [projects, setProjects] = useState<ProjectModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!user) return;
+
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (error) {
+          throw error;
+        }
+        setProjects(data || []);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [user]);
 
   const recentAnalytics = [
     { metric: 'Total Cost Reduction', value: '24%', trend: 'up' },
@@ -88,6 +69,15 @@ const Dashboard = () => {
     { metric: 'Inventory Turnover', value: '8.2x', trend: 'up' },
     { metric: 'Transport Efficiency', value: '89%', trend: 'stable' }
   ];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full min-h-[calc(100vh-200px)]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+        <p className="ml-4 text-lg">Loading Projects...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -142,49 +132,64 @@ const Dashboard = () => {
 
         {/* Optimization Models Grid */}
         <div>
-          <h2 className="text-2xl font-bold mb-6 text-center">Elite Optimization Models</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {optimizationModels.map((model, index) => (
-              <Card key={index} className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg ${model.color} text-white`}>
-                      {model.icon}
-                    </div>
-                    <Badge variant={model.status === 'Active' ? 'default' : 'secondary'}>
-                      {model.status}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-lg">{model.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-gray-600">{model.description}</p>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Cost Savings</span>
-                      <span className="text-sm font-bold text-green-600">{model.savings}</span>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium">Usage Rate</span>
-                        <span className="text-sm">{model.usage}%</span>
+          <h2 className="text-2xl font-bold mb-6 text-center">Your Optimization Projects</h2>
+          
+          {projects.length === 0 ? (
+            <Card className="text-center p-8">
+              <CardHeader>
+                <CardTitle>No projects yet!</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">Get started by creating your first optimization project.</p>
+                <Link to="/data-input">
+                  <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create New Project
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project) => {
+                const meta = modelMeta[project.project_type || 'Default'] || modelMeta['Default'];
+                return (
+                  <Card key={project.id} className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                        <div className={`p-3 rounded-lg ${meta.color} text-white`}>
+                          {meta.icon}
+                        </div>
+                        <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
+                          {project.status || 'inactive'}
+                        </Badge>
                       </div>
-                      <Progress value={model.usage} className="h-2" />
-                    </div>
-                  </div>
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-gray-600 h-10">{project.description}</p>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">Last Updated</span>
+                          <span className="text-sm font-bold text-gray-600">
+                            {new Date(project.updated_at || '').toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
 
-                  <Link to={model.href}>
-                    <Button className="w-full mt-4 group">
-                      Launch Model
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      <Link to={`${meta.href}/${project.id}`}>
+                        <Button className="w-full mt-4 group">
+                          Open Project
+                          <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Advanced Features */}
