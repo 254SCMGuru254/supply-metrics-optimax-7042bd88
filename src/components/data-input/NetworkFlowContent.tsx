@@ -1,29 +1,120 @@
-
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
-export const NetworkFlowContent = () => {
-  const [nodes] = useState([
-    { id: 1, name: "Warehouse A", capacity: 5000 },
-    { id: 2, name: "Warehouse B", capacity: 3000 },
-    { id: 3, name: "Distribution Center 1", capacity: 2000 },
-    { id: 4, name: "Retail Store 1", capacity: 1000 },
-    { id: 5, name: "Retail Store 2", capacity: 1500 },
-  ]);
+type Node = {
+  id: number;
+  name: string;
+  capacity: number;
+};
+
+type Route = {
+  id: number;
+  origin_id: number;
+  destination_id: number;
+  cost_per_unit: number;
+  min_flow: number;
+  max_flow: number;
+  nodes: { name: string }; // Origin
+  destination_node: { name: string }; // Destination
+};
+
+interface NetworkFlowContentProps {
+  projectId: string;
+}
+
+export const NetworkFlowContent = ({ projectId }: NetworkFlowContentProps) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: nodes, isLoading: isLoadingNodes } = useQuery<Node[]>({
+    queryKey: ['nodesForNetwork', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('nodes').select('id, name, capacity').eq('project_id', projectId);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  const { data: routes, isLoading: isLoadingRoutes } = useQuery<Route[]>({
+    queryKey: ['routesForNetwork', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('routes')
+        .select('*, nodes!origin_id(name), destination_node:nodes!destination_id(name)')
+        .eq('project_id', projectId);
+      if (error) throw new Error(error.message);
+      return data.map(r => ({ ...r, min_flow: 0, max_flow: r.capacity || 1000 }));
+    },
+    enabled: !!projectId,
+  });
+
+  const [localRoutes, setLocalRoutes] = useState<Route[]>([]);
+
+  useEffect(() => {
+    if(routes) {
+      setLocalRoutes(routes);
+    }
+  }, [routes]);
+
+  const updateNodeCapacityMutation = useMutation({
+    mutationFn: async ({ id, capacity }: { id: number; capacity: number }) => {
+      const { error } = await supabase.from('nodes').update({ capacity }).eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['nodesForNetwork', projectId] });
+      toast({ title: 'Success', description: 'Node capacity updated.' });
+    },
+    onError: (error: any) => toast({ title: 'Error', description: error.message, variant: 'destructive' }),
+  });
+
+  const updateRouteCostMutation = useMutation({
+    mutationFn: async ({ id, cost_per_unit }: { id: number; cost_per_unit: number }) => {
+      const { error } = await supabase.from('routes').update({ cost_per_unit }).eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['routesForNetwork', projectId] });
+      toast({ title: 'Success', description: 'Route cost updated.' });
+    },
+    onError: (error: any) => toast({ title: 'Error', description: error.message, variant: 'destructive' }),
+  });
+
+  const handleCapacityChange = (id: number, capacity: string) => {
+    const newCapacity = parseInt(capacity, 10);
+    if (!isNaN(newCapacity)) {
+      updateNodeCapacityMutation.mutate({ id, capacity: newCapacity });
+    }
+  };
   
-  const [costs] = useState([
-    { from: 1, to: 3, cost: 10 },
-    { from: 1, to: 4, cost: 20 },
-    { from: 2, to: 3, cost: 15 },
-    { from: 2, to: 5, cost: 25 },
-    { from: 3, to: 4, cost: 5 },
-    { from: 3, to: 5, cost: 8 },
-  ]);
-  
+  const handleCostChange = (id: number, cost: string) => {
+    const newCost = parseFloat(cost);
+    if (!isNaN(newCost)) {
+      updateRouteCostMutation.mutate({ id, cost_per_unit: newCost });
+    }
+  };
+
+  const handleFlowChange = (routeId: number, key: 'min_flow' | 'max_flow', value: string) => {
+    const numericValue = parseInt(value, 10);
+    if (!isNaN(numericValue)) {
+      setLocalRoutes(prevRoutes => 
+        prevRoutes.map(r => 
+          r.id === routeId ? { ...r, [key]: numericValue } : r
+        )
+      );
+      toast({ title: "Updated locally", description: "Flow constraint updated in local state." });
+    }
+  };
+
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-4">Network Flow Data</h2>
@@ -41,34 +132,38 @@ export const NetworkFlowContent = () => {
             <h3 className="text-lg font-medium">Node Capacities</h3>
             <Button variant="outline" size="sm">Import Data</Button>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Node ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Capacity</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {nodes.map((node) => (
-                <TableRow key={node.id}>
-                  <TableCell>{node.id}</TableCell>
-                  <TableCell>{node.name}</TableCell>
-                  <TableCell>
-                    <Input 
-                      type="number" 
-                      defaultValue={node.capacity} 
-                      className="w-24" 
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm">Edit</Button>
-                  </TableCell>
+          {isLoadingNodes ? (
+            <div className="flex justify-center items-center py-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Node Name</TableHead>
+                  <TableHead>Capacity</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {nodes?.map((node) => (
+                  <TableRow key={node.id}>
+                    <TableCell>{node.name}</TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number" 
+                        defaultValue={node.capacity} 
+                        className="w-24"
+                        onBlur={(e) => handleCapacityChange(node.id, e.target.value)}
+                        disabled={updateNodeCapacityMutation.isLoading}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" disabled>Edit</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </TabsContent>
         <TabsContent value="flow-constraints">
           <p className="text-muted-foreground mb-4">
@@ -78,58 +173,48 @@ export const NetworkFlowContent = () => {
             <h3 className="text-lg font-medium">Flow Constraints</h3>
             <Button variant="outline" size="sm">Add Constraint</Button>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Min Flow</TableHead>
-                <TableHead>Max Flow</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>Warehouse A</TableCell>
-                <TableCell>Distribution Center 1</TableCell>
-                <TableCell>
-                  <Input type="number" defaultValue={0} className="w-20" />
-                </TableCell>
-                <TableCell>
-                  <Input type="number" defaultValue={2000} className="w-20" />
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm">Edit</Button>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Warehouse B</TableCell>
-                <TableCell>Distribution Center 1</TableCell>
-                <TableCell>
-                  <Input type="number" defaultValue={100} className="w-20" />
-                </TableCell>
-                <TableCell>
-                  <Input type="number" defaultValue={1500} className="w-20" />
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm">Edit</Button>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Distribution Center 1</TableCell>
-                <TableCell>Retail Store 1</TableCell>
-                <TableCell>
-                  <Input type="number" defaultValue={200} className="w-20" />
-                </TableCell>
-                <TableCell>
-                  <Input type="number" defaultValue={1000} className="w-20" />
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm">Edit</Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          {isLoadingRoutes ? (
+            <div className="flex justify-center items-center py-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>From</TableHead>
+                  <TableHead>To</TableHead>
+                  <TableHead>Min Flow</TableHead>
+                  <TableHead>Max Flow</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {localRoutes.map((route) => (
+                  <TableRow key={route.id}>
+                    <TableCell>{route.nodes.name}</TableCell>
+                    <TableCell>{route.destination_node.name}</TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number" 
+                        defaultValue={route.min_flow} 
+                        className="w-20"
+                        onBlur={(e) => handleFlowChange(route.id, 'min_flow', e.target.value)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number" 
+                        defaultValue={route.max_flow} 
+                        className="w-20"
+                        onBlur={(e) => handleFlowChange(route.id, 'max_flow', e.target.value)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" disabled>Edit</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </TabsContent>
         <TabsContent value="cost-matrix">
           <p className="text-muted-foreground mb-4">
@@ -142,38 +227,40 @@ export const NetworkFlowContent = () => {
               <Button variant="outline" size="sm">Export</Button>
             </div>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Cost per Unit</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {costs.map((cost, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    {nodes.find(n => n.id === cost.from)?.name || `Node ${cost.from}`}
-                  </TableCell>
-                  <TableCell>
-                    {nodes.find(n => n.id === cost.to)?.name || `Node ${cost.to}`}
-                  </TableCell>
-                  <TableCell>
-                    <Input 
-                      type="number" 
-                      defaultValue={cost.cost} 
-                      className="w-24"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm">Edit</Button>
-                  </TableCell>
+          {isLoadingRoutes ? (
+             <div className="flex justify-center items-center py-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>From</TableHead>
+                  <TableHead>To</TableHead>
+                  <TableHead>Cost per Unit</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {routes?.map((route) => (
+                  <TableRow key={route.id}>
+                    <TableCell>{route.nodes?.name}</TableCell>
+                    <TableCell>{route.destination_node?.name}</TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number" 
+                        defaultValue={route.cost_per_unit} 
+                        className="w-24"
+                        onBlur={(e) => handleCostChange(route.id, e.target.value)}
+                        disabled={updateRouteCostMutation.isLoading}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" disabled>Edit</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </TabsContent>
       </Tabs>
     </Card>

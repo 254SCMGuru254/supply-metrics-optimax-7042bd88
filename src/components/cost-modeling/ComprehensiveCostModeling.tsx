@@ -1,12 +1,15 @@
-
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DollarSign, Calculator, TrendingUp, BarChart3 } from "lucide-react";
+import { DollarSign, Calculator, TrendingUp, BarChart3, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useParams } from "react-router-dom";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/lib/supabase";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface CostModelingResult {
   success: boolean;
@@ -15,18 +18,78 @@ interface CostModelingResult {
   formula: string;
 }
 
+interface CostModelInputData {
+  [key: string]: any;
+}
+
 export const ComprehensiveCostModeling = () => {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
   const [activeTab, setActiveTab] = useState("abc-costing");
-  const [inputs, setInputs] = useState<Record<string, any>>({});
   const [results, setResults] = useState<Record<string, CostModelingResult>>({});
 
-  const handleInputChange = (key: string, value: any) => {
-    setInputs(prev => ({ ...prev, [key]: value }));
-  };
+  const { data: inputs, isLoading: isLoadingInputs } = useQuery<Record<string, CostModelInputData>>({
+    queryKey: ['costModelInputs', projectId],
+    queryFn: async () => {
+      if (!projectId || !user) return {};
 
+      const { data, error } = await supabase
+        .from('cost_model_inputs')
+        .select('model_type, inputs')
+        .eq('project_id', projectId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error fetching cost model inputs:', error);
+        throw new Error(error.message);
+      }
+      
+      const formattedData = data.reduce((acc, curr) => {
+        acc[curr.model_type] = curr.inputs;
+        return acc;
+      }, {} as Record<string, CostModelInputData>);
+
+      return formattedData;
+    },
+    enabled: !!projectId && !!user,
+  });
+
+  const upsertMutation = useMutation({
+    mutationFn: async ({ modelType, newInputs }: { modelType: string; newInputs: CostModelInputData }) => {
+      if (!projectId || !user) return;
+
+      const { error } = await supabase.from('cost_model_inputs').upsert(
+        {
+          project_id: projectId,
+          user_id: user.id,
+          model_type: modelType,
+          inputs: newInputs,
+        },
+        { onConflict: 'project_id, user_id, model_type' }
+      );
+
+      if (error) {
+        console.error(`Error upserting ${modelType} data:`, error);
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['costModelInputs', projectId] });
+    },
+  });
+
+  const handleInputChange = (modelType: string, key: string, value: any) => {
+    const currentInputs = inputs?.[modelType] || {};
+    const newInputs = { ...currentInputs, [key]: value };
+    upsertMutation.mutate({ modelType, newInputs });
+  };
+  
   // Activity-Based Costing Calculator
   const calculateABC = () => {
-    const { activityRates = "100,200,150", activityUsage = "10,5,8" } = inputs;
+    const abcInputs = inputs?.['abc-costing'] || {};
+    const { activityRates = "100,200,150", activityUsage = "10,5,8" } = abcInputs;
     
     try {
       const rates = activityRates.split(',').map(Number);
@@ -76,7 +139,8 @@ export const ComprehensiveCostModeling = () => {
 
   // Total Cost of Ownership Calculator
   const calculateTCO = () => {
-    const { acquisition = 0, operating = 0, disposal = 0 } = inputs;
+    const tcoInputs = inputs?.['tco'] || {};
+    const { acquisition = 0, operating = 0, disposal = 0 } = tcoInputs;
     
     const acquisitionCost = Number(acquisition);
     const operatingCost = Number(operating);
@@ -116,8 +180,9 @@ export const ComprehensiveCostModeling = () => {
 
   // Cost-Benefit Analysis Calculator
   const calculateCostBenefit = () => {
+    const costBenefitInputs = inputs?.['cost-benefit'] || {};
     const { benefits = "1000000,1200000,1500000", costs = "800000,900000,950000", 
-            discountRate = 0.1, timePeriods = 3 } = inputs;
+            discountRate = 0.1, timePeriods = 3 } = costBenefitInputs;
     
     try {
       const benefitValues = benefits.split(',').map(Number);
@@ -181,7 +246,8 @@ export const ComprehensiveCostModeling = () => {
 
   // Break-Even Analysis Calculator
   const calculateBreakEven = () => {
-    const { fixedCosts = 0, price = 0, variableCost = 0 } = inputs;
+    const breakEvenInputs = inputs?.['break-even'] || {};
+    const { fixedCosts = 0, price = 0, variableCost = 0 } = breakEvenInputs;
     
     const fixed = Number(fixedCosts);
     const sellingPrice = Number(price);
@@ -248,39 +314,27 @@ export const ComprehensiveCostModeling = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(result.result).map(([key, value]) => (
-                  <div key={key} className="p-3 bg-blue-50 rounded-lg">
-                    <p className="font-medium text-sm text-blue-700 capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
-                    </p>
-                    <p className="text-lg font-bold text-blue-900">
-                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
+                {result.result && Object.entries(result.result).map(([key, value]) => (
+                  <div key={key} className="p-3 bg-gray-50 rounded-md">
+                    <p className="text-sm font-medium text-gray-500">{key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {typeof value === 'number' ? `Ksh ${value.toLocaleString(undefined, {maximumFractionDigits: 2})}` : typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
                     </p>
                   </div>
                 ))}
               </div>
-              
-              <div className="space-y-2">
-                <p className="font-semibold">Recommendations:</p>
-                {result.recommendations.map((rec, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <Badge variant="outline" className="mt-1">
-                      {index + 1}
-                    </Badge>
-                    <p className="text-sm">{rec}</p>
-                  </div>
-                ))}
+
+              <div>
+                <h4 className="font-semibold mb-2">Recommendations</h4>
+                <ul className="list-disc list-inside space-y-1">
+                  {result.recommendations.map((rec, index) => <li key={index} className="text-sm text-gray-700">{rec}</li>)}
+                </ul>
               </div>
             </div>
           ) : (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="font-semibold text-red-800">Calculation Failed</p>
-              <p className="text-sm text-red-600">Formula: {result.formula}</p>
-              <div className="mt-2 space-y-1">
-                {result.recommendations.map((rec, index) => (
-                  <p key={index} className="text-sm text-red-700">• {rec}</p>
-                ))}
-              </div>
+              {result.recommendations.map((rec, index) => <p key={index} className="text-sm text-red-600">{rec}</p>)}
             </div>
           )}
         </CardContent>
@@ -288,204 +342,120 @@ export const ComprehensiveCostModeling = () => {
     );
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <DollarSign className="h-8 w-8 text-primary" />
-        <div>
-          <h2 className="text-2xl font-bold">Cost Modeling & Financial Analysis</h2>
-          <p className="text-muted-foreground">Comprehensive financial modeling for supply chain investments</p>
-        </div>
+  if (isLoadingInputs) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-4 text-lg">Loading cost models...</p>
       </div>
+    );
+  }
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
-          <TabsTrigger value="abc-costing">ABC Costing</TabsTrigger>
-          <TabsTrigger value="tco-analysis">TCO Analysis</TabsTrigger>
-          <TabsTrigger value="cost-benefit">Cost-Benefit</TabsTrigger>
-          <TabsTrigger value="break-even">Break-Even</TabsTrigger>
+  return (
+    <div className="p-4 md:p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Comprehensive Cost Modeling</h1>
+        <p className="text-muted-foreground">Analyze and optimize your supply chain costs.</p>
+      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsTrigger value="abc-costing" onClick={() => setActiveTab('abc-costing')}>Activity-Based Costing</TabsTrigger>
+          <TabsTrigger value="tco" onClick={() => setActiveTab('tco')}>Total Cost of Ownership</TabsTrigger>
+          <TabsTrigger value="cost-benefit" onClick={() => setActiveTab('cost-benefit')}>Cost-Benefit Analysis</TabsTrigger>
+          <TabsTrigger value="break-even" onClick={() => setActiveTab('break-even')}>Break-Even Analysis</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="abc-costing" className="space-y-4">
+        <TabsContent value="abc-costing">
           <Card>
             <CardHeader>
-              <CardTitle>Activity-Based Costing (ABC)</CardTitle>
+              <CardTitle className="flex items-center gap-2"><BarChart3/> Activity-Based Costing (ABC)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="activityRates">Activity Rates (comma-separated)</Label>
-                  <Input
-                    id="activityRates"
-                    value={inputs.activityRates || ""}
-                    onChange={e => handleInputChange('activityRates', e.target.value)}
-                    placeholder="100,200,150"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="activityUsage">Activity Usage (comma-separated)</Label>
-                  <Input
-                    id="activityUsage"
-                    value={inputs.activityUsage || ""}
-                    onChange={e => handleInputChange('activityUsage', e.target.value)}
-                    placeholder="10,5,8"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="activityRates">Activity Rates (comma-separated)</Label>
+                <Input id="activityRates" value={inputs?.['abc-costing']?.activityRates ?? ''} onChange={e => handleInputChange('abc-costing', 'activityRates', e.target.value)} placeholder="e.g., 100,200,150" />
               </div>
-              <Button onClick={calculateABC} className="w-full">
-                <Calculator className="h-4 w-4 mr-2" />
-                Calculate ABC Cost
-              </Button>
+              <div>
+                <Label htmlFor="activityUsage">Activity Usage (comma-separated)</Label>
+                <Input id="activityUsage" value={inputs?.['abc-costing']?.activityUsage ?? ''} onChange={e => handleInputChange('abc-costing', 'activityUsage', e.target.value)} placeholder="e.g., 10,5,8" />
+              </div>
+              <Button onClick={calculateABC}><Calculator className="mr-2 h-4 w-4"/> Calculate ABC</Button>
               {renderResultCard('abc', 'Activity-Based Costing')}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="tco-analysis" className="space-y-4">
+        <TabsContent value="tco">
           <Card>
             <CardHeader>
-              <CardTitle>Total Cost of Ownership (TCO)</CardTitle>
+              <CardTitle className="flex items-center gap-2"><DollarSign/> Total Cost of Ownership (TCO)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="acquisition">Acquisition Cost (Ksh)</Label>
-                  <Input
-                    id="acquisition"
-                    type="number"
-                    value={inputs.acquisition || ""}
-                    onChange={e => handleInputChange('acquisition', e.target.value)}
-                    placeholder="1000000"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="operating">Operating Cost (Ksh)</Label>
-                  <Input
-                    id="operating"
-                    type="number"
-                    value={inputs.operating || ""}
-                    onChange={e => handleInputChange('operating', e.target.value)}
-                    placeholder="500000"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="disposal">Disposal Cost (Ksh)</Label>
-                  <Input
-                    id="disposal"
-                    type="number"
-                    value={inputs.disposal || ""}
-                    onChange={e => handleInputChange('disposal', e.target.value)}
-                    placeholder="50000"
-                  />
-                </div>
+               <div>
+                <Label htmlFor="acquisition">Acquisition Cost</Label>
+                <Input id="acquisition" type="number" value={inputs?.['tco']?.acquisition ?? 0} onChange={e => handleInputChange('tco', 'acquisition', e.target.value)} />
               </div>
-              <Button onClick={calculateTCO} className="w-full">
-                <Calculator className="h-4 w-4 mr-2" />
-                Calculate TCO
-              </Button>
+              <div>
+                <Label htmlFor="operating">Operating Cost</Label>
+                <Input id="operating" type="number" value={inputs?.['tco']?.operating ?? 0} onChange={e => handleInputChange('tco', 'operating', e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="disposal">Disposal Cost</Label>
+                <Input id="disposal" type="number" value={inputs?.['tco']?.disposal ?? 0} onChange={e => handleInputChange('tco', 'disposal', e.target.value)} />
+              </div>
+              <Button onClick={calculateTCO}><Calculator className="mr-2 h-4 w-4"/> Calculate TCO</Button>
               {renderResultCard('tco', 'Total Cost of Ownership')}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="cost-benefit" className="space-y-4">
+        <TabsContent value="cost-benefit">
           <Card>
             <CardHeader>
-              <CardTitle>Cost-Benefit Analysis</CardTitle>
+              <CardTitle className="flex items-center gap-2"><TrendingUp/> Cost-Benefit Analysis</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="benefits">Benefits per Year (comma-separated)</Label>
-                  <Input
-                    id="benefits"
-                    value={inputs.benefits || ""}
-                    onChange={e => handleInputChange('benefits', e.target.value)}
-                    placeholder="1000000,1200000,1500000"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="costs">Costs per Year (comma-separated)</Label>
-                  <Input
-                    id="costs"
-                    value={inputs.costs || ""}
-                    onChange={e => handleInputChange('costs', e.target.value)}
-                    placeholder="800000,900000,950000"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="discountRate">Discount Rate (decimal)</Label>
-                  <Input
-                    id="discountRate"
-                    type="number"
-                    step="0.01"
-                    value={inputs.discountRate || ""}
-                    onChange={e => handleInputChange('discountRate', e.target.value)}
-                    placeholder="0.1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="timePeriods">Time Periods (years)</Label>
-                  <Input
-                    id="timePeriods"
-                    type="number"
-                    value={inputs.timePeriods || ""}
-                    onChange={e => handleInputChange('timePeriods', e.target.value)}
-                    placeholder="3"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="benefits">Benefits (comma-separated per period)</Label>
+                <Input id="benefits" value={inputs?.['cost-benefit']?.benefits ?? ''} onChange={e => handleInputChange('cost-benefit', 'benefits', e.target.value)} placeholder="e.g., 1000000,1200000" />
               </div>
-              <Button onClick={calculateCostBenefit} className="w-full">
-                <Calculator className="h-4 w-4 mr-2" />
-                Calculate NPV
-              </Button>
+              <div>
+                <Label htmlFor="costs">Costs (comma-separated per period)</Label>
+                <Input id="costs" value={inputs?.['cost-benefit']?.costs ?? ''} onChange={e => handleInputChange('cost-benefit', 'costs', e.target.value)} placeholder="e.g., 800000,900000" />
+              </div>
+              <div>
+                <Label htmlFor="discountRate">Discount Rate (e.g., 0.1 for 10%)</Label>
+                <Input id="discountRate" type="number" step="0.01" value={inputs?.['cost-benefit']?.discountRate ?? 0.1} onChange={e => handleInputChange('cost-benefit', 'discountRate', e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="timePeriods">Number of Time Periods (years)</Label>
+                <Input id="timePeriods" type="number" value={inputs?.['cost-benefit']?.timePeriods ?? 3} onChange={e => handleInputChange('cost-benefit', 'timePeriods', e.target.value)} />
+              </div>
+              <Button onClick={calculateCostBenefit}><Calculator className="mr-2 h-4 w-4"/> Calculate Cost-Benefit</Button>
               {renderResultCard('costBenefit', 'Cost-Benefit Analysis')}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="break-even" className="space-y-4">
+        <TabsContent value="break-even">
           <Card>
             <CardHeader>
-              <CardTitle>Break-Even Analysis</CardTitle>
+              <CardTitle  className="flex items-center gap-2"><BarChart3/> Break-Even Analysis</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="fixedCosts">Fixed Costs (Ksh)</Label>
-                  <Input
-                    id="fixedCosts"
-                    type="number"
-                    value={inputs.fixedCosts || ""}
-                    onChange={e => handleInputChange('fixedCosts', e.target.value)}
-                    placeholder="500000"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="price">Selling Price per Unit (Ksh)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={inputs.price || ""}
-                    onChange={e => handleInputChange('price', e.target.value)}
-                    placeholder="100"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="variableCost">Variable Cost per Unit (Ksh)</Label>
-                  <Input
-                    id="variableCost"
-                    type="number"
-                    value={inputs.variableCost || ""}
-                    onChange={e => handleInputChange('variableCost', e.target.value)}
-                    placeholder="60"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="fixedCosts">Total Fixed Costs</Label>
+                <Input id="fixedCosts" type="number" value={inputs?.['break-even']?.fixedCosts ?? 0} onChange={e => handleInputChange('break-even', 'fixedCosts', e.target.value)} />
               </div>
-              <Button onClick={calculateBreakEven} className="w-full">
-                <Calculator className="h-4 w-4 mr-2" />
-                Calculate Break-Even Point
-              </Button>
+              <div>
+                <Label htmlFor="price">Selling Price Per Unit</Label>
+                <Input id="price" type="number" value={inputs?.['break-even']?.price ?? 0} onChange={e => handleInputChange('break-even', 'price', e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="variableCost">Variable Cost Per Unit</Label>
+                <Input id="variableCost" type="number" value={inputs?.['break-even']?.variableCost ?? 0} onChange={e => handleInputChange('break-even', 'variableCost', e.target.value)} />
+              </div>
+              <Button onClick={calculateBreakEven}><Calculator className="mr-2 h-4 w-4"/> Calculate Break-Even Point</Button>
               {renderResultCard('breakEven', 'Break-Even Analysis')}
             </CardContent>
           </Card>
@@ -493,6 +463,4 @@ export const ComprehensiveCostModeling = () => {
       </Tabs>
     </div>
   );
-};
-
-export default ComprehensiveCostModeling;
+}; 

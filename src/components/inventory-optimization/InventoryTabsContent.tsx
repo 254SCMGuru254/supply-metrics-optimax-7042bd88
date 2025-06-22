@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -14,7 +13,11 @@ import { ColdChainOptimizer } from "@/components/inventory-optimization/ColdChai
 import { RetailSupplyChainOptimizer } from "@/components/inventory-optimization/RetailSupplyChainOptimizer";
 import { HorticulturalEOQCalculator } from "@/components/inventory-optimization/HorticulturalEOQCalculator";
 
-export const InventoryTabsContent: React.FC = () => {
+interface InventoryTabsContentProps {
+  projectId: string;
+}
+
+export const InventoryTabsContent: React.FC<InventoryTabsContentProps> = ({ projectId }) => {
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
@@ -40,7 +43,7 @@ export const InventoryTabsContent: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <InventoryOptimizationContent />
+              <InventoryOptimizationContent projectId={projectId} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -58,7 +61,7 @@ export const InventoryTabsContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div id="eoq-calculator">
-                <EOQCalculator />
+                <EOQCalculator projectId={projectId} />
               </div>
             </CardContent>
           </Card>
@@ -77,7 +80,7 @@ export const InventoryTabsContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div id="safety-stock-calculator">
-                <SafetyStockCalculator />
+                <SafetyStockCalculator projectId={projectId} />
               </div>
             </CardContent>
           </Card>
@@ -96,7 +99,7 @@ export const InventoryTabsContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div id="abc-analysis">
-                <ABCAnalysis />
+                <ABCAnalysis projectId={projectId} />
               </div>
             </CardContent>
           </Card>
@@ -115,7 +118,7 @@ export const InventoryTabsContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div id="multi-echelon-optimization">
-                <MultiEchelonVisualization />
+                <MultiEchelonVisualization projectId={projectId} />
               </div>
             </CardContent>
           </Card>
@@ -134,7 +137,7 @@ export const InventoryTabsContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div id="cold-chain-optimization">
-                <ColdChainOptimizer />
+                <ColdChainOptimizer projectId={projectId} />
               </div>
             </CardContent>
           </Card>
@@ -153,7 +156,7 @@ export const InventoryTabsContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div id="retail-optimization">
-                <RetailSupplyChainOptimizer />
+                <RetailSupplyChainOptimizer projectId={projectId} />
               </div>
             </CardContent>
           </Card>
@@ -172,7 +175,7 @@ export const InventoryTabsContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div id="horticultural-eoq">
-                <HorticulturalEOQCalculator />
+                <HorticulturalEOQCalculator projectId={projectId} />
               </div>
             </CardContent>
           </Card>

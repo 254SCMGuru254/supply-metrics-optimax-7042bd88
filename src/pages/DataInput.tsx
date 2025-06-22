@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Database, Upload, BarChart3, Network, Target, Calculator, Activity, Layers } from "lucide-react";
@@ -16,6 +16,7 @@ import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigCo
 import { Node } from "@/components/map/MapTypes";
 
 const DataInput = () => {
+  const { projectId } = useParams<{ projectId: string }>();
   const [selectedModel, setSelectedModel] = useState<string>("");
   const [nodes, setNodes] = useState<Node[]>([]);
 
@@ -32,25 +33,37 @@ const DataInput = () => {
   ];
 
   const renderTabContent = (tabId: string) => {
+    if (!projectId) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Error: Project Not Found</CardTitle>
+            <CardDescription>
+              Please select a project from the dashboard to proceed.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      );
+    }
     switch (tabId) {
       case "general":
-        return <GeneralDataContent />;
+        return <GeneralDataContent projectId={projectId} />;
       case "comprehensive":
-        return <ComprehensiveDataContent />;
+        return <ComprehensiveDataContent projectId={projectId} />;
       case "cog":
-        return <CogDataContent />;
+        return <CogDataContent projectId={projectId} />;
       case "heuristic":
-        return <HeuristicContent />;
+        return <HeuristicContent projectId={projectId} />;
       case "isohedron":
-        return <IsohedronContent />;
+        return <IsohedronContent projectId={projectId} />;
       case "milp":
-        return <MILPDataContent />;
+        return <MILPDataContent projectId={projectId} />;
       case "network-flow":
-        return <NetworkFlowContent />;
+        return <NetworkFlowContent projectId={projectId} />;
       case "simulation":
-        return <SimulationContent />;
+        return <SimulationContent projectId={projectId} />;
       case "warehouse":
-        return <WarehouseConfigContent nodes={nodes} setNodes={setNodes} />;
+        return <WarehouseConfigContent nodes={nodes} setNodes={setNodes} projectId={projectId} />;
       default:
         return (
           <Card>

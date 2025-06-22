@@ -1,11 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Info } from "lucide-react";
+import { Shield, Info, AlertCircle, Package } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -16,6 +15,9 @@ import {
 } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Link } from 'react-router-dom';
 
 interface SafetyStockParams {
   averageDemand: number;
@@ -36,17 +38,57 @@ interface SafetyStockResult {
 
 export const SafetyStockCalculator = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   
   const [params, setParams] = useState<SafetyStockParams>({
-    averageDemand: 100,
-    demandStdDev: 20,
-    averageLeadTime: 7,
-    leadTimeStdDev: 2,
+    averageDemand: 0,
+    demandStdDev: 0,
+    averageLeadTime: 0,
+    leadTimeStdDev: 0,
     serviceLevel: 0.95,
     reviewPeriod: 14
   });
   
+  const [hasData, setHasData] = useState(false);
   const [result, setResult] = useState<SafetyStockResult | null>(null);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('inventory_items')
+          .select('*, demand_variability, lead_time_variability')
+          .eq('user_id', user.id)
+          .limit(1);
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const firstItem = data[0];
+          setParams(prev => ({
+            ...prev,
+            averageDemand: (firstItem.annual_demand || 0) / 365,
+            demandStdDev: firstItem.demand_variability || 20,
+            averageLeadTime: firstItem.lead_time || 7,
+            leadTimeStdDev: firstItem.lead_time_variability || 2,
+            serviceLevel: firstItem.service_level || 0.95
+          }));
+          setHasData(true);
+        } else {
+          setHasData(false);
+        }
+      } catch (error) {
+        console.error("Error fetching initial inventory data:", error);
+        setHasData(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInitialData();
+  }, [user]);
 
   const handleInputChange = (field: keyof SafetyStockParams, value: string) => {
     const numValue = parseFloat(value);
@@ -130,6 +172,28 @@ export const SafetyStockCalculator = () => {
   const roundToTwo = (num: number): number => {
     return Math.round(num * 100) / 100;
   };
+
+  if (loading) {
+    return <div className="text-center p-6">Loading calculator...</div>;
+  }
+
+  if (!hasData) {
+    return (
+      <Card className="p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No Inventory Data Found</h3>
+        <p className="mt-1 text-sm text-gray-500">Please add inventory items to use the Safety Stock calculator.</p>
+        <div className="mt-6">
+          <Link to="/data-input">
+            <Button>
+              <Package className="mr-2 h-4 w-4" />
+              Add Inventory Data
+            </Button>
+          </Link>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

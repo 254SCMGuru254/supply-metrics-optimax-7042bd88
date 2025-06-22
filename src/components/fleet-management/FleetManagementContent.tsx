@@ -1,19 +1,108 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { fleetColumns } from './fleetColumns';
 import { NetworkMap } from '@/components/NetworkMap';
 import { Node, Route } from '@/components/map/MapTypes';
-import { Truck, MapPin, Warehouse, User, Clock, Battery, Thermometer } from 'lucide-react';
+import { Truck, MapPin, Warehouse, User, Clock, Battery, Thermometer, PlusCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { mockVehicles, mockFleetNodes, mockFleetRoutes } from '@/data/mock-fleet-data';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { Tables } from '@/types/database';
+
+type Vehicle = Tables<'supply_nodes'> & {
+    currentLocation: { lat: number; lng: number };
+    driver: string;
+    eta: string;
+    fuelLevel: number;
+    cargoTemp: number;
+    originId: string;
+    destinationId: string;
+    status: 'on-route' | 'idle' | 'down';
+};
 
 export const FleetManagementContent = () => {
-  const [vehicles] = useState(mockVehicles);
-  const [nodes] = useState<Node[]>(mockFleetNodes);
-  const [routes] = useState<Route[]>(mockFleetRoutes);
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(vehicles[0]?.id || null);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        if (!user) return;
+
+        setLoading(true);
+        try {
+            const { data: nodesData, error: nodesError } = await supabase
+                .from('supply_nodes')
+                .select('*')
+                .eq('user_id', user.id);
+
+            const { data: routesData, error: routesError } = await supabase
+                .from('supply_routes')
+                .select('*')
+                .eq('user_id', user.id);
+
+            if (nodesError) throw nodesError;
+            if (routesError) throw routesError;
+
+            const fetchedVehicles: Vehicle[] = nodesData
+                ?.filter(n => n.node_type === 'vehicle' && n.latitude && n.longitude)
+                .map((n): Vehicle => ({
+                    ...(n as Tables<'supply_nodes'>),
+                    id: n.id,
+                    name: n.name,
+                    status: (n.properties as any)?.status || 'idle',
+                    currentLocation: { lat: n.latitude!, lng: n.longitude! },
+                    driver: (n.properties as any)?.driver || 'N/A',
+                    eta: (n.properties as any)?.eta || 'N/A',
+                    fuelLevel: (n.properties as any)?.fuelLevel || 0,
+                    cargoTemp: (n.properties as any)?.cargoTemp || 0,
+                    originId: (n.properties as any)?.originId || '',
+                    destinationId: (n.properties as any)?.destinationId || '',
+                })) || [];
+
+            const regularNodes: Node[] = nodesData
+                ?.filter(n => n.node_type !== 'vehicle' && n.latitude && n.longitude)
+                .map(n => ({
+                    id: n.id,
+                    name: n.name,
+                    type: n.node_type || 'warehouse',
+                    latitude: n.latitude!,
+                    longitude: n.longitude!,
+                    ownership: (n.properties as any)?.ownership || 'owned'
+                })) || [];
+
+            const fetchedRoutes: Route[] = routesData?.map(r => ({
+                id: r.id,
+                origin: r.origin_id || '',
+                destination: r.destination_id || '',
+                transportMode: r.transport_mode || 'truck',
+                vehicleId: (r.properties as any)?.vehicle_id,
+            })) || [];
+            
+            setVehicles(fetchedVehicles);
+            setNodes(regularNodes);
+            setRoutes(fetchedRoutes);
+
+        } catch (error) {
+            console.error("Error fetching fleet data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchData();
+  }, [user]);
+  
+  useEffect(() => {
+    if (!selectedVehicleId && vehicles.length > 0) {
+        setSelectedVehicleId(vehicles[0].id);
+    }
+  }, [vehicles, selectedVehicleId]);
 
   const vehicleNodes: Node[] = useMemo(() => {
     return vehicles.map(v => ({
@@ -34,12 +123,40 @@ export const FleetManagementContent = () => {
 
   const selectedVehicleRoute = useMemo(() => {
     if (!selectedVehicle) return [];
-    return routes.filter(r => r.vehicleId === selectedVehicle.id);
+    return routes.filter(r => (r as any).vehicleId === selectedVehicle.id);
   }, [selectedVehicle, routes]);
 
   const handleVehicleSelect = (vehicleId: string) => {
     setSelectedVehicleId(vehicleId);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full min-h-[calc(100vh-200px)]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+        <p className="ml-4 text-lg">Loading Fleet Data...</p>
+      </div>
+    );
+  }
+
+  if (vehicles.length === 0) {
+    return (
+      <Card className="text-center p-8">
+        <CardHeader>
+          <CardTitle>No vehicles found</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">Add vehicle data to get started with fleet management.</p>
+          <Link to="/data-input">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Data
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

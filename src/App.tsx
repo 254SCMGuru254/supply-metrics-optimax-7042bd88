@@ -23,6 +23,8 @@ import KenyaSupplyChain from "./pages/KenyaSupplyChain";
 import BusinessValue from "./pages/BusinessValue";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
+import Isohedron from "./pages/Isohedron";
+import WarehousePage from "./pages/Warehouse";
 
 const queryClient = new QueryClient();
 
@@ -64,16 +66,18 @@ const App = () => {
               {/* Protected Routes */}
               <Route element={<ProtectedRoutesLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
-                <Route path="/data-input" element={<DataInput />} />
-                <Route path="/route-optimization" element={<RouteOptimization />} />
-                <Route path="/inventory-management" element={<InventoryManagement />} />
-                <Route path="/network-optimization" element={<NetworkOptimization />} />
-                <Route path="/center-of-gravity" element={<CenterOfGravity />} />
-                <Route path="/heuristic" element={<Heuristic />} />
-                <Route path="/simulation" element={<Simulation />} />
-                <Route path="/fleet-management" element={<FleetManagement />} />
-                <Route path="/cost-modeling" element={<CostModeling />} />
+                <Route path="/analytics-dashboard/:projectId" element={<AnalyticsDashboard />} />
+                <Route path="/data-input/:projectId" element={<DataInput />} />
+                <Route path="/route-optimization/:projectId" element={<RouteOptimization />} />
+                <Route path="/inventory-management/:projectId" element={<InventoryManagement />} />
+                <Route path="/network-optimization/:projectId" element={<NetworkOptimization />} />
+                <Route path="/center-of-gravity/:projectId" element={<CenterOfGravity />} />
+                <Route path="/heuristic/:projectId" element={<Heuristic />} />
+                <Route path="/isohedron/:projectId" element={<Isohedron />} />
+                <Route path="/simulation/:projectId" element={<Simulation />} />
+                <Route path="/warehouse/:projectId" element={<WarehousePage />} />
+                <Route path="/fleet-management/:projectId" element={<FleetManagement />} />
+                <Route path="/cost-modeling/:projectId" element={<CostModeling />} />
                 <Route path="/kenya-supply-chain" element={<KenyaSupplyChain />} />
                 <Route path="/business-value" element={<BusinessValue />} />
                 <Route path="/documentation" element={<Documentation />} />

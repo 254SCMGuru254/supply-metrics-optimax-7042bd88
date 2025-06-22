@@ -1,5 +1,6 @@
-
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ComprehensiveSimulationEngine } from '@/components/simulation/ComprehensiveSimulationEngine';
@@ -8,40 +9,31 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ModelFormulas } from '@/components/shared/ModelFormulas';
 import { BarChart3, Play, Settings, Factory } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 const Simulation = () => {
-  const [simulationHistory, setSimulationHistory] = useState([
-    {
-      id: '1',
-      name: 'Monte Carlo Inventory Analysis',
-      type: 'Monte Carlo',
-      date: '2024-01-15',
-      status: 'Completed',
-      serviceLevel: 95.2,
-      totalCost: 125000,
-      iterations: 10000
+  const { projectId } = useParams<{ projectId: string }>();
+  const { toast } = useToast();
+
+  const { data: simulationHistory = [], isLoading: isLoadingHistory } = useQuery({
+    queryKey: ['simulationResults', projectId],
+    queryFn: async () => {
+      if (!projectId) return [];
+      const { data, error } = await supabase
+        .from('simulation_results')
+        .select('*')
+        .eq('project_id', projectId);
+      
+      if (error) {
+        toast({ title: "Error fetching simulation history", description: error.message, variant: "destructive" });
+        throw new Error(error.message);
+      }
+      return data;
     },
-    {
-      id: '2', 
-      name: 'Discrete Event Queue Analysis',
-      type: 'Discrete Event',
-      date: '2024-01-12',
-      status: 'Completed',
-      serviceLevel: 92.8,
-      totalCost: 138000,
-      iterations: 365
-    },
-    {
-      id: '3',
-      name: 'System Dynamics Inventory Flow',
-      type: 'System Dynamics',
-      date: '2024-01-10',
-      status: 'Completed',
-      serviceLevel: 88.5,
-      totalCost: 156000,
-      iterations: 52
-    }
-  ]);
+    enabled: !!projectId,
+  });
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -166,7 +158,33 @@ const Simulation = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {simulationHistory.length === 0 ? (
+              {isLoadingHistory ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <Skeleton className="h-5 w-48" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-5 w-20" />
+                          <Skeleton className="h-5 w-24" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-4 w-36" />
+                        <Skeleton className="h-4 w-40" />
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <Skeleton className="h-8 w-24" />
+                        <Skeleton className="h-8 w-28" />
+                        <Skeleton className="h-8 w-28" />
+                        <Skeleton className="h-8 w-32" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : simulationHistory.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No simulation results yet. Run your first simulation to see results here.</p>
@@ -186,16 +204,16 @@ const Simulation = () => {
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Date:</span> {simulation.date}
+                          <span className="text-muted-foreground">Date:</span> {new Date(simulation.date).toLocaleDateString()}
                         </div>
                         <div>
                           <span className="text-muted-foreground">Iterations:</span> {simulation.iterations?.toLocaleString()}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Service Level:</span> {simulation.serviceLevel}%
+                          <span className="text-muted-foreground">Service Level:</span> {simulation.service_level}%
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Total Cost:</span> KES {simulation.totalCost.toLocaleString()}
+                          <span className="text-muted-foreground">Total Cost:</span> KES {simulation.total_cost.toLocaleString()}
                         </div>
                       </div>
                       <div className="mt-3 flex gap-2">

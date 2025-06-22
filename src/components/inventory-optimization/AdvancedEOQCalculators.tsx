@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calculator, TrendingUp, Package, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface EOQResult {
   optimalOrderQuantity: number;
@@ -28,36 +30,106 @@ interface NewsvendorResult {
   fillRate: number;
 }
 
-export const AdvancedEOQCalculators = () => {
+interface AdvancedEOQCalculatorsProps {
+  projectId: string;
+}
+
+export const AdvancedEOQCalculators = ({ projectId }: AdvancedEOQCalculatorsProps) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("basic-eoq");
   
   // Basic EOQ State
-  const [demand, setDemand] = useState<number>(1000);
-  const [setupCost, setSetupCost] = useState<number>(50);
-  const [holdingCost, setHoldingCost] = useState<number>(2);
-  const [unitCost, setUnitCost] = useState<number>(10);
-  const [leadTime, setLeadTime] = useState<number>(7);
+  const [demand, setDemand] = useState<number>(0);
+  const [setupCost, setSetupCost] = useState<number>(0);
+  const [holdingCost, setHoldingCost] = useState<number>(0);
+  const [unitCost, setUnitCost] = useState<number>(0);
+  const [leadTime, setLeadTime] = useState<number>(0);
   const [eoqResult, setEoqResult] = useState<EOQResult | null>(null);
 
   // Quantity Discounts State
   const [discountTiers, setDiscountTiers] = useState<QuantityDiscountTier[]>([
-    { minQuantity: 0, unitPrice: 10 },
-    { minQuantity: 500, unitPrice: 9.5 },
-    { minQuantity: 1000, unitPrice: 9 }
+    { minQuantity: 0, unitPrice: 0 },
   ]);
   const [discountResult, setDiscountResult] = useState<any>(null);
 
   // Newsvendor Model State
-  const [demandMean, setDemandMean] = useState<number>(100);
-  const [demandStd, setDemandStd] = useState<number>(20);
-  const [sellingPrice, setSellingPrice] = useState<number>(15);
-  const [salvageValue, setSalvageValue] = useState<number>(3);
+  const [demandMean, setDemandMean] = useState<number>(0);
+  const [demandStd, setDemandStd] = useState<number>(0);
+  const [sellingPrice, setSellingPrice] = useState<number>(0);
+  const [salvageValue, setSalvageValue] = useState<number>(0);
   const [newsvendorResult, setNewsvendorResult] = useState<NewsvendorResult | null>(null);
 
   // Base Stock Policy State
-  const [demandRate, setDemandRate] = useState<number>(10);
+  const [demandRate, setDemandRate] = useState<number>(0);
   const [serviceLevel, setServiceLevel] = useState<number>(95);
   const [baseStockResult, setBaseStockResult] = useState<number | null>(null);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (!projectId || !user) return;
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const { data, error } = await supabase
+          .from("inventory_items")
+          .select("annual_demand, unit_cost, holding_cost, setup_cost, lead_time, selling_price, salvage_value")
+          .eq("project_id", projectId)
+          .limit(1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const item = data[0];
+          setDemand(item.annual_demand || 1000);
+          setUnitCost(item.unit_cost || 10);
+          setHoldingCost(item.holding_cost || 2);
+          setSetupCost(item.setup_cost || 50);
+          setLeadTime(item.lead_time || 7);
+          setSellingPrice(item.selling_price || 15);
+          setSalvageValue(item.salvage_value || 3);
+          
+          // For simplicity, let's derive some other values
+          setDemandMean(item.annual_demand ? item.annual_demand / 12 : 100);
+          setDemandStd(item.annual_demand ? Math.sqrt(item.annual_demand / 12) : 20);
+          setDemandRate(item.annual_demand ? item.annual_demand / 365 : 10);
+
+          setDiscountTiers([
+            { minQuantity: 0, unitPrice: item.unit_cost || 10 },
+            { minQuantity: 500, unitPrice: (item.unit_cost || 10) * 0.95 },
+            { minQuantity: 1000, unitPrice: (item.unit_cost || 10) * 0.90 }
+          ]);
+        } else {
+          // Set default values if no items are found
+          setDemand(1000);
+          setUnitCost(10);
+          setHoldingCost(2);
+          setSetupCost(50);
+          setLeadTime(7);
+          setSellingPrice(15);
+          setSalvageValue(3);
+          setDemandMean(100);
+          setDemandStd(20);
+          setDemandRate(10);
+          setDiscountTiers([
+            { minQuantity: 0, unitPrice: 10 },
+            { minQuantity: 500, unitPrice: 9.5 },
+            { minQuantity: 1000, unitPrice: 9 }
+          ]);
+        }
+      } catch (err: any) {
+        setError("Failed to load initial data for calculators. Using default values.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialData();
+  }, [projectId, user]);
 
   // Calculate Basic EOQ
   const calculateEOQ = () => {
@@ -161,6 +233,15 @@ export const AdvancedEOQCalculators = () => {
     return 0;
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Calculator className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-4">Loading calculator data...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -170,6 +251,15 @@ export const AdvancedEOQCalculators = () => {
           <p className="text-muted-foreground">Complete suite of inventory management formulas and calculators</p>
         </div>
       </div>
+
+      {error && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardContent className="p-4 flex items-center gap-4">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            <p className="text-sm text-destructive">{error}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">

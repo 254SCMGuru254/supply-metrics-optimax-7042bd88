@@ -1,13 +1,25 @@
-
 import { RouteOptimizationContent } from "@/components/route-optimization/RouteOptimizationContent";
 import { RouteFormulas } from "@/components/route-optimization/RouteFormulas";
 import { LeafletMapbox } from "@/components/maps/LeafletMapbox";
 import { EditableMapPoints } from "@/components/interactive-editing/EditableMapPoints";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Calculator, Activity } from "lucide-react";
+import { MapPin, Calculator, Activity, AlertTriangle } from "lucide-react";
+import { useParams } from 'react-router-dom';
 
 const RouteOptimization = () => {
+  const { projectId } = useParams<{ projectId: string }>();
+
+  if (!projectId) {
+    return (
+      <div className="container mx-auto text-center py-10">
+        <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
+        <h2 className="mt-4 text-xl font-semibold">Project Not Found</h2>
+        <p className="mt-2 text-gray-600">Please select a project from your dashboard to begin optimizing routes.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="text-center space-y-4">
@@ -71,7 +83,7 @@ const RouteOptimization = () => {
             </CardHeader>
             <CardContent>
               <EditableMapPoints 
-                projectId="route-optimization-project"
+                projectId={projectId}
                 onNodesChange={(nodes) => console.log('Nodes updated:', nodes)}
               />
             </CardContent>

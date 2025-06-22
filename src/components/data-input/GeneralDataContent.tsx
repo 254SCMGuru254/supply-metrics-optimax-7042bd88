@@ -1,11 +1,10 @@
-
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NodeForm } from "@/components/forms/NodeForm";
 import { DemandPointForm } from "@/components/forms/DemandPointForm";
 import { RouteForm } from "@/components/forms/RouteForm";
 
-export const GeneralDataContent = () => {
+export const GeneralDataContent = ({ projectId }: { projectId: string }) => {
   return (
     <Card className="p-6">
       <Tabs defaultValue="nodes">
@@ -15,13 +14,13 @@ export const GeneralDataContent = () => {
           <TabsTrigger value="routes">Routes</TabsTrigger>
         </TabsList>
         <TabsContent value="nodes">
-          <NodeForm />
+          <NodeForm projectId={projectId} />
         </TabsContent>
         <TabsContent value="demand">
-          <DemandPointForm />
+          <DemandPointForm projectId={projectId} />
         </TabsContent>
         <TabsContent value="routes">
-          <RouteForm />
+          <RouteForm projectId={projectId} />
         </TabsContent>
       </Tabs>
     </Card>

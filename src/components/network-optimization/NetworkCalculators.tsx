@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Network } from "lucide-react";
@@ -12,86 +12,78 @@ import Papa from "papaparse";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TableDiff } from "@/components/shared/TableDiff";
 import { OptimizationService } from '@/services/OptimizationService';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const formulas = [
-  {
-    id: "min-cost-flow",
-    name: "Minimum Cost Flow",
-    inputs: [
-      { label: "Arc Cost Matrix", name: "arcCosts", type: "textarea" },
-      { label: "Arc Capacities", name: "capacities", type: "textarea" }
-    ],
-    desc: "Finds the flow with minimum total cost."
-  },
-  {
-    id: "max-flow",
-    name: "Maximum Flow",
-    inputs: [
-      { label: "Capacity Matrix", name: "capacityMatrix", type: "textarea" }
-    ],
-    desc: "Finds the maximum feasible flow from source to sink."
-  },
-  {
-    id: "network-simplex",
-    name: "Network Simplex",
-    inputs: [
-      { label: "Supply/Demand Array", name: "supplyDemandData", type: "textarea" }
-    ],
-    desc: "Solves for minimum cost flow with simplex."
-  },
-  {
-    id: "shortest-path",
-    name: "Shortest Path",
-    inputs: [
-      { label: "Adjacency Matrix", name: "adjacencyMatrix", type: "textarea" }
-    ],
-    desc: "Compute the shortest path through the network."
-  },
-  {
-    id: "capacitated-flow",
-    name: "Capacitated Flow",
-    inputs: [
-      { label: "Node Capacities", name: "nodeCaps", type: "textarea" },
-      { label: "Edge Capacities", name: "edgeCaps", type: "textarea" }
-    ],
-    desc: "Flow calculation subject to node or edge capacity restrictions."
-  },
-  {
-    id: "multi-commodity-flow",
-    name: "Multi-Commodity Flow",
-    inputs: [
-      { label: "Commodity List", name: "commodityData", type: "textarea" }
-    ],
-    desc: "Support for multi-product flows by commodity."
-  }
-];
+interface NetworkCalculatorsProps {
+  projectId: string;
+}
 
-// Example data for nodes, edges, commodities
-const exampleNodes = [
-  { id: "N1", name: "Factory", type: "source", capacity: 1000, demand: 0, latitude: -1.3, longitude: 36.8 },
-  { id: "N2", name: "Warehouse", type: "intermediate", capacity: 500, demand: 0, latitude: -1.2, longitude: 36.9 },
-  { id: "N3", name: "Retailer", type: "sink", capacity: 0, demand: 800, latitude: -1.1, longitude: 37.0 }
-];
-const exampleEdges = [
-  { id: "E1", from: "N1", to: "N2", capacity: 500, cost: 10, distance: 50 },
-  { id: "E2", from: "N2", to: "N3", capacity: 400, cost: 8, distance: 30 }
-];
-const exampleCommodities = [
-  { id: "C1", name: "Product A", source: "N1", sink: "N3", demand: 800 }
-];
-
-export function NetworkCalculators() {
+export function NetworkCalculators({ projectId }: NetworkCalculatorsProps) {
   const [activeTab, setActiveTab] = useState("network");
-  const [nodes, setNodes] = useState(exampleNodes);
-  const [edges, setEdges] = useState(exampleEdges);
-  const [commodities, setCommodities] = useState(exampleCommodities);
+  
+  const queryClient = useQueryClient();
+
+  const { data: formulas, isLoading: isLoadingFormulas } = useQuery({
+    queryKey: ['modelFormulas', 'network-optimization'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('model_formulas')
+        .select('*')
+        .eq('model_id', 'network-optimization');
+      if (error) throw new Error(error.message);
+      return data;
+    }
+  });
+
+  const { data: nodes, isLoading: isLoadingNodes } = useQuery({
+    queryKey: ['networkNodes', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('nodes').select('*').eq('project_id', projectId);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  const { data: edges, isLoading: isLoadingEdges } = useQuery({
+    queryKey: ['networkEdges', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('routes').select('*').eq('project_id', projectId);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!projectId,
+  });
+  
+  const { data: commodities, isLoading: isLoadingCommodities } = useQuery({
+    queryKey: ['networkCommodities', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('commodities').select('*').eq('project_id', projectId);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  const deleteNodeMutation = useMutation({
+    mutationFn: async (nodeId: string) => {
+      const { error } = await supabase.from('nodes').delete().eq('id', nodeId);
+      if (error) {
+        toast({ title: "Error deleting node", description: error.message, variant: "destructive" });
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['networkNodes', projectId] });
+      toast({ title: "Node Deleted", description: "The node has been successfully removed." });
+    },
+  });
+
   const [scenarioName, setScenarioName] = useState("");
   const [error, setError] = useState("");
-  const { toast } = useToast();
   const nodeFileRef = useRef();
   const edgeFileRef = useRef();
   const commodityFileRef = useRef();
@@ -103,28 +95,29 @@ export function NetworkCalculators() {
   const [comparisonScenarioId, setComparisonScenarioId] = useState("");
   const [showComparison, setShowComparison] = useState(false);
   const [activeModel, setActiveModel] = useState("network-optimization");
+  const [selectedFormulaId, setSelectedFormulaId] = useState("min-cost-flow");
 
   // Add/edit/remove logic for nodes
-  const addNode = () => setNodes([...nodes, { id: `N${nodes.length+1}`, name: "", type: "source", capacity: 0, demand: 0, latitude: 0, longitude: 0 }]);
-  const updateNode = (idx, field, value) => setNodes(nodes.map((n, i) => i === idx ? { ...n, [field]: value } : n));
-  const removeNode = idx => setNodes(nodes.filter((_, i) => i !== idx));
+  const addNode = () => {}; // Will be replaced by mutation
+  const updateNode = (idx, field, value) => {}; // Will be replaced by mutation
+  const removeNode = idx => {}; // Will be replaced by mutation
   // Add/edit/remove logic for edges
-  const addEdge = () => setEdges([...edges, { id: `E${edges.length+1}`, from: "", to: "", capacity: 0, cost: 0, distance: 0 }]);
-  const updateEdge = (idx, field, value) => setEdges(edges.map((e, i) => i === idx ? { ...e, [field]: value } : e));
-  const removeEdge = idx => setEdges(edges.filter((_, i) => i !== idx));
+  const addEdge = () => {}; // Will be replaced by mutation
+  const updateEdge = (idx, field, value) => {}; // Will be replaced by mutation
+  const removeEdge = idx => {}; // Will be replaced by mutation
   // Add/edit/remove logic for commodities
-  const addCommodity = () => setCommodities([...commodities, { id: `C${commodities.length+1}`, name: "", source: "", sink: "", demand: 0 }]);
-  const updateCommodity = (idx, field, value) => setCommodities(commodities.map((c, i) => i === idx ? { ...c, [field]: value } : c));
-  const removeCommodity = idx => setCommodities(commodities.filter((_, i) => i !== idx));
+  const addCommodity = () => {}; // Will be replaced by mutation
+  const updateCommodity = (idx, field, value) => {}; // Will be replaced by mutation
+  const removeCommodity = idx => {}; // Will be replaced by mutation
 
   // Import/export handlers
   const importCSV = (type, file) => {
     Papa.parse(file, {
       header: true,
       complete: results => {
-        if (type === "nodes") setNodes(results.data);
-        if (type === "edges") setEdges(results.data);
-        if (type === "commodities") setCommodities(results.data);
+        if (type === "nodes") nodes(results.data);
+        if (type === "edges") edges(results.data);
+        if (type === "commodities") commodities(results.data);
       }
     });
   };
@@ -186,9 +179,9 @@ export function NetworkCalculators() {
 
   // Contextual help and example data
   const loadExample = () => {
-    setNodes(exampleNodes);
-    setEdges(exampleEdges);
-    setCommodities(exampleCommodities);
+    nodes(exampleNodes);
+    edges(exampleEdges);
+    commodities(exampleCommodities);
     setScenarioName("Example Scenario");
     setError("");
     toast({ title: "Example data loaded" });
@@ -200,7 +193,12 @@ export function NetworkCalculators() {
     setOptimizationResult(null);
     try {
       const { data, error } = await supabase.functions.invoke('optimization-engine', {
-        body: { nodes, edges, commodities }
+        body: { 
+          nodes, 
+          edges, 
+          commodities,
+          formula: selectedFormulaId 
+        }
       });
       if (error) {
         setError("Optimization failed: " + error.message);
@@ -221,9 +219,9 @@ export function NetworkCalculators() {
   const loadScenarioDetails = async (id) => {
     const { data, error } = await supabase.from("network_optimizations").select("*").eq("id", id).single();
     if (data) {
-      setNodes(data.network_graph.nodes);
-      setEdges(data.network_graph.edges);
-      setCommodities(data.network_graph.commodities);
+      nodes(data.network_graph.nodes);
+      edges(data.network_graph.edges);
+      commodities(data.network_graph.commodities);
       setScenarioName(data.scenario_name);
     }
   };
@@ -264,40 +262,45 @@ export function NetworkCalculators() {
             <input type="file" accept=".csv" ref={nodeFileRef} style={{ display: "none" }} onChange={e => e.target.files && importCSV("nodes", e.target.files[0])} />
             <Button variant="outline" onClick={() => nodeFileRef.current && nodeFileRef.current.click()}>Import CSV</Button>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Capacity</TableHead>
-                <TableHead>Demand</TableHead>
-                <TableHead>Latitude</TableHead>
-                <TableHead>Longitude</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {nodes.map((node, idx) => (
-                <TableRow key={node.id}>
-                  <TableCell><Input value={node.id} onChange={e => updateNode(idx, "id", e.target.value)} /></TableCell>
-                  <TableCell><Input value={node.name} onChange={e => updateNode(idx, "name", e.target.value)} /></TableCell>
-                  <TableCell>
-                    <select value={node.type} onChange={e => updateNode(idx, "type", e.target.value)} className="border rounded p-1">
-                      <option value="source">Source</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="sink">Sink</option>
-                    </select>
-                  </TableCell>
-                  <TableCell><Input type="number" value={node.capacity} onChange={e => updateNode(idx, "capacity", Number(e.target.value))} /></TableCell>
-                  <TableCell><Input type="number" value={node.demand} onChange={e => updateNode(idx, "demand", Number(e.target.value))} /></TableCell>
-                  <TableCell><Input type="number" value={node.latitude} onChange={e => updateNode(idx, "latitude", Number(e.target.value))} /></TableCell>
-                  <TableCell><Input type="number" value={node.longitude} onChange={e => updateNode(idx, "longitude", Number(e.target.value))} /></TableCell>
-                  <TableCell><Button variant="destructive" onClick={() => removeNode(idx)}>Remove</Button></TableCell>
+          {isLoadingNodes ? <p>Loading nodes...</p> : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Capacity</TableHead>
+                  <TableHead>Demand</TableHead>
+                  <TableHead>Latitude</TableHead>
+                  <TableHead>Longitude</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {nodes?.map((node, idx) => (
+                  <TableRow key={node.id}>
+                    <TableCell><Input value={node.id} onChange={e => updateNode(idx, "id", e.target.value)} /></TableCell>
+                    <TableCell><Input value={node.name} onChange={e => updateNode(idx, "name", e.target.value)} /></TableCell>
+                    <TableCell>
+                      <Select value={node.type} onValueChange={v => updateNode(idx, "type", v)}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="source">Source</SelectItem>
+                          <SelectItem value="intermediate">Intermediate</SelectItem>
+                          <SelectItem value="sink">Sink</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell><Input type="number" value={node.capacity} onChange={e => updateNode(idx, "capacity", e.target.value)} /></TableCell>
+                    <TableCell><Input type="number" value={node.demand} onChange={e => updateNode(idx, "demand", e.target.value)} /></TableCell>
+                    <TableCell><Input type="number" value={node.latitude} onChange={e => updateNode(idx, "latitude", e.target.value)} /></TableCell>
+                    <TableCell><Input type="number" value={node.longitude} onChange={e => updateNode(idx, "longitude", e.target.value)} /></TableCell>
+                    <TableCell><Button variant="destructive" onClick={() => removeNode(idx)}>Remove</Button></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
       {/* Edges Table */}
@@ -385,7 +388,7 @@ export function NetworkCalculators() {
                 <Select onValueChange={setActiveModel} defaultValue={activeModel}>
                   <SelectTrigger><SelectValue placeholder="Select a model" /></SelectTrigger>
                   <SelectContent>
-                    {modelFormulaRegistry.map(model => (
+                    {formulas?.map(model => (
                       <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
                     ))}
                   </SelectContent>

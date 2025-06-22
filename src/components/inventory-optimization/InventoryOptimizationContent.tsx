@@ -1,30 +1,50 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Bar, LineChart, Line } from 'recharts';
 import { NetworkMap } from '@/components/NetworkMap';
 import { Node, InventoryItem } from '@/components/map/MapTypes';
-
-// Mock data (replace with actual data fetching)
-const mockNodes: Node[] = [
-  { id: '1', name: 'Nairobi Warehouse', type: 'warehouse', latitude: -1.2921, longitude: 36.8219, ownership: 'owned' },
-  { id: '2', name: 'Mombasa Port', type: 'port', latitude: -4.0435, longitude: 39.6682, ownership: 'owned' },
-  { id: '3', name: 'Kisumu Distribution', type: 'distribution', latitude: -0.0917, longitude: 34.7680, ownership: 'owned' },
-  { id: '4', name: 'Eldoret Store', type: 'retail', latitude: 0.5143, longitude: 35.2698, ownership: 'owned' },
-];
-
-const mockInventory: InventoryItem[] = [
-  { id: 'item1', name: 'Product A', nodeId: '1', unitCost: 100, annualDemand: 1200, orderingCost: 50, holdingCost: 0.2 },
-  { id: 'item2', name: 'Product B', nodeId: '1', unitCost: 150, annualDemand: 800, orderingCost: 60, holdingCost: 0.25 },
-  { id: 'item3', name: 'Product C', nodeId: '2', unitCost: 200, annualDemand: 600, orderingCost: 70, holdingCost: 0.3 },
-  { id: 'item4', name: 'Product D', nodeId: '3', unitCost: 50, annualDemand: 2400, orderingCost: 40, holdingCost: 0.15 },
-  { id: 'item5', name: 'Product E', nodeId: '4', unitCost: 300, annualDemand: 300, orderingCost: 100, holdingCost: 0.35 },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { Link } from 'react-router-dom';
+import { PlusCircle } from 'lucide-react';
 
 export const InventoryOptimizationContent = () => {
-  const [nodes] = useState<Node[]>(mockNodes);
-  const [inventory] = useState<InventoryItem[]>(mockInventory);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const { data: nodesData, error: nodesError } = await supabase
+          .from('supply_nodes')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        const { data: inventoryData, error: inventoryError } = await supabase
+          .from('inventory_items')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (nodesError) throw nodesError;
+        if (inventoryError) throw inventoryError;
+
+        setNodes(nodesData.map(n => ({ ...n, type: n.node_type || 'warehouse' })) || []);
+        setInventory(inventoryData || []);
+      } catch (error) {
+        console.error("Error fetching inventory data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   const handleNodeClick = (node: Node) => {
     setSelectedNode(node);
@@ -43,6 +63,22 @@ export const InventoryOptimizationContent = () => {
       return { name: node.name, value };
     });
   }, [nodes, inventory]);
+
+  if(loading) {
+    return <div className="text-center p-8">Loading inventory data...</div>
+  }
+
+  if(nodes.length === 0 || inventory.length === 0) {
+    return (
+      <Card className="text-center p-8">
+        <CardHeader><CardTitle>No Inventory Data</CardTitle></CardHeader>
+        <CardContent>
+          <p className="mb-4">You need to add locations and inventory items to get started.</p>
+          <Link to="/data-input"><Button><PlusCircle className="mr-2 h-4 w-4" /> Add Inventory Data</Button></Link>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -90,7 +126,7 @@ export const InventoryOptimizationContent = () => {
                   <li key={item.id} className="py-2">
                     <div className="flex justify-between">
                       <span>{item.name}</span>
-                      <span className="font-mono">Value: KES {(item.unitCost * item.annualDemand).toLocaleString()}</span>
+                      <span className="font-mono">Value: KES {(item.unitCost * (item.annualDemand || 0)).toLocaleString()}</span>
                     </div>
                   </li>
                 ))}

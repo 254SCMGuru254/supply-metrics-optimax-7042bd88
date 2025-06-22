@@ -1,11 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Calculator, Package, TrendingUp, Info } from "lucide-react";
+import { Calculator, Package, TrendingUp, Info, AlertCircle } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -16,6 +15,9 @@ import {
 } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Link } from 'react-router-dom';
 
 export interface EOQParams {
   annualDemand: number;
@@ -40,18 +42,58 @@ interface EOQResult {
 
 export const EOQCalculator = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   
   const [params, setParams] = useState<EOQParams>({
-    annualDemand: 1000,
-    orderingCost: 100,
-    holdingCost: 0.2,
-    unitCost: 50,
+    annualDemand: 0,
+    orderingCost: 0,
+    holdingCost: 0,
+    unitCost: 0,
     leadTime: 7,
     serviceLevel: 0.95,
     daysPerYear: 365
   });
-  
+
+  const [hasData, setHasData] = useState(false);
   const [result, setResult] = useState<EOQResult | null>(null);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('inventory_items')
+          .select('*')
+          .eq('user_id', user.id)
+          .limit(1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const firstItem = data[0];
+          setParams(prev => ({
+            ...prev,
+            annualDemand: firstItem.annual_demand || 1000,
+            orderingCost: firstItem.ordering_cost || 100,
+            holdingCost: firstItem.holding_cost || 0.2,
+            unitCost: firstItem.unit_cost || 50,
+            leadTime: firstItem.lead_time || 7,
+          }));
+          setHasData(true);
+        } else {
+          setHasData(false);
+        }
+      } catch (error) {
+        console.error("Error fetching initial inventory data:", error);
+        setHasData(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInitialData();
+  }, [user]);
 
   const handleInputChange = (field: keyof EOQParams, value: string) => {
     const numValue = parseFloat(value);
@@ -145,6 +187,28 @@ export const EOQCalculator = () => {
   const roundToTwo = (num: number): number => {
     return Math.round(num * 100) / 100;
   };
+
+  if (loading) {
+    return <div className="text-center p-6">Loading calculator...</div>;
+  }
+
+  if (!hasData) {
+    return (
+      <Card className="p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No Inventory Data Found</h3>
+        <p className="mt-1 text-sm text-gray-500">Please add inventory items to use the EOQ calculator.</p>
+        <div className="mt-6">
+          <Link to="/data-input">
+            <Button>
+              <Package className="mr-2 h-4 w-4" />
+              Add Inventory Data
+            </Button>
+          </Link>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

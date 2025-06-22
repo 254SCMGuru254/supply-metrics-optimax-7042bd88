@@ -1,10 +1,9 @@
-
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BarChart3, Upload, Download, FileInput, Info, Plus, X } from "lucide-react";
+import { BarChart3, Upload, Download, FileInput, Info, Plus, X, AlertCircle, Package } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,6 +15,9 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Link, useParams } from "react-router-dom";
 
 interface InventoryItem {
   id: string;
@@ -27,55 +29,15 @@ interface InventoryItem {
   category: "A" | "B" | "C" | null;
 }
 
-export const ABCAnalysis = () => {
+interface ABCAnalysisProps {
+  projectId: string;
+}
+
+export const ABCAnalysis = ({ projectId }: ABCAnalysisProps) => {
   const { toast } = useToast();
-  const [items, setItems] = useState<InventoryItem[]>([
-    { 
-      id: "1", 
-      name: "Product A", 
-      unitCost: 500, 
-      annualDemand: 200, 
-      annualValue: 100000,
-      cumulativePercentage: 0,
-      category: null
-    },
-    { 
-      id: "2", 
-      name: "Product B", 
-      unitCost: 50, 
-      annualDemand: 800, 
-      annualValue: 40000,
-      cumulativePercentage: 0,
-      category: null
-    },
-    { 
-      id: "3", 
-      name: "Product C", 
-      unitCost: 100, 
-      annualDemand: 300, 
-      annualValue: 30000,
-      cumulativePercentage: 0,
-      category: null
-    },
-    { 
-      id: "4", 
-      name: "Product D", 
-      unitCost: 10, 
-      annualDemand: 2000, 
-      annualValue: 20000,
-      cumulativePercentage: 0,
-      category: null
-    },
-    { 
-      id: "5", 
-      name: "Product E", 
-      unitCost: 5, 
-      annualDemand: 1000, 
-      annualValue: 5000,
-      cumulativePercentage: 0,
-      category: null
-    }
-  ]);
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<InventoryItem[]>([]);
   const [analysisResults, setAnalysisResults] = useState<{
     classA: { itemCount: number, valuePercent: number },
     classB: { itemCount: number, valuePercent: number },
@@ -88,6 +50,37 @@ export const ABCAnalysis = () => {
     unitCost: 0,
     annualDemand: 0
   });
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      if (!user || !projectId) return;
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('inventory_items')
+          .select('*')
+          .eq('project_id', projectId);
+        
+        if (error) throw error;
+        
+        const formattedItems = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          unitCost: item.unit_cost || 0,
+          annualDemand: item.annual_demand || 0,
+          annualValue: (item.unit_cost || 0) * (item.annual_demand || 0),
+          cumulativePercentage: 0,
+          category: item.category || null
+        }));
+        setItems(formattedItems);
+      } catch (error) {
+        console.error("Error fetching inventory items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItems();
+  }, [user, projectId]);
 
   const handleInputChange = (field: keyof InventoryItem, value: string, id?: string) => {
     if (id) {
@@ -116,8 +109,8 @@ export const ABCAnalysis = () => {
     }
   };
 
-  const addItem = () => {
-    if (!newItem.name || !newItem.unitCost || !newItem.annualDemand) {
+  const addItem = async () => {
+    if (!user || !newItem.name || !newItem.unitCost || !newItem.annualDemand) {
       toast({
         title: "Missing Information",
         description: "Please fill all fields for the new item.",
@@ -126,36 +119,72 @@ export const ABCAnalysis = () => {
       return;
     }
 
-    const annualValue = (newItem.unitCost || 0) * (newItem.annualDemand || 0);
-    
-    const newItemComplete: InventoryItem = {
-      id: crypto.randomUUID(),
-      name: newItem.name || "",
-      unitCost: newItem.unitCost || 0,
-      annualDemand: newItem.annualDemand || 0,
-      annualValue,
-      cumulativePercentage: 0,
-      category: null
+    const newItemData = {
+      user_id: user.id,
+      project_id: projectId,
+      name: newItem.name,
+      unit_cost: newItem.unitCost,
+      annual_demand: newItem.annualDemand,
     };
-    
-    setItems([...items, newItemComplete]);
-    setNewItem({
-      name: "",
-      unitCost: 0,
-      annualDemand: 0
-    });
-    
-    toast({
-      title: "Item Added",
-      description: `${newItemComplete.name} has been added to the analysis.`
-    });
+
+    const { data, error } = await supabase
+      .from('inventory_items')
+      .insert([newItemData])
+      .select();
+
+    if (error) {
+      toast({
+        title: "Error adding item",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else if (data) {
+      const addedItem = data[0];
+      const newFormattedItem: InventoryItem = {
+        id: addedItem.id,
+        name: addedItem.name,
+        unitCost: addedItem.unit_cost || 0,
+        annualDemand: addedItem.annual_demand || 0,
+        annualValue: (addedItem.unit_cost || 0) * (addedItem.annual_demand || 0),
+        cumulativePercentage: 0,
+        category: null
+      };
+      setItems([...items, newFormattedItem]);
+      setNewItem({ name: "", unitCost: 0, annualDemand: 0 });
+      toast({
+        title: "Item Added",
+        description: `${addedItem.name} has been added to the analysis.`
+      });
+    }
   };
 
-  const removeItem = (id: string) => {
+  const removeItem = async (id: string) => {
+    // Optimistic UI update
+    const originalItems = items;
     setItems(items.filter(item => item.id !== id));
+
+    const { error } = await supabase
+      .from('inventory_items')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      // Revert if there's an error
+      setItems(originalItems);
+      toast({
+        title: "Error deleting item",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Item Removed",
+        description: "The item has been successfully removed."
+      });
+    }
   };
 
-  const performABCAnalysis = () => {
+  const performABCAnalysis = async () => {
     if (items.length === 0) {
       toast({
         title: "No Items",
@@ -171,8 +200,16 @@ export const ABCAnalysis = () => {
       
       // Calculate total annual value
       const totalValue = sortedItems.reduce((sum, item) => sum + item.annualValue, 0);
+      if (totalValue === 0) {
+        toast({
+          title: "Analysis Warning",
+          description: "Total annual value is zero. Cannot perform analysis.",
+          variant: "default"
+        });
+        return;
+      }
       
-      // Calculate cumulative percentages
+      // Calculate cumulative percentages and assign categories
       let cumulativeValue = 0;
       const itemsWithCumulative = sortedItems.map(item => {
         cumulativeValue += item.annualValue;
@@ -194,7 +231,27 @@ export const ABCAnalysis = () => {
         };
       });
       
-      // Count items and value by category
+      // Update local state immediately for responsive UI
+      setItems(itemsWithCumulative);
+      
+      // Save categories to database
+      const updates = itemsWithCumulative.map(item => ({
+        id: item.id,
+        category: item.category,
+        user_id: user?.id,
+        project_id: projectId,
+      }));
+
+      const { error: updateError } = await supabase
+        .from('inventory_items')
+        .upsert(updates, { onConflict: 'id' });
+
+      if (updateError) {
+        // Handle error, maybe revert UI changes or notify user
+        throw updateError;
+      }
+
+      // Count items and value by category for summary
       const categoryStats = itemsWithCumulative.reduce((stats, item) => {
         if (item.category) {
           stats[item.category].count += 1;
@@ -207,284 +264,203 @@ export const ABCAnalysis = () => {
         C: { count: 0, value: 0 }
       });
       
-      // Calculate percentages
-      const totalItems = items.length;
-      const results = {
-        classA: {
-          itemCount: (categoryStats.A.count / totalItems) * 100,
-          valuePercent: (categoryStats.A.value / totalValue) * 100
-        },
-        classB: {
-          itemCount: (categoryStats.B.count / totalItems) * 100,
-          valuePercent: (categoryStats.B.value / totalValue) * 100
-        },
-        classC: {
-          itemCount: (categoryStats.C.count / totalItems) * 100,
-          valuePercent: (categoryStats.C.value / totalValue) * 100
-        },
-        totalValue
-      };
-      
-      setItems(itemsWithCumulative);
-      setAnalysisResults(results);
-      
-      toast({
-        title: "ABC Analysis Complete",
-        description: "Items have been classified into A, B, and C categories."
+      const classAPercent = (categoryStats.A.value / totalValue) * 100;
+      const classBPercent = (categoryStats.B.value / totalValue) * 100;
+      const classCPercent = (categoryStats.C.value / totalValue) * 100;
+            
+      setAnalysisResults({
+        classA: { itemCount: categoryStats.A.count, valuePercent: roundToTwo(classAPercent) },
+        classB: { itemCount: categoryStats.B.count, valuePercent: roundToTwo(classBPercent) },
+        classC: { itemCount: categoryStats.C.count, valuePercent: roundToTwo(classCPercent) },
+        totalValue: roundToTwo(totalValue)
       });
-    } catch (error) {
-      console.error("Analysis error:", error);
+
+      toast({
+        title: "Analysis Complete",
+        description: "ABC analysis has been successfully performed and results are saved."
+      });
+    } catch(error: any) {
+      console.error("ABC analysis error:", error);
       toast({
         title: "Analysis Error",
-        description: "An error occurred while performing the ABC analysis.",
+        description: error.message || "An error occurred during the analysis.",
         variant: "destructive"
       });
     }
   };
 
-  const exportCSV = () => {
-    if (items.length === 0) {
-      toast({
-        title: "No Data",
-        description: "There are no items to export.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const headers = ["Item Name", "Unit Cost", "Annual Demand", "Annual Value", "Cumulative %", "Category"];
-    const rows = items.map(item => [
-      item.name,
-      item.unitCost,
-      item.annualDemand,
-      item.annualValue,
-      item.cumulativePercentage.toFixed(2) + "%",
-      item.category || ""
-    ]);
-    
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(row => row.join(","))
-    ].join("\n");
-    
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "abc_analysis.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Export Complete",
-      description: "ABC analysis data has been exported to CSV."
-    });
+  const roundToTwo = (num: number) => {
+    if (typeof num !== 'number' || isNaN(num)) return 0;
+    return Math.round(num * 100) / 100;
   };
+  
+  const exportCSV = () => {
+    const analysisData = items.map(item => ({
+      ID: item.id,
+      Name: item.name,
+      'Unit Cost': item.unitCost,
+      'Annual Demand': item.annualDemand,
+      'Annual Value': item.annualValue,
+      'Cumulative %': roundToTwo(item.cumulativePercentage),
+      Category: item.category,
+    }));
+    
+    const header = Object.keys(analysisData[0]);
+    const rows = analysisData.map(obj => header.map(key => obj[key as keyof typeof obj]));
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + header.join(",") + "\n" 
+      + rows.map(e => e.join(",")).join("\n");
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", "abc-analysis.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  if (loading) {
+    return <div className="text-center p-6">Loading inventory data...</div>;
+  }
+
+  if (items.length === 0 && !loading) {
+    return (
+      <Card className="p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No Inventory Items</h3>
+        <p className="mt-1 text-sm text-gray-500">Get started by adding inventory items for your project.</p>
+        <div className="mt-6">
+          <Link to={`/data-input/${projectId}`}>
+            <Button>
+              <Package className="mr-2 h-4 w-4" />
+              Add Inventory Data
+            </Button>
+          </Link>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-2">
-            <BarChart3 className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-semibold">ABC Inventory Analysis</h2>
-          </div>
-          <div className="flex space-x-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Import
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Import inventory data from CSV</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <Button variant="outline" size="sm" onClick={exportCSV}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-          </div>
+        <div className="flex items-center space-x-2 mb-6">
+          <BarChart3 className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-semibold">ABC Analysis</h2>
         </div>
         
         <p className="text-muted-foreground mb-6">
-          ABC Analysis is an inventory categorization technique that divides inventory into three categories based on value:
-          Class A (high-value), Class B (medium-value), and Class C (low-value). This helps optimize inventory management resources.
+          Categorize inventory items based on their importance to the business. Class A items are the most valuable, while Class C items are the least valuable.
         </p>
-        
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <Separator className="my-6" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* New Item Form */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Add New Item</h3>
             <div className="space-y-2">
-              <Label htmlFor="new-name">Item Name</Label>
+              <Label htmlFor="newItemName">Item Name</Label>
               <Input 
-                id="new-name"
-                value={newItem.name}
+                id="newItemName"
+                value={newItem.name || ""}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter item name"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="new-unit-cost">Unit Cost ($)</Label>
-              <Input 
-                id="new-unit-cost"
-                type="number"
-                value={newItem.unitCost}
-                onChange={(e) => handleInputChange('unitCost', e.target.value)}
-                placeholder="Enter unit cost"
-                min="0.01"
-                step="0.01"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="new-annual-demand">Annual Demand (units)</Label>
-              <div className="flex space-x-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="newItemUnitCost">Unit Cost</Label>
                 <Input 
-                  id="new-annual-demand"
+                  id="newItemUnitCost"
                   type="number"
-                  value={newItem.annualDemand}
-                  onChange={(e) => handleInputChange('annualDemand', e.target.value)}
-                  placeholder="Enter annual demand"
-                  min="1"
-                  className="flex-1"
+                  value={newItem.unitCost || ""}
+                  onChange={(e) => handleInputChange('unitCost', e.target.value)}
                 />
-                <Button onClick={addItem}>
-                  <Plus className="h-4 w-4" />
-                  Add
-                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newItemAnnualDemand">Annual Demand</Label>
+                <Input 
+                  id="newItemAnnualDemand"
+                  type="number"
+                  value={newItem.annualDemand || ""}
+                  onChange={(e) => handleInputChange('annualDemand', e.target.value)}
+                />
               </div>
             </div>
+            <Button onClick={addItem}><Plus className="mr-2 h-4 w-4" /> Add Item</Button>
           </div>
           
-          <Separator />
-          
-          <div>
-            <div className="flex justify-between mb-4">
-              <h3 className="text-lg font-medium">Inventory Items</h3>
-              <Button onClick={performABCAnalysis}>Run ABC Analysis</Button>
+          {/* Analysis Controls & Summary */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Analysis & Actions</h3>
+            <div className="flex gap-2">
+              <Button onClick={performABCAnalysis}>Perform Analysis</Button>
+              <Button variant="outline" onClick={exportCSV} disabled={items.every(item => !item.category)}><Download className="mr-2 h-4 w-4" /> Export CSV</Button>
             </div>
-            
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead className="text-right">Unit Cost ($)</TableHead>
-                    <TableHead className="text-right">Annual Demand</TableHead>
-                    <TableHead className="text-right">Annual Value ($)</TableHead>
-                    {analysisResults && (
-                      <>
-                        <TableHead className="text-right">Cumulative %</TableHead>
-                        <TableHead>Category</TableHead>
-                      </>
-                    )}
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item) => (
-                    <TableRow key={item.id} className={
-                      item.category === "A" ? "bg-green-50 dark:bg-green-900/20" :
-                      item.category === "B" ? "bg-blue-50 dark:bg-blue-900/20" :
-                      item.category === "C" ? "bg-amber-50 dark:bg-amber-900/20" : ""
-                    }>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="text-right">${item.unitCost}</TableCell>
-                      <TableCell className="text-right">{item.annualDemand}</TableCell>
-                      <TableCell className="text-right">${item.annualValue.toLocaleString()}</TableCell>
-                      {analysisResults && (
-                        <>
-                          <TableCell className="text-right">{item.cumulativePercentage.toFixed(2)}%</TableCell>
-                          <TableCell>
-                            {item.category && (
-                              <span className={
-                                item.category === "A" ? "font-semibold text-green-600 dark:text-green-400" :
-                                item.category === "B" ? "font-semibold text-blue-600 dark:text-blue-400" :
-                                "font-semibold text-amber-600 dark:text-amber-400"
-                              }>
-                                Class {item.category}
-                              </span>
-                            )}
-                          </TableCell>
-                        </>
-                      )}
-                      <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            {analysisResults && (
+              <Card className="p-4 bg-muted">
+                <h4 className="font-semibold mb-2">Analysis Summary</h4>
+                <div className="space-y-1 text-sm">
+                  <p><b>Total Value:</b> ${analysisResults.totalValue.toLocaleString()}</p>
+                  <p><b>Class A:</b> {analysisResults.classA.itemCount} items ({analysisResults.classA.valuePercent}%)</p>
+                  <p><b>Class B:</b> {analysisResults.classB.itemCount} items ({analysisResults.classB.valuePercent}%)</p>
+                  <p><b>Class C:</b> {analysisResults.classC.itemCount} items ({analysisResults.classC.valuePercent}%)</p>
+                </div>
+              </Card>
+            )}
           </div>
         </div>
       </Card>
       
-      {analysisResults && (
-        <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-6">ABC Analysis Results</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card className="p-4 border-l-4 border-green-500">
-              <h4 className="text-lg font-medium text-green-700 dark:text-green-400">Class A Items</h4>
-              <p className="text-3xl font-bold my-2">{analysisResults.classA.itemCount.toFixed(0)}%</p>
-              <p className="text-sm text-muted-foreground">of items</p>
-              <p className="text-xl font-semibold mt-4 text-green-600">{analysisResults.classA.valuePercent.toFixed(0)}%</p>
-              <p className="text-sm text-muted-foreground">of total value</p>
-            </Card>
-            
-            <Card className="p-4 border-l-4 border-blue-500">
-              <h4 className="text-lg font-medium text-blue-700 dark:text-blue-400">Class B Items</h4>
-              <p className="text-3xl font-bold my-2">{analysisResults.classB.itemCount.toFixed(0)}%</p>
-              <p className="text-sm text-muted-foreground">of items</p>
-              <p className="text-xl font-semibold mt-4 text-blue-600">{analysisResults.classB.valuePercent.toFixed(0)}%</p>
-              <p className="text-sm text-muted-foreground">of total value</p>
-            </Card>
-            
-            <Card className="p-4 border-l-4 border-amber-500">
-              <h4 className="text-lg font-medium text-amber-700 dark:text-amber-400">Class C Items</h4>
-              <p className="text-3xl font-bold my-2">{analysisResults.classC.itemCount.toFixed(0)}%</p>
-              <p className="text-sm text-muted-foreground">of items</p>
-              <p className="text-xl font-semibold mt-4 text-amber-600">{analysisResults.classC.valuePercent.toFixed(0)}%</p>
-              <p className="text-sm text-muted-foreground">of total value</p>
-            </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Inventory Item List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-[600px] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item Name</TableHead>
+                  <TableHead>Unit Cost</TableHead>
+                  <TableHead>Annual Demand</TableHead>
+                  <TableHead>Annual Value</TableHead>
+                  <TableHead>Cumulative %</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map(item => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>${item.unitCost.toLocaleString()}</TableCell>
+                    <TableCell>{item.annualDemand.toLocaleString()}</TableCell>
+                    <TableCell>${item.annualValue.toLocaleString()}</TableCell>
+                    <TableCell>{item.category ? `${roundToTwo(item.cumulativePercentage)}%` : 'N/A'}</TableCell>
+                    <TableCell>
+                      {item.category && (
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          item.category === 'A' ? 'bg-red-200 text-red-800' :
+                          item.category === 'B' ? 'bg-yellow-200 text-yellow-800' :
+                          'bg-green-200 text-green-800'
+                        }`}>
+                          Class {item.category}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          
-          <div className="p-4 bg-muted rounded-md">
-            <h4 className="text-lg font-medium mb-2">Management Recommendations</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><strong>Class A Items:</strong> Strict inventory control, frequent counting, accurate demand forecasting, and close monitoring of lead times.</li>
-              <li><strong>Class B Items:</strong> Regular monitoring with moderate controls, less frequent reviews than Class A items.</li>
-              <li><strong>Class C Items:</strong> Simplest controls with minimal record keeping, bulk ordering, and higher safety stock levels.</li>
-            </ul>
-          </div>
-        </Card>
-      )}
-      
-      <Card className="p-6 bg-muted/50">
-        <div className="flex items-start space-x-3">
-          <Info className="h-6 w-6 text-primary mt-1" />
-          <div>
-            <h3 className="text-lg font-medium">About ABC Analysis</h3>
-            <p className="text-sm text-muted-foreground mt-2">
-              ABC Analysis is based on the Pareto principle (80/20 rule), which suggests that 80% of effects come from 20% of causes. 
-              In inventory management, this translates to a small percentage of items accounting for a large percentage of inventory value.
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Typically, Class A items (10-20% of inventory) account for 70-80% of the total value, Class B items (30%) represent 15-20% of value, 
-              and Class C items (50-60%) account for just 5-10% of value. This categorization helps allocate resources efficiently.
-            </p>
-          </div>
-        </div>
+        </CardContent>
       </Card>
     </div>
   );

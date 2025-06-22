@@ -1,8 +1,10 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import HeuristicCalculators from "@/components/heuristic/HeuristicCalculators";
 
 const Heuristic = () => {
+  const { projectId } = useParams<{ projectId: string }>();
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Card className="shadow-2xl border-teal-200">
@@ -13,7 +15,11 @@ const Heuristic = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
-          <HeuristicCalculators />
+          {projectId ? (
+            <HeuristicCalculators projectId={projectId} />
+          ) : (
+            <p>Please select a project to continue.</p>
+          )}
         </CardContent>
       </Card>
     </div>

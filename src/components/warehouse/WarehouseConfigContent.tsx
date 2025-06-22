@@ -1,47 +1,106 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Warehouse, Building } from "lucide-react";
-import { Node } from "@/components/map/MapTypes";
+import { Warehouse, Building, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-interface WarehouseConfigProps {
-  nodes: Node[];
-  setNodes: (nodes: Node[]) => void;
+type WarehouseNode = {
+  id: string;
+  name: string;
+  type: 'warehouse';
+  latitude: number;
+  longitude: number;
+  capacity: number;
 }
 
-export function WarehouseConfigContent({ nodes, setNodes }: WarehouseConfigProps) {
+interface WarehouseConfigProps {
+  projectId: string;
+}
+
+export function WarehouseConfigContent({ projectId }: WarehouseConfigProps) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
   const [warehouseName, setWarehouseName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [location, setLocation] = useState({ lat: "", lng: "" });
 
+  const { data: warehouses, isLoading } = useQuery<WarehouseNode[]>({
+    queryKey: ['warehouses', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('nodes')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('type', 'warehouse');
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  const addWarehouseMutation = useMutation({
+    mutationFn: async (newWarehouse: Omit<WarehouseNode, 'id'>) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase.from('nodes').insert({
+        ...newWarehouse,
+        user_id: user.id,
+        project_id: projectId
+      }).select();
+      if(error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warehouses', projectId] });
+      toast({ title: 'Success', description: 'Warehouse added successfully.' });
+      // Reset form
+      setWarehouseName("");
+      setCapacity("");
+      setLocation({ lat: "", lng: "" });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  });
+
+  const deleteWarehouseMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('nodes').delete().eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warehouses', projectId] });
+      toast({ title: 'Success', description: 'Warehouse removed successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  });
+
+
   const addWarehouse = () => {
     if (!warehouseName || !capacity || !location.lat || !location.lng) {
+      toast({ title: 'Error', description: 'All fields are required.', variant: 'destructive' });
       return;
     }
 
-    const newWarehouse: Node = {
-      id: crypto.randomUUID(),
+    addWarehouseMutation.mutate({
       name: warehouseName,
       type: "warehouse",
       latitude: parseFloat(location.lat),
       longitude: parseFloat(location.lng),
       capacity: parseInt(capacity),
-      ownership: 'owned'
-    };
-
-    setNodes([...nodes, newWarehouse]);
-    
-    // Reset form
-    setWarehouseName("");
-    setCapacity("");
-    setLocation({ lat: "", lng: "" });
+    });
   };
 
   const removeWarehouse = (id: string) => {
-    setNodes(nodes.filter(node => node.id !== id));
+    deleteWarehouseMutation.mutate(id);
   };
 
   return (
@@ -102,7 +161,8 @@ export function WarehouseConfigContent({ nodes, setNodes }: WarehouseConfigProps
               />
             </div>
           </div>
-          <Button onClick={addWarehouse} className="w-full">
+          <Button onClick={addWarehouse} className="w-full" disabled={addWarehouseMutation.isLoading}>
+            {addWarehouseMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Add Warehouse
           </Button>
         </CardContent>
@@ -119,13 +179,17 @@ export function WarehouseConfigContent({ nodes, setNodes }: WarehouseConfigProps
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {nodes.filter(node => node.type === 'warehouse').length === 0 ? (
+          {isLoading ? (
+             <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : warehouses?.length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
               No warehouses configured. Add your first warehouse above.
             </p>
           ) : (
             <div className="space-y-2">
-              {nodes.filter(node => node.type === 'warehouse').map((warehouse) => (
+              {warehouses?.map((warehouse) => (
                 <div key={warehouse.id} className="flex items-center justify-between p-3 border rounded">
                   <div>
                     <h4 className="font-medium">{warehouse.name}</h4>
@@ -137,6 +201,7 @@ export function WarehouseConfigContent({ nodes, setNodes }: WarehouseConfigProps
                     variant="destructive"
                     size="sm"
                     onClick={() => removeWarehouse(warehouse.id)}
+                    disabled={deleteWarehouseMutation.isLoading}
                   >
                     Remove
                   </Button>

@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
@@ -7,13 +6,43 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
-export const IsohedronContent = () => {
-  const [tessellationMethod, setTessellationMethod] = useState("voronoi");
-  const [cellSize, setCellSize] = useState(25);
-  const [smoothingFactor, setSmoothingFactor] = useState(50);
-  const [balanceFactor, setBalanceFactor] = useState(50);
-  const [territoryCount, setTerritoryCount] = useState(6);
-  
+interface IsohedronSettings {
+  tessellationMethod: 'voronoi' | 'hexagonal' | 'triangular' | 'square';
+  cellSize: number;
+  smoothingFactor: number;
+  divisionMethod: 'population' | 'geographic' | 'demand' | 'hybrid';
+  territoryCount: number;
+  balanceFactor: number;
+  populationWeight: number;
+  distanceWeight: number;
+  revenueWeight: number;
+  workloadWeight: number;
+}
+
+interface IsohedronContentProps {
+  projectId: string;
+}
+
+export const IsohedronContent = ({ projectId }: IsohedronContentProps) => {
+  const [settings, setSettings] = useState<IsohedronSettings>({
+    tessellationMethod: 'voronoi',
+    cellSize: 25,
+    smoothingFactor: 50,
+    divisionMethod: 'population',
+    territoryCount: 6,
+    balanceFactor: 50,
+    populationWeight: 70,
+    distanceWeight: 50,
+    revenueWeight: 60,
+    workloadWeight: 40,
+  });
+
+  const handleSettingChange = (key: keyof IsohedronSettings, value: any) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  // TODO: Add useEffect to fetch/save settings from/to Supabase
+
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-4">Isohedron Analysis Data</h2>
@@ -30,7 +59,7 @@ export const IsohedronContent = () => {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Tessellation Method</Label>
-              <Select value={tessellationMethod} onValueChange={setTessellationMethod}>
+              <Select value={settings.tessellationMethod} onValueChange={(value) => handleSettingChange('tessellationMethod', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select method" />
                 </SelectTrigger>
@@ -45,27 +74,27 @@ export const IsohedronContent = () => {
             
             <div className="space-y-2">
               <div className="flex justify-between">
-                <Label>Cell Size (km): {cellSize}</Label>
+                <Label>Cell Size (km): {settings.cellSize}</Label>
               </div>
               <Slider 
-                value={[cellSize]} 
+                value={[settings.cellSize]} 
                 min={5} 
                 max={100} 
                 step={1} 
-                onValueChange={(values) => setCellSize(values[0])} 
+                onValueChange={(values) => handleSettingChange('cellSize', values[0])} 
               />
             </div>
             
             <div className="space-y-2">
               <div className="flex justify-between">
-                <Label>Smoothing Factor: {smoothingFactor}%</Label>
+                <Label>Smoothing Factor: {settings.smoothingFactor}%</Label>
               </div>
               <Slider 
-                value={[smoothingFactor]} 
+                value={[settings.smoothingFactor]} 
                 min={0} 
                 max={100} 
                 step={1} 
-                onValueChange={(values) => setSmoothingFactor(values[0])} 
+                onValueChange={(values) => handleSettingChange('smoothingFactor', values[0])} 
               />
             </div>
           </div>
@@ -79,16 +108,16 @@ export const IsohedronContent = () => {
               <Label>Number of Territories</Label>
               <Input 
                 type="number" 
-                value={territoryCount} 
+                value={settings.territoryCount} 
                 min={1} 
                 max={20} 
-                onChange={(e) => setTerritoryCount(parseInt(e.target.value, 10) || 1)} 
+                onChange={(e) => handleSettingChange('territoryCount', parseInt(e.target.value, 10) || 1)} 
               />
             </div>
             
             <div className="space-y-2">
               <Label>Division Method</Label>
-              <Select defaultValue="population">
+              <Select value={settings.divisionMethod} onValueChange={(value) => handleSettingChange('divisionMethod', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select method" />
                 </SelectTrigger>
@@ -103,14 +132,14 @@ export const IsohedronContent = () => {
             
             <div className="space-y-2">
               <div className="flex justify-between">
-                <Label>Balance Priority: {balanceFactor}%</Label>
+                <Label>Balance Priority: {settings.balanceFactor}%</Label>
               </div>
               <Slider 
-                value={[balanceFactor]} 
+                value={[settings.balanceFactor]} 
                 min={0} 
                 max={100} 
                 step={1} 
-                onValueChange={(values) => setBalanceFactor(values[0])} 
+                onValueChange={(values) => handleSettingChange('balanceFactor', values[0])} 
               />
             </div>
           </div>
@@ -123,19 +152,19 @@ export const IsohedronContent = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Population Weight</Label>
-                <Slider defaultValue={[70]} min={0} max={100} step={1} />
+                <Slider value={[settings.populationWeight]} onValueChange={(v) => handleSettingChange('populationWeight', v[0])} min={0} max={100} step={1} />
               </div>
               <div className="space-y-2">
                 <Label>Distance Weight</Label>
-                <Slider defaultValue={[50]} min={0} max={100} step={1} />
+                <Slider value={[settings.distanceWeight]} onValueChange={(v) => handleSettingChange('distanceWeight', v[0])} min={0} max={100} step={1} />
               </div>
               <div className="space-y-2">
                 <Label>Revenue Weight</Label>
-                <Slider defaultValue={[60]} min={0} max={100} step={1} />
+                <Slider value={[settings.revenueWeight]} onValueChange={(v) => handleSettingChange('revenueWeight', v[0])} min={0} max={100} step={1} />
               </div>
               <div className="space-y-2">
                 <Label>Workload Weight</Label>
-                <Slider defaultValue={[40]} min={0} max={100} step={1} />
+                <Slider value={[settings.workloadWeight]} onValueChange={(v) => handleSettingChange('workloadWeight', v[0])} min={0} max={100} step={1} />
               </div>
             </div>
           </div>

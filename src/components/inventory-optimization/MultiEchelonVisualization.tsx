@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -12,9 +11,12 @@ import {
   SelectTrigger, 
   SelectValue
 } from "@/components/ui/select";
-import { Truck, Package, Database, Info, Boxes, Settings, ArrowDown } from "lucide-react";
+import { Truck, Package, Database, Info, Boxes, Settings, ArrowDown, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Link } from "react-router-dom";
 
 interface SupplyChainNode {
   id: string;
@@ -33,119 +35,41 @@ interface SupplyChainNode {
 
 export const MultiEchelonVisualization = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [optimized, setOptimized] = useState(false);
-  
-  const [nodes, setNodes] = useState<SupplyChainNode[]>([
-    {
-      id: "supplier1",
-      name: "Raw Materials Supplier",
-      type: "supplier",
-      tier: 1,
-      leadTime: 14,
-      demandMean: 1000,
-      demandStd: 200,
-      serviceLevel: 0.95,
-      inventoryLevel: 2000,
-      safetyStock: 500
-    },
-    {
-      id: "dc1",
-      name: "Central Distribution Center",
-      type: "dc",
-      tier: 2,
-      leadTime: 7,
-      demandMean: 800,
-      demandStd: 150,
-      serviceLevel: 0.97,
-      inventoryLevel: 1600,
-      safetyStock: 400,
-      parentId: "supplier1"
-    },
-    {
-      id: "wh1",
-      name: "Regional Warehouse 1",
-      type: "warehouse",
-      tier: 3,
-      leadTime: 3,
-      demandMean: 400,
-      demandStd: 80,
-      serviceLevel: 0.95,
-      inventoryLevel: 800,
-      safetyStock: 200,
-      parentId: "dc1"
-    },
-    {
-      id: "wh2",
-      name: "Regional Warehouse 2",
-      type: "warehouse",
-      tier: 3,
-      leadTime: 4,
-      demandMean: 350,
-      demandStd: 70,
-      serviceLevel: 0.95,
-      inventoryLevel: 700,
-      safetyStock: 180,
-      parentId: "dc1"
-    },
-    {
-      id: "retail1",
-      name: "Retail Store 1",
-      type: "retail",
-      tier: 4,
-      leadTime: 1,
-      demandMean: 150,
-      demandStd: 30,
-      serviceLevel: 0.98,
-      inventoryLevel: 300,
-      safetyStock: 90,
-      parentId: "wh1"
-    },
-    {
-      id: "retail2",
-      name: "Retail Store 2",
-      type: "retail",
-      tier: 4,
-      leadTime: 1,
-      demandMean: 200,
-      demandStd: 40,
-      serviceLevel: 0.99,
-      inventoryLevel: 400,
-      safetyStock: 120,
-      parentId: "wh1"
-    },
-    {
-      id: "retail3",
-      name: "Retail Store 3",
-      type: "retail",
-      tier: 4,
-      leadTime: 1,
-      demandMean: 170,
-      demandStd: 35,
-      serviceLevel: 0.97,
-      inventoryLevel: 340,
-      safetyStock: 100,
-      parentId: "wh2"
-    },
-    {
-      id: "retail4",
-      name: "Retail Store 4",
-      type: "retail",
-      tier: 4,
-      leadTime: 2,
-      demandMean: 180,
-      demandStd: 36,
-      serviceLevel: 0.96,
-      inventoryLevel: 360,
-      safetyStock: 105,
-      parentId: "wh2"
-    }
-  ]);
+  const [nodes, setNodes] = useState<SupplyChainNode[]>([]);
   
   const [systemServiceLevel, setSystemServiceLevel] = useState<number>(0.95);
   const [inventoryHoldingCost, setInventoryHoldingCost] = useState<number>(0.25);
-  
-  // Selected node state for detailed view
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>('dc1');
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchNodes = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('supply_chain_nodes')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setNodes(data);
+          setSelectedNodeId(data[0].id);
+        } else {
+          setNodes([]);
+        }
+      } catch (error) {
+        console.error("Error fetching supply chain nodes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNodes();
+  }, [user]);
   
   const getNodeIcon = (type: SupplyChainNode['type']) => {
     switch (type) {
@@ -198,22 +122,15 @@ export const MultiEchelonVisualization = () => {
     
     // Consider demand from children for non-retail nodes
     if (childNodes.length > 0) {
-      totalDemand = childNodes.reduce((sum, child) => sum + child.demandMean, 0);
-      
-      // Calculate variance
       if (useRiskPooling) {
-        // Risk pooling - consider correlation effects
-        // This is a simplified implementation of risk pooling
-        // In practice, we would use covariance matrix of demands
-        const poolingEffect = 0.7; // 0.7 represents partial correlation
-        totalVariance = childNodes.reduce((sum, child) => {
-          return sum + Math.pow(child.demandStd * poolingEffect, 2);
-        }, 0);
+        // With risk pooling, sum means and variances
+        childNodes.forEach(child => {
+          totalDemand += child.demandMean;
+          totalVariance += Math.pow(child.demandStd, 2);
+        });
       } else {
-        // No risk pooling - just sum the variances
-        totalVariance = childNodes.reduce((sum, child) => {
-          return sum + Math.pow(child.demandStd, 2);
-        }, 0);
+        // Without risk pooling, sum the inventory needs of children
+        return childNodes.reduce((sum, child) => sum + calculateOptimalInventory(child, useRiskPooling), 0);
       }
     }
     
@@ -275,76 +192,89 @@ export const MultiEchelonVisualization = () => {
   };
 
   const renderSupplyChainNetwork = () => {
-    // Group nodes by tier
-    const nodesByTier = nodes.reduce((acc, node) => {
-      if (!acc[node.tier]) acc[node.tier] = [];
-      acc[node.tier].push(node);
-      return acc;
-    }, {} as Record<number, SupplyChainNode[]>);
+    const tiers = Array.from(new Set(nodes.map(n => n.tier))).sort((a,b) => a-b);
     
     // Render tiers
-    return Object.entries(nodesByTier)
-      .sort(([tierA], [tierB]) => Number(tierA) - Number(tierB))
-      .map(([tier, tierNodes]) => (
-        <div key={tier} className="mb-6">
-          <h3 className="text-lg font-medium mb-4">Tier {tier}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {tierNodes.map(node => (
-              <Card 
-                key={node.id} 
-                className={`p-4 border-l-4 ${
-                  selectedNodeId === node.id ? 'ring-2 ring-primary' : ''
-                }`}
-                style={{ borderLeftColor: getNodeColor(node.type).replace('bg-', '') }}
-                onClick={() => setSelectedNodeId(node.id)}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <div className={`p-2 rounded-full ${getNodeColor(node.type)} bg-opacity-20`}>
-                      {getNodeIcon(node.type)}
-                    </div>
-                    <h4 className="font-medium">{node.name}</h4>
-                  </div>
+    return tiers.map((tier) => (
+      <div key={tier} className="flex flex-col items-center space-y-4">
+        <h3 className="font-semibold text-lg mb-2">Tier {tier}</h3>
+        {nodes.filter(n => n.tier === tier).map(node => (
+          <Card 
+            key={node.id} 
+            className={`p-4 border-l-4 ${
+              selectedNodeId === node.id ? 'ring-2 ring-primary' : ''
+            }`}
+            style={{ borderLeftColor: getNodeColor(node.type).replace('bg-', '') }}
+            onClick={() => setSelectedNodeId(node.id)}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <div className={`p-2 rounded-full ${getNodeColor(node.type)} bg-opacity-20`}>
+                  {getNodeIcon(node.type)}
                 </div>
-                
-                <div className="space-y-1 mt-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Current Inventory:</span>
-                    <span className="font-medium">{node.inventoryLevel} units</span>
-                  </div>
-                  
-                  {optimized && node.optimalInventory && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Optimal Inventory:</span>
-                      <span className={
-                        node.optimalInventory < node.inventoryLevel ? 'font-medium text-green-600' : 
-                          node.optimalInventory > node.inventoryLevel ? 'font-medium text-red-600' : 'font-medium'
-                      }>
-                        {node.optimalInventory} units
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Safety Stock:</span>
-                    <span className="font-medium">{node.safetyStock} units</span>
-                  </div>
+                <h4 className="font-medium">{node.name}</h4>
+              </div>
+            </div>
+            
+            <div className="space-y-1 mt-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Current Inventory:</span>
+                <span className="font-medium">{node.inventoryLevel} units</span>
+              </div>
+              
+              {optimized && node.optimalInventory && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Optimal Inventory:</span>
+                  <span className={
+                    node.optimalInventory < node.inventoryLevel ? 'font-medium text-green-600' : 
+                      node.optimalInventory > node.inventoryLevel ? 'font-medium text-red-600' : 'font-medium'
+                  }>
+                    {node.optimalInventory} units
+                  </span>
                 </div>
-                
-                {node.parentId && (
-                  <div className="flex items-center justify-center mt-3">
-                    <ArrowDown className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                )}
-              </Card>
-            ))}
-          </div>
-        </div>
-      ));
+              )}
+              
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Safety Stock:</span>
+                <span className="font-medium">{node.safetyStock} units</span>
+              </div>
+            </div>
+            
+            {node.parentId && (
+              <div className="flex items-center justify-center mt-3">
+                <ArrowDown className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
+    ));
   };
 
   // Get selected node details
   const selectedNode = selectedNodeId ? nodes.find(node => node.id === selectedNodeId) : null;
+
+  if (loading) {
+    return <div className="text-center p-6">Loading supply chain data...</div>;
+  }
+
+  if (nodes.length === 0) {
+    return (
+      <Card className="p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No Supply Chain Data</h3>
+        <p className="mt-1 text-sm text-gray-500">Add nodes to your supply chain to begin optimization.</p>
+        <div className="mt-6">
+          <Link to="/data-input">
+            <Button>
+              <Package className="mr-2 h-4 w-4" />
+              Add Supply Chain Data
+            </Button>
+          </Link>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

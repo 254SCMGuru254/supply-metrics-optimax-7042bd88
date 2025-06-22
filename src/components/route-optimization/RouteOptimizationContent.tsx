@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { NetworkMap } from '@/components/NetworkMap';
@@ -12,36 +12,83 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
-// Mock data
-const mockNodes: Node[] = [
-  { id: '1', name: 'Warehouse A', type: 'warehouse', latitude: -1.28, longitude: 36.82, ownership: 'owned' },
-  { id: '2', name: 'Customer 1', type: 'customer', latitude: -1.30, longitude: 36.85, ownership: 'owned', demand: 10 },
-  { id: '3', name: 'Customer 2', type: 'customer', latitude: -1.27, longitude: 36.80, ownership: 'owned', demand: 15 },
-  { id: '4', name: 'Customer 3', type: 'customer', latitude: -1.32, longitude: 36.78, ownership: 'owned', demand: 8 },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { Link } from 'react-router-dom';
 
 export const RouteOptimizationContent = () => {
-  const [nodes, setNodes] = useState<Node[]>(mockNodes);
+  const [nodes, setNodes] = useState<Node[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [isOptimized, setIsOptimized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-  const handleAddNode = () => {
-    const newNodeId = (nodes.length + 1).toString();
-    const newNode: Node = {
-      id: newNodeId,
-      name: `Customer ${newNodeId}`,
-      type: 'customer',
+  const fetchNodes = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('supply_nodes')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      const formattedNodes: Node[] = data.map(n => ({
+        id: n.id,
+        name: n.name,
+        type: n.node_type || 'customer',
+        latitude: n.latitude,
+        longitude: n.longitude,
+        demand: n.demand || 0,
+        ownership: 'owned'
+      }));
+      setNodes(formattedNodes);
+    } catch (error) {
+      console.error("Error fetching nodes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNodes();
+  }, [user]);
+
+  const handleAddNode = async () => {
+    if (!user) return;
+    const newNodeData = {
+      user_id: user.id,
+      name: `New Customer #${Math.floor(Math.random() * 1000)}`,
+      node_type: 'customer',
       latitude: -1.28 + (Math.random() - 0.5) * 0.1,
       longitude: 36.82 + (Math.random() - 0.5) * 0.1,
       demand: Math.floor(Math.random() * 20) + 5,
-      ownership: 'owned'
     };
-    setNodes([...nodes, newNode]);
+
+    const { data, error } = await supabase
+      .from('supply_nodes')
+      .insert([newNodeData])
+      .select();
+
+    if (error) {
+      console.error('Error adding node:', error);
+    } else if (data) {
+      fetchNodes(); // Re-fetch nodes to update the list
+    }
   };
 
-  const handleRemoveNode = (nodeId: string) => {
-    setNodes(nodes.filter(n => n.id !== nodeId));
+  const handleRemoveNode = async (nodeId: string) => {
+    const { error } = await supabase
+      .from('supply_nodes')
+      .delete()
+      .eq('id', nodeId);
+    
+    if(error) {
+      console.error("Error deleting node:", error);
+    } else {
+      setNodes(nodes.filter(n => n.id !== nodeId));
+    }
   };
   
   const handleOptimize = () => {
@@ -101,6 +148,22 @@ export const RouteOptimizationContent = () => {
     setIsOptimized(false);
   }
 
+  if (loading) {
+    return <div className="text-center p-8">Loading node data...</div>
+  }
+
+  if (nodes.length === 0) {
+    return (
+      <Card className="text-center p-8">
+        <CardHeader><CardTitle>No locations to optimize</CardTitle></CardHeader>
+        <CardContent>
+          <p className="mb-4">You need to add some locations (warehouses, customers) before you can optimize a route.</p>
+          <Link to="/data-input"><Button><Plus className="mr-2 h-4 w-4" /> Add Location Data</Button></Link>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <div className="lg:col-span-3">
@@ -126,7 +189,7 @@ export const RouteOptimizationContent = () => {
             <CardTitle>Nodes</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleAddNode} size="sm" className="mb-4"><Plus className="mr-2 h-4 w-4"/>Add Node</Button>
+            <Button onClick={handleAddNode} size="sm" className="mb-4"><Plus className="mr-2 h-4 w-4"/>Add Random Node</Button>
             <div className="max-h-[480px] overflow-y-auto">
               <Table>
                 <TableHeader>

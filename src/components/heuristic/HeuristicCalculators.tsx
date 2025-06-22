@@ -1,63 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Settings } from "lucide-react";
+import { Settings, AlertCircle, Package } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
-const formulas = [
-  {
-    id: "simulated-annealing",
-    name: "Simulated Annealing",
-    inputs: [
-      { label: "Initial Temperature", name: "initialTemp", type: "number" },
-      { label: "Cooling Rate", name: "coolingRate", type: "number" }
-    ],
-    desc: "Metaheuristic for combinatorial optimization problems."
-  },
-  {
-    id: "genetic-algorithm",
-    name: "Genetic Algorithm",
-    inputs: [
-      { label: "Population Size", name: "populationSize", type: "number" },
-      { label: "Generations", name: "generations", type: "number" }
-    ],
-    desc: "Evolutionary search algorithm using crossover/mutation."
-  },
-  {
-    id: "particle-swarm",
-    name: "Particle Swarm Optimization",
-    inputs: [
-      { label: "Number of Particles", name: "numParticles", type: "number" },
-      { label: "Iterations", name: "iterations", type: "number" }
-    ],
-    desc: "Swarm-based optimization using velocity/social learning."
-  },
-  {
-    id: "tabu-search",
-    name: "Tabu Search",
-    inputs: [
-      { label: "Tabu List Size", name: "tabuListSize", type: "number" },
-      { label: "Max Iterations", name: "maxIterations", type: "number" }
-    ],
-    desc: "Improvement algorithm to escape local optima."
-  }
-];
+interface HeuristicCalculatorsProps {
+  projectId: string;
+}
 
-export function HeuristicCalculators() {
-  const [activeTab, setActiveTab] = useState(formulas[0].id);
+export function HeuristicCalculators({ projectId }: HeuristicCalculatorsProps) {
+  const [activeTab, setActiveTab] = useState('');
   const [inputs, setInputs] = useState({});
   const [result, setResult] = useState(null);
 
-  // Fetch data from Supabase (e.g., demand_points or nodes depending on context)
-  const { data: demandPoints, refetch } = useQuery({
-    queryKey: ['demand_points'],
+  const { data: formulas, isLoading: isLoadingFormulas } = useQuery({
+    queryKey: ['heuristicFormulas', projectId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("demand_points").select("*");
+      if (!projectId) return [];
+      const { data, error } = await supabase
+        .from('model_formulas')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('category', 'heuristic');
+      
+      if (error) throw new Error(error.message);
+
+      if (data && data.length > 0) {
+        setActiveTab(data[0].formula);
+      }
+      return data || [];
+    },
+    enabled: !!projectId,
+  });
+
+  const { data: projectNodes, isLoading: isLoadingNodes } = useQuery({
+    queryKey: ['projectNodes', projectId],
+    queryFn: async () => {
+      if (!projectId) return [];
+      const { data, error } = await supabase.from("nodes").select("*").eq('project_id', projectId);
       if (error) throw error;
       return data || [];
     },
-    staleTime: 60000,
+    enabled: !!projectId,
   });
 
   const handleInputChange = (id, value) => {
@@ -68,9 +57,38 @@ export function HeuristicCalculators() {
     setResult({
       status: "success",
       message: "Heuristic run complete.",
-      output: { ...inputs, demandPoints }
+      output: { ...inputs, nodes: projectNodes }
     });
   };
+
+  if (isLoadingFormulas || isLoadingNodes) {
+    return (
+        <div className="flex items-center justify-center h-48">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading Heuristic Models...</span>
+        </div>
+    );
+  }
+
+  if (!formulas || formulas.length === 0) {
+    return (
+      <Card className="m-4 p-8 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-xl font-semibold text-gray-900">No Heuristic Models Found</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Please add heuristic models to your project to begin optimization.
+        </p>
+        <div className="mt-6">
+          <Link to={`/data-input/${projectId}`}>
+            <Button>
+              <Package className="mr-2 h-4 w-4" />
+              Add Models
+            </Button>
+          </Link>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -78,11 +96,11 @@ export function HeuristicCalculators() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 lg:grid-cols-4">
           {formulas.map(f => (
-            <TabsTrigger key={f.id} value={f.id}>{f.name}</TabsTrigger>
+            <TabsTrigger key={f.formula} value={f.formula}>{f.name}</TabsTrigger>
           ))}
         </TabsList>
         {formulas.map(formula => (
-          <TabsContent key={formula.id} value={formula.id}>
+          <TabsContent key={formula.formula} value={formula.formula}>
             <Card className="my-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
