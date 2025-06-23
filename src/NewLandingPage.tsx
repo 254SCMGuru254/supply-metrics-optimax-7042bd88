@@ -1,5 +1,3 @@
-import React from "react";
-import CountUp from "react-countup";
 import "./Landing.css";
 
 const logos = [
@@ -67,11 +65,13 @@ const TestimonialCard = ({ quote, author }) => (
 const StatBox = ({ label, value, suffix }) => (
   <div className="flex flex-col items-center">
     <div className="text-3xl font-bold text-blue-300">
-      <CountUp end={value} duration={2} separator="," suffix={suffix || ""} />
+      {value.toLocaleString()}{suffix || ""}
     </div>
     <div className="text-blue-100 text-sm mt-1">{label}</div>
   </div>
 );
+
+import React, { useEffect } from "react";
 
 const NewLandingPage = () => {
   useEffect(() => {
@@ -231,7 +231,14 @@ const NewLandingPage = () => {
           </div>
           {/* Animated Stats */}
           <div className="flex space-x-8 mt-8">
-            {stats.map((stat) => <StatBox key={stat.label} {...stat} />)}
+            {stats.map((stat) => (
+              <StatBox
+                key={stat.label}
+                label={stat.label}
+                value={stat.value}
+                suffix={stat.suffix ?? ""}
+              />
+            ))}
           </div>
         </div>
         {/* Illustration or Animation */}
