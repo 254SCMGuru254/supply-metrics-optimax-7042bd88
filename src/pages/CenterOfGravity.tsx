@@ -8,12 +8,15 @@ import type { Node, Route } from "@/components/map/MapTypes";
 import { CogFormulaSelector } from "@/components/cog/CogFormulaSelector";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { AlertCircle, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const CenterOfGravity = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   const [cogResult, setCogResult] = useState<CogCalculationResult | null>(null);
   const [optimizedRoutes, setOptimizedRoutes] = useState<Route[]>([]);
@@ -37,15 +40,39 @@ const CenterOfGravity = () => {
       return data.map(n => ({
         id: n.id,
         name: n.name,
-        type: 'customer',
+        type: n.type,
         latitude: n.latitude,
         longitude: n.longitude,
-        weight: n.demand || 100,
+        weight: n.demand,
         ownership: 'owned'
       }));
     },
     enabled: !!projectId
   });
+
+  const addNodeMutation = useMutation(
+    async (newNode: Partial<Node>) => {
+      const { data, error } = await supabase.from('nodes').insert([{ 
+        ...newNode, 
+        project_id: projectId, 
+        user_id: user?.id,
+        name: `New Demand Point ${demandPoints?.length || 0 + 1}`,
+        type: 'demand',
+        demand: 100, // Default demand
+       }]).select();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['demandPoints', projectId]);
+        toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
+      },
+      onError: (error: Error) => {
+        toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
+      }
+    }
+  );
 
   useEffect(() => {
     let currentNodes: Node[] = [...(demandPoints || [])];
@@ -66,17 +93,16 @@ const CenterOfGravity = () => {
     setCogResult(results);
     const newOptimizedRoutes = (demandPoints || []).map(dp => ({
       id: `route-${dp.id}-cog`,
-      startNodeId: dp.id,
-      endNodeId: 'cog-result',
+      from: dp.id,
+      to: 'cog-result',
       label: `Optimized route to ${dp.name}`,
-      color: '#16a34a',
-      isOptimized: true
+      ownership: 'proposed'
     }));
     setOptimizedRoutes(newOptimizedRoutes);
   };
 
   const handleMapClick = (lat: number, lng: number) => {
-    toast({ title: 'New Point (Not Saved)', description: 'Map click detected. Add mutation to save.' });
+    addNodeMutation.mutate({ latitude: lat, longitude: lng });
   };
 
   if (isLoading) {
@@ -94,13 +120,13 @@ const CenterOfGravity = () => {
         <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-xl font-semibold text-gray-900">No Customer Locations Found</h3>
         <p className="mt-1 text-sm text-gray-500">
-          The Center of Gravity model requires customer locations (demand points) to calculate the optimal facility location.
+          The Center of Gravity model requires customer locations (demand points) to calculate the optimal facility location. Click on the map to add one.
         </p>
         <div className="mt-6">
           <Link to={`/data-input/${projectId}`}>
             <Button>
               <Package className="mr-2 h-4 w-4" />
-              Add Customer Data
+              Add Customer Data Manually
             </Button>
           </Link>
         </div>
