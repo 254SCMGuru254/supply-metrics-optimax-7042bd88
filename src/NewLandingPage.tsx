@@ -1,5 +1,77 @@
-import { useEffect } from "react";
+import React from "react";
+import CountUp from "react-countup";
 import "./Landing.css";
+
+const logos = [
+  "/public/logo1.png",
+  "/public/logo2.png",
+  "/public/logo3.png",
+];
+
+const testimonials = [
+  {
+    quote: "Chain.IO gave us real-time visibility and cut our logistics costs by 18% in 3 months.",
+    author: "Jane Doe, COO, MegaRetail"
+  },
+  {
+    quote: "The AI-powered insights are a game changer for our global operations.",
+    author: "John Smith, VP Supply Chain, AgroCorp"
+  }
+];
+
+const stats = [
+  { label: "Transactions", value: 12000000 },
+  { label: "Active Users", value: 40000 },
+  { label: "Uptime", value: 99.99, suffix: "%" },
+  { label: "Global Clients", value: 120 }
+];
+
+const features = [
+  {
+    title: "Network Design",
+    desc: "Model and optimize your end-to-end supply chain network.",
+    icon: "network"
+  },
+  {
+    title: "Inventory Optimization",
+    desc: "Reduce stockouts and costs with AI-driven inventory policies.",
+    icon: "inventory"
+  },
+  {
+    title: "Route Optimization",
+    desc: "Minimize transport costs and delivery times with advanced algorithms.",
+    icon: "route"
+  },
+  {
+    title: "Risk & Resilience",
+    desc: "Simulate disruptions and build a more resilient supply chain.",
+    icon: "risk"
+  }
+];
+
+const FeatureCard = ({ title, desc }) => (
+  <div className="bg-blue-900 bg-opacity-60 rounded-xl p-6 shadow-lg flex flex-col items-start">
+    <div className="mb-4 text-2xl">🔹</div>
+    <div className="font-bold text-lg mb-2">{title}</div>
+    <div className="text-blue-100 text-sm">{desc}</div>
+  </div>
+);
+
+const TestimonialCard = ({ quote, author }) => (
+  <div className="bg-blue-950 bg-opacity-80 rounded-xl p-6 shadow-md max-w-xs">
+    <div className="italic mb-3">“{quote}”</div>
+    <div className="text-blue-300 font-semibold">{author}</div>
+  </div>
+);
+
+const StatBox = ({ label, value, suffix }) => (
+  <div className="flex flex-col items-center">
+    <div className="text-3xl font-bold text-blue-300">
+      <CountUp end={value} duration={2} separator="," suffix={suffix || ""} />
+    </div>
+    <div className="text-blue-100 text-sm mt-1">{label}</div>
+  </div>
+);
 
 const NewLandingPage = () => {
   useEffect(() => {
@@ -129,163 +201,79 @@ const NewLandingPage = () => {
   }, []);
 
   return (
-    <>
-      <div className="particles" id="particles"></div>
-      <header>
-        <div className="container">
-          <nav>
-            <div className="logo">Chain.IO</div>
-            <ul className="nav-links">
-              <li>
-                <a href="#features">Features</a>
-              </li>
-              <li>
-                <a href="#portal">Portal</a>
-              </li>
-              <li>
-                <a href="#docs">Docs</a>
-              </li>
-              <li>
-                <a href="#support">Support</a>
-              </li>
-            </ul>
-            <a href="/dashboard" className="cta-button">
-              Launch App
-            </a>
-          </nav>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-950 text-white flex flex-col">
+      {/* Header */}
+      <header className="flex justify-between items-center px-8 py-6">
+        <div className="text-2xl font-bold tracking-tight">
+          <span className="text-blue-400">Chain</span>.<span className="text-blue-300">IO</span>
         </div>
+        <nav className="space-x-6">
+          <a href="#features" className="hover:underline">Features</a>
+          <a href="#pricing" className="hover:underline">Pricing</a>
+          <a href="#docs" className="hover:underline">Docs</a>
+          <a href="#support" className="hover:underline">Support</a>
+          <button className="ml-6 px-5 py-2 bg-blue-500 rounded-lg font-semibold hover:bg-blue-600 transition">Launch App</button>
+        </nav>
       </header>
 
-      <section className="hero">
-        <div className="container">
-          <h1>Intelligent Supply Chain Optimization</h1>
-          <p>Supply Chain 3.0: Outthink. Outmaneuver. Outperform. Build a resilient, efficient, and sustainable supply chain.</p>
-          <div className="hero-buttons">
-            <a href="/dashboard" className="btn-primary">
-              Enter Portal
-            </a>
-            <a href="#features" className="btn-secondary">
-              Explore Features
-            </a>
+      {/* Hero Section */}
+      <section className="flex flex-col md:flex-row items-center justify-between px-8 py-16">
+        <div className="md:w-1/2 space-y-6">
+          <h1 className="text-5xl font-extrabold leading-tight">
+            Supply Chain 3.0: Outthink. Outmaneuver. Outperform
+          </h1>
+          <p className="text-lg text-blue-100">
+            The next generation of supply chain optimization. Harness AI and advanced analytics to build a resilient, efficient, and sustainable supply chain.
+          </p>
+          <div className="flex space-x-4 mt-6">
+            <button className="px-6 py-3 bg-blue-500 rounded-lg font-bold text-lg shadow-lg hover:bg-blue-600 transition">Get Started Free</button>
+            <button className="px-6 py-3 border border-blue-400 rounded-lg font-bold text-lg hover:bg-blue-700 transition">See Live Demo</button>
           </div>
-
-          <div className="stats">
-            <div className="stat-item">
-              <span className="stat-number" data-value="15" data-suffix="%">15%</span>
-              <span className="stat-label">Average Cost Reduction</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number" data-value="20" data-suffix="%">20%</span>
-              <span className="stat-label">Efficiency Gain</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number" data-value="98.5" data-suffix="%">98.5%</span>
-              <span className="stat-label">On-Time Delivery</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number" data-value="1000" data-suffix="+">1000+</span>
-              <span className="stat-label">Scenarios Modelled</span>
-            </div>
+          {/* Animated Stats */}
+          <div className="flex space-x-8 mt-8">
+            {stats.map((stat) => <StatBox key={stat.label} {...stat} />)}
           </div>
+        </div>
+        {/* Illustration or Animation */}
+        <div className="md:w-1/2 flex justify-center mt-12 md:mt-0">
+          <img src="/public/illustration-supplychain.svg" alt="Supply Chain Illustration" className="w-96 h-auto" />
         </div>
       </section>
 
-      <section className="features" id="features">
-        <div className="container">
-          <h2>Powerful Optimization Features</h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">🌐</div>
-              <h3>Network Design</h3>
-              <p>
-                Model your end-to-end supply chain. Find optimal facility locations and product flows with our advanced algorithms.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">📈</div>
-              <h3>Demand Forecasting</h3>
-              <p>
-                Utilize advanced statistical models to accurately predict demand and reduce uncertainty in your planning.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">📦</div>
-              <h3>Inventory Optimization</h3>
-              <p>
-                Balance service levels and costs. Utilize demand forecasting and multi-echelon inventory policies to hold the right amount of stock.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">🚚</div>
-              <h3>Route Optimization</h3>
-              <p>
-                Minimize transport costs and delivery times. Our routing engine handles complex constraints including capacity, time windows, and more.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">📍</div>
-              <h3>Center of Gravity</h3>
-              <p>
-                Identify the ideal location for a new distribution center or facility based on demand points and shipping volumes.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">🌊</div>
-              <h3>Risk & Resilience Simulation</h3>
-              <p>
-                Test your supply chain against disruptions. Identify vulnerabilities and build a more resilient network with "what-if" scenario analysis.
-              </p>
-            </div>
-            <div className="feature-card">
-                <div className="feature-icon">📊</div>
-                <h3>Cost-to-Serve Modeling</h3>
-                <p>
-                Analyze the total cost of serving each customer and product to identify opportunities for profitability improvement.
-                </p>
-            </div>
-            <div className="feature-card">
-                <div className="feature-icon">🛰️</div>
-                <h3>Fleet Management</h3>
-                <p>
-                Monitor your fleet in real-time, manage vehicle capacity, and optimize dispatching to improve asset utilization.
-                </p>
-            </div>
-          </div>
+      {/* Trusted By */}
+      <section className="py-8 bg-blue-950 bg-opacity-80">
+        <div className="text-center text-blue-200 mb-4">Trusted by leading brands</div>
+        <div className="flex justify-center space-x-8">
+          {logos.map((logo, i) => <img key={i} src={logo} alt={`Brand${i+1}`} className="h-8" />)}
         </div>
       </section>
 
-      <footer>
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-section">
-              <h3>Chain.IO</h3>
-              <p>Supply Chain 3.0: Outthink. Outmaneuver. Outperform.</p>
-            </div>
-            <div className="footer-section">
-              <h3>Quick Links</h3>
-              <a href="/documentation">Documentation</a>
-              <a href="#features">Features</a>
-              <a href="/dashboard">Portal Login</a>
-            </div>
-            <div className="footer-section">
-              <h3>Support</h3>
-              <a href="#">Help Center</a>
-              <a href="#">Contact Us</a>
-              <a href="#">Bug Reports</a>
-            </div>
-            <div className="footer-section">
-              <h3>Legal</h3>
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Cookie Policy</a>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>© 2025 Chain.IO. All rights reserved.</p>
-          </div>
+      {/* Features */}
+      <section id="features" className="py-16 px-8">
+        <h2 className="text-3xl font-bold text-center mb-10">Powerful Optimization Features</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((f) => <FeatureCard key={f.title} {...f} />)}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-16 bg-blue-950 bg-opacity-80">
+        <h2 className="text-2xl font-bold text-center mb-8">What Our Customers Say</h2>
+        <div className="flex justify-center space-x-8">
+          {testimonials.map((t, i) => <TestimonialCard key={i} {...t} />)}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-8 text-blue-200 flex flex-col md:flex-row justify-between items-center border-t border-blue-800">
+        <div>© {new Date().getFullYear()} Chain.IO. All rights reserved.</div>
+        <div className="space-x-6">
+          <a href="#privacy" className="hover:underline">Privacy Policy</a>
+          <a href="#terms" className="hover:underline">Terms of Service</a>
+          <a href="#contact" className="hover:underline">Contact</a>
         </div>
       </footer>
-    </>
+    </div>
   );
 };
 
