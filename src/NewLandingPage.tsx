@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, CheckCircle, Users, Globe, Award, TrendingUp, MapPin, Package, Calculator, Network } from "lucide-react";
+import { ArrowRight, CheckCircle, Users, Globe, TrendingUp, MapPin, Package, Calculator, Network } from "lucide-react";
 import ProfessionalHeader from "@/components/layout/ProfessionalHeader";
 import ProfessionalFooter from "@/components/layout/ProfessionalFooter";
 
@@ -152,12 +152,7 @@ const NewLandingPage = () => {
               {/* Enhanced Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">
-                      {stat.value.toLocaleString()}{stat.suffix || ""}
-                    </div>
-                    <div className="text-gray-600 font-medium text-sm">{stat.label}</div>
-                  </div>
+                  <StatBox key={stat.label} {...stat} />
                 ))}
               </div>
             </div>

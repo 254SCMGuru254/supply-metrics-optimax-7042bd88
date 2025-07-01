@@ -1,10 +1,10 @@
+
 import { useState, useEffect, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
-import Draggable from 'react-draggable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,8 @@ export interface NetworkMapProps {
   isOptimized?: boolean;
   highlightNodes?: string[];
   selectable?: boolean;
-  onNodeSelect?: (nodes: string[]) => void;  onNodesChange?: (nodes: Node[]) => void;
+  onNodeSelect?: (nodes: string[]) => void;
+  onNodesChange?: (nodes: Node[]) => void;
   onRoutesChange?: (routes: Route[]) => void;
   disruptionData?: any;
   resilienceMetrics?: any;
@@ -204,75 +205,42 @@ const NodeEditDialog = ({
                 </SelectContent>
               </Select>
             </div>
-            
-            {editedNode.ownership === 'hired' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="monthlyRent">Monthly Rent</Label>
-                  <Input
-                    id="monthlyRent"
-                    type="number"
-                    value={editedNode.monthlyRent || ''}
-                    onChange={(e) => setEditedNode({ ...editedNode, monthlyRent: parseFloat(e.target.value) || 0 })}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="contractDuration">Contract Duration (months)</Label>
-                  <Input
-                    id="contractDuration"
-                    type="number"
-                    value={editedNode.contractDuration || ''}
-                    onChange={(e) => setEditedNode({ ...editedNode, contractDuration: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                
-                <div className="col-span-2">
-                  <Label htmlFor="leaseTerms">Lease Terms</Label>
-                  <Textarea
-                    id="leaseTerms"
-                    value={editedNode.leaseTerms || ''}
-                    onChange={(e) => setEditedNode({ ...editedNode, leaseTerms: e.target.value })}
-                    placeholder="Lease terms and conditions..."
-                  />
-                </div>
-              </div>
-            )}
-            
-            {editedNode.ownership === 'outsourced' && (
-              <div>
-                <Label htmlFor="serviceProvider">Service Provider</Label>
-                <Input
-                  id="serviceProvider"
-                  value={editedNode.serviceProvider || ''}
-                  onChange={(e) => setEditedNode({ ...editedNode, serviceProvider: e.target.value })}
-                  placeholder="Name of service provider..."
-                />
-              </div>
-            )}
           </TabsContent>
           
           <TabsContent value="details" className="space-y-4">
-             <div className="grid grid-cols-2 gap-4">
-                 <div>
-                    <Label htmlFor="floorArea">Floor Area (sq meters)</Label>
-                    <Input id="floorArea" type="number" />
-                  </div>
-                  <div>
-                    <Label htmlFor="storageType">Storage Type</Label>
-                    <Input id="storageType" />
-                  </div>
-             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input
+                  id="latitude"
+                  type="number"
+                  step="0.0001"
+                  value={editedNode.latitude}
+                  onChange={(e) => setEditedNode({ ...editedNode, latitude: parseFloat(e.target.value) })}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input
+                  id="longitude"
+                  type="number"
+                  step="0.0001"
+                  value={editedNode.longitude}
+                  onChange={(e) => setEditedNode({ ...editedNode, longitude: parseFloat(e.target.value) })}
+                />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
         
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            <X className="h-4 w-4 mr-2" />
+            <X className="mr-2 h-4 w-4" />
             Cancel
           </Button>
           <Button onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
         </DialogFooter>
@@ -281,274 +249,265 @@ const NodeEditDialog = ({
   );
 };
 
-export const NetworkMap: React.FC<NetworkMapProps> = ({
+const NetworkMap: React.FC<NetworkMapProps> = ({
   nodes,
-  routes,
+  routes = [],
   onNodeClick,
   onMapClick,
   isOptimized = false,
   highlightNodes = [],
   selectable = false,
   onNodeSelect,
+  onNodesChange,
+  onRoutesChange,
   disruptionData,
   resilienceMetrics,
-  airportNodes,
-  showLegend = true,
+  airportNodes = [],
+  showLegend = true
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [editingNode, setEditingNode] = useState<Node | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [localNodes, setLocalNodes] = useState<Node[]>(nodes);
+  const mapRef = useRef<L.Map | null>(null);
 
-  useEffect(() => {
-    setLocalNodes(nodes);
+  // Default center - Kenya coordinates
+  const defaultCenter: [number, number] = [-1.286389, 36.817223];
+  const defaultZoom = 7;
+
+  // Calculate map center based on nodes
+  const mapCenter = useMemo(() => {
+    if (nodes.length === 0) return defaultCenter;
+    
+    const validNodes = nodes.filter(node => 
+      typeof node.latitude === 'number' && 
+      typeof node.longitude === 'number' &&
+      !isNaN(node.latitude) && 
+      !isNaN(node.longitude)
+    );
+    
+    if (validNodes.length === 0) return defaultCenter;
+    
+    const avgLat = validNodes.reduce((sum, node) => sum + node.latitude, 0) / validNodes.length;
+    const avgLng = validNodes.reduce((sum, node) => sum + node.longitude, 0) / validNodes.length;
+    
+    return [avgLat, avgLng] as [number, number];
   }, [nodes]);
 
-  // Kenya bounds for map centering
-  const kenyaBounds: [number, number] = [-0.0236, 37.9062];
-
-  // Get node color based on ownership
-  const getNodeColor = (node: Node) => {
-    if (highlightNodes.includes(node.id)) {
-      return '#ff6b6b'; // Highlighted red
-    }
-    
-    switch (node.ownership) {
-      case 'owned':
-        return '#22c55e'; // Green for owned
-      case 'hired':
-        return '#3b82f6'; // Blue for hired
-      case 'outsourced':
-        return '#f59e0b'; // Orange for outsourced
-      default:
-        return '#6b7280'; // Gray default
-    }
-  };
-
-  // Get node icon based on type
-  const getNodeIcon = (node: Node) => {
-    const color = getNodeColor(node);
-    const iconMap = {
-      warehouse: '🏪',
-      distribution: '📦',
-      supplier: '🏭',
-      customer: '🏪',
-      factory: '🏭',
-      retail: '🛒',
-      airport: '✈️',
-      port: '🚢',
-      railhub: '🚂'
+  // Icon creation functions
+  const createIcon = (type: NodeType, ownership: OwnershipType = 'owned', isHighlighted = false) => {
+    const colors = {
+      owned: '#10B981',
+      hired: '#F59E0B', 
+      outsourced: '#8B5CF6',
+      proposed: '#EF4444'
     };
     
-    const iconHtml = `
-      <div style="
-        background-color: ${color};
-        color: white;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 3px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        font-size: 16px;
-      ">
-        ${iconMap[node.type] || '📍'}
-      </div>
-    `;
+    const color = colors[ownership] || colors.owned;
+    const size = isHighlighted ? 40 : 30;
     
     return L.divIcon({
-      html: iconHtml,
-      className: 'custom-node-icon',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      html: `
+        <div style="
+          background-color: ${color};
+          width: ${size}px;
+          height: ${size}px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: ${isHighlighted ? '16px' : '12px'};
+        ">
+          ${getNodeSymbol(type)}
+        </div>
+      `,
+      className: 'custom-div-icon',
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2]
     });
   };
 
+  const getNodeSymbol = (type: NodeType): string => {
+    const symbols = {
+      warehouse: 'W',
+      factory: 'F',
+      distribution: 'D',
+      supplier: 'S',
+      customer: 'C',
+      retail: 'R',
+      facility: 'F',
+      demand: 'D'
+    };
+    return symbols[type] || 'N';
+  };
+
+  // Handle node selection
   const handleNodeClick = (node: Node) => {
     if (selectable) {
-      const newSelected = selectedNodes.includes(node.id)
+      const newSelection = selectedNodes.includes(node.id)
         ? selectedNodes.filter(id => id !== node.id)
         : [...selectedNodes, node.id];
-      setSelectedNodes(newSelected);
-      onNodeSelect?.(newSelected);
-    } else {
-      // Double click to edit
-      setEditingNode(node);
-      setIsEditDialogOpen(true);
+      
+      setSelectedNodes(newSelection);
+      onNodeSelect?.(newSelection);
     }
+    
     onNodeClick?.(node);
   };
 
-  const handleNodeSave = (updatedNode: Node) => {
-    const updatedNodes = localNodes.map(node => 
-      node.id === updatedNode.id ? updatedNode : node
-    );
-    setLocalNodes(updatedNodes);
+  const handleNodeEdit = (node: Node) => {
+    setEditingNode(node);
+    setIsEditDialogOpen(true);
   };
 
-  const routeLines = useMemo(() => {
-    return routes.map(route => {
-      const fromNode = localNodes.find(n => n.id === route.from);
-      const toNode = localNodes.find(n => n.id === route.to);
-      
-      if (!fromNode || !toNode) return null;
-      
-      const positions: [number, number][] = [
-        [fromNode.latitude, fromNode.longitude],
-        [toNode.latitude, toNode.longitude]
-      ];
-      
-      const routeColor = route.color || (route.ownership === 'owned' ? '#22c55e' : route.ownership === 'hired' ? '#3b82f6' : '#f59e0b');
-      
-      return (
-        <Polyline
-          key={route.id}
-          positions={positions}
-          pathOptions={{
-            color: routeColor,
-            weight: route.isOptimized ? 4 : 2,
-            opacity: route.isOptimized ? 0.8 : 0.6,
-            dashArray: route.ownership === 'outsourced' ? '10, 5' : undefined
-          }}
-        >
-          <Popup>
-            <div className="space-y-2">
-              <h3 className="font-semibold">{route.from} → {route.to}</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <span>Distance:</span>
-                <span>{route.distance?.toFixed(1)} km</span>
-                <span>Cost:</span>
-                <span>${route.cost?.toLocaleString()}</span>
-                <span>Ownership:</span>
-                <Badge variant={route.ownership === 'owned' ? 'default' : 'secondary'}>
-                  {route.ownership}
-                </Badge>
-              </div>
-              {route.vehicleName && (
-                <div className="text-sm">
-                  <span className="font-medium">Vehicle:</span> {route.vehicleName}
-                </div>
-              )}
-            </div>
-          </Popup>
-        </Polyline>
-      );
-    }).filter(Boolean);
-  }, [routes, localNodes]);
+  const handleNodeSave = (updatedNode: Node) => {
+    if (onNodesChange) {
+      const updatedNodes = nodes.map(n => n.id === updatedNode.id ? updatedNode : n);
+      onNodesChange(updatedNodes);
+    }
+    setIsEditDialogOpen(false);
+    setEditingNode(null);
+  };
+
+  // Route line colors
+  const getRouteColor = (route: Route) => {
+    if (route.ownership === 'proposed') return '#EF4444';
+    if (isOptimized) return '#10B981';
+    return '#3B82F6';
+  };
 
   return (
-    <div className="w-full h-full relative">
+    <div className="relative w-full h-full">
       <MapContainer
-        center={kenyaBounds}
-        zoom={6}
-        style={{ height: "100%", width: "100%" }}
-        className="rounded-lg"
+        center={mapCenter}
+        zoom={defaultZoom}
+        style={{ height: '100%', width: '100%' }}
+        ref={mapRef}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        <MapClickHandler onMapClick={onMapClick} />
+        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         
-        {localNodes.map((node) => (
+        {/* Render routes */}
+        {routes.map((route) => {
+          const fromNode = nodes.find(n => n.id === route.from);
+          const toNode = nodes.find(n => n.id === route.to);
+          
+          if (!fromNode || !toNode) return null;
+          
+          return (
+            <Polyline
+              key={route.id}
+              positions={[
+                [fromNode.latitude, fromNode.longitude],
+                [toNode.latitude, toNode.longitude]
+              ]}
+              color={getRouteColor(route)}
+              weight={3}
+              opacity={0.7}
+            >
+              <Popup>
+                <div>
+                  <strong>{route.label || `Route ${route.id}`}</strong>
+                  <br />
+                  From: {fromNode.name}
+                  <br />
+                  To: {toNode.name}
+                </div>
+              </Popup>
+            </Polyline>
+          );
+        })}
+        
+        {/* Render nodes */}
+        {nodes.map((node) => (
           <Marker
             key={node.id}
             position={[node.latitude, node.longitude]}
-            icon={getNodeIcon(node)}
+            icon={createIcon(
+              node.type, 
+              node.ownership,
+              highlightNodes.includes(node.id) || selectedNodes.includes(node.id)
+            )}
             eventHandlers={{
               click: () => handleNodeClick(node),
+              dblclick: () => handleNodeEdit(node)
             }}
           >
             <Popup>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{node.name}</h3>
-                  <Badge variant={node.ownership === 'owned' ? 'default' : 'secondary'}>
-                    {node.ownership}
-                  </Badge>
+              <div className="min-w-[200px]">
+                <div className="flex items-center justify-between mb-2">
+                  <strong className="text-lg">{node.name}</strong>
+                  <Badge variant="outline">{node.type}</Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span>Type:</span>
-                  <span className="capitalize">{node.type}</span>
-                  <span>Capacity:</span>
-                  <span>{node.capacity?.toLocaleString() || 'N/A'}</span>
-                  {node.cost && (
-                    <>
-                      <span>Cost:</span>
-                      <span>${node.cost.toLocaleString()}/mo</span>
-                    </>
-                  )}
+                
+                <div className="space-y-1 text-sm">
+                  <div>Type: {node.type}</div>
+                  <div>Ownership: {node.ownership}</div>
+                  {node.capacity && <div>Capacity: {node.capacity}</div>}
+                  {node.cost && <div>Cost: ${node.cost}</div>}
+                  {node.weight && <div>Weight: {node.weight}</div>}
+                  <div>Location: {node.latitude.toFixed(4)}, {node.longitude.toFixed(4)}</div>
                 </div>
+                
                 {node.notes && (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="mt-2 text-sm text-gray-600">
                     {node.notes}
                   </div>
                 )}
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    setEditingNode(node);
-                    setIsEditDialogOpen(true);
-                  }}
-                  className="w-full"
-                >
-                  <Edit className="h-3 w-3 mr-1" />
-                  Edit Node
-                </Button>
+                
+                <div className="mt-3 flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => handleNodeEdit(node)}>
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                </div>
               </div>
             </Popup>
           </Marker>
         ))}
-        
-        {routeLines}
       </MapContainer>
       
+      {/* Legend */}
       {showLegend && (
-        <Card className="absolute top-4 right-4 w-64 bg-white/95 backdrop-blur">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Network Legend</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="space-y-1">
-              <h4 className="text-xs font-medium">Ownership Types:</h4>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span>Owned Assets</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                <span>Hired/Leased</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                <span>Outsourced</span>
-              </div>
+        <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg z-[1000]">
+          <h4 className="font-semibold mb-3">Map Legend</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-green-500"></div>
+              <span>Owned Assets</span>
             </div>
-            <div className="space-y-1">
-              <h4 className="text-xs font-medium">Node Types:</h4>
-              <div className="grid grid-cols-2 gap-1 text-xs">
-                <span>🏪 Warehouse</span>
-                <span>📦 Distribution</span>
-                <span>🏭 Supplier</span>
-                <span>🛒 Customer</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+              <span>Hired/Leased</span>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-purple-500"></div>
+              <span>Outsourced</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-red-500"></div>
+              <span>Proposed</span>
+            </div>
+          </div>
+        </div>
       )}
       
+      {/* Node Edit Dialog */}
       <NodeEditDialog
         node={editingNode}
         isOpen={isEditDialogOpen}
-        onClose={() => {
-          setIsEditDialogOpen(false);
-          setEditingNode(null);
-        }}
+        onClose={() => setIsEditDialogOpen(false)}
         onSave={handleNodeSave}
       />
     </div>
   );
 };
+
+export default NetworkMap;

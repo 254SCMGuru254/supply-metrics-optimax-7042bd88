@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 type DemandPoint = {
   id: number;
@@ -53,12 +53,19 @@ export const CogDataContent = ({ projectId }: CogDataContentProps) => {
     queryKey: ['demandPointsForCog', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('demand_points')
+        .from('supply_nodes')
         .select('id, name, latitude, longitude, demand')
-        .eq('project_id', projectId);
+        .eq('project_id', projectId)
+        .eq('node_type', 'customer');
       
       if (error) throw new Error(error.message);
-      return data;
+      return data.map(item => ({
+        id: parseInt(item.id),
+        name: item.name,
+        latitude: item.latitude,
+        longitude: item.longitude,
+        demand: item.demand || 0
+      }));
     },
     enabled: !!projectId,
   });
@@ -66,9 +73,9 @@ export const CogDataContent = ({ projectId }: CogDataContentProps) => {
   const updateDemandMutation = useMutation({
     mutationFn: async ({ id, demand }: { id: number, demand: number }) => {
       const { data, error } = await supabase
-        .from('demand_points')
+        .from('supply_nodes')
         .update({ demand })
-        .eq('id', id);
+        .eq('id', id.toString());
 
       if (error) throw new Error(error.message);
       return data;
@@ -166,7 +173,7 @@ export const CogDataContent = ({ projectId }: CogDataContentProps) => {
                         defaultValue={point.demand} 
                         className="w-32 ml-auto"
                         onBlur={(e) => handleWeightChange(point.id, e.target.value)}
-                        disabled={updateDemandMutation.isLoading}
+                        disabled={updateDemandMutation.isPending}
                       />
                     </TableCell>
                   </TableRow>

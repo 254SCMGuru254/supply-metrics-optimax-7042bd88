@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, Package, Truck, DollarSign, Clock, AlertTriangle, CheckCircle } from "lucide-react";
 
 const AdvancedAnalyticsDashboard = ({ projectId }: { projectId: string }) => {
@@ -114,15 +114,15 @@ const AdvancedAnalyticsDashboard = ({ projectId }: { projectId: string }) => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <AreaChart data={optimizationHistory}>
+                <LineChart data={optimizationHistory}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Area type="monotone" dataKey="baseline" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                  <Area type="monotone" dataKey="optimized" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                </AreaChart>
+                  <Line type="monotone" dataKey="baseline" stroke="#8884d8" />
+                  <Line type="monotone" dataKey="optimized" stroke="#82ca9d" />
+                </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -138,7 +138,7 @@ const AdvancedAnalyticsDashboard = ({ projectId }: { projectId: string }) => {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={modelPerformance}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="model" angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="model" />
                     <YAxis />
                     <Tooltip />
                     <Bar dataKey="accuracy" fill="#3B82F6" />
