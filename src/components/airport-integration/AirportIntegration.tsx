@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { NetworkMap } from "@/components/NetworkMap";
+import NetworkMap from "@/components/NetworkMap";
 import { TimePicker } from "@/components/ui/time-picker-demo";
 import { safeClick } from "@/utils/domUtils";
 import { Database } from "@/types/network";

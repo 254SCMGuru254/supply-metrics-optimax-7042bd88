@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface CostModelingResult {
   success: boolean;
@@ -27,6 +27,7 @@ export const ComprehensiveCostModeling = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState("abc-costing");
   const [results, setResults] = useState<Record<string, CostModelingResult>>({});
@@ -47,32 +48,33 @@ export const ComprehensiveCostModeling = () => {
   });
 
   const { data: savedResults, isLoading: isLoadingResults } = useQuery<Record<string, CostModelingResult>>({
-      queryKey: ['costModelResults', projectId],
-      queryFn: async () => {
-        if (!projectId || !user) return {};
-        const { data, error } = await supabase
-          .from('cost_model_results')
-          .select('model_type, results, recommendations, formula')
-          .eq('project_id', projectId)
-          .eq('user_id', user.id);
-        if (error) throw new Error(error.message);
-        return data.reduce((acc, curr) => ({ 
-            ...acc, 
-            [curr.model_type]: {
-                success: true,
-                result: curr.results,
-                recommendations: curr.recommendations,
-                formula: curr.formula,
-            }
-        }), {});
-      },
-      enabled: !!projectId && !!user,
-      onSuccess: (data) => {
-          if (data) {
-              setResults(data);
+    queryKey: ['costModelResults', projectId],
+    queryFn: async () => {
+      if (!projectId || !user) return {};
+      const { data, error } = await supabase
+        .from('cost_model_results')
+        .select('model_type, results, recommendations, formula')
+        .eq('project_id', projectId)
+        .eq('user_id', user.id);
+      if (error) throw new Error(error.message);
+      return data.reduce((acc, curr) => ({ 
+          ...acc, 
+          [curr.model_type]: {
+              success: true,
+              result: curr.results,
+              recommendations: curr.recommendations,
+              formula: curr.formula,
           }
-      }
+      }), {});
+    },
+    enabled: !!projectId && !!user,
   });
+
+  useEffect(() => {
+    if (savedResults) {
+      setResults(savedResults);
+    }
+  }, [savedResults]);
 
   const upsertInputsMutation = useMutation({
     mutationFn: async ({ modelType, newInputs }: { modelType: string; newInputs: CostModelInputData }) => {
@@ -92,31 +94,30 @@ export const ComprehensiveCostModeling = () => {
   });
 
   const upsertResultsMutation = useMutation({
-      mutationFn: async ({ modelType, resultData }: { modelType: string; resultData: CostModelingResult & { inputs: CostModelInputData } }) => {
-        if (!projectId || !user) return;
-        const { error } = await supabase.from('cost_model_results').upsert(
-            { 
-                project_id: projectId,
-                user_id: user.id,
-                model_type: modelType,
-                inputs: resultData.inputs,
-                results: resultData.result,
-                recommendations: resultData.recommendations,
-                formula: resultData.formula,
-            },
-            { onConflict: 'project_id, user_id, model_type' }
-        );
-        if (error) throw new Error(error.message);
-      },
-      onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['costModelResults', projectId] });
-          toast({ title: 'Analysis Saved', description: 'Your calculation results have been saved.' });
-      },
-      onError: (error: Error) => {
-        toast({ title: `Error saving results`, description: error.message, variant: 'destructive' });
-      }
+    mutationFn: async ({ modelType, resultData }: { modelType: string; resultData: CostModelingResult & { inputs: CostModelInputData } }) => {
+      if (!projectId || !user) return;
+      const { error } = await supabase.from('cost_model_results').upsert(
+          { 
+              project_id: projectId,
+              user_id: user.id,
+              model_type: modelType,
+              inputs: resultData.inputs,
+              results: resultData.result,
+              recommendations: resultData.recommendations,
+              formula: resultData.formula,
+          },
+          { onConflict: 'project_id, user_id, model_type' }
+      );
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['costModelResults', projectId] });
+        toast({ title: 'Analysis Saved', description: 'Your calculation results have been saved.' });
+    },
+    onError: (error: Error) => {
+      toast({ title: `Error saving results`, description: error.message, variant: 'destructive' });
+    }
   });
-
 
   const handleInputChange = (modelType: string, key: string, value: any) => {
     const currentInputs = inputs?.[modelType] || {};
@@ -318,8 +319,8 @@ export const ComprehensiveCostModeling = () => {
                     <Label htmlFor="activityUsage">Activity Usage (comma-separated)</Label>
                     <Input id="activityUsage" value={inputs?.['abc-costing']?.activityUsage || ""} onChange={(e) => handleInputChange('abc-costing', 'activityUsage', e.target.value)} placeholder="e.g., 10,5,8" />
                   </div>
-                  <Button onClick={() => runAndSaveAnalysis('abc', calculateABC)} disabled={upsertResultsMutation.isLoading}>
-                    {upsertResultsMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate ABC
+                  <Button onClick={() => runAndSaveAnalysis('abc', calculateABC)} disabled={upsertResultsMutation.isPending}>
+                    {upsertResultsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate ABC
                   </Button>
                 </CardContent>
               </Card>
@@ -341,8 +342,8 @@ export const ComprehensiveCostModeling = () => {
                             <Label htmlFor="disposal">Disposal Costs</Label>
                             <Input id="disposal" type="number" value={inputs?.['tco']?.disposal || 0} onChange={(e) => handleInputChange('tco', 'disposal', e.target.valueAsNumber)} />
                         </div>
-                        <Button onClick={() => runAndSaveAnalysis('tco', calculateTCO)} disabled={upsertResultsMutation.isLoading}>
-                            {upsertResultsMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate TCO
+                        <Button onClick={() => runAndSaveAnalysis('tco', calculateTCO)} disabled={upsertResultsMutation.isPending}>
+                            {upsertResultsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate TCO
                         </Button>
                     </CardContent>
                 </Card>
@@ -368,8 +369,8 @@ export const ComprehensiveCostModeling = () => {
                             <Label htmlFor="timePeriods">Time Periods (e.g., years)</Label>
                             <Input id="timePeriods" type="number" value={inputs?.['cost-benefit']?.timePeriods || 3} onChange={(e) => handleInputChange('cost-benefit', 'timePeriods', e.target.valueAsNumber)} />
                         </div>
-                        <Button onClick={() => runAndSaveAnalysis('cost-benefit', calculateCostBenefit)} disabled={upsertResultsMutation.isLoading}>
-                            {upsertResultsMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate CBA
+                        <Button onClick={() => runAndSaveAnalysis('cost-benefit', calculateCostBenefit)} disabled={upsertResultsMutation.isPending}>
+                            {upsertResultsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate CBA
                         </Button>
                     </CardContent>
                 </Card>
@@ -391,8 +392,8 @@ export const ComprehensiveCostModeling = () => {
                             <Label htmlFor="pricePerUnit">Price Per Unit</Label>
                             <Input id="pricePerUnit" type="number" value={inputs?.['break-even']?.pricePerUnit || 0} onChange={(e) => handleInputChange('break-even', 'pricePerUnit', e.target.valueAsNumber)} />
                         </div>
-                        <Button onClick={() => runAndSaveAnalysis('break-even', calculateBreakEven)} disabled={upsertResultsMutation.isLoading}>
-                            {upsertResultsMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate Break-Even
+                        <Button onClick={() => runAndSaveAnalysis('break-even', calculateBreakEven)} disabled={upsertResultsMutation.isPending}>
+                            {upsertResultsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />} Calculate Break-Even
                         </Button>
                     </CardContent>
                 </Card>
@@ -409,4 +410,4 @@ export const ComprehensiveCostModeling = () => {
       </div>
     </div>
   );
-}; 
+};

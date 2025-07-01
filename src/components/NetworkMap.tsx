@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -13,8 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Warehouse, Factory, Store, Truck, MapPin, Edit, Save, X } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Warehouse, Factory, Store, MapPin, Edit, Save, X } from "lucide-react";
 import type { Node, Route, NodeType, OwnershipType } from "@/components/map/MapTypes";
 
 export type { Node, Route, NodeType, OwnershipType };
@@ -96,6 +96,7 @@ const NodeEditDialog = ({
     { value: 'owned', label: 'Owned', description: 'Company-owned asset' },
     { value: 'hired', label: 'Hired/Leased', description: 'Leased or rented asset' },
     { value: 'outsourced', label: 'Outsourced', description: 'Third-party managed' },
+    { value: 'proposed', label: 'Proposed', description: 'Planned location' },
   ];
 
   return (
@@ -268,7 +269,6 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [editingNode, setEditingNode] = useState<Node | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const mapRef = useRef<L.Map | null>(null);
 
   // Default center - Kenya coordinates
   const defaultCenter: [number, number] = [-1.286389, 36.817223];
@@ -385,7 +385,6 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
         center={mapCenter}
         zoom={defaultZoom}
         style={{ height: '100%', width: '100%' }}
-        ref={mapRef}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -408,9 +407,11 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
                 [fromNode.latitude, fromNode.longitude],
                 [toNode.latitude, toNode.longitude]
               ]}
-              color={getRouteColor(route)}
-              weight={3}
-              opacity={0.7}
+              pathOptions={{
+                color: getRouteColor(route),
+                weight: 3,
+                opacity: 0.7
+              }}
             >
               <Popup>
                 <div>
