@@ -383,6 +383,75 @@ export type Database = {
           },
         ]
       }
+      kpi_definitions: {
+        Row: {
+          bad_threshold: number | null
+          description: string | null
+          good_threshold: number | null
+          higher_is_better: boolean
+          id: number
+          name: string
+        }
+        Insert: {
+          bad_threshold?: number | null
+          description?: string | null
+          good_threshold?: number | null
+          higher_is_better: boolean
+          id?: never
+          name: string
+        }
+        Update: {
+          bad_threshold?: number | null
+          description?: string | null
+          good_threshold?: number | null
+          higher_is_better?: boolean
+          id?: never
+          name?: string
+        }
+        Relationships: []
+      }
+      kpis: {
+        Row: {
+          id: number
+          kpi_id: number | null
+          model_id: string | null
+          project_id: string | null
+          recorded_at: string | null
+          value: number | null
+        }
+        Insert: {
+          id?: never
+          kpi_id?: number | null
+          model_id?: string | null
+          project_id?: string | null
+          recorded_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          id?: never
+          kpi_id?: number | null
+          model_id?: string | null
+          project_id?: string | null
+          recorded_at?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpis_kpi_id_fkey"
+            columns: ["kpi_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kpis_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       model_constraints: {
         Row: {
           constraint_name: string

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +11,9 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { AlertCircle, Package, Loader2 } from "lucide-react";
+import { AlertCircle, Package, Loader2, MapPin, Calculator, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const CenterOfGravity = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -116,55 +118,162 @@ const CenterOfGravity = () => {
 
   if (!demandPoints || demandPoints.length === 0) {
     return (
-      <Card className="m-4 p-8 text-center">
-        <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-xl font-semibold text-gray-900">No Customer Locations Found</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          The Center of Gravity model requires customer locations (demand points) to calculate the optimal facility location. Click on the map to add one.
-        </p>
-        <div className="mt-6">
-          <Link to={`/data-input/${projectId}`}>
-            <Button>
-              <Package className="mr-2 h-4 w-4" />
-              Add Customer Data Manually
-            </Button>
-          </Link>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Center of Gravity Analysis</h1>
+                <p className="text-gray-600">Find optimal facility locations using mathematical modeling</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                Mathematical Optimization
+              </Badge>
+              <Badge variant="outline">Kenya Focused</Badge>
+            </div>
+          </div>
+
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader className="text-center">
+              <AlertCircle className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+              <CardTitle className="text-2xl text-gray-900">No Customer Locations Found</CardTitle>
+              <p className="text-gray-600 mt-2">
+                The Center of Gravity model requires customer locations (demand points) to calculate the optimal facility location. 
+                Add some customer locations to get started.
+              </p>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link to={`/data-input/${projectId}`}>
+                  <Button className="w-full">
+                    <Package className="mr-2 h-4 w-4" />
+                    Add Customer Data
+                  </Button>
+                </Link>
+                <Link to="/documentation">
+                  <Button variant="outline" className="w-full">
+                    <Calculator className="mr-2 h-4 w-4" />
+                    View Documentation
+                  </Button>
+                </Link>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">
+                You can also click on the map to add demand points directly once you have the interface loaded.
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Center of Gravity Analysis</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <Card className="h-[600px]">
-            <NetworkMap 
-              nodes={mapNodes} 
-              routes={optimizedRoutes} 
-              onMapClick={handleMapClick} 
-            />
-          </Card>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Center of Gravity Analysis</h1>
+              <p className="text-gray-600">Mathematical optimization for optimal facility placement</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+              {demandPoints?.length || 0} Demand Points
+            </Badge>
+            <Badge variant="outline">Real-time Optimization</Badge>
+            {cogResult && (
+              <Badge className="bg-green-100 text-green-700">
+                Solution Found
+              </Badge>
+            )}
+          </div>
         </div>
-        <div className="space-y-4">
-          <Card>
-            <CardHeader><CardTitle>Configuration</CardTitle></CardHeader>
-            <CardContent>
-              {cogModel && (
-                <CogFormulaSelector
-                  formulas={cogModel.formulas}
-                  selectedFormulaId={selectedFormulaId}
-                  onFormulaChange={setSelectedFormulaId}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Map Section */}
+          <div className="lg:col-span-2">
+            <Card className="h-[600px] shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-2">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                  <span>Interactive Supply Chain Map</span>
+                </CardTitle>
+                <p className="text-sm text-gray-600">Click on the map to add new demand points</p>
+              </CardHeader>
+              <CardContent className="p-0 h-[500px]">
+                <NetworkMap 
+                  nodes={mapNodes} 
+                  routes={optimizedRoutes} 
+                  onMapClick={handleMapClick} 
                 />
-              )}
-            </CardContent>
-          </Card>
-          <CompleteCogCalculation
-            demandPoints={demandPoints || []}
-            selectedFormula={selectedFormulaId}
-            onResultsCalculated={handleResultsCalculated}
-          />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Controls Section */}
+          <div className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Calculator className="h-5 w-5 text-purple-600" />
+                  <span>Model Configuration</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {cogModel && (
+                  <CogFormulaSelector
+                    formulas={cogModel.formulas}
+                    selectedFormulaId={selectedFormulaId}
+                    onFormulaChange={setSelectedFormulaId}
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            <CompleteCogCalculation
+              demandPoints={demandPoints || []}
+              selectedFormula={selectedFormulaId}
+              onResultsCalculated={handleResultsCalculated}
+            />
+
+            {/* Quick Actions */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-lg">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Link to={`/data-input/${projectId}`}>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Package className="mr-2 h-4 w-4" />
+                    Manage Data Input
+                  </Button>
+                </Link>
+                <Link to="/documentation">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calculator className="mr-2 h-4 w-4" />
+                    View Documentation
+                  </Button>
+                </Link>
+                <Link to={`/analytics-dashboard/${projectId}`}>
+                  <Button variant="outline" className="w-full justify-start">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Analytics Dashboard
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

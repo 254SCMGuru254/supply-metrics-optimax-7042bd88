@@ -1,100 +1,92 @@
-import "./Landing.css";
+
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, CheckCircle, Users, Globe, Award, TrendingUp, MapPin, Package, Calculator, Network } from "lucide-react";
 
 const logos = [
-  "/public/logo1.png",
-  "/public/logo2.png",
-  "/public/logo3.png",
+  "/lovable-uploads/a2956ea1-b63b-41de-a08a-e2aea31c4533.png",
+  "/lovable-uploads/a2956ea1-b63b-41de-a08a-e2aea31c4533.png",
+  "/lovable-uploads/a2956ea1-b63b-41de-a08a-e2aea31c4533.png",
 ];
 
 const testimonials = [
   {
-    quote: "Chain.IO gave us real-time visibility and cut our logistics costs by 18% in 3 months.",
-    author: "Jane Doe, COO, MegaRetail"
+    quote: "Supply Metrics Optimax gave us real-time visibility and cut our logistics costs by 18% in 3 months.",
+    author: "Jane Doe, COO, MegaRetail Kenya"
   },
   {
-    quote: "The AI-powered insights are a game changer for our global operations.",
-    author: "John Smith, VP Supply Chain, AgroCorp"
+    quote: "The AI-powered insights are a game changer for our global operations and Kenya focus.",
+    author: "John Smith, VP Supply Chain, AgroCorp East Africa"
   }
 ];
 
 const stats = [
-  { label: "Transactions", value: 12000000 },
-  { label: "Active Users", value: 40000 },
-  { label: "Uptime", value: 99.99, suffix: "%" },
-  { label: "Global Clients", value: 120 }
+  { label: "Models Available", value: 42, suffix: "+" },
+  { label: "Active Users", value: 40000, suffix: "" },
+  { label: "Accuracy Rate", value: 98, suffix: "%" },
+  { label: "Kenya Industries", value: 12, suffix: "" }
 ];
 
 const features = [
   {
     title: "Network Design",
-    desc: "Model and optimize your end-to-end supply chain network.",
-    icon: "network"
+    desc: "Model and optimize your end-to-end supply chain network with advanced algorithms.",
+    icon: Network
   },
   {
     title: "Inventory Optimization",
-    desc: "Reduce stockouts and costs with AI-driven inventory policies.",
-    icon: "inventory"
+    desc: "Reduce stockouts and costs with AI-driven inventory policies and safety stock optimization.",
+    icon: Package
   },
   {
     title: "Route Optimization",
-    desc: "Minimize transport costs and delivery times with advanced algorithms.",
-    icon: "route"
+    desc: "Minimize transport costs and delivery times with advanced routing algorithms.",
+    icon: MapPin
   },
   {
-    title: "Risk & Resilience",
-    desc: "Simulate disruptions and build a more resilient supply chain.",
-    icon: "risk"
+    title: "Kenya Focus",
+    desc: "Specialized models for Kenya's unique supply chain challenges and opportunities.",
+    icon: Globe
   }
 ];
 
-const FeatureCard = ({ title, desc }) => (
-  <div className="bg-blue-900 bg-opacity-60 rounded-xl p-6 shadow-lg flex flex-col items-start">
-    <div className="mb-4 text-2xl">🔹</div>
-    <div className="font-bold text-lg mb-2">{title}</div>
-    <div className="text-blue-100 text-sm">{desc}</div>
-  </div>
+const FeatureCard = ({ title, desc, icon: Icon }) => (
+  <Card className="h-full group hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200">
+    <CardHeader>
+      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        <Icon className="h-6 w-6 text-white" />
+      </div>
+      <CardTitle className="text-lg font-bold">{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-gray-600">{desc}</p>
+    </CardContent>
+  </Card>
 );
 
 const TestimonialCard = ({ quote, author }) => (
-  <div className="bg-blue-950 bg-opacity-80 rounded-xl p-6 shadow-md max-w-xs">
-    <div className="italic mb-3">“{quote}”</div>
-    <div className="text-blue-300 font-semibold">{author}</div>
-  </div>
+  <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+    <CardContent className="p-6">
+      <blockquote className="italic text-gray-700 mb-4">"{quote}"</blockquote>
+      <div className="font-semibold text-blue-600">{author}</div>
+    </CardContent>
+  </Card>
 );
 
 const StatBox = ({ label, value, suffix }) => (
-  <div className="flex flex-col items-center">
-    <div className="text-3xl font-bold text-blue-300">
+  <div className="text-center">
+    <div className="text-4xl font-bold text-blue-600 mb-2">
       {value.toLocaleString()}{suffix || ""}
     </div>
-    <div className="text-blue-100 text-sm mt-1">{label}</div>
+    <div className="text-gray-600 font-medium">{label}</div>
   </div>
 );
 
-import React, { useEffect } from "react";
-
 const NewLandingPage = () => {
   useEffect(() => {
-    // Create animated particles
-    function createParticles() {
-      const particlesContainer = document.getElementById("particles");
-      if (!particlesContainer) return;
-
-      // Clear any existing particles
-      particlesContainer.innerHTML = '';
-
-      const particleCount = 50;
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement("div");
-        particle.className = "particle";
-        particle.style.left = Math.random() * 100 + "%";
-        particle.style.animationDelay = Math.random() * 20 + "s";
-        particle.style.animationDuration =
-          Math.random() * 10 + 15 + "s";
-        particlesContainer.appendChild(particle);
-      }
-    }
-
     // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
       anchor.addEventListener("click", function (e) {
@@ -109,179 +101,234 @@ const NewLandingPage = () => {
       });
     });
 
-    // Counter animation for stats
-    function animateCounter(element: HTMLElement, target: number, duration = 2000) {
-      let start = 0;
-      const increment = target / (duration / 16);
-
-      function updateCounter() {
-        start += increment;
-        if (start < target) {
-          element.textContent = Math.floor(start).toLocaleString();
-          requestAnimationFrame(updateCounter);
-        } else {
-          element.textContent = target.toLocaleString() + (element.dataset.suffix || '');
-        }
-      }
-      updateCounter();
-    }
-    
-    // Animate stats when they come into view
-    const statsObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                const stat = entry.target as HTMLElement;
-                const value = stat.dataset.value || '';
-                const suffix = stat.dataset.suffix || '';
-                const num = parseFloat(value);
-
-                if(!isNaN(num)) {
-                    stat.textContent = '0' + suffix;
-                    animateCounter(stat, num);
-                }
-                statsObserver.unobserve(stat);
-            }
-        });
-    }, { threshold: 0.5 });
-
-    document.querySelectorAll('.stat-number').forEach(stat => {
-        statsObserver.observe(stat);
-    });
-
-    // Intersection Observer for feature cards
-    const cardObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-            const card = entry.target as HTMLElement;
-            card.style.opacity = "1";
-            card.style.transform = "translateY(0)";
-            cardObserver.unobserve(card);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    document.querySelectorAll('.feature-card').forEach(card => {
-        const htmlCard = card as HTMLElement;
-        htmlCard.style.opacity = '0';
-        htmlCard.style.transform = 'translateY(50px)';
-        htmlCard.style.transition = 'all 0.6s ease';
-        cardObserver.observe(card);
-    });
-
-    // Dynamic glow effect for hero title
-    const heroTitle = document.querySelector('.hero h1') as HTMLElement;
-    let glowIntensity = 0;
-    let glowDirection = 1;
-
-    const glowInterval = setInterval(() => {
-        glowIntensity += glowDirection * 0.02;
-        if (glowIntensity >= 1) glowDirection = -1;
-        if (glowIntensity <= 0) glowDirection = 1;
-        
-        const glowValue = 20 + (glowIntensity * 20);
-        if(heroTitle) {
-            heroTitle.style.filter = `drop-shadow(0 0 ${glowValue}px rgba(0, 212, 255, ${0.3 + glowIntensity * 0.3}))`;
-        }
-    }, 50);
-
-
-    // Initial setup
-    createParticles();
-
-    // Cleanup function
     return () => {
-        clearInterval(glowInterval);
-        statsObserver.disconnect();
-        cardObserver.disconnect();
-        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-             anchor.removeEventListener("click", () => {});
-        });
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.removeEventListener("click", () => {});
+      });
     }
-
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-950 text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
-      <header className="flex justify-between items-center px-8 py-6">
-        <div className="text-2xl font-bold tracking-tight">
-          <span className="text-blue-400">Chain</span>.<span className="text-blue-300">IO</span>
+      <header className="bg-white/90 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Network className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Supply Metrics Optimax
+                </span>
+              </div>
+            </Link>
+            <nav className="hidden md:flex space-x-8">
+              <a href="#features" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Features</a>
+              <Link to="/pricing" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Pricing</Link>
+              <Link to="/documentation" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Docs</Link>
+              <Link to="/kenya-supply-chain" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Kenya Focus</Link>
+            </nav>
+            <div className="flex items-center space-x-4">
+              <Link to="/auth">
+                <Button variant="ghost">Sign In</Button>
+              </Link>
+              <Link to="/dashboard">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  Launch App
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
-        <nav className="space-x-6">
-          <a href="#features" className="hover:underline">Features</a>
-          <a href="#pricing" className="hover:underline">Pricing</a>
-          <a href="#docs" className="hover:underline">Docs</a>
-          <a href="#support" className="hover:underline">Support</a>
-          <button className="ml-6 px-5 py-2 bg-blue-500 rounded-lg font-semibold hover:bg-blue-600 transition">Launch App</button>
-        </nav>
       </header>
 
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-8 py-16">
-        <div className="md:w-1/2 space-y-6">
-          <h1 className="text-5xl font-extrabold leading-tight">
-            Supply Chain 3.0: Outthink. Outmaneuver. Outperform
-          </h1>
-          <p className="text-lg text-blue-100">
-            The next generation of supply chain optimization. Harness AI and advanced analytics to build a resilient, efficient, and sustainable supply chain.
-          </p>
-          <div className="flex space-x-4 mt-6">
-            <button className="px-6 py-3 bg-blue-500 rounded-lg font-bold text-lg shadow-lg hover:bg-blue-600 transition">Get Started Free</button>
-            <button className="px-6 py-3 border border-blue-400 rounded-lg font-bold text-lg hover:bg-blue-700 transition">See Live Demo</button>
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+                  🇰🇪 Kenya-Focused Supply Chain Intelligence
+                </Badge>
+                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight">
+                  Supply Chain 3.0: 
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    {" "}Outthink. Outmaneuver. Outperform
+                  </span>
+                </h1>
+                <p className="text-xl text-gray-600 leading-relaxed">
+                  The next generation of supply chain optimization. Harness AI and advanced analytics to build a resilient, efficient, and sustainable supply chain with specialized Kenya market focus.
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/auth">
+                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6">
+                    Get Started Free
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/dashboard">
+                  <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-2">
+                    See Live Demo
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
+                {stats.map((stat) => (
+                  <StatBox
+                    key={stat.label}
+                    label={stat.label}
+                    value={stat.value}
+                    suffix={stat.suffix}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="aspect-square bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-2xl flex items-center justify-center">
+                <div className="text-center text-white p-8">
+                  <Network className="h-24 w-24 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold mb-2">42+ Models</h3>
+                  <p className="text-blue-100">Advanced optimization algorithms for every supply chain challenge</p>
+                </div>
+              </div>
+            </div>
           </div>
-          {/* Animated Stats */}
-          <div className="flex space-x-8 mt-8">
-            {stats.map((stat) => (
-              <StatBox
-                key={stat.label}
-                label={stat.label}
-                value={stat.value}
-                suffix={stat.suffix ?? ""}
-              />
-            ))}
-          </div>
-        </div>
-        {/* Illustration or Animation */}
-        <div className="md:w-1/2 flex justify-center mt-12 md:mt-0">
-          <img src="/public/illustration-supplychain.svg" alt="Supply Chain Illustration" className="w-96 h-auto" />
         </div>
       </section>
 
       {/* Trusted By */}
-      <section className="py-8 bg-blue-950 bg-opacity-80">
-        <div className="text-center text-blue-200 mb-4">Trusted by leading brands</div>
-        <div className="flex justify-center space-x-8">
-          {logos.map((logo, i) => <img key={i} src={logo} alt={`Brand${i+1}`} className="h-8" />)}
+      <section className="py-12 bg-white border-y">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-gray-500 mb-8 font-medium">Trusted by leading Kenya businesses</div>
+          <div className="flex justify-center items-center space-x-12 opacity-60">
+            {logos.map((logo, i) => (
+              <div key={i} className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                <Package className="h-8 w-8 text-gray-400" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="py-16 px-8">
-        <h2 className="text-3xl font-bold text-center mb-10">Powerful Optimization Features</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((f) => <FeatureCard key={f.title} {...f} />)}
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Powerful Optimization Features</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Advanced mathematical models and AI-driven insights to transform your supply chain operations
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature) => (
+              <FeatureCard key={feature.title} {...feature} />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 bg-blue-950 bg-opacity-80">
-        <h2 className="text-2xl font-bold text-center mb-8">What Our Customers Say</h2>
-        <div className="flex justify-center space-x-8">
-          {testimonials.map((t, i) => <TestimonialCard key={i} {...t} />)}
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
+            <p className="text-xl text-gray-600">Real results from Kenya businesses using our platform</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {testimonials.map((testimonial, i) => (
+              <TestimonialCard key={i} {...testimonial} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to Transform Your Supply Chain?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Join thousands of businesses optimizing their operations with our AI-powered platform
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/auth">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-6">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link to="/kenya-supply-chain">
+              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-6">
+                Explore Kenya Solutions
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-8 text-blue-200 flex flex-col md:flex-row justify-between items-center border-t border-blue-800">
-        <div>© {new Date().getFullYear()} Chain.IO. All rights reserved.</div>
-        <div className="space-x-6">
-          <a href="#privacy" className="hover:underline">Privacy Policy</a>
-          <a href="#terms" className="hover:underline">Terms of Service</a>
-          <a href="#contact" className="hover:underline">Contact</a>
+      <footer className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Network className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xl font-bold">Supply Metrics Optimax</span>
+              </div>
+              <p className="text-gray-400">
+                Advanced supply chain optimization platform with specialized focus on Kenya market dynamics.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Platform</h3>
+              <div className="space-y-2">
+                <Link to="/dashboard" className="block text-gray-400 hover:text-white transition-colors">Dashboard</Link>
+                <Link to="/analytics-dashboard/demo" className="block text-gray-400 hover:text-white transition-colors">Analytics</Link>
+                <Link to="/documentation" className="block text-gray-400 hover:text-white transition-colors">Documentation</Link>
+                <Link to="/pricing" className="block text-gray-400 hover:text-white transition-colors">Pricing</Link>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Solutions</h3>
+              <div className="space-y-2">
+                <Link to="/kenya-supply-chain" className="block text-gray-400 hover:text-white transition-colors">Kenya Focus</Link>
+                <Link to="/business-value" className="block text-gray-400 hover:text-white transition-colors">Business Value</Link>
+                <a href="#features" className="block text-gray-400 hover:text-white transition-colors">Features</a>
+                <Link to="/documentation" className="block text-gray-400 hover:text-white transition-colors">Case Studies</Link>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Support</h3>
+              <div className="space-y-2">
+                <Link to="/documentation" className="block text-gray-400 hover:text-white transition-colors">Help Center</Link>
+                <Link to="/auth" className="block text-gray-400 hover:text-white transition-colors">Contact Us</Link>
+                <Link to="/documentation" className="block text-gray-400 hover:text-white transition-colors">API Reference</Link>
+                <Link to="/documentation" className="block text-gray-400 hover:text-white transition-colors">Community</Link>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; {new Date().getFullYear()} Supply Metrics Optimax. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>
   );
 };
 
-export default NewLandingPage; 
+export default NewLandingPage;

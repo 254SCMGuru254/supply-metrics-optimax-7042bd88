@@ -25,6 +25,7 @@ import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 import Isohedron from "./pages/Isohedron";
 import WarehousePage from "./pages/Warehouse";
+import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => {
               {/* Public Routes */}
               <Route path="/" element={<NewLandingPage />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/support" element={<Support />} />
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoutesLayout />}>
