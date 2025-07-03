@@ -7,16 +7,15 @@ import {
   TrendingUp, 
   BarChart3, 
   MapPin, 
-  Zap, 
+  Activity, // Replace Zap
   Shield, 
   Users, 
   CheckCircle, 
-  Star,
+  Target, // Replace Star
   ArrowRight,
   Play,
   Globe,
-  Target,
-  Cpu
+  Settings, // Replace Cpu
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -33,7 +32,7 @@ const NewLandingPage = () => {
       description: "Visualize your supply chain with OpenStreetMap integration, route optimization, and facility location planning."
     },
     {
-      icon: <Zap className="h-8 w-8" />,
+      icon: <Activity className="h-8 w-8" />,
       title: "AI-Powered Optimization",
       description: "Machine learning algorithms for demand forecasting, inventory optimization, and predictive analytics."
     },
@@ -101,21 +100,16 @@ const NewLandingPage = () => {
               </div>
             </div>
             
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-8 flex-1 justify-center">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
               <a href="#models" className="text-gray-600 hover:text-gray-900 transition-colors">Models</a>
               <Link to="/documentation" className="text-gray-600 hover:text-gray-900 transition-colors">Docs</Link>
               <Link to="/support" className="text-gray-600 hover:text-gray-900 transition-colors">Support</Link>
-              <Link to="/dashboard">
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                  Launch App
-                </Button>
-              </Link>
             </div>
             
-            <div className="md:hidden">
+            <div className="flex items-center">
               <Link to="/dashboard">
-                <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                   Launch App
                 </Button>
               </Link>
@@ -125,12 +119,12 @@ const NewLandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto w-full">
           <div className="text-center space-y-8">
             <div className="space-y-4">
               <Badge className="px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border-blue-200">
-                <Star className="h-4 w-4 mr-2" />
+                <Target className="h-4 w-4 mr-2" />
                 Enterprise-Grade Supply Chain Optimization
               </Badge>
               
@@ -226,7 +220,7 @@ const NewLandingPage = () => {
               <div key={index} className="p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 hover:shadow-lg hover:border-blue-200 transition-all duration-300 group">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Cpu className="h-4 w-4 text-blue-600" />
+                    <Settings className="h-4 w-4 text-blue-600" />
                   </div>
                   <span className="font-medium text-gray-900">{model}</span>
                 </div>
@@ -263,7 +257,7 @@ const NewLandingPage = () => {
                 <CardContent className="p-6">
                   <div className="flex mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                      <Target key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                     ))}
                   </div>
                   <p className="text-gray-700 mb-6 leading-relaxed">"{testimonial.content}"</p>

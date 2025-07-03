@@ -1,128 +1,153 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
-    TrendingUp, 
-    AlertTriangle, 
-    DollarSign, 
-    Package,
-    Activity,
-    Box,
-    Truck,
-    CircleSlash,
-    Archive,
-    ShoppingCart
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  Package, 
+  AlertCircle, // Replace CircleSlash
+  FileArchive, // Replace Archive
+  Truck,
+  ShoppingCart,
+  Clock,
+  BarChart3
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
 
-const iconMap: { [key: string]: React.ComponentType<any> } = {
-    TrendingUp,
-    AlertTriangle,
-    DollarSign,
-    Package,
-    Activity,
-    Box,
-    Truck,
-    CircleSlash,
-    Archive,
-    ShoppingCart,
-    default: Package,
-};
-
-type Metric = {
-  title: string;
-  value: string;
-  change?: string;
-  trend?: "up" | "down" | "stable";
-  icon: string;
-  color?: string;
-};
-
-interface InventoryMetricsGridProps {
-  projectId: string;
+interface InventoryMetric {
+  name: string;
+  value: number;
+  change: number;
+  unit: string;
+  status: 'good' | 'warning' | 'critical';
+  target?: number;
 }
 
-export const InventoryMetricsGrid: React.FC<InventoryMetricsGridProps> = ({ projectId }) => {
-  const { user } = useAuth();
-  const [metrics, setMetrics] = useState<Metric[]>([]);
-  const [loading, setLoading] = useState(true);
+interface InventoryMetricsGridProps {
+  metrics?: InventoryMetric[];
+}
 
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      if (!user || !projectId) return;
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("inventory_metrics")
-          .select("title, value, change, trend, icon, color")
-          .eq("project_id", projectId);
+export const InventoryMetricsGrid = ({ metrics = [] }: InventoryMetricsGridProps) => {
+  const defaultMetrics: InventoryMetric[] = [
+    {
+      name: "Inventory Turnover",
+      value: 8.5,
+      change: 12.5,
+      unit: "times/year",
+      status: 'good',
+      target: 8.0
+    },
+    {
+      name: "Stock-out Rate",
+      value: 2.3,
+      change: -5.2,
+      unit: "%",
+      status: 'good',
+      target: 3.0
+    },
+    {
+      name: "Carrying Cost",
+      value: 18.5,
+      change: -8.1,
+      unit: "%",
+      status: 'warning',
+      target: 15.0
+    },
+    {
+      name: "Order Frequency",
+      value: 24,
+      change: 3.7,
+      unit: "orders/month",
+      status: 'good',
+      target: 20
+    },
+    {
+      name: "Lead Time",
+      value: 7.2,
+      change: -12.8,
+      unit: "days",
+      status: 'good',
+      target: 8.0
+    },
+    {
+      name: "Safety Stock Level",
+      value: 85,
+      change: -2.1,
+      unit: "%",
+      status: 'warning',
+      target: 90
+    }
+  ];
 
-        if (error) throw error;
-        setMetrics(data as Metric[]);
-      } catch (error) {
-        console.error("Error fetching inventory metrics:", error);
-        // Optionally set some default or error state here
-      } finally {
-        setLoading(false);
-      }
-    };
+  const displayMetrics = metrics.length > 0 ? metrics : defaultMetrics;
 
-    fetchMetrics();
-  }, [projectId, user]);
-  
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[...Array(4)].map((_, index) => (
-          <Card key={index} className="p-6">
-            <div className="h-8 bg-gray-200 rounded-md w-3/4 animate-pulse mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded-md w-1/2 animate-pulse"></div>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'good': return 'text-green-600';
+      case 'warning': return 'text-yellow-600';
+      case 'critical': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  };
 
-  if (metrics.length === 0) {
-    return (
-      <div className="text-center py-8 col-span-full">
-        <p>No inventory metrics found for this project.</p>
-      </div>
-    );
-  }
+  const getStatusIcon = (name: string) => {
+    switch (name.toLowerCase()) {
+      case 'inventory turnover': return <BarChart3 className="h-5 w-5" />;
+      case 'stock-out rate': return <AlertCircle className="h-5 w-5" />;
+      case 'carrying cost': return <DollarSign className="h-5 w-5" />;
+      case 'order frequency': return <ShoppingCart className="h-5 w-5" />;
+      case 'lead time': return <Clock className="h-5 w-5" />;
+      case 'safety stock level': return <FileArchive className="h-5 w-5" />;
+      default: return <Package className="h-5 w-5" />;
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {metrics.map((metric, index) => {
-        const Icon = iconMap[metric.icon] || iconMap.default;
-        const trendColor = metric.trend === 'up' ? 'green' : metric.trend === 'down' ? 'red' : 'gray';
-        
-        return (
-          <Card key={index}>
-            <CardContent className="flex items-center p-6">
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-lg bg-${trendColor}-100 text-${trendColor}-600`}>
-                  <Icon className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{metric.title}</p>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-2xl font-bold">{metric.value}</p>
-                    {metric.change && (
-                       <Badge 
-                         className={`bg-${trendColor}-100 text-${trendColor}-800 hover:bg-${trendColor}-200`}
-                       >
-                         {metric.trend === 'up' ? '↑' : '↓'} {metric.change}
-                       </Badge>
-                    )}
-                  </div>
-                </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {displayMetrics.map((metric, index) => (
+        <Card key={index} className="hover:shadow-lg transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
+            <div className={getStatusColor(metric.status)}>
+              {getStatusIcon(metric.name)}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl font-bold">
+                {metric.value} {metric.unit}
               </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+              <div className="flex items-center space-x-1">
+                {metric.change > 0 ? (
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-red-600" />
+                )}
+                <span className={`text-sm font-medium ${metric.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(metric.change)}%
+                </span>
+              </div>
+            </div>
+            
+            {metric.target && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Target: {metric.target} {metric.unit}</span>
+                  <Badge variant={metric.status === 'good' ? 'default' : metric.status === 'warning' ? 'secondary' : 'destructive'}>
+                    {metric.status}
+                  </Badge>
+                </div>
+                <Progress 
+                  value={Math.min((metric.value / metric.target) * 100, 100)} 
+                  className="h-2"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };
