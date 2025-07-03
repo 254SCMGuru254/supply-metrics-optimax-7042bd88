@@ -9,6 +9,106 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      cost_model_inputs: {
+        Row: {
+          created_at: string
+          id: string
+          inputs: Json
+          model_type: string
+          project_id: string
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inputs?: Json
+          model_type: string
+          project_id: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inputs?: Json
+          model_type?: string
+          project_id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_model_inputs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cost_model_results: {
+        Row: {
+          cost_savings_percentage: number | null
+          created_at: string
+          execution_time_ms: number | null
+          formula: string | null
+          id: string
+          inputs: Json
+          model_type: string
+          performance_metrics: Json | null
+          project_id: string
+          recommendations: string[] | null
+          results: Json
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cost_savings_percentage?: number | null
+          created_at?: string
+          execution_time_ms?: number | null
+          formula?: string | null
+          id?: string
+          inputs?: Json
+          model_type: string
+          performance_metrics?: Json | null
+          project_id: string
+          recommendations?: string[] | null
+          results?: Json
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cost_savings_percentage?: number | null
+          created_at?: string
+          execution_time_ms?: number | null
+          formula?: string | null
+          id?: string
+          inputs?: Json
+          model_type?: string
+          performance_metrics?: Json | null
+          project_id?: string
+          recommendations?: string[] | null
+          results?: Json
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_model_results_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_imports: {
         Row: {
           created_at: string | null
@@ -701,6 +801,62 @@ export type Database = {
         }
         Relationships: []
       }
+      route_constraints: {
+        Row: {
+          cost: number | null
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          notes: string | null
+          project_id: string
+          restrictions: string[] | null
+          time_delay: number | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          notes?: string | null
+          project_id: string
+          restrictions?: string[] | null
+          time_delay?: number | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          notes?: string | null
+          project_id?: string
+          restrictions?: string[] | null
+          time_delay?: number | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_constraints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       route_event_logs: {
         Row: {
           event_data: Json | null
@@ -1189,6 +1345,151 @@ export type Database = {
           vehicle_id?: string
         }
         Relationships: []
+      }
+      vehicles: {
+        Row: {
+          capacity: number
+          capacity_unit: string
+          created_at: string
+          driver_cost_per_day: number | null
+          fuel_consumption: number | null
+          height_limit: number | null
+          id: string
+          maintenance_cost: number | null
+          max_speed: number | null
+          misc_expenses: number | null
+          name: string
+          ownership: string
+          project_id: string
+          type: string
+          updated_at: string
+          user_id: string
+          weight_limit: number | null
+          width_limit: number | null
+        }
+        Insert: {
+          capacity?: number
+          capacity_unit?: string
+          created_at?: string
+          driver_cost_per_day?: number | null
+          fuel_consumption?: number | null
+          height_limit?: number | null
+          id?: string
+          maintenance_cost?: number | null
+          max_speed?: number | null
+          misc_expenses?: number | null
+          name: string
+          ownership?: string
+          project_id: string
+          type?: string
+          updated_at?: string
+          user_id: string
+          weight_limit?: number | null
+          width_limit?: number | null
+        }
+        Update: {
+          capacity?: number
+          capacity_unit?: string
+          created_at?: string
+          driver_cost_per_day?: number | null
+          fuel_consumption?: number | null
+          height_limit?: number | null
+          id?: string
+          maintenance_cost?: number | null
+          max_speed?: number | null
+          misc_expenses?: number | null
+          name?: string
+          ownership?: string
+          project_id?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          weight_limit?: number | null
+          width_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      warehouses: {
+        Row: {
+          address: string | null
+          automation_level: string | null
+          cold_chain: boolean | null
+          cold_chain_temperature: number | null
+          created_at: string
+          functions: string[] | null
+          handling_cost_per_unit: number | null
+          id: string
+          labor_cost: number | null
+          latitude: number
+          longitude: number
+          monthly_cost: number | null
+          name: string
+          ownership: string
+          project_id: string
+          size: number | null
+          size_unit: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          automation_level?: string | null
+          cold_chain?: boolean | null
+          cold_chain_temperature?: number | null
+          created_at?: string
+          functions?: string[] | null
+          handling_cost_per_unit?: number | null
+          id?: string
+          labor_cost?: number | null
+          latitude: number
+          longitude: number
+          monthly_cost?: number | null
+          name: string
+          ownership?: string
+          project_id: string
+          size?: number | null
+          size_unit?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          automation_level?: string | null
+          cold_chain?: boolean | null
+          cold_chain_temperature?: number | null
+          created_at?: string
+          functions?: string[] | null
+          handling_cost_per_unit?: number | null
+          id?: string
+          labor_cost?: number | null
+          latitude?: number
+          longitude?: number
+          monthly_cost?: number | null
+          name?: string
+          ownership?: string
+          project_id?: string
+          size?: number | null
+          size_unit?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warehouses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -1,201 +1,222 @@
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp, TrendingDown, Package, Truck, DollarSign, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
+import { TrendingUp, AlertTriangle, CheckCircle, Users, Zap, Target, Database, Activity } from "lucide-react";
 
-const AdvancedAnalyticsDashboard = ({ projectId }: { projectId: string }) => {
-  const [selectedTimeRange, setSelectedTimeRange] = useState("30d");
-  const [isLoading, setIsLoading] = useState(false);
+// Mock data for analytics
+const modelAccuracyData = [
+  { model: "Center of Gravity", accuracy: 94, usage: 45, impact: "High" },
+  { model: "Route Optimization", accuracy: 89, usage: 78, impact: "Very High" },
+  { model: "Inventory Management", accuracy: 92, usage: 56, impact: "High" },
+  { model: "Network Flow", accuracy: 87, usage: 34, impact: "Medium" },
+  { model: "Facility Location", accuracy: 91, usage: 29, impact: "High" },
+];
 
-  // Sample analytics data (in real app, this would come from Supabase)
-  const performanceMetrics = [
-    { name: "Cost Reduction", value: 23.5, trend: "up", icon: DollarSign, color: "text-green-600" },
-    { name: "Delivery Time", value: -15.2, trend: "down", icon: Clock, color: "text-blue-600" },
-    { name: "Inventory Turnover", value: 18.7, trend: "up", icon: Package, color: "text-purple-600" },
-    { name: "Route Efficiency", value: 31.4, trend: "up", icon: Truck, color: "text-orange-600" }
-  ];
+const performanceMetrics = [
+  { name: "Cost Reduction", value: 23, target: 25, status: "on-track" },
+  { name: "Service Level", value: 97, target: 95, status: "exceeding" },
+  { name: "Processing Speed", value: 87, target: 90, status: "needs-attention" },
+  { name: "User Satisfaction", value: 92, target: 88, status: "exceeding" },
+];
 
-  const optimizationHistory = [
-    { date: "2024-01", baseline: 100, optimized: 88, savings: 12 },
-    { date: "2024-02", baseline: 100, optimized: 85, savings: 15 },
-    { date: "2024-03", baseline: 100, optimized: 82, savings: 18 },
-    { date: "2024-04", baseline: 100, optimized: 78, savings: 22 },
-    { date: "2024-05", baseline: 100, optimized: 75, savings: 25 },
-    { date: "2024-06", baseline: 100, optimized: 73, savings: 27 }
-  ];
+const usageTrends = [
+  { month: "Jan", users: 120, optimizations: 450, savings: 12000 },
+  { month: "Feb", users: 145, optimizations: 523, savings: 15600 },
+  { month: "Mar", users: 178, optimizations: 612, savings: 18900 },
+  { month: "Apr", users: 203, optimizations: 734, savings: 22400 },
+  { month: "May", users: 235, optimizations: 856, savings: 26800 },
+  { month: "Jun", users: 267, optimizations: 978, savings: 31200 },
+];
 
-  const modelPerformance = [
-    { model: "Center of Gravity", accuracy: 94.2, usage: 65, impact: "High" },
-    { model: "Route Optimization", accuracy: 97.8, usage: 89, impact: "Very High" },
-    { model: "Inventory Management", accuracy: 91.5, usage: 72, impact: "High" },
-    { model: "Network Flow", accuracy: 89.3, usage: 45, impact: "Medium" },
-    { model: "Multi-Echelon", accuracy: 96.1, usage: 38, impact: "Very High" }
-  ];
+const systemHealth = [
+  { component: "Database", status: "healthy", uptime: 99.9, response: 45 },
+  { component: "API Gateway", status: "healthy", uptime: 99.7, response: 120 },
+  { component: "Optimization Engine", status: "warning", uptime: 98.5, response: 340 },
+  { component: "Map Services", status: "healthy", uptime: 99.8, response: 89 },
+];
 
-  const industryComparison = [
-    { metric: "Cost Efficiency", yourValue: 85, industryAvg: 72, kenyaAvg: 68 },
-    { metric: "Delivery Performance", yourValue: 94, industryAvg: 81, kenyaAvg: 76 },
-    { metric: "Inventory Management", yourValue: 88, industryAvg: 75, kenyaAvg: 71 },
-    { metric: "Sustainability Score", yourValue: 76, industryAvg: 63, kenyaAvg: 58 }
-  ];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
-  const COLORS = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'];
+export const AdvancedAnalyticsDashboard = () => {
+  const [realTimeData, setRealTimeData] = useState({
+    activeUsers: 47,
+    runningOptimizations: 12,
+    totalSavings: 156000,
+    systemLoad: 67
+  });
+
+  useEffect(() => {
+    // Simulate real-time updates
+    const interval = setInterval(() => {
+      setRealTimeData(prev => ({
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 5) - 2,
+        runningOptimizations: Math.max(0, prev.runningOptimizations + Math.floor(Math.random() * 3) - 1),
+        totalSavings: prev.totalSavings + Math.floor(Math.random() * 1000),
+        systemLoad: Math.max(0, Math.min(100, prev.systemLoad + Math.floor(Math.random() * 10) - 5))
+      }));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "healthy": return "text-green-600";
+      case "warning": return "text-yellow-600";
+      case "critical": return "text-red-600";
+      default: return "text-gray-600";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "exceeding": return <TrendingUp className="h-4 w-4 text-green-600" />;
+      case "on-track": return <CheckCircle className="h-4 w-4 text-blue-600" />;
+      case "needs-attention": return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      default: return <Activity className="h-4 w-4 text-gray-600" />;
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Advanced Analytics</h2>
-          <p className="text-gray-600">Comprehensive insights into your supply chain performance</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-            Project: {projectId}
-          </Badge>
-          <select
-            value={selectedTimeRange}
-            onChange={(e) => setSelectedTimeRange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-            <option value="1y">Last year</option>
-          </select>
-        </div>
+    <div className="p-6 space-y-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Advanced Analytics Dashboard</h1>
+        <p className="text-muted-foreground">
+          Real-time insights into system performance, model accuracy, and business impact
+        </p>
       </div>
 
-      {/* Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {performanceMetrics.map((metric) => (
-          <Card key={metric.name} className="shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{metric.name}</p>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <span className="text-2xl font-bold text-gray-900">
-                      {metric.value > 0 ? '+' : ''}{metric.value}%
-                    </span>
-                    {metric.trend === "up" ? (
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-red-500" />
-                    )}
-                  </div>
-                </div>
-                <div className={`w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center ${metric.color}`}>
-                  <metric.icon className="h-6 w-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Real-time Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{realTimeData.activeUsers}</div>
+            <p className="text-xs text-muted-foreground">Live sessions</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Running Optimizations</CardTitle>
+            <Zap className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{realTimeData.runningOptimizations}</div>
+            <p className="text-xs text-muted-foreground">Active processes</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Savings</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${realTimeData.totalSavings.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">System Load</CardTitle>
+            <Database className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{realTimeData.systemLoad}%</div>
+            <Progress value={realTimeData.systemLoad} className="mt-2" />
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Analytics Tabs */}
-      <Tabs defaultValue="trends" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="trends">Optimization Trends</TabsTrigger>
+      <Tabs defaultValue="models" className="space-y-6">
+        <TabsList>
           <TabsTrigger value="models">Model Performance</TabsTrigger>
-          <TabsTrigger value="comparison">Industry Comparison</TabsTrigger>
-          <TabsTrigger value="insights">AI Insights</TabsTrigger>
+          <TabsTrigger value="business">Business Impact</TabsTrigger>
+          <TabsTrigger value="system">System Health</TabsTrigger>
+          <TabsTrigger value="trends">Usage Trends</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="trends" className="space-y-6">
-          <Card className="shadow-lg">
+        <TabsContent value="models" className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Cost Savings Over Time</CardTitle>
+              <CardTitle>Model Accuracy & Usage</CardTitle>
+              <CardDescription>Performance metrics for optimization models</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={optimizationHistory}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={modelAccuracyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis dataKey="model" height={60} textAnchor="end" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="baseline" stroke="#8884d8" />
-                  <Line type="monotone" dataKey="optimized" stroke="#82ca9d" />
-                </LineChart>
+                  <Bar dataKey="accuracy" fill="#8884d8" name="Accuracy %" />
+                  <Bar dataKey="usage" fill="#82ca9d" name="Usage Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Model Usage Distribution</CardTitle>
+              <CardDescription>Relative usage of different optimization models</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={modelAccuracyData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="usage"
+                    label={({ model, usage }) => `${model}: ${usage}`}
+                  >
+                    {modelAccuracyData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="models" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Model Accuracy Scores</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={modelPerformance}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="model" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="accuracy" fill="#3B82F6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Model Usage Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={modelPerformance}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="usage"
-                      label={({ model, usage }) => `${model}: ${usage}%`}
-                    >
-                      {modelPerformance.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="shadow-lg">
+        <TabsContent value="business" className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Model Performance Summary</CardTitle>
+              <CardTitle>Performance Metrics</CardTitle>
+              <CardDescription>Key business performance indicators</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {modelPerformance.map((model) => (
-                  <div key={model.model} className="flex items-center justify-between p-4 border rounded-lg">
+                {performanceMetrics.map((metric) => (
+                  <div key={metric.name} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      {getStatusIcon(metric.status)}
                       <div>
-                        <div className="font-medium">{model.model}</div>
-                        <div className="text-sm text-gray-500">Accuracy: {model.accuracy}%</div>
+                        <h4 className="font-medium">{metric.name}</h4>
+                        <p className="text-sm text-muted-foreground">Target: {metric.target}%</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge 
-                        variant={model.impact === "Very High" ? "default" : model.impact === "High" ? "secondary" : "outline"}
-                      >
-                        {model.impact} Impact
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">{metric.value}%</div>
+                      <Badge variant={metric.status === "exceeding" ? "default" : metric.status === "on-track" ? "secondary" : "destructive"}>
+                        {metric.status.replace("-", " ")}
                       </Badge>
-                      <span className="text-sm text-gray-500">{model.usage}% usage</span>
                     </div>
                   </div>
                 ))}
@@ -204,98 +225,70 @@ const AdvancedAnalyticsDashboard = ({ projectId }: { projectId: string }) => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="comparison" className="space-y-6">
-          <Card className="shadow-lg">
+        <TabsContent value="system" className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Performance vs Industry Benchmarks</CardTitle>
-              <p className="text-gray-600">Compare your performance against Kenya and global industry averages</p>
+              <CardTitle>System Health</CardTitle>
+              <CardDescription>Real-time system component monitoring</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={industryComparison}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="metric" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="yourValue" fill="#3B82F6" name="Your Performance" />
-                  <Bar dataKey="industryAvg" fill="#8B5CF6" name="Global Industry Average" />
-                  <Bar dataKey="kenyaAvg" fill="#10B981" name="Kenya Industry Average" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="space-y-4">
+                {systemHealth.map((component) => (
+                  <div key={component.component} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${component.status === "healthy" ? "bg-green-500" : component.status === "warning" ? "bg-yellow-500" : "bg-red-500"}`} />
+                      <div>
+                        <h4 className="font-medium">{component.component}</h4>
+                        <p className="text-sm text-muted-foreground">Response: {component.response}ms</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-semibold">{component.uptime}%</div>
+                      <p className="text-sm text-muted-foreground">Uptime</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="insights" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-lg border-green-200 bg-green-50">
-              <CardHeader>
-                <CardTitle className="flex items-center text-green-800">
-                  <CheckCircle className="mr-2 h-5 w-5" />
-                  Key Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-sm text-green-700">
-                  • 27% reduction in total supply chain costs
-                </div>
-                <div className="text-sm text-green-700">
-                  • 94% improvement in delivery performance
-                </div>
-                <div className="text-sm text-green-700">
-                  • 15% reduction in inventory holding costs
-                </div>
-                <div className="text-sm text-green-700">
-                  • 31% increase in route optimization efficiency
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg border-blue-200 bg-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center text-blue-800">
-                  <TrendingUp className="mr-2 h-5 w-5" />
-                  AI Recommendations
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-sm text-blue-700">
-                  • Consider implementing multi-echelon inventory optimization
-                </div>
-                <div className="text-sm text-blue-700">
-                  • Explore Kenya-specific supplier diversification options
-                </div>
-                <div className="text-sm text-blue-700">
-                  • Optimize for seasonal demand patterns in tea sector
-                </div>
-                <div className="text-sm text-blue-700">
-                  • Implement predictive maintenance for fleet management
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="shadow-lg">
+        <TabsContent value="trends" className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Executive Summary</CardTitle>
+              <CardTitle>Usage Trends</CardTitle>
+              <CardDescription>Monthly growth and usage patterns</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="prose max-w-none text-gray-700">
-                <p>
-                  Your supply chain optimization initiative has delivered exceptional results over the past 6 months. 
-                  With a 27% reduction in total costs and 94% improvement in delivery performance, you're outperforming 
-                  both Kenya and global industry benchmarks across all key metrics.
-                </p>
-                <p>
-                  The Route Optimization model has been your most effective tool, with 97.8% accuracy and highest usage rate. 
-                  Consider expanding its application to additional distribution centers for maximum impact.
-                </p>
-                <p>
-                  Recommended next steps include implementing multi-echelon inventory optimization and exploring 
-                  sustainability initiatives to maintain competitive advantage in the Kenya market.
-                </p>
-              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={usageTrends}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="users" stroke="#8884d8" name="Active Users" />
+                  <Line type="monotone" dataKey="optimizations" stroke="#82ca9d" name="Optimizations" />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Cost Savings Trend</CardTitle>
+              <CardDescription>Monthly cost savings achieved</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={usageTrends}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, "Savings"]} />
+                  <Bar dataKey="savings" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
@@ -303,5 +296,3 @@ const AdvancedAnalyticsDashboard = ({ projectId }: { projectId: string }) => {
     </div>
   );
 };
-
-export default AdvancedAnalyticsDashboard;

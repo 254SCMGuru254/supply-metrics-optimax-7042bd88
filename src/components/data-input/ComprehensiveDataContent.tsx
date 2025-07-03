@@ -1,51 +1,27 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
+import React, { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Plus, Trash2, Upload, Download, Truck, Building, MapPin, Settings } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Trash2 } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 
-// DB types
-export type VehicleData = {
-  id: string;
-  project_id: string;
+interface VehicleData {
+  id?: string;
   name: string;
   type: string;
-  ownership: "owned" | "outsourced";
+  ownership: string;
   capacity: number;
-  capacity_unit: "tons" | "kg" | "pallets" | "cbm";
+  capacity_unit: string;
   fuel_consumption: number;
   maintenance_cost: number;
   driver_cost_per_day: number;
@@ -54,808 +30,873 @@ export type VehicleData = {
   height_limit: number;
   width_limit: number;
   misc_expenses: number;
-};
+}
 
-export type WarehouseData = {
-  id: string;
-  project_id: string;
+interface WarehouseData {
+  id?: string;
   name: string;
   latitude: number;
   longitude: number;
   address: string;
-  ownership: "owned" | "outsourced";
+  ownership: string;
   size: number;
-  size_unit: "sqm" | "sqft";
+  size_unit: string;
   functions: string[];
-  automation_level: "automated" | "semi-automated" | "manual";
+  automation_level: string;
   cold_chain: boolean;
-  cold_chain_temperature?: number;
+  cold_chain_temperature: number;
   monthly_cost: number;
   handling_cost_per_unit: number;
   labor_cost: number;
-};
+}
 
-export type RouteConstraintData = {
-  id: string;
-  project_id: string;
+interface RouteConstraintData {
+  id?: string;
   name: string;
-  type: "checkpoint" | "toll" | "weight-restriction" | "time-window" | "environmental-zone";
-  latitude?: number;
-  longitude?: number;
+  type: string;
+  latitude: number;
+  longitude: number;
   cost: number;
   time_delay: number;
   restrictions: string[];
   notes: string;
-};
+}
 
 interface ComprehensiveDataContentProps {
   projectId: string;
 }
 
 export const ComprehensiveDataContent = ({ projectId }: ComprehensiveDataContentProps) => {
-  const [activeTab, setActiveTab] = useState("vehicles");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Local state for forms (will be removed)
-  const [vehicles, setVehicles] = useState<VehicleData[]>([]);
-  const [warehouses, setWarehouses] = useState<WarehouseData[]>([]);
-  const [routeConstraints, setRouteConstraints] = useState<RouteConstraintData[]>([]);
+  // Vehicle form state
+  const [vehicleForm, setVehicleForm] = useState<VehicleData>({
+    name: "",
+    type: "truck",
+    ownership: "owned",
+    capacity: 0,
+    capacity_unit: "tons",
+    fuel_consumption: 0,
+    maintenance_cost: 0,
+    driver_cost_per_day: 0,
+    max_speed: 80,
+    weight_limit: 0,
+    height_limit: 0,
+    width_limit: 0,
+    misc_expenses: 0,
+  });
 
-  // Fetching data
-  const { data: vehiclesData, isLoading: isLoadingVehicles } = useQuery<VehicleData[]>({
+  // Warehouse form state
+  const [warehouseForm, setWarehouseForm] = useState<WarehouseData>({
+    name: "",
+    latitude: 0,
+    longitude: 0,
+    address: "",
+    ownership: "owned",
+    size: 0,
+    size_unit: "sqm",
+    functions: [],
+    automation_level: "manual",
+    cold_chain: false,
+    cold_chain_temperature: 0,
+    monthly_cost: 0,
+    handling_cost_per_unit: 0,
+    labor_cost: 0,
+  });
+
+  // Route constraint form state
+  const [routeConstraintForm, setRouteConstraintForm] = useState<RouteConstraintData>({
+    name: "",
+    type: "checkpoint",
+    latitude: 0,
+    longitude: 0,
+    cost: 0,
+    time_delay: 0,
+    restrictions: [],
+    notes: "",
+  });
+
+  // Fetch vehicles
+  const { data: vehicles, isLoading: vehiclesLoading } = useQuery({
     queryKey: ['vehicles', projectId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('vehicles').select('*').eq('project_id', projectId);
+      const { data, error } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('project_id', projectId);
       if (error) throw new Error(error.message);
       return data;
     },
     enabled: !!projectId,
   });
 
-  const { data: warehousesData, isLoading: isLoadingWarehouses } = useQuery<WarehouseData[]>({
+  // Fetch warehouses
+  const { data: warehouses, isLoading: warehousesLoading } = useQuery({
     queryKey: ['warehouses', projectId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('warehouses').select('*').eq('project_id', projectId);
+      const { data, error } = await supabase
+        .from('warehouses')
+        .select('*')
+        .eq('project_id', projectId);
       if (error) throw new Error(error.message);
       return data;
     },
     enabled: !!projectId,
   });
 
-  const { data: routeConstraintsData, isLoading: isLoadingRouteConstraints } = useQuery<RouteConstraintData[]>({
-    queryKey: ['route_constraints', projectId],
+  // Fetch route constraints
+  const { data: routeConstraints, isLoading: routeConstraintsLoading } = useQuery({
+    queryKey: ['routeConstraints', projectId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('route_constraints').select('*').eq('project_id', projectId);
+      const { data, error } = await supabase
+        .from('route_constraints')
+        .select('*')
+        .eq('project_id', projectId);
       if (error) throw new Error(error.message);
       return data;
     },
     enabled: !!projectId,
   });
 
-  // Mutations for adding data
+  // Vehicle mutations
   const addVehicleMutation = useMutation({
-    mutationFn: async (newVehicle: Omit<VehicleData, 'id'>) => {
-      const { data, error } = await supabase.from('vehicles').insert(newVehicle).select();
+    mutationFn: async (vehicleData: Omit<VehicleData, 'id'>) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase
+        .from('vehicles')
+        .insert({
+          ...vehicleData,
+          project_id: projectId,
+          user_id: user.id,
+        })
+        .select();
+      
       if (error) throw new Error(error.message);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles', projectId] });
-      toast({ title: "Success", description: "Vehicle added." });
+      toast({ title: "Success", description: "Vehicle added successfully." });
+      setVehicleForm({
+        name: "",
+        type: "truck",
+        ownership: "owned",
+        capacity: 0,
+        capacity_unit: "tons",
+        fuel_consumption: 0,
+        maintenance_cost: 0,
+        driver_cost_per_day: 0,
+        max_speed: 80,
+        weight_limit: 0,
+        height_limit: 0,
+        width_limit: 0,
+        misc_expenses: 0,
+      });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
+  // Warehouse mutations
   const addWarehouseMutation = useMutation({
-    mutationFn: async (newWarehouse: Omit<WarehouseData, 'id'>) => {
-      const { data, error } = await supabase.from('warehouses').insert(newWarehouse).select();
+    mutationFn: async (warehouseData: Omit<WarehouseData, 'id'>) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase
+        .from('warehouses')
+        .insert({
+          ...warehouseData,
+          project_id: projectId,
+          user_id: user.id,
+        })
+        .select();
+      
       if (error) throw new Error(error.message);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['warehouses', projectId] });
-      toast({ title: "Success", description: "Warehouse added." });
+      toast({ title: "Success", description: "Warehouse added successfully." });
+      setWarehouseForm({
+        name: "",
+        latitude: 0,
+        longitude: 0,
+        address: "",
+        ownership: "owned",
+        size: 0,
+        size_unit: "sqm",
+        functions: [],
+        automation_level: "manual",
+        cold_chain: false,
+        cold_chain_temperature: 0,
+        monthly_cost: 0,
+        handling_cost_per_unit: 0,
+        labor_cost: 0,
+      });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
+  // Route constraint mutations
   const addRouteConstraintMutation = useMutation({
-    mutationFn: async (newConstraint: Omit<RouteConstraintData, 'id'>) => {
-      const { data, error } = await supabase.from('route_constraints').insert(newConstraint).select();
+    mutationFn: async (constraintData: Omit<RouteConstraintData, 'id'>) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase
+        .from('route_constraints')
+        .insert({
+          ...constraintData,
+          project_id: projectId,
+          user_id: user.id,
+        })
+        .select();
+      
       if (error) throw new Error(error.message);
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['route_constraints', projectId] });
-      toast({ title: "Success", description: "Route constraint added." });
+      queryClient.invalidateQueries({ queryKey: ['routeConstraints', projectId] });
+      toast({ title: "Success", description: "Route constraint added successfully." });
+      setRouteConstraintForm({
+        name: "",
+        type: "checkpoint",
+        latitude: 0,
+        longitude: 0,
+        cost: 0,
+        time_delay: 0,
+        restrictions: [],
+        notes: "",
+      });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
-  
-    // Delete Mutations
+
+  // Delete mutations
   const deleteVehicleMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('vehicles').delete().eq('id', id);
+      const { error } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('id', id);
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles', projectId] });
-      toast({ title: 'Success', description: 'Vehicle deleted.' });
+      toast({ title: "Success", description: "Vehicle deleted successfully." });
     },
-    onError: (error) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
-  // Forms
-  const vehicleForm = useForm<VehicleData>({
-    defaultValues: {
-      id: crypto.randomUUID(),
-      project_id: projectId,
-      name: "",
-      type: "truck",
-      ownership: "owned",
-      capacity: 0,
-      capacity_unit: "tons",
-      fuel_consumption: 0,
-      maintenance_cost: 0,
-      driver_cost_per_day: 0,
-      max_speed: 80,
-      weight_limit: 0,
-      height_limit: 0,
-      width_limit: 0,
-      misc_expenses: 0,
+  const deleteWarehouseMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('warehouses')
+        .delete()
+        .eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warehouses', projectId] });
+      toast({ title: "Success", description: "Warehouse deleted successfully." });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
-  
-  // Submit handlers
-  const handleVehicleSubmit = (data: VehicleData) => {
-    addVehicleMutation.mutate({...data, project_id: projectId});
-    vehicleForm.reset();
+
+  const deleteRouteConstraintMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('route_constraints')
+        .delete()
+        .eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['routeConstraints', projectId] });
+      toast({ title: "Success", description: "Route constraint deleted successfully." });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleVehicleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addVehicleMutation.mutate(vehicleForm);
   };
 
-  // ... (Similar forms and handlers for warehouse and route constraints)
+  const handleWarehouseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addWarehouseMutation.mutate(warehouseForm);
+  };
+
+  const handleRouteConstraintSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addRouteConstraintMutation.mutate(routeConstraintForm);
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Comprehensive Supply Chain Data</CardTitle>
-        <CardDescription>
-          Enter detailed information about your supply chain components.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="vehicles">
-          <TabsList className="mb-6 grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-            <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
-            <TabsTrigger value="warehouses">Warehouses</TabsTrigger>
-            <TabsTrigger value="route-constraints">Route Constraints</TabsTrigger>
-            <TabsTrigger value="existing-data">Existing Data</TabsTrigger>
-          </TabsList>
+    <Card className="p-6">
+      <h2 className="text-xl font-semibold mb-4">Comprehensive Supply Chain Data</h2>
+      <Tabs defaultValue="vehicles">
+        <TabsList className="mb-6">
+          <TabsTrigger value="vehicles">Fleet Management</TabsTrigger>
+          <TabsTrigger value="warehouses">Warehouses</TabsTrigger>
+          <TabsTrigger value="constraints">Route Constraints</TabsTrigger>
+          <TabsTrigger value="import-export">Import/Export</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="vehicles">
-            <form onSubmit={vehicleForm.handleSubmit(handleVehicleSubmit)}>
-              <div className="grid gap-4 py-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Vehicle Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="e.g., Delivery Truck 01"
-                    {...vehicleForm.register("name")}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="type">Vehicle Type</Label>
-                  <Select
-                    onValueChange={(value) => vehicleForm.setValue("type", value)}
-                    defaultValue="truck"
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select vehicle type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="truck">Truck</SelectItem>
-                        <SelectItem value="van">Van</SelectItem>
-                        <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                        <SelectItem value="train">Train</SelectItem>
-                        <SelectItem value="aircraft">Aircraft</SelectItem>
-                        <SelectItem value="ship">Ship</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ownership">Ownership</Label>
-                  <Select
-                    onValueChange={(value: "owned" | "outsourced") => vehicleForm.setValue("ownership", value)}
-                    defaultValue="owned"
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select ownership type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="owned">Owned</SelectItem>
-                        <SelectItem value="outsourced">Outsourced</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="capacity">Capacity</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="capacity"
-                      type="number"
-                      placeholder="0"
-                      {...vehicleForm.register("capacity", { valueAsNumber: true })}
-                    />
-                    <Select
-                      onValueChange={(value: "tons" | "kg" | "pallets" | "cbm") => 
-                        vehicleForm.setValue("capacity_unit", value)
-                      }
-                      defaultValue="tons"
-                    >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue placeholder="Unit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="tons">Tons</SelectItem>
-                          <SelectItem value="kg">KG</SelectItem>
-                          <SelectItem value="pallets">Pallets</SelectItem>
-                          <SelectItem value="cbm">CBM</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fuel_consumption">Fuel Consumption (L/100km)</Label>
-                  <Input
-                    id="fuel_consumption"
-                    type="number"
-                    placeholder="0"
-                    {...vehicleForm.register("fuel_consumption", { valueAsNumber: true })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="maintenance_cost">Monthly Maintenance Cost (KES)</Label>
-                  <Input
-                    id="maintenance_cost"
-                    type="number"
-                    placeholder="0"
-                    {...vehicleForm.register("maintenance_cost", { valueAsNumber: true })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="driver_cost_per_day">Driver Cost per Day (KES)</Label>
-                  <Input
-                    id="driver_cost_per_day"
-                    type="number"
-                    placeholder="0"
-                    {...vehicleForm.register("driver_cost_per_day", { valueAsNumber: true })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="max_speed">Maximum Speed (km/h)</Label>
-                  <Input
-                    id="max_speed"
-                    type="number"
-                    placeholder="80"
-                    {...vehicleForm.register("max_speed", { valueAsNumber: true })}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label>Vehicle Restrictions</Label>
-                  <div className="grid gap-4 mt-2 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="weight_limit">Weight Limit (tons)</Label>
+        <TabsContent value="vehicles" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Add Vehicle Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Truck className="h-5 w-5" />
+                  Add Vehicle
+                </CardTitle>
+                <CardDescription>Configure your fleet vehicles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleVehicleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="vehicle-name">Vehicle Name</Label>
                       <Input
-                        id="weight_limit"
+                        id="vehicle-name"
+                        value={vehicleForm.name}
+                        onChange={(e) => setVehicleForm({ ...vehicleForm, name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vehicle-type">Type</Label>
+                      <Select
+                        value={vehicleForm.type}
+                        onValueChange={(value) => setVehicleForm({ ...vehicleForm, type: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="truck">Truck</SelectItem>
+                          <SelectItem value="van">Van</SelectItem>
+                          <SelectItem value="trailer">Trailer</SelectItem>
+                          <SelectItem value="pickup">Pickup</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="ownership">Ownership</Label>
+                      <Select
+                        value={vehicleForm.ownership}
+                        onValueChange={(value) => setVehicleForm({ ...vehicleForm, ownership: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="owned">Owned</SelectItem>
+                          <SelectItem value="outsourced">Outsourced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="capacity">Capacity</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="capacity"
+                          type="number"
+                          value={vehicleForm.capacity}
+                          onChange={(e) => setVehicleForm({ ...vehicleForm, capacity: parseFloat(e.target.value) || 0 })}
+                        />
+                        <Select
+                          value={vehicleForm.capacity_unit}
+                          onValueChange={(value) => setVehicleForm({ ...vehicleForm, capacity_unit: value })}
+                        >
+                          <SelectTrigger className="w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tons">Tons</SelectItem>
+                            <SelectItem value="kg">Kg</SelectItem>
+                            <SelectItem value="pallets">Pallets</SelectItem>
+                            <SelectItem value="cbm">CBM</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="fuel-consumption">Fuel Consumption (L/100km)</Label>
+                      <Input
+                        id="fuel-consumption"
                         type="number"
-                        placeholder="0"
-                        {...vehicleForm.register("weight_limit", { valueAsNumber: true })}
+                        value={vehicleForm.fuel_consumption}
+                        onChange={(e) => setVehicleForm({ ...vehicleForm, fuel_consumption: parseFloat(e.target.value) || 0 })}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="height_limit">Height Limit (m)</Label>
+                    <div>
+                      <Label htmlFor="maintenance-cost">Maintenance Cost/Month</Label>
                       <Input
-                        id="height_limit"
+                        id="maintenance-cost"
                         type="number"
-                        placeholder="0"
-                        {...vehicleForm.register("height_limit", { valueAsNumber: true })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="width_limit">Width Limit (m)</Label>
-                      <Input
-                        id="width_limit"
-                        type="number"
-                        placeholder="0"
-                        {...vehicleForm.register("width_limit", { valueAsNumber: true })}
+                        value={vehicleForm.maintenance_cost}
+                        onChange={(e) => setVehicleForm({ ...vehicleForm, maintenance_cost: parseFloat(e.target.value) || 0 })}
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="misc_expenses">Miscellaneous Expenses (KES/month)</Label>
-                  <Input
-                    id="misc_expenses"
-                    type="number"
-                    placeholder="0"
-                    {...vehicleForm.register("misc_expenses", { valueAsNumber: true })}
-                  />
-                </div>
-              </div>
+                  <Button type="submit" disabled={addVehicleMutation.isPending} className="w-full">
+                    {addVehicleMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Add Vehicle
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
-              <Button type="submit" disabled={addVehicleMutation.isLoading}>
-                {addVehicleMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Add Vehicle
-              </Button>
-            </form>
-          </TabsContent>
-
-          <TabsContent value="warehouses">
-            <form onSubmit={warehouseForm.handleSubmit(handleWarehouseSubmit)}>
-              <div className="grid gap-4 py-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Warehouse/Facility Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="e.g., Central Distribution Center"
-                    {...warehouseForm.register("name")}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ownership">Ownership</Label>
-                  <Select
-                    onValueChange={(value: "owned" | "outsourced") => warehouseForm.setValue("ownership", value)}
-                    defaultValue="owned"
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select ownership type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="owned">Owned</SelectItem>
-                        <SelectItem value="outsourced">Outsourced/Leased</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label>Location</Label>
-                  <div className="grid gap-4 mt-2 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="latitude">Latitude</Label>
-                      <Input
-                        id="latitude"
-                        type="number"
-                        placeholder="0.0000"
-                        {...warehouseForm.register("latitude", { valueAsNumber: true })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="longitude">Longitude</Label>
-                      <Input
-                        id="longitude"
-                        type="number"
-                        placeholder="0.0000"
-                        {...warehouseForm.register("longitude", { valueAsNumber: true })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="address">Address</Label>
-                      <Input
-                        id="address"
-                        placeholder="Physical address"
-                        {...warehouseForm.register("address")}
-                      />
-                    </div>
+            {/* Vehicles List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Fleet Overview</CardTitle>
+                <CardDescription>Manage your vehicle fleet</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {vehiclesLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="size">Facility Size</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="size"
-                      type="number"
-                      placeholder="0"
-                      {...warehouseForm.register("size", { valueAsNumber: true })}
-                    />
-                    <Select
-                      onValueChange={(value: "sqm" | "sqft") => 
-                        warehouseForm.setValue("size_unit", value)
-                      }
-                      defaultValue="sqm"
-                    >
-                      <SelectTrigger className="w-[100px]">
-                        <SelectValue placeholder="Unit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="sqm">m²</SelectItem>
-                          <SelectItem value="sqft">ft²</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="automation_level">Automation Level</Label>
-                  <Select
-                    onValueChange={(value: "automated" | "semi-automated" | "manual") => 
-                      warehouseForm.setValue("automation_level", value)
-                    }
-                    defaultValue="manual"
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select automation level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="automated">Fully Automated</SelectItem>
-                        <SelectItem value="semi-automated">Semi-Automated</SelectItem>
-                        <SelectItem value="manual">Manual Operations</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label>Warehouse Functions</Label>
-                  <div className="grid gap-2 mt-2 md:grid-cols-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="storage" onCheckedChange={(checked) => {
-                        const functions = warehouseForm.getValues("functions");
-                        if (checked) {
-                          warehouseForm.setValue("functions", [...functions, "storage"]);
-                        } else {
-                          warehouseForm.setValue("functions", functions.filter(f => f !== "storage"));
-                        }
-                      }} />
-                      <Label htmlFor="storage">Storage</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="crossdocking" onCheckedChange={(checked) => {
-                        const functions = warehouseForm.getValues("functions");
-                        if (checked) {
-                          warehouseForm.setValue("functions", [...functions, "cross-docking"]);
-                        } else {
-                          warehouseForm.setValue("functions", functions.filter(f => f !== "cross-docking"));
-                        }
-                      }} />
-                      <Label htmlFor="crossdocking">Cross-Docking</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="transhipment" onCheckedChange={(checked) => {
-                        const functions = warehouseForm.getValues("functions");
-                        if (checked) {
-                          warehouseForm.setValue("functions", [...functions, "transshipment"]);
-                        } else {
-                          warehouseForm.setValue("functions", functions.filter(f => f !== "transshipment"));
-                        }
-                      }} />
-                      <Label htmlFor="transhipment">Transshipment</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="valueAddition" onCheckedChange={(checked) => {
-                        const functions = warehouseForm.getValues("functions");
-                        if (checked) {
-                          warehouseForm.setValue("functions", [...functions, "value-addition"]);
-                        } else {
-                          warehouseForm.setValue("functions", functions.filter(f => f !== "value-addition"));
-                        }
-                      }} />
-                      <Label htmlFor="valueAddition">Value Addition</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="distribution" onCheckedChange={(checked) => {
-                        const functions = warehouseForm.getValues("functions");
-                        if (checked) {
-                          warehouseForm.setValue("functions", [...functions, "distribution"]);
-                        } else {
-                          warehouseForm.setValue("functions", functions.filter(f => f !== "distribution"));
-                        }
-                      }} />
-                      <Label htmlFor="distribution">Distribution</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="customs" onCheckedChange={(checked) => {
-                        const functions = warehouseForm.getValues("functions");
-                        if (checked) {
-                          warehouseForm.setValue("functions", [...functions, "customs"]);
-                        } else {
-                          warehouseForm.setValue("functions", functions.filter(f => f !== "customs"));
-                        }
-                      }} />
-                      <Label htmlFor="customs">Customs Clearance</Label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Switch id="cold_chain" onCheckedChange={(checked) => {
-                      warehouseForm.setValue("cold_chain", checked);
-                    }} />
-                    <Label htmlFor="cold_chain">Cold Chain Facility</Label>
-                  </div>
-                </div>
-
-                {warehouseForm.watch("cold_chain") && (
+                ) : vehicles?.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-4">No vehicles configured</p>
+                ) : (
                   <div className="space-y-2">
-                    <Label htmlFor="cold_chain_temperature">Temperature Range (°C)</Label>
-                    <Input
-                      id="cold_chain_temperature"
-                      type="number"
-                      placeholder="e.g., -18"
-                      {...warehouseForm.register("cold_chain_temperature", { valueAsNumber: true })}
-                    />
+                    {vehicles?.map((vehicle) => (
+                      <div key={vehicle.id} className="flex items-center justify-between p-3 border rounded">
+                        <div>
+                          <h4 className="font-medium">{vehicle.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {vehicle.type} • {vehicle.capacity} {vehicle.capacity_unit} • {vehicle.ownership}
+                          </p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteVehicleMutation.mutate(vehicle.id)}
+                          disabled={deleteVehicleMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-                <div className="space-y-2">
-                  <Label htmlFor="monthly_cost">Monthly Operating Cost (KES)</Label>
-                  <Input
-                    id="monthly_cost"
-                    type="number"
-                    placeholder="0"
-                    {...warehouseForm.register("monthly_cost", { valueAsNumber: true })}
-                  />
-                </div>
+        <TabsContent value="warehouses" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Add Warehouse Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Add Warehouse
+                </CardTitle>
+                <CardDescription>Configure warehouse facilities</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleWarehouseSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="warehouse-name">Warehouse Name</Label>
+                    <Input
+                      id="warehouse-name"
+                      value={warehouseForm.name}
+                      onChange={(e) => setWarehouseForm({ ...warehouseForm, name: e.target.value })}
+                      required
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="handling_cost_per_unit">Handling Cost per Unit (KES)</Label>
-                  <Input
-                    id="handling_cost_per_unit"
-                    type="number"
-                    placeholder="0"
-                    {...warehouseForm.register("handling_cost_per_unit", { valueAsNumber: true })}
-                  />
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="warehouse-lat">Latitude</Label>
+                      <Input
+                        id="warehouse-lat"
+                        type="number"
+                        step="any"
+                        value={warehouseForm.latitude}
+                        onChange={(e) => setWarehouseForm({ ...warehouseForm, latitude: parseFloat(e.target.value) || 0 })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="warehouse-lng">Longitude</Label>
+                      <Input
+                        id="warehouse-lng"
+                        type="number"
+                        step="any"
+                        value={warehouseForm.longitude}
+                        onChange={(e) => setWarehouseForm({ ...warehouseForm, longitude: parseFloat(e.target.value) || 0 })}
+                        required
+                      />
+                    </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="labor_cost">Monthly Labor Cost (KES)</Label>
-                  <Input
-                    id="labor_cost"
-                    type="number"
-                    placeholder="0"
-                    {...warehouseForm.register("labor_cost", { valueAsNumber: true })}
-                  />
-                </div>
-              </div>
+                  <div>
+                    <Label htmlFor="warehouse-address">Address</Label>
+                    <Textarea
+                      id="warehouse-address"
+                      value={warehouseForm.address}
+                      onChange={(e) => setWarehouseForm({ ...warehouseForm, address: e.target.value })}
+                    />
+                  </div>
 
-              <Button type="submit" className="mt-4">
-                Add Warehouse/Facility
-              </Button>
-            </form>
-          </TabsContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="warehouse-ownership">Ownership</Label>
+                      <Select
+                        value={warehouseForm.ownership}
+                        onValueChange={(value) => setWarehouseForm({ ...warehouseForm, ownership: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="owned">Owned</SelectItem>
+                          <SelectItem value="outsourced">Outsourced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="warehouse-size">Size</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="warehouse-size"
+                          type="number"
+                          value={warehouseForm.size}
+                          onChange={(e) => setWarehouseForm({ ...warehouseForm, size: parseFloat(e.target.value) || 0 })}
+                        />
+                        <Select
+                          value={warehouseForm.size_unit}
+                          onValueChange={(value) => setWarehouseForm({ ...warehouseForm, size_unit: value })}
+                        >
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sqm">m²</SelectItem>
+                            <SelectItem value="sqft">ft²</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
 
-          <TabsContent value="route-constraints">
-            <form onSubmit={routeConstraintForm.handleSubmit(handleRouteConstraintSubmit)}>
-              <div className="grid gap-4 py-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Constraint Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="e.g., Nakuru Weigh Bridge"
-                    {...routeConstraintForm.register("name")}
-                  />
-                </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="cold-chain"
+                      checked={warehouseForm.cold_chain}
+                      onCheckedChange={(checked) => setWarehouseForm({ ...warehouseForm, cold_chain: checked as boolean })}
+                    />
+                    <Label htmlFor="cold-chain">Cold Chain Facility</Label>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="type">Constraint Type</Label>
-                  <Select
-                    onValueChange={(value: "checkpoint" | "toll" | "weight-restriction" | "time-window" | "environmental-zone") => 
-                      routeConstraintForm.setValue("type", value)
-                    }
-                    defaultValue="checkpoint"
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select constraint type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="checkpoint">Checkpoint/Weigh Bridge</SelectItem>
+                  <Button type="submit" disabled={addWarehouseMutation.isPending} className="w-full">
+                    {addWarehouseMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Add Warehouse
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Warehouses List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Warehouse Network</CardTitle>
+                <CardDescription>Manage your warehouse facilities</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {warehousesLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : warehouses?.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-4">No warehouses configured</p>
+                ) : (
+                  <div className="space-y-2">
+                    {warehouses?.map((warehouse) => (
+                      <div key={warehouse.id} className="flex items-center justify-between p-3 border rounded">
+                        <div>
+                          <h4 className="font-medium">{warehouse.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {warehouse.size} {warehouse.size_unit} • {warehouse.ownership}
+                            {warehouse.cold_chain && <Badge className="ml-2" variant="secondary">Cold Chain</Badge>}
+                          </p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteWarehouseMutation.mutate(warehouse.id)}
+                          disabled={deleteWarehouseMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="constraints" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Add Route Constraint Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Add Route Constraint
+                </CardTitle>
+                <CardDescription>Configure route restrictions and checkpoints</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleRouteConstraintSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="constraint-name">Constraint Name</Label>
+                    <Input
+                      id="constraint-name"
+                      value={routeConstraintForm.name}
+                      onChange={(e) => setRouteConstraintForm({ ...routeConstraintForm, name: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="constraint-type">Type</Label>
+                    <Select
+                      value={routeConstraintForm.type}
+                      onValueChange={(value) => setRouteConstraintForm({ ...routeConstraintForm, type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="checkpoint">Checkpoint</SelectItem>
                         <SelectItem value="toll">Toll Station</SelectItem>
                         <SelectItem value="weight-restriction">Weight Restriction</SelectItem>
-                        <SelectItem value="time-window">Time Window Restriction</SelectItem>
+                        <SelectItem value="time-window">Time Window</SelectItem>
                         <SelectItem value="environmental-zone">Environmental Zone</SelectItem>
-                      </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="constraint-lat">Latitude</Label>
+                      <Input
+                        id="constraint-lat"
+                        type="number"
+                        step="any"
+                        value={routeConstraintForm.latitude}
+                        onChange={(e) => setRouteConstraintForm({ ...routeConstraintForm, latitude: parseFloat(e.target.value) || 0 })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="constraint-lng">Longitude</Label>
+                      <Input
+                        id="constraint-lng"
+                        type="number"
+                        step="any"
+                        value={routeConstraintForm.longitude}
+                        onChange={(e) => setRouteConstraintForm({ ...routeConstraintForm, longitude: parseFloat(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="constraint-cost">Additional Cost</Label>
+                      <Input
+                        id="constraint-cost"
+                        type="number"
+                        value={routeConstraintForm.cost}
+                        onChange={(e) => setRouteConstraintForm({ ...routeConstraintForm, cost: parseFloat(e.target.value) || 0 })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="constraint-delay">Time Delay (minutes)</Label>
+                      <Input
+                        id="constraint-delay"
+                        type="number"
+                        value={routeConstraintForm.time_delay}
+                        onChange={(e) => setRouteConstraintForm({ ...routeConstraintForm, time_delay: parseFloat(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="constraint-notes">Notes</Label>
+                    <Textarea
+                      id="constraint-notes"
+                      value={routeConstraintForm.notes}
+                      onChange={(e) => setRouteConstraintForm({ ...routeConstraintForm, notes: e.target.value })}
+                    />
+                  </div>
+
+                  <Button type="submit" disabled={addRouteConstraintMutation.isPending} className="w-full">
+                    {addRouteConstraintMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Add Constraint
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Route Constraints List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Route Constraints</CardTitle>
+                <CardDescription>Manage route restrictions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {routeConstraintsLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : routeConstraints?.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-4">No constraints configured</p>
+                ) : (
+                  <div className="space-y-2">
+                    {routeConstraints?.map((constraint) => (
+                      <div key={constraint.id} className="flex items-center justify-between p-3 border rounded">
+                        <div>
+                          <h4 className="font-medium">{constraint.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {constraint.type} • Cost: ${constraint.cost} • Delay: {constraint.time_delay}min
+                          </p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteRouteConstraintMutation.mutate(constraint.id)}
+                          disabled={deleteRouteConstraintMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="import-export" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Import Data
+                </CardTitle>
+                <CardDescription>Import data from CSV/Excel files</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Data Type</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select data type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="vehicles">Vehicles</SelectItem>
+                      <SelectItem value="warehouses">Warehouses</SelectItem>
+                      <SelectItem value="constraints">Route Constraints</SelectItem>
+                      <SelectItem value="demand">Demand Points</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label>File Upload</Label>
+                  <Input type="file" accept=".csv,.xlsx,.xls" />
+                </div>
+                <Button className="w-full">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Import Data
+                </Button>
+              </CardContent>
+            </Card>
 
-                <div className="md:col-span-2">
-                  <Label>Location (if applicable)</Label>
-                  <div className="grid gap-4 mt-2 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="latitudeConstraint">Latitude</Label>
-                      <Input
-                        id="latitudeConstraint"
-                        type="number"
-                        placeholder="0.0000"
-                        onChange={(e) => {
-                          if (!routeConstraintForm.getValues("location")) {
-                            routeConstraintForm.setValue("location", { latitude: 0, longitude: 0 });
-                          }
-                          routeConstraintForm.setValue("location.latitude", parseFloat(e.target.value));
-                        }}
-                      />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5" />
+                  Export Data
+                </CardTitle>
+                <CardDescription>Export data to various formats</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Export Format</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="csv">CSV</SelectItem>
+                      <SelectItem value="excel">Excel</SelectItem>
+                      <SelectItem value="json">JSON</SelectItem>
+                      <SelectItem value="pdf">PDF Report</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Data Selection</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="export-vehicles" />
+                      <Label htmlFor="export-vehicles">Vehicles</Label>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="longitudeConstraint">Longitude</Label>
-                      <Input
-                        id="longitudeConstraint"
-                        type="number"
-                        placeholder="0.0000"
-                        onChange={(e) => {
-                          if (!routeConstraintForm.getValues("location")) {
-                            routeConstraintForm.setValue("location", { latitude: 0, longitude: 0 });
-                          }
-                          routeConstraintForm.setValue("location.longitude", parseFloat(e.target.value));
-                        }}
-                      />
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="export-warehouses" />
+                      <Label htmlFor="export-warehouses">Warehouses</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="export-constraints" />
+                      <Label htmlFor="export-constraints">Route Constraints</Label>
                     </div>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cost">Cost (KES)</Label>
-                  <Input
-                    id="cost"
-                    type="number"
-                    placeholder="0"
-                    {...routeConstraintForm.register("cost", { valueAsNumber: true })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="time_delay">Time Delay (minutes)</Label>
-                  <Input
-                    id="time_delay"
-                    type="number"
-                    placeholder="0"
-                    {...routeConstraintForm.register("time_delay", { valueAsNumber: true })}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label>Specific Restrictions</Label>
-                  <div className="grid gap-2 mt-2 md:grid-cols-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="weightRestriction" onCheckedChange={(checked) => {
-                        const restrictions = routeConstraintForm.getValues("restrictions");
-                        if (checked) {
-                          routeConstraintForm.setValue("restrictions", [...restrictions, "weight"]);
-                        } else {
-                          routeConstraintForm.setValue("restrictions", restrictions.filter(r => r !== "weight"));
-                        }
-                      }} />
-                      <Label htmlFor="weightRestriction">Weight Restriction</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="heightRestriction" onCheckedChange={(checked) => {
-                        const restrictions = routeConstraintForm.getValues("restrictions");
-                        if (checked) {
-                          routeConstraintForm.setValue("restrictions", [...restrictions, "height"]);
-                        } else {
-                          routeConstraintForm.setValue("restrictions", restrictions.filter(r => r !== "height"));
-                        }
-                      }} />
-                      <Label htmlFor="heightRestriction">Height Restriction</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="timeRestriction" onCheckedChange={(checked) => {
-                        const restrictions = routeConstraintForm.getValues("restrictions");
-                        if (checked) {
-                          routeConstraintForm.setValue("restrictions", [...restrictions, "time"]);
-                        } else {
-                          routeConstraintForm.setValue("restrictions", restrictions.filter(r => r !== "time"));
-                        }
-                      }} />
-                      <Label htmlFor="timeRestriction">Time Restriction</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="vehicleTypeRestriction" onCheckedChange={(checked) => {
-                        const restrictions = routeConstraintForm.getValues("restrictions");
-                        if (checked) {
-                          routeConstraintForm.setValue("restrictions", [...restrictions, "vehicle-type"]);
-                        } else {
-                          routeConstraintForm.setValue("restrictions", restrictions.filter(r => r !== "vehicle-type"));
-                        }
-                      }} />
-                      <Label htmlFor="vehicleTypeRestriction">Vehicle Type Restriction</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="goodsTypeRestriction" onCheckedChange={(checked) => {
-                        const restrictions = routeConstraintForm.getValues("restrictions");
-                        if (checked) {
-                          routeConstraintForm.setValue("restrictions", [...restrictions, "goods-type"]);
-                        } else {
-                          routeConstraintForm.setValue("restrictions", restrictions.filter(r => r !== "goods-type"));
-                        }
-                      }} />
-                      <Label htmlFor="goodsTypeRestriction">Goods Type Restriction</Label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Input
-                    id="notes"
-                    placeholder="Additional details about this constraint"
-                    {...routeConstraintForm.register("notes")}
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="mt-4">
-                Add Route Constraint
-              </Button>
-            </form>
-          </TabsContent>
-
-          <TabsContent value="existing-data" className="space-y-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Existing Vehicles</h3>
-              {isLoadingVehicles ? <Loader2 className="animate-spin" /> : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Capacity</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {vehiclesData?.map(v => (
-                      <TableRow key={v.id}>
-                        <TableCell>{v.name}</TableCell>
-                        <TableCell>{v.type}</TableCell>
-                        <TableCell>{v.capacity} {v.capacity_unit}</TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="icon" onClick={() => deleteVehicleMutation.mutate(v.id)} disabled={deleteVehicleMutation.isLoading}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
-            
-            {/* Tables for warehouses and route constraints */}
-
-          </TabsContent>
-        </Tabs>
-      </CardContent>
+                <Button className="w-full">
+                  <Download className="mr-2 h-4 w-4" />
+                  Export Data
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </Card>
   );
 };
