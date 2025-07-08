@@ -1,5 +1,5 @@
 
-export type NodeType = 'factory' | 'distribution' | 'supplier' | 'customer' | 'retail' | 'facility' | 'demand' | 'airport' | 'port' | 'warehouse';
+export type NodeType = 'factory' | 'distribution' | 'supplier' | 'customer' | 'retail' | 'facility' | 'demand' | 'airport' | 'port' | 'warehouse' | 'railhub';
 export type OwnershipType = 'owned' | 'leased' | 'outsourced' | 'proposed' | 'hired';
 
 export interface Node {
@@ -35,6 +35,7 @@ export interface Route {
   mode?: string;
   transitTime?: number;
   type?: string;
+  color?: string;
 }
 
 export interface MapPathOptions {
@@ -81,6 +82,7 @@ export interface EOQResult {
   reorderPoint: number;
   safetyStock: number;
   ordersPerYear?: number;
+  cycleTime?: number;
 }
 
 export interface ABCAnalysisResult {
@@ -92,4 +94,11 @@ export interface ABCAnalysisResult {
   classA?: InventoryItem[];
   classB?: InventoryItem[];
   classC?: InventoryItem[];
+  metrics?: {
+    totalItems: number;
+    totalValue: number;
+    aItems: number;
+    bItems: number;
+    cItems: number;
+  };
 }

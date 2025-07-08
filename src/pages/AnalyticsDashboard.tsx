@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +30,7 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  BarChart2
+  BarChart3
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -62,7 +63,7 @@ interface CostBreakdownItem {
 
 // Icon Map
 const iconMap: { [key: string]: React.ComponentType<any> } = {
-  DollarSign, CheckCircle, Package, Clock, TrendingUp, Activity, MapPin, BarChart2,
+  DollarSign, CheckCircle, Package, Clock, TrendingUp, Activity, MapPin, BarChart3,
   default: Package
 };
 
@@ -112,22 +113,42 @@ const AnalyticsDashboard = () => {
       setError(null);
 
       try {
-        const [kpisRes, perfRes, optRes, costRes] = await Promise.all([
-          supabase.from('kpis').select('*').eq('project_id', projectId),
-          supabase.from('performance_data').select('*').eq('project_id', projectId).order('month_date'),
-          supabase.from('optimization_metrics').select('*').eq('project_id', projectId),
-          supabase.from('cost_breakdown').select('*').eq('project_id', projectId)
-        ]);
+        // Mock data for now since tables don't exist yet
+        const mockKpis = [
+          { title: "Total Cost Savings", value: "$2.4M", change: "+12%", icon: "DollarSign", color: "from-green-500 to-green-600" },
+          { title: "Optimization Success", value: "94%", change: "+5%", icon: "CheckCircle", color: "from-blue-500 to-blue-600" },
+          { title: "Active Projects", value: "28", change: "+8", icon: "Package", color: "from-purple-500 to-purple-600" },
+          { title: "Processing Time", value: "2.3s", change: "-15%", icon: "Clock", color: "from-orange-500 to-orange-600" }
+        ];
 
-        if (kpisRes.error) throw kpisRes.error;
-        if (perfRes.error) throw perfRes.error;
-        if (optRes.error) throw optRes.error;
-        if (costRes.error) throw costRes.error;
+        const mockPerformanceData = [
+          { month: "Jan", cost: 85000, efficiency: 78, savings: 12000 },
+          { month: "Feb", cost: 82000, efficiency: 82, savings: 15000 },
+          { month: "Mar", cost: 78000, efficiency: 85, savings: 18000 },
+          { month: "Apr", cost: 75000, efficiency: 88, savings: 22000 },
+          { month: "May", cost: 72000, efficiency: 91, savings: 25000 },
+          { month: "Jun", cost: 69000, efficiency: 94, savings: 28000 }
+        ];
 
-        setKpis(kpisRes.data || []);
-        setPerformanceData(perfRes.data.map(d => ({...d, month: new Date(d.month_date).toLocaleString('default', { month: 'short' }) })) || []);
-        setOptimizationMetrics(optRes.data || []);
-        setCostBreakdown(costRes.data || []);
+        const mockOptimizationMetrics = [
+          { model: "Center of Gravity", usage: 85, savings: 23, status: "Active" },
+          { model: "Route Optimization", usage: 92, savings: 35, status: "Active" },
+          { model: "Inventory Management", usage: 76, savings: 18, status: "Active" },
+          { model: "Network Flow", usage: 68, savings: 12, status: "Inactive" }
+        ];
+
+        const mockCostBreakdown = [
+          { name: "Transportation", value: 35, color: "#8884d8" },
+          { name: "Warehousing", value: 25, color: "#82ca9d" },
+          { name: "Inventory", value: 20, color: "#ffc658" },
+          { name: "Labor", value: 15, color: "#ff7c7c" },
+          { name: "Other", value: 5, color: "#8dd1e1" }
+        ];
+
+        setKpis(mockKpis);
+        setPerformanceData(mockPerformanceData);
+        setOptimizationMetrics(mockOptimizationMetrics);
+        setCostBreakdown(mockCostBreakdown);
 
       } catch (error: any) {
         console.error("Failed to fetch analytics data:", error);
@@ -174,7 +195,6 @@ const AnalyticsDashboard = () => {
           ) : (
             kpis.map((kpi, index) => {
               const Icon = iconMap[kpi.icon] || iconMap.default;
-              // A simple way to derive text color from background gradient
               const textColor = kpi.color.replace('from-', 'text-').replace(/-500$/, '-600').split(' ')[0];
               return (
                 <Card key={index} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">

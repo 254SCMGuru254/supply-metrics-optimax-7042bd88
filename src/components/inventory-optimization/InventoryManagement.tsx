@@ -81,7 +81,7 @@ export const InventoryManagement = ({ projectId = "default" }: InventoryManageme
             </Card>
           </div>
 
-          <InventoryMetricsGrid />
+          <InventoryMetricsGrid projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="eoq" className="space-y-6">
@@ -93,7 +93,7 @@ export const InventoryManagement = ({ projectId = "default" }: InventoryManageme
         </TabsContent>
 
         <TabsContent value="abc" className="space-y-6">
-          <ABCAnalysis projectId={projectId} />
+          <ABCAnalysis projectId={projectId || "default"} />
         </TabsContent>
       </Tabs>
     </div>

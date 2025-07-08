@@ -195,7 +195,6 @@ export const AdvancedAnalyticsDashboard = () => {
           </Card>
         </TabsContent>
 
-        
         <TabsContent value="business" className="space-y-6">
           <Card>
             <CardHeader>

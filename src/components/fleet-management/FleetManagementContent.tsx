@@ -1,251 +1,283 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/ui/data-table";
-import NetworkMap from "@/components/NetworkMap";
 import { 
   Truck, 
-  Settings, 
-  DollarSign, 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  Activity,
-  TrendingUp
+  Plus, 
+  Edit, 
+  Trash2, 
+  MapPin,
+  Clock,
+  Settings,
+  BarChart3
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
+
+interface FleetManagementContentProps {
+  projectId?: string;
+}
 
 interface Vehicle {
   id: string;
   name: string;
   type: string;
-  ownership: string;
   capacity: number;
-  capacity_unit: string;
-  fuel_consumption: number;
-  maintenance_cost: number;
-  driver_cost_per_day: number;
+  status: 'active' | 'maintenance' | 'inactive';
+  location: string;
+  fuelConsumption: number;
+  lastMaintenance: string;
 }
 
-interface FleetRoute {
-  id: string;
-  origin: string;
-  destination: string;
-  transportMode: string;
-  vehicleId: string;
-}
+export const FleetManagementContent: React.FC<FleetManagementContentProps> = ({ projectId }) => {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([
+    {
+      id: '1',
+      name: 'Truck Alpha',
+      type: 'Heavy Truck',
+      capacity: 20,
+      status: 'active',
+      location: 'Nairobi Depot',
+      fuelConsumption: 12.5,
+      lastMaintenance: '2024-01-15'
+    },
+    {
+      id: '2',
+      name: 'Van Beta',
+      type: 'Delivery Van',
+      capacity: 5,
+      status: 'maintenance',
+      location: 'Mombasa Hub',
+      fuelConsumption: 8.2,
+      lastMaintenance: '2024-01-10'
+    },
+    {
+      id: '3',
+      name: 'Truck Gamma',
+      type: 'Medium Truck',
+      capacity: 15,
+      status: 'active',
+      location: 'Kisumu Center',
+      fuelConsumption: 10.8,
+      lastMaintenance: '2024-01-20'
+    }
+  ]);
 
-interface FleetManagementContentProps {
-  projectId: string;
-}
+  const [newVehicle, setNewVehicle] = useState({
+    name: '',
+    type: '',
+    capacity: 0,
+    location: '',
+    fuelConsumption: 0
+  });
 
-export const FleetManagementContent = ({ projectId }: FleetManagementContentProps) => {
-  const { user } = useAuth();
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [routes, setRoutes] = useState<FleetRoute[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    fetchFleetData();
-  }, [projectId, user]);
-
-  const fetchFleetData = async () => {
-    if (!user || !projectId) return;
-
-    setLoading(true);
-    try {
-      const { data: vehiclesData } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('project_id', projectId);
-
-      if (vehiclesData) {
-        setVehicles(vehiclesData);
-      }
-
-      // Mock routes data for demonstration
-      setRoutes([
-        { id: '1', origin: 'Warehouse A', destination: 'Customer 1', transportMode: 'Road', vehicleId: 'v1' },
-        { id: '2', origin: 'Warehouse B', destination: 'Customer 2', transportMode: 'Road', vehicleId: 'v2' },
-      ]);
-
-    } catch (error) {
-      console.error('Error fetching fleet data:', error);
-    } finally {
-      setLoading(false);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'maintenance': return 'bg-yellow-100 text-yellow-800';
+      case 'inactive': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const vehicleColumns = [
-    {
-      key: 'name' as keyof Vehicle,
-      header: 'Vehicle Name',
-    },
-    {
-      key: 'type' as keyof Vehicle,
-      header: 'Type',
-    },
-    {
-      key: 'ownership' as keyof Vehicle,
-      header: 'Ownership',
-      render: (value: string) => (
-        <Badge variant={value === 'owned' ? 'default' : 'secondary'}>
-          {value}
-        </Badge>
-      ),
-    },
-    {
-      key: 'capacity' as keyof Vehicle,
-      header: 'Capacity',
-      render: (value: number, item: Vehicle) => (
-        `${value} ${item.capacity_unit}`
-      ),
-    },
-    {
-      key: 'fuel_consumption' as keyof Vehicle,
-      header: 'Fuel Consumption',
-      render: (value: number) => `${value} L/100km`,
-    },
-  ];
+  const addVehicle = () => {
+    if (newVehicle.name && newVehicle.type) {
+      const vehicle: Vehicle = {
+        id: (vehicles.length + 1).toString(),
+        ...newVehicle,
+        status: 'active',
+        lastMaintenance: new Date().toISOString().split('T')[0]
+      };
+      setVehicles([...vehicles, vehicle]);
+      setNewVehicle({
+        name: '',
+        type: '',
+        capacity: 0,
+        location: '',
+        fuelConsumption: 0
+      });
+    }
+  };
 
-  const fleetMetrics = [
-    {
-      title: "Total Vehicles",
-      value: vehicles.length,
-      icon: <Truck className="h-5 w-5" />,
-      color: "text-blue-600",
-    },
-    {
-      title: "Fleet Utilization",
-      value: "87%",
-      icon: <Activity className="h-5 w-5" />,
-      color: "text-green-600",
-    },
-    {
-      title: "Avg Fuel Cost",
-      value: "$2,450",
-      icon: <Settings className="h-5 w-5" />,
-      color: "text-orange-600",
-    },
-    {
-      title: "Cost Savings",
-      value: "23%",
-      icon: <TrendingUp className="h-5 w-5" />,
-      color: "text-purple-600",
-    },
-  ];
+  const deleteVehicle = (id: string) => {
+    setVehicles(vehicles.filter(v => v.id !== id));
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const updateVehicleStatus = (id: string, status: Vehicle['status']) => {
+    setVehicles(vehicles.map(v => v.id === id ? { ...v, status } : v));
+  };
 
   return (
     <div className="space-y-6">
-      {/* Fleet Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {fleetMetrics.map((metric, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {metric.title}
-                  </p>
-                  <p className="text-2xl font-bold">{metric.value}</p>
-                </div>
-                <div className={`${metric.color}`}>
-                  {metric.icon}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Fleet Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
+            <Truck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{vehicles.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active</CardTitle>
+            <BarChart3 className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {vehicles.filter(v => v.status === 'active').length}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">In Maintenance</CardTitle>
+            <Settings className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">
+              {vehicles.filter(v => v.status === 'maintenance').length}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Capacity</CardTitle>
+            <Truck className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              {vehicles.reduce((sum, v) => sum + v.capacity, 0)} tons
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Fleet Map */}
+      {/* Add New Vehicle */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Fleet Location Map
+            <Plus className="h-5 w-5" />
+            Add New Vehicle
           </CardTitle>
-          <CardDescription>
-            Real-time fleet tracking and route visualization
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-            <NetworkMap 
-              nodes={[]}
-              routes={[]}
-              onNodesChange={() => {}}
-              onRoutesChange={() => {}}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div>
+              <Label htmlFor="name">Vehicle Name</Label>
+              <Input
+                id="name"
+                value={newVehicle.name}
+                onChange={(e) => setNewVehicle({...newVehicle, name: e.target.value})}
+                placeholder="Enter vehicle name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="type">Type</Label>
+              <Input
+                id="type"
+                value={newVehicle.type}
+                onChange={(e) => setNewVehicle({...newVehicle, type: e.target.value})}
+                placeholder="e.g., Heavy Truck"
+              />
+            </div>
+            <div>
+              <Label htmlFor="capacity">Capacity (tons)</Label>
+              <Input
+                id="capacity"
+                type="number"
+                value={newVehicle.capacity}
+                onChange={(e) => setNewVehicle({...newVehicle, capacity: parseFloat(e.target.value) || 0})}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={newVehicle.location}
+                onChange={(e) => setNewVehicle({...newVehicle, location: e.target.value})}
+                placeholder="Enter location"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button onClick={addVehicle} className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Vehicle
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Vehicle Management */}
+      {/* Vehicle List */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5" />
-            Vehicle Fleet
-          </CardTitle>
-          <CardDescription>
-            Manage your vehicle fleet and track performance
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {vehicles.length > 0 ? (
-            <DataTable
-              data={vehicles}
-              columns={vehicleColumns}
-            />
-          ) : (
-            <div className="text-center py-8">
-              <Truck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No vehicles found. Add vehicles to get started.</p>
-              <Button className="mt-4">Add Vehicle</Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Route Performance */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Route Performance
-          </CardTitle>
-          <CardDescription>
-            Monitor route efficiency and delivery performance
-          </CardDescription>
+          <CardTitle>Fleet Management</CardTitle>
+          <CardDescription>Manage your vehicle fleet and track performance</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {routes.map((route) => (
-              <div key={route.id} className="flex items-center justify-between p-4 border rounded-lg">
+            {vehicles.map((vehicle) => (
+              <div key={vehicle.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium">{route.origin}</span>
-                    <span className="text-gray-500">→</span>
-                    <span className="font-medium">{route.destination}</span>
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Truck className="h-6 w-6 text-blue-600" />
                   </div>
-                  <Badge variant="outline">{route.transportMode}</Badge>
+                  <div>
+                    <h3 className="font-semibold">{vehicle.name}</h3>
+                    <p className="text-sm text-muted-foreground">{vehicle.type}</p>
+                    <div className="flex items-center gap-4 mt-1">
+                      <span className="text-xs flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {vehicle.location}
+                      </span>
+                      <span className="text-xs flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Last maintenance: {vehicle.lastMaintenance}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Vehicle ID</p>
-                  <p className="font-medium">{route.vehicleId}</p>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <div className="font-semibold">{vehicle.capacity} tons</div>
+                    <div className="text-sm text-muted-foreground">
+                      {vehicle.fuelConsumption} L/100km
+                    </div>
+                  </div>
+                  
+                  <Badge className={getStatusColor(vehicle.status)}>
+                    {vehicle.status}
+                  </Badge>
+                  
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateVehicleStatus(
+                        vehicle.id, 
+                        vehicle.status === 'active' ? 'maintenance' : 'active'
+                      )}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => deleteVehicle(vehicle.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
