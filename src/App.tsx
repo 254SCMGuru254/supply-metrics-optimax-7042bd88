@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import NewLandingPage from "./NewLandingPage";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Pricing from "./pages/Pricing";
+import Analytics from "./pages/Analytics";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import DataInput from "./pages/DataInput";
 import RouteOptimization from "./pages/RouteOptimization";
@@ -64,6 +66,12 @@ const App = () => {
               <Route path="/" element={<NewLandingPage />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/support" element={<Support />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/documentation" element={<Documentation />} />
+              <Route path="/kenya-supply-chain" element={<KenyaSupplyChain />} />
+
+              {/* Analytics route - accessible without protection for now */}
+              <Route path="/analytics" element={<Analytics />} />
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoutesLayout />}>
@@ -80,10 +88,7 @@ const App = () => {
                 <Route path="/warehouse/:projectId" element={<WarehousePage />} />
                 <Route path="/fleet-management/:projectId" element={<FleetManagement />} />
                 <Route path="/cost-modeling/:projectId" element={<CostModeling />} />
-                <Route path="/kenya-supply-chain" element={<KenyaSupplyChain />} />
                 <Route path="/business-value" element={<BusinessValue />} />
-                <Route path="/documentation" element={<Documentation />} />
-                <Route path="/pricing" element={<Pricing />} />
               </Route>
 
               {/* Redirect old onboarding routes to data-input */}

@@ -14,6 +14,7 @@ const ProfessionalHeader = () => {
 
   const navigationItems = [
     { name: "Features", href: "#features", type: "anchor" },
+    { name: "Analytics", href: "/analytics", type: "route" },
     { name: "Pricing", href: "/pricing", type: "route" },
     { name: "Documentation", href: "/documentation", type: "route" },
     { name: "Kenya Focus", href: "/kenya-supply-chain", type: "route" },
@@ -37,9 +38,9 @@ const ProfessionalHeader = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Properly Centered */}
+          {/* Desktop Navigation - Centered */}
           <nav className="hidden md:flex items-center justify-center flex-1 max-w-2xl mx-8">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-6">
               {navigationItems.map((item) => (
                 item.type === "anchor" ? (
                   <a

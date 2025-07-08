@@ -90,10 +90,10 @@ const NewLandingPage = () => {
       {/* Professional Header */}
       <ProfessionalHeader />
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* Hero Section - Balanced Layout */}
+      <section className="pt-16 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[600px]">
             {/* Left side - Content */}
             <div className="space-y-8">
               <div className="space-y-4">
@@ -140,35 +140,39 @@ const NewLandingPage = () => {
               </div>
             </div>
 
-            {/* Right side - Visual element */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl p-8 text-white relative overflow-hidden">
-                <div className="relative z-10">
-                  <h2 className="text-3xl font-bold mb-4">Intel</h2>
-                  <h3 className="text-4xl font-bold mb-2">Supply</h3>
-                  <h3 className="text-4xl font-bold">Chain</h3>
-                  <h3 className="text-4xl font-bold">Optimization</h3>
-                  
-                  <div className="mt-8 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                      <span className="text-sm">Real-time Analytics</span>
+            {/* Right side - Balanced Visual */}
+            <div className="flex justify-center items-center">
+              <div className="relative w-full max-w-md">
+                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+                  <div className="relative z-10">
+                    <div className="text-center space-y-4">
+                      <h2 className="text-3xl font-bold">Supply Chain</h2>
+                      <h3 className="text-4xl font-bold">Intelligence</h3>
+                      <div className="w-16 h-1 bg-white mx-auto rounded-full"></div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                      <span className="text-sm">AI-Powered Insights</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                      <span className="text-sm">Enterprise Scale</span>
+                    
+                    <div className="mt-8 space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-white rounded-full"></div>
+                        <span className="text-sm">Real-time Analytics</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-white rounded-full"></div>
+                        <span className="text-sm">AI-Powered Insights</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-white rounded-full"></div>
+                        <span className="text-sm">Enterprise Scale</span>
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Balanced decorative elements */}
+                  <div className="absolute top-4 right-4 w-12 h-12 bg-white/10 rounded-full"></div>
+                  <div className="absolute bottom-6 right-6 w-6 h-6 bg-white/20 rounded-full"></div>
+                  <div className="absolute top-1/2 right-12 w-3 h-3 bg-white/30 rounded-full"></div>
+                  <div className="absolute bottom-1/3 left-4 w-4 h-4 bg-white/15 rounded-full"></div>
                 </div>
-                
-                {/* Decorative particles */}
-                <div className="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full"></div>
-                <div className="absolute bottom-8 right-8 w-8 h-8 bg-white/20 rounded-full"></div>
-                <div className="absolute top-1/2 right-16 w-4 h-4 bg-white/30 rounded-full"></div>
               </div>
             </div>
           </div>
@@ -263,7 +267,7 @@ const NewLandingPage = () => {
                 <CardContent className="p-6">
                   <div className="flex mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Target key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                      <CheckCircle key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                     ))}
                   </div>
                   <p className="text-gray-700 mb-6 leading-relaxed">"{testimonial.content}"</p>

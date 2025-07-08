@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -155,7 +156,7 @@ export const AdvancedAnalyticsDashboard = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={modelAccuracyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="model" interval={0} />
+                  <XAxis dataKey="model" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
