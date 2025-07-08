@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
-import { TrendingUp, AlertTriangle, CheckCircle, Users, Activity, Target, Database, Activity as ActivityIcon } from "lucide-react";
+import { TrendingUp, AlertTriangle, CheckCircle, Users, Activity, Target, Database, Settings } from "lucide-react";
 
 // Mock data for analytics
 const modelAccuracyData = [
@@ -78,7 +77,7 @@ export const AdvancedAnalyticsDashboard = () => {
       case "exceeding": return <TrendingUp className="h-4 w-4 text-green-600" />;
       case "on-track": return <CheckCircle className="h-4 w-4 text-blue-600" />;
       case "needs-attention": return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      default: return <ActivityIcon className="h-4 w-4 text-gray-600" />;
+      default: return <Activity className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -156,7 +155,7 @@ export const AdvancedAnalyticsDashboard = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={modelAccuracyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="model" textAnchor="end" interval={0} />
+                  <XAxis dataKey="model" interval={0} />
                   <YAxis />
                   <Tooltip />
                   <Legend />
@@ -195,6 +194,7 @@ export const AdvancedAnalyticsDashboard = () => {
           </Card>
         </TabsContent>
 
+        
         <TabsContent value="business" className="space-y-6">
           <Card>
             <CardHeader>

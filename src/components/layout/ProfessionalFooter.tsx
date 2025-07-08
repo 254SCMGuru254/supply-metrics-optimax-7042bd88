@@ -3,13 +3,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   BarChart3, 
-  Mail, 
-  Phone, 
+  Activity, 
   MapPin, 
-  Target, // Replace Award
-  Github, 
-  Twitter, 
-  Linkedin 
+  Target,
+  Settings
 } from 'lucide-react';
 
 export const ProfessionalFooter = () => {
@@ -41,7 +38,7 @@ export const ProfessionalFooter = () => {
             <ul className="space-y-2">
               <li><Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors text-sm">Dashboard</Link></li>
               <li><Link to="/analytics" className="text-gray-400 hover:text-white transition-colors text-sm">Analytics</Link></li>
-              <li><Link to="/optimization" className="text-gray-400 hover:text-white transition-colors text-sm">Optimization</Link></li>
+              <li><Link to="/route-optimization" className="text-gray-400 hover:text-white transition-colors text-sm">Optimization</Link></li>
               <li><Link to="/simulation" className="text-gray-400 hover:text-white transition-colors text-sm">Simulation</Link></li>
               <li><Link to="/cost-modeling" className="text-gray-400 hover:text-white transition-colors text-sm">Cost Modeling</Link></li>
             </ul>
@@ -64,11 +61,11 @@ export const ProfessionalFooter = () => {
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4 text-gray-400" />
+                <Activity className="h-4 w-4 text-gray-400" />
                 <span className="text-gray-400 text-sm">support@supplymetrics.com</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4 text-gray-400" />
+                <Settings className="h-4 w-4 text-gray-400" />
                 <span className="text-gray-400 text-sm">+1 (555) 123-4567</span>
               </div>
               <div className="flex items-center space-x-2">
@@ -80,13 +77,13 @@ export const ProfessionalFooter = () => {
             {/* Social Links */}
             <div className="flex space-x-4 mt-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
+                <Activity className="h-5 w-5" />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="h-5 w-5" />
+                <Settings className="h-5 w-5" />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Github className="h-5 w-5" />
+                <Target className="h-5 w-5" />
               </a>
             </div>
           </div>

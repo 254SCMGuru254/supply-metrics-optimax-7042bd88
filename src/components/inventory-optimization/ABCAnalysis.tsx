@@ -1,203 +1,217 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { DataTable } from "@/components/ui/data-table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { Package, TrendingUp, AlertCircle } from 'lucide-react';
+import { InventoryItem, ABCAnalysisResult } from '@/components/map/MapTypes';
 
 interface ABCAnalysisProps {
   projectId: string;
+  items?: InventoryItem[];
 }
 
-interface InventoryItem {
-  id: string;
-  sku: string;
-  description: string;
-  unit_cost: number;
-  demand_rate: number;
-  abc_classification?: 'A' | 'B' | 'C';
-}
-
-interface ABCAnalysisResult {
-  item: InventoryItem;
-  annualValue: number;
-  percentage: number;
-  cumulativePercentage: number;
-  classification: 'A' | 'B' | 'C';
-}
-
-export const ABCAnalysis = ({ projectId }: ABCAnalysisProps) => {
-  const [analysisResults, setAnalysisResults] = useState<ABCAnalysisResult[]>([]);
-
-  // Fetch inventory items
-  const { data: inventoryItems, isLoading } = useQuery({
-    queryKey: ['inventoryItems', projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select('*')
-        .eq('project_id', projectId);
-      
-      if (error) throw new Error(error.message);
-      return data as InventoryItem[];
+export const ABCAnalysis = ({ projectId, items = [] }: ABCAnalysisProps) => {
+  // Mock data for demonstration
+  const mockItems: InventoryItem[] = items.length > 0 ? items : [
+    {
+      id: '1',
+      sku: 'A001',
+      description: 'High-value component',
+      unitCost: 500,
+      demandRate: 100,
+      leadTime: 7,
+      holdingCostRate: 0.25,
+      orderingCost: 50,
+      safetyStock: 20,
+      reorderPoint: 150,
+      economicOrderQuantity: 40,
+      abcClassification: 'A',
+      annualValue: 50000
     },
-    enabled: !!projectId,
-  });
-
-  useEffect(() => {
-    if (inventoryItems && inventoryItems.length > 0) {
-      performABCAnalysis(inventoryItems);
+    {
+      id: '2',
+      sku: 'B002',
+      description: 'Medium-value component',
+      unitCost: 100,
+      demandRate: 200,
+      leadTime: 5,
+      holdingCostRate: 0.20,
+      orderingCost: 30,
+      safetyStock: 15,
+      reorderPoint: 100,
+      economicOrderQuantity: 60,
+      abcClassification: 'B',
+      annualValue: 20000
+    },
+    {
+      id: '3',
+      sku: 'C003',
+      description: 'Low-value component',
+      unitCost: 10,
+      demandRate: 500,
+      leadTime: 3,
+      holdingCostRate: 0.15,
+      orderingCost: 20,
+      safetyStock: 10,
+      reorderPoint: 50,
+      economicOrderQuantity: 100,
+      abcClassification: 'C',
+      annualValue: 5000
     }
-  }, [inventoryItems]);
+  ];
 
-  const performABCAnalysis = (items: InventoryItem[]) => {
-    // Calculate annual value for each item
-    const itemsWithValue = items.map(item => ({
-      item,
-      annualValue: item.unit_cost * item.demand_rate * 365 // Assuming daily demand rate
-    }));
+  const performABCAnalysis = (items: InventoryItem[]): ABCAnalysisResult[] => {
+    const totalValue = items.reduce((sum, item) => sum + (item.annualValue || 0), 0);
+    
+    const sortedItems = items
+      .map(item => ({
+        ...item,
+        annualValue: item.annualValue || item.unitCost * item.demandRate
+      }))
+      .sort((a, b) => b.annualValue - a.annualValue);
 
-    // Sort by annual value (descending)
-    itemsWithValue.sort((a, b) => b.annualValue - a.annualValue);
-
-    // Calculate total value
-    const totalValue = itemsWithValue.reduce((sum, item) => sum + item.annualValue, 0);
-
-    // Calculate percentages and cumulative percentages
     let cumulativeValue = 0;
-    const results: ABCAnalysisResult[] = itemsWithValue.map(({ item, annualValue }) => {
-      const percentage = (annualValue / totalValue) * 100;
-      cumulativeValue += percentage;
+    const results: ABCAnalysisResult[] = [];
+
+    sortedItems.forEach(item => {
+      cumulativeValue += item.annualValue;
+      const percentage = (item.annualValue / totalValue) * 100;
+      const cumulativePercentage = (cumulativeValue / totalValue) * 100;
       
-      // Classify based on cumulative percentage
       let classification: 'A' | 'B' | 'C';
-      if (cumulativeValue <= 80) {
+      if (cumulativePercentage <= 80) {
         classification = 'A';
-      } else if (cumulativeValue <= 95) {
+      } else if (cumulativePercentage <= 95) {
         classification = 'B';
       } else {
         classification = 'C';
       }
 
-      return {
+      results.push({
         item,
-        annualValue,
+        annualValue: item.annualValue,
         percentage,
-        cumulativePercentage: cumulativeValue,
+        cumulativePercentage,
         classification
-      };
+      });
     });
 
-    setAnalysisResults(results);
+    return results;
   };
 
-  const getClassificationColor = (classification: 'A' | 'B' | 'C') => {
-    switch (classification) {
-      case 'A': return 'bg-red-100 text-red-800';
-      case 'B': return 'bg-yellow-100 text-yellow-800';
-      case 'C': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const abcResults = performABCAnalysis(mockItems);
+  
+  const summaryData = [
+    { 
+      class: 'A', 
+      count: abcResults.filter(r => r.classification === 'A').length,
+      value: abcResults.filter(r => r.classification === 'A').reduce((sum, r) => sum + r.annualValue, 0)
+    },
+    { 
+      class: 'B', 
+      count: abcResults.filter(r => r.classification === 'B').length,
+      value: abcResults.filter(r => r.classification === 'B').reduce((sum, r) => sum + r.annualValue, 0)
+    },
+    { 
+      class: 'C', 
+      count: abcResults.filter(r => r.classification === 'C').length,
+      value: abcResults.filter(r => r.classification === 'C').reduce((sum, r) => sum + r.annualValue, 0)
     }
-  };
+  ];
 
-  const chartData = analysisResults.slice(0, 10).map(result => ({
-    sku: result.item.sku,
-    value: result.annualValue,
-    classification: result.classification
-  }));
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p>Loading ABC Analysis...</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!inventoryItems || inventoryItems.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>ABC Analysis</CardTitle>
-          <CardDescription>No inventory items found for analysis</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Add inventory items to perform ABC analysis.</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const columns = [
+    {
+      key: 'sku' as keyof ABCAnalysisResult,
+      header: 'SKU',
+      render: (value: any, row: ABCAnalysisResult) => row.item.sku
+    },
+    {
+      key: 'description' as keyof ABCAnalysisResult,
+      header: 'Description',
+      render: (value: any, row: ABCAnalysisResult) => row.item.description
+    },
+    {
+      key: 'annualValue' as keyof ABCAnalysisResult,
+      header: 'Annual Value',
+      render: (value: number) => `$${value.toLocaleString()}`
+    },
+    {
+      key: 'percentage' as keyof ABCAnalysisResult,
+      header: 'Percentage',
+      render: (value: number) => `${value.toFixed(1)}%`
+    },
+    {
+      key: 'cumulativePercentage' as keyof ABCAnalysisResult,
+      header: 'Cumulative %',
+      render: (value: number) => `${value.toFixed(1)}%`
+    },
+    {
+      key: 'classification' as keyof ABCAnalysisResult,
+      header: 'Class',
+      render: (value: 'A' | 'B' | 'C') => (
+        <Badge variant={value === 'A' ? 'default' : value === 'B' ? 'secondary' : 'outline'}>
+          Class {value}
+        </Badge>
+      )
+    }
+  ];
 
   return (
     <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {summaryData.map((data) => (
+          <Card key={data.class}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Class {data.class} Items</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{data.count}</div>
+              <p className="text-xs text-muted-foreground">
+                ${data.value.toLocaleString()} annual value
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* ABC Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>ABC Analysis Results</CardTitle>
-          <CardDescription>
-            Categorization of inventory items based on annual value contribution
-          </CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            ABC Classification Distribution
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
+            <BarChart data={summaryData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="sku" />
+              <XAxis dataKey="class" />
               <YAxis />
-              <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, "Annual Value"]} />
+              <Tooltip />
               <Bar dataKey="value" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
+      {/* Results Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed ABC Classification</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
+            ABC Analysis Results
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>SKU</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Annual Value</TableHead>
-                <TableHead>Percentage</TableHead>
-                <TableHead>Cumulative %</TableHead>
-                <TableHead>Classification</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {analysisResults.map((result, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{result.item.sku}</TableCell>
-                  <TableCell>{result.item.description}</TableCell>
-                  <TableCell>${result.annualValue.toLocaleString()}</TableCell>
-                  <TableCell>{result.percentage.toFixed(2)}%</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <span>{result.cumulativePercentage.toFixed(2)}%</span>
-                      <Progress value={result.cumulativePercentage} className="w-16 h-2" />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getClassificationColor(result.classification)}>
-                      Class {result.classification}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            data={abcResults}
+            columns={columns}
+          />
         </CardContent>
       </Card>
     </div>

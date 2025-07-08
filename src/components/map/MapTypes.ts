@@ -18,6 +18,7 @@ export interface Node {
   color?: string;
   isOptimized?: boolean;
   isSelected?: boolean;
+  metadata?: Record<string, any>;
 }
 
 export interface Route {
@@ -32,6 +33,8 @@ export interface Route {
   isOptimized?: boolean;
   isSelected?: boolean;
   mode?: string;
+  transitTime?: number;
+  type?: string;
 }
 
 export interface MapPathOptions {
@@ -65,6 +68,8 @@ export interface InventoryItem {
   economicOrderQuantity: number;
   serviceLevel?: number;
   abcClassification?: 'A' | 'B' | 'C';
+  abcClass?: 'A' | 'B' | 'C';
+  annualValue?: number;
 }
 
 export interface EOQResult {
@@ -75,6 +80,7 @@ export interface EOQResult {
   holdingCost: number;
   reorderPoint: number;
   safetyStock: number;
+  ordersPerYear?: number;
 }
 
 export interface ABCAnalysisResult {
@@ -83,4 +89,7 @@ export interface ABCAnalysisResult {
   percentage: number;
   cumulativePercentage: number;
   classification: 'A' | 'B' | 'C';
+  classA?: InventoryItem[];
+  classB?: InventoryItem[];
+  classC?: InventoryItem[];
 }

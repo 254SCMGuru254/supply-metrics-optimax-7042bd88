@@ -7,7 +7,7 @@ import { DataTable } from "@/components/ui/data-table";
 import NetworkMap from "@/components/NetworkMap";
 import { 
   Truck, 
-  Fuel, 
+  Settings, 
   DollarSign, 
   MapPin, 
   Calendar, 
@@ -127,7 +127,7 @@ export const FleetManagementContent = ({ projectId }: FleetManagementContentProp
     {
       title: "Avg Fuel Cost",
       value: "$2,450",
-      icon: <Fuel className="h-5 w-5" />,
+      icon: <Settings className="h-5 w-5" />,
       color: "text-orange-600",
     },
     {

@@ -37,15 +37,15 @@ const ProfessionalHeader = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Centered and Balanced */}
-          <nav className="hidden md:flex items-center justify-center flex-1 mx-8">
+          {/* Desktop Navigation - Properly Centered */}
+          <nav className="hidden md:flex items-center justify-center flex-1 max-w-2xl mx-8">
             <div className="flex items-center space-x-8">
               {navigationItems.map((item) => (
                 item.type === "anchor" ? (
                   <a
                     key={item.name}
                     href={item.href}
-                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors relative group"
+                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors relative group px-3 py-2"
                   >
                     {item.name}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
@@ -54,7 +54,7 @@ const ProfessionalHeader = () => {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`font-medium transition-colors relative group ${
+                    className={`font-medium transition-colors relative group px-3 py-2 ${
                       isActive(item.href) 
                         ? "text-blue-600" 
                         : "text-gray-700 hover:text-blue-600"
@@ -70,16 +70,16 @@ const ProfessionalHeader = () => {
             </div>
           </nav>
 
-          {/* Desktop Action Buttons */}
+          {/* Desktop Action Buttons - Right Aligned */}
           <div className="hidden md:flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
+            <Badge variant="secondary" className="bg-green-100 text-green-700 px-3 py-1">
               🇰🇪 Kenya Ready
             </Badge>
             <Link to="/auth">
               <Button variant="ghost" className="font-medium">Sign In</Button>
             </Link>
             <Link to="/dashboard">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 font-medium">
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 font-medium px-6">
                 Launch App
               </Button>
             </Link>
