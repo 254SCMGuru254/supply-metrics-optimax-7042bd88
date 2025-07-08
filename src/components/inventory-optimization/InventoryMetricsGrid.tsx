@@ -8,8 +8,8 @@ import {
   TrendingDown, 
   DollarSign, 
   Package, 
-  AlertCircle, // Replace CircleSlash
-  FileArchive, // Replace Archive
+  AlertCircle,
+  Archive,
   Truck,
   ShoppingCart,
   Clock,
@@ -99,7 +99,7 @@ export const InventoryMetricsGrid = ({ metrics = [] }: InventoryMetricsGridProps
       case 'carrying cost': return <DollarSign className="h-5 w-5" />;
       case 'order frequency': return <ShoppingCart className="h-5 w-5" />;
       case 'lead time': return <Clock className="h-5 w-5" />;
-      case 'safety stock level': return <FileArchive className="h-5 w-5" />;
+      case 'safety stock level': return <Archive className="h-5 w-5" />;
       default: return <Package className="h-5 w-5" />;
     }
   };

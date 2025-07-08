@@ -37,35 +37,37 @@ const ProfessionalHeader = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => (
-              item.type === "anchor" ? (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-700 hover:text-blue-600 font-medium transition-colors relative group"
-                >
-                  {item.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
-                </a>
-              ) : (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`font-medium transition-colors relative group ${
-                    isActive(item.href) 
-                      ? "text-blue-600" 
-                      : "text-gray-700 hover:text-blue-600"
-                  }`}
-                >
-                  {item.name}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-blue-600 transition-all ${
-                    isActive(item.href) ? "w-full" : "w-0 group-hover:w-full"
-                  }`}></span>
-                </Link>
-              )
-            ))}
+          {/* Desktop Navigation - Centered and Balanced */}
+          <nav className="hidden md:flex items-center justify-center flex-1 mx-8">
+            <div className="flex items-center space-x-8">
+              {navigationItems.map((item) => (
+                item.type === "anchor" ? (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors relative group"
+                  >
+                    {item.name}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
+                  </a>
+                ) : (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`font-medium transition-colors relative group ${
+                      isActive(item.href) 
+                        ? "text-blue-600" 
+                        : "text-gray-700 hover:text-blue-600"
+                    }`}
+                  >
+                    {item.name}
+                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-blue-600 transition-all ${
+                      isActive(item.href) ? "w-full" : "w-0 group-hover:w-full"
+                    }`}></span>
+                  </Link>
+                )
+              ))}
+            </div>
           </nav>
 
           {/* Desktop Action Buttons */}

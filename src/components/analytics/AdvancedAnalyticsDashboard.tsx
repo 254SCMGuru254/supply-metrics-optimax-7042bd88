@@ -156,7 +156,7 @@ export const AdvancedAnalyticsDashboard = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={modelAccuracyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="model" angle={-45} textAnchor="end" interval={0} />
+                  <XAxis dataKey="model" textAnchor="end" interval={0} />
                   <YAxis />
                   <Tooltip />
                   <Legend />

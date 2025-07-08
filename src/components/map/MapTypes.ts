@@ -1,6 +1,6 @@
 
-export type NodeType = 'factory' | 'distribution' | 'supplier' | 'customer' | 'retail' | 'facility' | 'demand' | 'airport' | 'port';
-export type OwnershipType = 'owned' | 'leased' | 'outsourced' | 'proposed';
+export type NodeType = 'factory' | 'distribution' | 'supplier' | 'customer' | 'retail' | 'facility' | 'demand' | 'airport' | 'port' | 'warehouse';
+export type OwnershipType = 'owned' | 'leased' | 'outsourced' | 'proposed' | 'hired';
 
 export interface Node {
   id: string;
@@ -11,6 +11,9 @@ export interface Node {
   capacity?: number;
   demand?: number;
   cost?: number;
+  weight?: number;
+  ownership?: OwnershipType;
+  notes?: string;
   properties?: Record<string, any>;
   color?: string;
   isOptimized?: boolean;
@@ -48,19 +51,25 @@ export interface InventoryItem {
   id: string;
   sku: string;
   description: string;
+  name?: string;
+  nodeId?: string;
   unitCost: number;
   demandRate: number;
+  annualDemand?: number;
   leadTime: number;
   holdingCostRate: number;
+  holdingCost?: number;
   orderingCost: number;
   safetyStock: number;
   reorderPoint: number;
   economicOrderQuantity: number;
+  serviceLevel?: number;
   abcClassification?: 'A' | 'B' | 'C';
 }
 
 export interface EOQResult {
   eoq: number;
+  economicOrderQuantity?: number;
   totalCost: number;
   orderingCost: number;
   holdingCost: number;

@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Warehouse, Network, Truck, BarChart3, Box } from "lucide-react";
+import { Warehouse, Network, Truck, BarChart3, Package } from "lucide-react";
 
 const analyticsModels = [
   {
@@ -24,15 +24,15 @@ const analyticsModels = [
     path: "/simulation",
   },
   {
-    title: "Heuristic Analysis",
-    description: "Quick solutions for complex distribution problems",
+    title: "Advanced Analytics",
+    description: "Real-time insights and performance metrics",
     icon: BarChart3,
-    path: "/heuristic",
+    path: "/analytics-dashboard",
   },
   {
     title: "Isohedron Analysis",
     description: "Optimize territory coverage and spatial distribution",
-    icon: Box,
+    icon: Package,
     path: "/isohedron",
   },
 ];
