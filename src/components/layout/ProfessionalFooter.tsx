@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { 
   Network,
-  MessageCircle,
+  Mail,
   Phone,
   MapPin,
   Github,
@@ -59,7 +59,7 @@ export const ProfessionalFooter = () => {
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
-                <MessageCircle className="h-5 w-5 text-gray-400" />
+                <Mail className="h-5 w-5 text-gray-400" />
                 <span className="text-gray-300">support@optimax.co.ke</span>
               </div>
               <div className="flex items-center space-x-3">

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Network, 
-  MessageCircle, 
+  Mail, 
   Phone, 
   MapPin, 
   CheckCircle, 
@@ -153,7 +153,7 @@ const Auth = () => {
               <h3 className="text-lg font-semibold mb-4">Need Help?</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-3">
-                  <MessageCircle className="h-4 w-4 text-blue-200" />
+                  <Mail className="h-4 w-4 text-blue-200" />
                   <span className="text-blue-100 text-sm">support@optimax.co.ke</span>
                 </div>
                 <div className="flex items-center space-x-3">

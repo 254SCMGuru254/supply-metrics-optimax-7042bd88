@@ -77,6 +77,7 @@ export interface EOQResult {
   eoq: number;
   economicOrderQuantity?: number;
   totalCost: number;
+  totalAnnualCost?: number;
   orderingCost: number;
   holdingCost: number;
   reorderPoint: number;
@@ -100,5 +101,6 @@ export interface ABCAnalysisResult {
     aItems: number;
     bItems: number;
     cItems: number;
+    classAValuePercentage?: number;
   };
 }
