@@ -70,21 +70,28 @@ const App = () => {
               <Route path="/documentation" element={<Documentation />} />
               <Route path="/kenya-supply-chain" element={<KenyaSupplyChain />} />
 
-              {/* Analytics route - accessible without protection for now */}
+              {/* Analytics route - public for now but functional */}
               <Route path="/analytics" element={<Analytics />} />
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoutesLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/analytics-dashboard/:projectId" element={<AnalyticsDashboard />} />
+                <Route path="/analytics-dashboard/new" element={<AnalyticsDashboard />} />
                 <Route path="/data-input/:projectId" element={<DataInput />} />
+                <Route path="/data-input/new" element={<DataInput />} />
                 <Route path="/route-optimization/:projectId" element={<RouteOptimization />} />
+                <Route path="/route-optimization/new" element={<RouteOptimization />} />
                 <Route path="/inventory-management/:projectId" element={<InventoryManagement />} />
+                <Route path="/inventory-management/new" element={<InventoryManagement />} />
                 <Route path="/network-optimization/:projectId" element={<NetworkOptimization />} />
+                <Route path="/network-optimization/new" element={<NetworkOptimization />} />
                 <Route path="/center-of-gravity/:projectId" element={<CenterOfGravity />} />
+                <Route path="/center-of-gravity/new" element={<CenterOfGravity />} />
                 <Route path="/heuristic/:projectId" element={<Heuristic />} />
                 <Route path="/isohedron/:projectId" element={<Isohedron />} />
                 <Route path="/simulation/:projectId" element={<Simulation />} />
+                <Route path="/simulation/new" element={<Simulation />} />
                 <Route path="/warehouse/:projectId" element={<WarehousePage />} />
                 <Route path="/fleet-management/:projectId" element={<FleetManagement />} />
                 <Route path="/cost-modeling/:projectId" element={<CostModeling />} />
@@ -92,7 +99,7 @@ const App = () => {
               </Route>
 
               {/* Redirect old onboarding routes to data-input */}
-              <Route path="/onboarding/*" element={<Navigate to="/data-input" replace />} />
+              <Route path="/onboarding/*" element={<Navigate to="/data-input/new" replace />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

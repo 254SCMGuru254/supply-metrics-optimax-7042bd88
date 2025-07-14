@@ -3,7 +3,7 @@ import "../Landing.css";
 
 const Index = () => {
   useEffect(() => {
-    // Create animated particles
+    // Create animated particles with full page coverage
     function createParticles() {
       const particlesContainer = document.getElementById("particles");
       if (!particlesContainer) return;
@@ -11,14 +11,14 @@ const Index = () => {
       // Clear any existing particles
       particlesContainer.innerHTML = '';
 
-      const particleCount = 50;
+      const particleCount = 80; // Increased for better coverage
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement("div");
         particle.className = "particle";
         particle.style.left = Math.random() * 100 + "%";
+        particle.style.top = Math.random() * 100 + "%"; // Add vertical positioning
         particle.style.animationDelay = Math.random() * 20 + "s";
-        particle.style.animationDuration =
-          Math.random() * 10 + 15 + "s";
+        particle.style.animationDuration = Math.random() * 10 + 15 + "s";
         particlesContainer.appendChild(particle);
       }
     }
@@ -152,57 +152,44 @@ const Index = () => {
 
   return (
     <>
-      <div className="particles" id="particles"></div>
-      <header>
+      <div className="particles fixed inset-0 w-full h-full z-0" id="particles"></div>
+      <header className="relative z-10">
         <div className="container">
           <nav>
-            <div className="logo">Chain.IO</div>
+            <div className="logo">Supply Metrics Optimax</div>
             <ul className="nav-links">
-              <li>
-                <a href="#features">Features</a>
-              </li>
-              <li>
-                <a href="#portal">Portal</a>
-              </li>
-              <li>
-                <a href="#docs">Docs</a>
-              </li>
-              <li>
-                <a href="#support">Support</a>
-              </li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="/analytics">Analytics</a></li>
+              <li><a href="/pricing">Pricing</a></li>
+              <li><a href="/documentation">Docs</a></li>
+              <li><a href="/support">Support</a></li>
             </ul>
-            <a href="#" className="cta-button">
-              Launch Portal
-            </a>
+            <a href="/dashboard" className="cta-button">Launch Portal</a>
           </nav>
         </div>
       </header>
 
-      <section className="hero">
+      <section className="hero relative z-10">
         <div className="container">
-          <h1>Chain.IO</h1>
-          <p>Tenderzville Portal - Your Gateway to the Decentralized Future</p>
+          <h1>Supply Metrics Optimax</h1>
+          <p>Advanced Supply Chain Intelligence - Your Gateway to Optimized Operations</p>
           <div className="hero-buttons">
-            <a href="#" className="btn-primary">
-              Enter Portal
-            </a>
-            <a href="#" className="btn-secondary">
-              Explore Features
-            </a>
+            <a href="/dashboard" className="btn-primary">Enter Portal</a>
+            <a href="#features" className="btn-secondary">Explore Features</a>
           </div>
 
           <div className="stats">
             <div className="stat-item">
-              <span className="stat-number">10M+</span>
-              <span className="stat-label">Transactions</span>
+              <span className="stat-number">40+</span>
+              <span className="stat-label">Optimization Models</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">50K+</span>
-              <span className="stat-label">Active Users</span>
+              <span className="stat-number">100K+</span>
+              <span className="stat-label">Data Points</span>
             </div>
             <div className="stat-item">
               <span className="stat-number">99.9%</span>
-              <span className="stat-label">Uptime</span>
+              <span className="stat-label">Accuracy</span>
             </div>
             <div className="stat-item">
               <span className="stat-number">24/7</span>

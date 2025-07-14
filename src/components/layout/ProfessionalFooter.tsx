@@ -1,96 +1,85 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { 
+import {
   Network,
-  Mail,
-  Phone,
   MapPin,
+  Phone as PhoneIcon,
+  Mail as MailIcon,
   Github,
   Twitter,
   Linkedin
 } from "lucide-react";
 
 export const ProfessionalFooter = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Section */}
+          {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Network className="h-6 w-6 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Network className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <div className="text-xl font-bold">Supply Metrics Optimax</div>
-                <div className="text-sm text-gray-400">Advanced Supply Chain Intelligence</div>
-              </div>
+              <span className="text-xl font-bold">Supply Metrics Optimax</span>
             </div>
-            <p className="text-gray-300 text-sm">
-              Transform your supply chain with AI-powered optimization and real-time analytics.
+            <p className="text-gray-400 leading-relaxed">
+              Advanced supply chain optimization platform powered by AI and mathematical modeling.
             </p>
+            <div className="flex space-x-4">
+              <Github className="h-5 w-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+              <Twitter className="h-5 w-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+              <Linkedin className="h-5 w-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+            </div>
           </div>
 
-          {/* Product Links */}
+          {/* Solutions */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Product</h3>
-            <ul className="space-y-2">
-              <li><Link to="/analytics" className="text-gray-300 hover:text-white transition-colors">Analytics</Link></li>
-              <li><Link to="/pricing" className="text-gray-300 hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link to="/documentation" className="text-gray-300 hover:text-white transition-colors">Documentation</Link></li>
-              <li><Link to="/kenya-supply-chain" className="text-gray-300 hover:text-white transition-colors">Kenya Focus</Link></li>
+            <h3 className="text-lg font-semibold mb-4">Solutions</h3>
+            <ul className="space-y-2 text-gray-400">
+              <li><Link to="/analytics" className="hover:text-white transition-colors">Analytics Dashboard</Link></li>
+              <li><Link to="/network-optimization" className="hover:text-white transition-colors">Network Optimization</Link></li>
+              <li><Link to="/inventory-management" className="hover:text-white transition-colors">Inventory Management</Link></li>
+              <li><Link to="/route-optimization" className="hover:text-white transition-colors">Route Optimization</Link></li>
             </ul>
           </div>
 
-          {/* Support Links */}
+          {/* Resources */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
-            <ul className="space-y-2">
-              <li><Link to="/support" className="text-gray-300 hover:text-white transition-colors">Help Center</Link></li>
-              <li><Link to="/documentation" className="text-gray-300 hover:text-white transition-colors">API Docs</Link></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Community</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Status</a></li>
+            <h3 className="text-lg font-semibold mb-4">Resources</h3>
+            <ul className="space-y-2 text-gray-400">
+              <li><Link to="/documentation" className="hover:text-white transition-colors">Documentation</Link></li>
+              <li><Link to="/support" className="hover:text-white transition-colors">Support Center</Link></li>
+              <li><Link to="/kenya-supply-chain" className="hover:text-white transition-colors">Kenya Focus</Link></li>
+              <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <Mail className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-300">support@optimax.co.ke</span>
+            <div className="space-y-3 text-gray-400">
+              <div className="flex items-center space-x-2">
+                <MailIcon className="h-4 w-4" />
+                <span>contact@supplymetricsoptimax.com</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-300">+254 700 000 000</span>
+              <div className="flex items-center space-x-2">
+                <PhoneIcon className="h-4 w-4" />
+                <span>+254 (0) 700 123 456</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <MapPin className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-300">Nairobi, Kenya</span>
+              <div className="flex items-start space-x-2">
+                <MapPin className="h-4 w-4 mt-1" />
+                <span>Nairobi, Kenya<br />East Africa Hub</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="text-gray-400 text-sm">
-            © 2024 Supply Metrics Optimax. All rights reserved.
-          </div>
-          
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <Github className="h-5 w-5" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <Twitter className="h-5 w-5" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <Linkedin className="h-5 w-5" />
-            </a>
-          </div>
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <p>&copy; {currentYear} Supply Metrics Optimax. All rights reserved.</p>
         </div>
       </div>
     </footer>
