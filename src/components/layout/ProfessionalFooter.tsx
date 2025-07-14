@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import {
   Network,
   MapPin,
-  Phone as PhoneIcon,
-  Mail as MailIcon,
+  Phone,
+  Mail,
   Github,
   Twitter,
   Linkedin
@@ -63,11 +63,11 @@ export const ProfessionalFooter = () => {
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <div className="space-y-3 text-gray-400">
               <div className="flex items-center space-x-2">
-                <MailIcon className="h-4 w-4" />
+                <Mail className="h-4 w-4" />
                 <span>contact@supplymetricsoptimax.com</span>
               </div>
               <div className="flex items-center space-x-2">
-                <PhoneIcon className="h-4 w-4" />
+                <Phone className="h-4 w-4" />
                 <span>+254 (0) 700 123 456</span>
               </div>
               <div className="flex items-start space-x-2">
