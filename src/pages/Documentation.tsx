@@ -4,14 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { 
-  Book, 
   BookOpen, 
   FileText, 
   HelpCircle, 
   ExternalLink, 
   Download,
   Lightbulb,
-  Zap as Lightning,
+  Zap,
   Search,
   Settings
 } from "lucide-react";
@@ -27,7 +26,7 @@ const Documentation = () => {
     {
       title: "Optimization Models",
       description: "Optimize your operations with our powerful optimization models.",
-      icon: Lightning,
+      icon: Zap,
     },
     {
       title: "Real-time Data",
@@ -51,7 +50,7 @@ const Documentation = () => {
       title: "Getting Started",
       description: "Learn how to get started with Supply Metrics Optimax.",
       href: "#getting-started",
-      icon: Book,
+      icon: BookOpen,
     },
     {
       title: "Troubleshooting",

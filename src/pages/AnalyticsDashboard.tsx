@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,7 +112,6 @@ const AnalyticsDashboard = () => {
       setError(null);
 
       try {
-        // Mock data for now since tables don't exist yet
         const mockKpis = [
           { title: "Total Cost Savings", value: "$2.4M", change: "+12%", icon: "DollarSign", color: "from-green-500 to-green-600" },
           { title: "Optimization Success", value: "94%", change: "+5%", icon: "CheckCircle", color: "from-blue-500 to-blue-600" },

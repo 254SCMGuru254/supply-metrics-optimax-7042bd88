@@ -1,5 +1,5 @@
 
-import { Node, Route } from "@/components/NetworkMap";
+import { Node, Route } from "@/components/map/MapTypes";
 
 type HeuristicMetricsProps = {
   nodes: Node[];

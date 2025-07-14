@@ -10,7 +10,7 @@ import {
   Shield, 
   CheckCircle, 
   TrendingUp, 
-  MailIcon,
+  Mail,
   MessageCircle,
   Network,
   Star
