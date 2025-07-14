@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Calculator, TrendingUp, DollarSign, AlertCircle, CheckCircle, Download } from 'lucide-react';
+import { Calculator, TrendingUp, DollarSign, AlertTriangle, CheckCircle, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CostModelingProps {

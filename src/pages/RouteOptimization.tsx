@@ -1,3 +1,4 @@
+
 import { RouteOptimizationContent } from "@/components/route-optimization/RouteOptimizationContent";
 import { RouteFormulas } from "@/components/route-optimization/RouteFormulas";
 import { LeafletMapbox } from "@/components/maps/LeafletMapbox";
@@ -56,7 +57,7 @@ const RouteOptimization = () => {
         </TabsContent>
 
         <TabsContent value="optimization">
-          <RouteOptimizationContent />
+          <RouteOptimizationContent projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="leaflet">

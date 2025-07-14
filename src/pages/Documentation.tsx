@@ -8,11 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   BookOpen, 
   Search, 
-  Filter, 
+  SlidersHorizontal, 
   Download,
   ExternalLink,
   FileText,
-  Zap,
+  Activity,
   ArrowRight
 } from 'lucide-react';
 import { AppDocumentation } from '@/components/documentation/AppDocumentation';
@@ -87,7 +87,7 @@ const Documentation = () => {
                 />
               </div>
               <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
                 Filter
               </Button>
             </div>
@@ -105,10 +105,10 @@ const Documentation = () => {
           <TabsContent value="guides" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {quickStartGuides.map((guide, index) => (
-                <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary">{guide.category}</Badge>
+                      <Badge variant="outline">{guide.category}</Badge>
                       <span className="text-sm text-gray-500">{guide.time}</span>
                     </div>
                     <CardTitle className="text-lg">{guide.title}</CardTitle>
@@ -116,7 +116,7 @@ const Documentation = () => {
                   <CardContent>
                     <p className="text-gray-600 mb-4">{guide.description}</p>
                     <Button className="w-full">
-                      Read Guide
+                      Start Reading
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </CardContent>
@@ -126,30 +126,38 @@ const Documentation = () => {
           </TabsContent>
 
           <TabsContent value="api" className="space-y-6">
-            <Card className="shadow-lg bg-white/90 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  API Reference
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {apiDocumentation.map((api, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">{api.title}</h3>
-                        <Badge variant="outline">{api.endpoint.split(' ')[0]}</Badge>
+            <div className="grid grid-cols-1 gap-6">
+              {apiDocumentation.map((api, index) => (
+                <Card key={index} className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      {api.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Badge variant="outline" className="font-mono">
+                          {api.endpoint}
+                        </Badge>
                       </div>
-                      <code className="text-sm bg-gray-100 px-2 py-1 rounded">
-                        {api.endpoint}
-                      </code>
-                      <p className="text-gray-600 mt-2">{api.description}</p>
+                      <p className="text-gray-600">{api.description}</p>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Try It Out
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
 
           <TabsContent value="formulas" className="space-y-6">
@@ -157,46 +165,31 @@ const Documentation = () => {
           </TabsContent>
 
           <TabsContent value="integration" className="space-y-6">
-            <Card className="shadow-lg bg-white/90 backdrop-blur-sm">
+            <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Integration Guide
-                </CardTitle>
+                <CardTitle>System Integration</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">ERP Integration</h3>
-                    <p className="text-gray-600 mb-4">
-                      Connect Supply Metrics Optimax with your existing ERP systems for seamless data flow.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="p-4">
-                        <h4 className="font-semibold mb-2">SAP Integration</h4>
-                        <p className="text-sm text-gray-600">Direct API connections to SAP systems</p>
-                      </Card>
-                      <Card className="p-4">
-                        <h4 className="font-semibold mb-2">Oracle Integration</h4>
-                        <p className="text-sm text-gray-600">Seamless Oracle database connectivity</p>
-                      </Card>
+                <div className="space-y-4">
+                  <p className="text-gray-600">
+                    Learn how to integrate Supply Metrics Optimax with your existing systems:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <h4 className="font-semibold mb-2">ERP Integration</h4>
+                      <p className="text-sm text-gray-600">Connect with SAP, Oracle, and other ERP systems</p>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Third-Party APIs</h3>
-                    <p className="text-gray-600 mb-4">
-                      Integrate with external services for enhanced functionality.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="p-4">
-                        <h4 className="font-semibold mb-2">Google Maps API</h4>
-                        <p className="text-sm text-gray-600">Real-time mapping and routing</p>
-                      </Card>
-                      <Card className="p-4">
-                        <h4 className="font-semibold mb-2">Weather API</h4>
-                        <p className="text-sm text-gray-600">Weather-based optimization</p>
-                      </Card>
+                    <div className="p-4 border rounded-lg">
+                      <h4 className="font-semibold mb-2">WMS Integration</h4>
+                      <p className="text-sm text-gray-600">Warehouse Management System connectivity</p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <h4 className="font-semibold mb-2">TMS Integration</h4>
+                      <p className="text-sm text-gray-600">Transportation Management System integration</p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <h4 className="font-semibold mb-2">API Integration</h4>
+                      <p className="text-sm text-gray-600">RESTful API for custom integrations</p>
                     </div>
                   </div>
                 </div>
@@ -204,18 +197,6 @@ const Documentation = () => {
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Download Section */}
-        <Card className="shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Need Offline Access?</h2>
-            <p className="mb-6">Download our comprehensive documentation as a PDF for offline reference.</p>
-            <Button variant="secondary" size="lg">
-              <Download className="h-5 w-5 mr-2" />
-              Download PDF Guide
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

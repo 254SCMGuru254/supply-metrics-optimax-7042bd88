@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NetworkMap, Node, Route } from "@/components/NetworkMap";
+import { NetworkMap } from "@/components/NetworkMap";
 import { useToast } from "@/hooks/use-toast";
 import { ManualConnectionCreator } from "@/components/network-flow/ManualConnectionCreator";
-import { NodeType } from "@/components/map/MapTypes";
+import { Node, Route, NodeType } from "@/integrations/supabase/types";
 
 const NetworkFlow = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -86,7 +86,7 @@ const NetworkFlow = () => {
       const optimizationFactor = 0.8 + Math.random() * 0.4; // 80-120% of original
       return {
         ...route,
-        volume: Math.round(route.volume * optimizationFactor),
+        volume: Math.round((route.volume || 0) * optimizationFactor),
         isOptimized: true
       };
     });
@@ -172,7 +172,7 @@ const NetworkFlow = () => {
   };
 
   const getTotalCapacity = () => {
-    return routes.reduce((total, route) => total + route.volume, 0);
+    return routes.reduce((total, route) => total + (route.volume || 0), 0);
   };
 
   const getAverageTransitTime = () => {

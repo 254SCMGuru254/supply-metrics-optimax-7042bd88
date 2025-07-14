@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  Smartphone, 
+  Phone, 
   Mail, 
   Github, 
   Twitter, 
@@ -69,7 +69,7 @@ export const ProfessionalFooter = () => {
                 <span>support@supplymetricsoptmax.com</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Smartphone className="h-4 w-4 text-blue-400" />
+                <Phone className="h-4 w-4 text-blue-400" />
                 <span>+254 700 000 000</span>
               </div>
             </div>

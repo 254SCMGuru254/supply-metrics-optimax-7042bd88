@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NetworkMap } from "@/components/NetworkMap";
 import { CompleteCogCalculation, CogCalculationResult } from "@/components/cog/CompleteCogCalculation";
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
-import type { Node, Route } from "@/components/map/MapTypes";
+import { Node, Route, OwnershipType } from "@/integrations/supabase/types";
 import { CogFormulaSelector } from "@/components/cog/CogFormulaSelector";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,23 +42,23 @@ const CenterOfGravity = () => {
       return data.map(n => ({
         id: n.id,
         name: n.name,
-        type: n.type,
+        type: n.type as any,
         latitude: n.latitude,
         longitude: n.longitude,
         weight: n.demand,
-        ownership: 'owned' as const
+        ownership: 'owned' as OwnershipType
       }));
     },
     enabled: !!projectId
   });
 
   const addNodeMutation = useMutation({
-    mutationFn: async (newNode: Partial<Node>) => {
+    mutationFn: async (newNode: { latitude: number; longitude: number }) => {
       const { data, error } = await supabase.from('nodes').insert([{ 
         ...newNode, 
         project_id: projectId, 
         user_id: user?.id,
-        name: `New Demand Point ${demandPoints?.length || 0 + 1}`,
+        name: `New Demand Point ${(demandPoints?.length || 0) + 1}`,
         type: 'demand',
         demand: 100, // Default demand
        }]).select();
@@ -83,7 +83,7 @@ const CenterOfGravity = () => {
         name: 'Optimized Location',
         latitude: cogResult.latitude,
         longitude: cogResult.longitude,
-        ownership: 'proposed' as const
+        ownership: 'proposed' as OwnershipType
       });
     }
     setMapNodes(currentNodes);
@@ -96,7 +96,7 @@ const CenterOfGravity = () => {
       from: dp.id,
       to: 'cog-result',
       label: `Optimized route to ${dp.name}`,
-      ownership: 'proposed' as const
+      ownership: 'proposed' as OwnershipType
     }));
     setOptimizedRoutes(newOptimizedRoutes);
   };
