@@ -1,9 +1,10 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { NetworkMap } from '@/components/NetworkMap';
 import { Node, Route } from '@/components/map/MapTypes';
-import { Plus, Trash, Play, Upload, Download, Building, ShoppingCart, TruckIcon, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Play, Upload, Download, Building, ShoppingCart, Truck, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -66,73 +67,64 @@ export default function NetworkDesign() {
     enabled: !!projectId,
   });
 
-  const addFacilityMutation = useMutation(
-    async (newFacility: Omit<Facility, 'id' | 'ownership'>) => {
+  const addFacilityMutation = useMutation({
+    mutationFn: async (newFacility: Omit<Facility, 'id' | 'ownership'>) => {
       const { data, error } = await supabase.from('supply_nodes').insert([{ ...newFacility, project_id: projectId, user_id: user?.id }]).select();
       if (error) throw new Error(error.message);
       return data;
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['facilities', projectId]);
-        toast({ title: "Facility Added" });
-      },
-      onError: (error: Error) => {
-        toast({ title: "Error", description: error.message, variant: 'destructive' });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['facilities', projectId] });
+      toast({ title: "Facility Added" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: 'destructive' });
     }
-  );
+  });
 
-  const removeFacilityMutation = useMutation(
-    async (id: string) => {
+  const removeFacilityMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase.from('supply_nodes').delete().eq('id', id);
       if (error) throw new Error(error.message);
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['facilities', projectId]);
-        queryClient.invalidateQueries(['routes', projectId]);
-        toast({ title: "Facility Removed" });
-      },
-      onError: (error: Error) => {
-        toast({ title: "Error", description: error.message, variant: 'destructive' });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['facilities', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['routes', projectId] });
+      toast({ title: "Facility Removed" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: 'destructive' });
     }
-  );
+  });
   
-  const addRouteMutation = useMutation(
-    async (newRoute: Omit<Route, 'id' | 'ownership'>) => {
+  const addRouteMutation = useMutation({
+    mutationFn: async (newRoute: Omit<Route, 'id' | 'ownership'>) => {
       const { data, error } = await supabase.from('routes').insert([{ ...newRoute, project_id: projectId, user_id: user?.id }]).select();
       if (error) throw new Error(error.message);
       return data;
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['routes', projectId]);
-        toast({ title: "Route Added" });
-      },
-      onError: (error: Error) => {
-        toast({ title: "Error", description: error.message, variant: 'destructive' });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['routes', projectId] });
+      toast({ title: "Route Added" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: 'destructive' });
     }
-  );
+  });
 
-  const removeRouteMutation = useMutation(
-    async (id: string) => {
+  const removeRouteMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase.from('routes').delete().eq('id', id);
       if (error) throw new Error(error.message);
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['routes', projectId]);
-        toast({ title: "Route Removed" });
-      },
-      onError: (error: Error) => {
-        toast({ title: "Error", description: error.message, variant: 'destructive' });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['routes', projectId] });
+      toast({ title: "Route Removed" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: 'destructive' });
     }
-  );
-
+  });
 
   const [products, setProducts] = useState<Product[]>([{id: 'P1', name: 'Standard Widget', demand: 100}]);
 
@@ -216,13 +208,13 @@ export default function NetworkDesign() {
                 <Tabs defaultValue="facilities" className="flex-grow flex flex-col">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="facilities"><Building className="mr-2 h-4 w-4"/>Facilities</TabsTrigger>
-                        <TabsTrigger value="routes"><TruckIcon className="mr-2 h-4 w-4"/>Routes</TabsTrigger>
+                        <TabsTrigger value="routes"><Truck className="mr-2 h-4 w-4"/>Routes</TabsTrigger>
                         <TabsTrigger value="products"><ShoppingCart className="mr-2 h-4 w-4"/>Products</TabsTrigger>
                     </TabsList>
                     <TabsContent value="facilities" className="flex-grow overflow-y-auto">
                         <Card className="h-full">
                             <CardContent className="p-4">
-                                <Button onClick={handleAddFacility} size="sm" className="mb-4" disabled={addFacilityMutation.isLoading}><Plus className="mr-2 h-4 w-4"/>Add Facility</Button>
+                                <Button onClick={handleAddFacility} size="sm" className="mb-4" disabled={addFacilityMutation.isPending}><Plus className="mr-2 h-4 w-4"/>Add Facility</Button>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -239,8 +231,8 @@ export default function NetworkDesign() {
                                                 <TableCell>{f.type}</TableCell>
                                                 <TableCell>{f.capacity}</TableCell>
                                                 <TableCell>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveFacility(f.id)} disabled={removeFacilityMutation.isLoading}>
-                                                        <Trash className="h-4 w-4" />
+                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveFacility(f.id)} disabled={removeFacilityMutation.isPending}>
+                                                        <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
@@ -253,7 +245,7 @@ export default function NetworkDesign() {
                     <TabsContent value="routes" className="flex-grow overflow-y-auto">
                          <Card className="h-full">
                             <CardContent className="p-4">
-                                <Button onClick={handleAddRoute} size="sm" className="mb-4" disabled={addRouteMutation.isLoading}><Plus className="mr-2 h-4 w-4"/>Add Route</Button>
+                                <Button onClick={handleAddRoute} size="sm" className="mb-4" disabled={addRouteMutation.isPending}><Plus className="mr-2 h-4 w-4"/>Add Route</Button>
                                  <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -268,8 +260,8 @@ export default function NetworkDesign() {
                                                 <TableCell>{facilities.find(f=>f.id === r.from)?.name}</TableCell>
                                                 <TableCell>{facilities.find(f=>f.id === r.to)?.name}</TableCell>
                                                 <TableCell>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveRoute(r.id)} disabled={removeRouteMutation.isLoading}>
-                                                        <Trash className="h-4 w-4" />
+                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveRoute(r.id)} disabled={removeRouteMutation.isPending}>
+                                                        <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>

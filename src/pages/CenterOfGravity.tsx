@@ -46,14 +46,14 @@ const CenterOfGravity = () => {
         latitude: n.latitude,
         longitude: n.longitude,
         weight: n.demand,
-        ownership: 'owned'
+        ownership: 'owned' as const
       }));
     },
     enabled: !!projectId
   });
 
-  const addNodeMutation = useMutation(
-    async (newNode: Partial<Node>) => {
+  const addNodeMutation = useMutation({
+    mutationFn: async (newNode: Partial<Node>) => {
       const { data, error } = await supabase.from('nodes').insert([{ 
         ...newNode, 
         project_id: projectId, 
@@ -65,16 +65,14 @@ const CenterOfGravity = () => {
       if (error) throw new Error(error.message);
       return data;
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['demandPoints', projectId]);
-        toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
-      },
-      onError: (error: Error) => {
-        toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['demandPoints', projectId] });
+      toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
     }
-  );
+  });
 
   useEffect(() => {
     let currentNodes: Node[] = [...(demandPoints || [])];
@@ -85,7 +83,7 @@ const CenterOfGravity = () => {
         name: 'Optimized Location',
         latitude: cogResult.latitude,
         longitude: cogResult.longitude,
-        ownership: 'proposed'
+        ownership: 'proposed' as const
       });
     }
     setMapNodes(currentNodes);
@@ -98,7 +96,7 @@ const CenterOfGravity = () => {
       from: dp.id,
       to: 'cog-result',
       label: `Optimized route to ${dp.name}`,
-      ownership: 'proposed'
+      ownership: 'proposed' as const
     }));
     setOptimizedRoutes(newOptimizedRoutes);
   };

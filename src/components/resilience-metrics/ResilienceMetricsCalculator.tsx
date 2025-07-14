@@ -1,80 +1,276 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import NetworkMap from '@/components/NetworkMap';
-import { Shield, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NetworkMap } from '@/components/NetworkMap';
+import { AlertTriangle, Shield, TrendingUp, Activity, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-export const ResilienceMetricsCalculator = () => {
-  const [resilienceScore, setResilienceScore] = useState(0);
-  const [metrics, setMetrics] = useState([
-    { name: 'Network Redundancy', score: 85, status: 'good' },
-    { name: 'Supplier Diversity', score: 72, status: 'moderate' },
-    { name: 'Risk Mitigation', score: 91, status: 'excellent' },
-    { name: 'Recovery Time', score: 68, status: 'moderate' }
-  ]);
+interface ResilienceMetricsProps {
+  projectId?: string;
+}
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'excellent': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'good': return <Activity className="h-4 w-4 text-blue-600" />;
-      case 'moderate': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      default: return <AlertTriangle className="h-4 w-4 text-red-600" />;
-    }
-  };
+const ResilienceMetricsCalculator: React.FC<ResilienceMetricsProps> = ({ projectId }) => {
+  const [metrics, setMetrics] = useState({
+    redundancy: 0,
+    flexibility: 0,
+    velocity: 0,
+    visibility: 0,
+    collaboration: 0
+  });
+
+  const [results, setResults] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const calculateResilience = () => {
-    const average = metrics.reduce((sum, metric) => sum + metric.score, 0) / metrics.length;
-    setResilienceScore(Math.round(average));
+    setLoading(true);
+    
+    // Simulate calculation
+    setTimeout(() => {
+      const overallScore = Object.values(metrics).reduce((sum, score) => sum + score, 0) / Object.keys(metrics).length;
+      
+      const resilienceLevel = overallScore >= 80 ? 'High' : overallScore >= 60 ? 'Medium' : 'Low';
+      const riskLevel = overallScore >= 80 ? 'Low' : overallScore >= 60 ? 'Medium' : 'High';
+      
+      setResults({
+        overallScore,
+        resilienceLevel,
+        riskLevel,
+        recommendations: [
+          'Increase supplier diversification to improve redundancy',
+          'Implement real-time visibility tools',
+          'Develop contingency plans for critical disruptions'
+        ]
+      });
+      setLoading(false);
+      
+      toast({
+        title: "Resilience Analysis Complete",
+        description: `Overall resilience score: ${overallScore.toFixed(1)}%`
+      });
+    }, 2000);
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getScoreBadge = (score: number) => {
+    if (score >= 80) return 'default';
+    if (score >= 60) return 'secondary';
+    return 'destructive';
   };
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Supply Chain Resilience Metrics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Resilience Components</h3>
-              {metrics.map((metric, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(metric.status)}
-                    <span>{metric.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Progress value={metric.score} className="w-20" />
-                    <Badge variant="secondary">{metric.score}%</Badge>
-                  </div>
-                </div>
-              ))}
-              
-              <Button onClick={calculateResilience} className="w-full">
-                Calculate Overall Resilience
-              </Button>
-              
-              {resilienceScore > 0 && (
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{resilienceScore}%</div>
-                  <div className="text-sm text-gray-600">Overall Resilience Score</div>
-                </div>
-              )}
-            </div>
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
+          Supply Chain Resilience Metrics
+        </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto mt-2">
+          Assess and improve your supply chain's ability to withstand and recover from disruptions
+        </p>
+      </div>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Network Visualization</h3>
-              <NetworkMap nodes={[]} routes={[]} />
+      <Tabs defaultValue="assessment" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="assessment">Assessment</TabsTrigger>
+          <TabsTrigger value="results">Results</TabsTrigger>
+          <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="assessment" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Resilience Factors Assessment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <Label htmlFor="redundancy">Redundancy Score (0-100)</Label>
+                  <div className="flex items-center gap-4 mt-2">
+                    <Input
+                      id="redundancy"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={metrics.redundancy || ''}
+                      onChange={(e) => setMetrics({...metrics, redundancy: parseInt(e.target.value) || 0})}
+                      placeholder="Enter redundancy score"
+                    />
+                    <Progress value={metrics.redundancy} className="flex-1" />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Alternative suppliers, routes, and facilities</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="flexibility">Flexibility Score (0-100)</Label>
+                  <div className="flex items-center gap-4 mt-2">
+                    <Input
+                      id="flexibility"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={metrics.flexibility || ''}
+                      onChange={(e) => setMetrics({...metrics, flexibility: parseInt(e.target.value) || 0})}
+                      placeholder="Enter flexibility score"
+                    />
+                    <Progress value={metrics.flexibility} className="flex-1" />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Ability to adapt to changing conditions</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="velocity">Velocity Score (0-100)</Label>
+                  <div className="flex items-center gap-4 mt-2">
+                    <Input
+                      id="velocity"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={metrics.velocity || ''}
+                      onChange={(e) => setMetrics({...metrics, velocity: parseInt(e.target.value) || 0})}
+                      placeholder="Enter velocity score"
+                    />
+                    <Progress value={metrics.velocity} className="flex-1" />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Speed of response to disruptions</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="visibility">Visibility Score (0-100)</Label>
+                  <div className="flex items-center gap-4 mt-2">
+                    <Input
+                      id="visibility"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={metrics.visibility || ''}
+                      onChange={(e) => setMetrics({...metrics, visibility: parseInt(e.target.value) || 0})}
+                      placeholder="Enter visibility score"
+                    />
+                    <Progress value={metrics.visibility} className="flex-1" />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Real-time monitoring and transparency</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="collaboration">Collaboration Score (0-100)</Label>
+                  <div className="flex items-center gap-4 mt-2">
+                    <Input
+                      id="collaboration"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={metrics.collaboration || ''}
+                      onChange={(e) => setMetrics({...metrics, collaboration: parseInt(e.target.value) || 0})}
+                      placeholder="Enter collaboration score"
+                    />
+                    <Progress value={metrics.collaboration} className="flex-1" />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Partnership strength and communication</p>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <Button 
+                  onClick={calculateResilience} 
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? 'Calculating...' : 'Calculate Resilience Score'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="results" className="space-y-6">
+          {results && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Overall Resilience Score</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center space-y-4">
+                    <div className={`text-6xl font-bold ${getScoreColor(results.overallScore)}`}>
+                      {results.overallScore.toFixed(1)}%
+                    </div>
+                    <div className="flex justify-center gap-2">
+                      <Badge variant={getScoreBadge(results.overallScore)}>
+                        {results.resilienceLevel} Resilience
+                      </Badge>
+                      <Badge variant={results.riskLevel === 'Low' ? 'default' : results.riskLevel === 'Medium' ? 'secondary' : 'destructive'}>
+                        {results.riskLevel} Risk
+                      </Badge>
+                    </div>
+                    <Progress value={results.overallScore} className="mt-4" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Factor Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(metrics).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-center">
+                        <span className="capitalize">{key}</span>
+                        <div className="flex items-center gap-2">
+                          <Progress value={value} className="w-20" />
+                          <span className={`font-semibold ${getScoreColor(value)}`}>{value}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="recommendations" className="space-y-6">
+          {results && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Improvement Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {results.recommendations.map((rec: string, index: number) => (
+                    <div key={index} className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div>
+                        <div className="font-semibold">Recommendation {index + 1}</div>
+                        <div className="text-sm text-gray-600">{rec}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
+
+export default ResilienceMetricsCalculator;

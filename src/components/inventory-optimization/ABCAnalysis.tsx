@@ -1,100 +1,88 @@
 
-import React, { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, Download, Upload } from "lucide-react";
-import { InventoryItem, ABCAnalysisResult } from "@/components/map/MapTypes";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Plus, Download, Upload, Filter } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface InventoryItem {
+  id: string;
+  name: string;
+  annualUsage: number;
+  unitCost: number;
+  annualValue: number;
+  classification: 'A' | 'B' | 'C';
+  percentage: number;
+  cumulativePercentage: number;
+}
 
 interface ABCAnalysisProps {
   projectId?: string;
 }
 
 const ABCAnalysis: React.FC<ABCAnalysisProps> = ({ projectId }) => {
-  const [items, setItems] = useState<InventoryItem[]>([
-    {
-      id: "1",
-      sku: "SKU-001",
-      description: "High-value component A",
-      name: "Component A",
-      unitCost: 500,
-      demandRate: 1000,
-      leadTime: 7,
-      holdingCostRate: 0.25,
-      orderingCost: 100,
-      safetyStock: 50,
-      reorderPoint: 150,
-      economicOrderQuantity: 200,
-      annualDemand: 12000,
-      serviceLevel: 99
-    },
-    {
-      id: "2",
-      sku: "SKU-002",
-      description: "Medium-value component B",
-      name: "Component B",
-      unitCost: 200,
-      demandRate: 800,
-      leadTime: 5,
-      holdingCostRate: 0.20,
-      orderingCost: 80,
-      safetyStock: 30,
-      reorderPoint: 100,
-      economicOrderQuantity: 150,
-      annualDemand: 9600,
-      serviceLevel: 95
-    },
-    {
-      id: "3",
-      sku: "SKU-003",
-      description: "Low-value component C",
-      name: "Component C",
-      unitCost: 50,
-      demandRate: 500,
-      leadTime: 3,
-      holdingCostRate: 0.15,
-      orderingCost: 50,
-      safetyStock: 20,
-      reorderPoint: 60,
-      economicOrderQuantity: 100,
-      annualDemand: 6000,
-      serviceLevel: 90
-    }
-  ]);
-
-  const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
-    sku: "",
-    description: "",
-    unitCost: 0,
-    demandRate: 0,
-    annualDemand: 0
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [newItem, setNewItem] = useState({
+    name: '',
+    annualUsage: 0,
+    unitCost: 0
   });
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const { toast } = useToast();
 
-  const abcAnalysis = useMemo(() => {
-    if (items.length === 0) return null;
+  // Sample data for demonstration
+  const sampleData = [
+    { id: '1', name: 'Premium Coffee Beans', annualUsage: 1000, unitCost: 25.50 },
+    { id: '2', name: 'Tea Leaves', annualUsage: 500, unitCost: 15.00 },
+    { id: '3', name: 'Sugar', annualUsage: 2000, unitCost: 2.50 },
+    { id: '4', name: 'Milk Powder', annualUsage: 800, unitCost: 8.00 },
+    { id: '5', name: 'Coffee Filters', annualUsage: 1200, unitCost: 0.50 },
+    { id: '6', name: 'Packaging Material', annualUsage: 3000, unitCost: 1.20 },
+    { id: '7', name: 'Cleaning Supplies', annualUsage: 200, unitCost: 5.00 },
+    { id: '8', name: 'Equipment Parts', annualUsage: 50, unitCost: 45.00 },
+  ];
 
-    // Calculate annual value for each item
-    const itemsWithValue = items.map(item => ({
+  useEffect(() => {
+    // Initialize with sample data
+    const initialItems = sampleData.map(item => ({
       ...item,
-      annualValue: (item.annualDemand || item.demandRate * 12) * item.unitCost
+      annualValue: item.annualUsage * item.unitCost,
+      classification: 'A' as const,
+      percentage: 0,
+      cumulativePercentage: 0
     }));
+    
+    const analyzed = performABCAnalysis(initialItems);
+    setItems(analyzed);
+  }, []);
 
-    // Sort by annual value descending
-    itemsWithValue.sort((a, b) => b.annualValue - a.annualValue);
-
-    const totalValue = itemsWithValue.reduce((sum, item) => sum + item.annualValue, 0);
+  const performABCAnalysis = (itemList: Omit<InventoryItem, 'classification' | 'percentage' | 'cumulativePercentage'>[]): InventoryItem[] => {
+    // Calculate total annual value
+    const totalValue = itemList.reduce((sum, item) => sum + item.annualValue, 0);
+    
+    // Sort by annual value in descending order
+    const sortedItems = [...itemList].sort((a, b) => b.annualValue - a.annualValue);
+    
+    // Calculate percentages and cumulative percentages
     let cumulativeValue = 0;
-
-    // Classify items
-    const classifiedItems = itemsWithValue.map((item, index) => {
-      cumulativeValue += item.annualValue;
+    const analyzedItems: InventoryItem[] = sortedItems.map(item => {
       const percentage = (item.annualValue / totalValue) * 100;
+      cumulativeValue += item.annualValue;
       const cumulativePercentage = (cumulativeValue / totalValue) * 100;
       
+      // Classify items
       let classification: 'A' | 'B' | 'C';
       if (cumulativePercentage <= 80) {
         classification = 'A';
@@ -103,80 +91,65 @@ const ABCAnalysis: React.FC<ABCAnalysisProps> = ({ projectId }) => {
       } else {
         classification = 'C';
       }
-
+      
       return {
-        item,
-        annualValue: item.annualValue,
+        ...item,
         percentage,
         cumulativePercentage,
         classification
       };
     });
 
-    // Group by classification
-    const classA = classifiedItems.filter(item => item.classification === 'A');
-    const classB = classifiedItems.filter(item => item.classification === 'B');
-    const classC = classifiedItems.filter(item => item.classification === 'C');
+    // Calculate summary statistics
+    const aItems = analyzedItems.filter(item => item.classification === 'A');
+    const bItems = analyzedItems.filter(item => item.classification === 'B');
+    const cItems = analyzedItems.filter(item => item.classification === 'C');
 
-    const classAValue = classA.reduce((sum, item) => sum + item.annualValue, 0);
-
-    return {
-      items: classifiedItems,
-      classA: classA.map(c => c.item),
-      classB: classB.map(c => c.item),
-      classC: classC.map(c => c.item),
-      metrics: {
-        totalItems: items.length,
-        totalValue,
-        aItems: classA.length,
-        bItems: classB.length,
-        cItems: classC.length,
-        classAValuePercentage: (classAValue / totalValue) * 100
-      }
+    const results = {
+      totalItems: analyzedItems.length,
+      totalValue,
+      aItems: aItems.length,
+      bItems: bItems.length,
+      cItems: cItems.length,
+      classAValuePercentage: (aItems.reduce((sum, item) => sum + item.annualValue, 0) / totalValue) * 100,
+      classBValuePercentage: (bItems.reduce((sum, item) => sum + item.annualValue, 0) / totalValue) * 100,
+      classCValuePercentage: (cItems.reduce((sum, item) => sum + item.annualValue, 0) / totalValue) * 100,
     };
-  }, [items]);
 
-  const chartData = useMemo(() => {
-    if (!abcAnalysis) return [];
-    
-    return [
-      { name: 'Class A', count: abcAnalysis.metrics.aItems, value: abcAnalysis.classA.reduce((sum, item) => sum + (item.annualDemand || 0) * item.unitCost, 0), color: '#ef4444' },
-      { name: 'Class B', count: abcAnalysis.metrics.bItems, value: abcAnalysis.classB.reduce((sum, item) => sum + (item.annualDemand || 0) * item.unitCost, 0), color: '#f59e0b' },
-      { name: 'Class C', count: abcAnalysis.metrics.cItems, value: abcAnalysis.classC.reduce((sum, item) => sum + (item.annualDemand || 0) * item.unitCost, 0), color: '#10b981' }
-    ];
-  }, [abcAnalysis]);
-
-  const addItem = () => {
-    if (newItem.sku && newItem.description && newItem.unitCost && newItem.demandRate) {
-      const item: InventoryItem = {
-        id: Date.now().toString(),
-        sku: newItem.sku,
-        description: newItem.description || "",
-        name: newItem.description || "",
-        unitCost: newItem.unitCost,
-        demandRate: newItem.demandRate,
-        annualDemand: newItem.annualDemand || newItem.demandRate * 12,
-        leadTime: 7,
-        holdingCostRate: 0.25,
-        orderingCost: 100,
-        safetyStock: 0,
-        reorderPoint: 0,
-        economicOrderQuantity: 0,
-        serviceLevel: 95
-      };
-      
-      setItems([...items, item]);
-      setNewItem({
-        sku: "",
-        description: "",
-        unitCost: 0,
-        demandRate: 0,
-        annualDemand: 0
-      });
-    }
+    setAnalysisResults(results);
+    return analyzedItems;
   };
 
-  const getClassificationColor = (classification: 'A' | 'B' | 'C') => {
+  const handleAddItem = () => {
+    if (!newItem.name || newItem.annualUsage <= 0 || newItem.unitCost <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all fields with valid values",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const item = {
+      id: Date.now().toString(),
+      name: newItem.name,
+      annualUsage: newItem.annualUsage,
+      unitCost: newItem.unitCost,
+      annualValue: newItem.annualUsage * newItem.unitCost
+    };
+
+    const updatedItems = [...items, item];
+    const analyzed = performABCAnalysis(updatedItems);
+    setItems(analyzed);
+    setNewItem({ name: '', annualUsage: 0, unitCost: 0 });
+    
+    toast({
+      title: "Item Added",
+      description: "Item has been added and analysis updated"
+    });
+  };
+
+  const getClassificationColor = (classification: string) => {
     switch (classification) {
       case 'A': return 'bg-red-100 text-red-800';
       case 'B': return 'bg-yellow-100 text-yellow-800';
@@ -185,172 +158,190 @@ const ABCAnalysis: React.FC<ABCAnalysisProps> = ({ projectId }) => {
     }
   };
 
+  const chartData = analysisResults ? [
+    { name: 'Class A', count: analysisResults.aItems, value: analysisResults.classAValuePercentage, color: '#ef4444' },
+    { name: 'Class B', count: analysisResults.bItems, value: analysisResults.classBValuePercentage, color: '#f59e0b' },
+    { name: 'Class C', count: analysisResults.cItems, value: analysisResults.classCValuePercentage, color: '#10b981' }
+  ] : [];
+
+  const COLORS = ['#ef4444', '#f59e0b', '#10b981'];
+
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">ABC Analysis</h2>
+          <p className="text-muted-foreground">Classify inventory items based on their annual value</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-2" />
+            Import
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Add New Item Form */}
       <Card>
         <CardHeader>
-          <CardTitle>ABC Analysis - Inventory Classification</CardTitle>
+          <CardTitle>Add New Item</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="space-y-2">
-              <Label htmlFor="sku">SKU</Label>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="itemName">Item Name</Label>
               <Input
-                id="sku"
-                value={newItem.sku || ""}
-                onChange={(e) => setNewItem({ ...newItem, sku: e.target.value })}
-                placeholder="Enter SKU"
+                id="itemName"
+                value={newItem.name}
+                onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                placeholder="Enter item name"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+            <div>
+              <Label htmlFor="annualUsage">Annual Usage</Label>
               <Input
-                id="description"
-                value={newItem.description || ""}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                placeholder="Item description"
+                id="annualUsage"
+                type="number"
+                value={newItem.annualUsage || ''}
+                onChange={(e) => setNewItem({...newItem, annualUsage: parseInt(e.target.value) || 0})}
+                placeholder="Enter annual usage"
               />
             </div>
-            <div className="space-y-2">
+            <div>
               <Label htmlFor="unitCost">Unit Cost ($)</Label>
               <Input
                 id="unitCost"
                 type="number"
-                value={newItem.unitCost || ""}
-                onChange={(e) => setNewItem({ ...newItem, unitCost: Number(e.target.value) })}
-                placeholder="0"
+                step="0.01"
+                value={newItem.unitCost || ''}
+                onChange={(e) => setNewItem({...newItem, unitCost: parseFloat(e.target.value) || 0})}
+                placeholder="Enter unit cost"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="demandRate">Annual Demand</Label>
-              <Input
-                id="demandRate"
-                type="number"
-                value={newItem.demandRate || ""}
-                onChange={(e) => setNewItem({ ...newItem, demandRate: Number(e.target.value) })}
-                placeholder="0"
-              />
+            <div className="flex items-end">
+              <Button onClick={handleAddItem} className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Item
+              </Button>
             </div>
           </div>
-          
-          <div className="flex gap-2 mb-6">
-            <Button onClick={addItem} className="flex items-center gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Add Item
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Upload className="h-4 w-4" />
-              Import CSV
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export Results
-            </Button>
-          </div>
+        </CardContent>
+      </Card>
 
-          {abcAnalysis && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Classification Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Total Items:</span>
-                      <span className="font-semibold">{abcAnalysis.metrics.totalItems}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Total Value:</span>
-                      <span className="font-semibold">${abcAnalysis.metrics.totalValue.toLocaleString()}</span>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Badge className="bg-red-100 text-red-800">Class A</Badge>
-                        <span>{abcAnalysis.metrics.aItems} items ({((abcAnalysis.metrics.aItems/abcAnalysis.metrics.totalItems)*100).toFixed(1)}%)</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <Badge className="bg-yellow-100 text-yellow-800">Class B</Badge>
-                        <span>{abcAnalysis.metrics.bItems} items ({((abcAnalysis.metrics.bItems/abcAnalysis.metrics.totalItems)*100).toFixed(1)}%)</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <Badge className="bg-green-100 text-green-800">Class C</Badge>
-                        <span>{abcAnalysis.metrics.cItems} items ({((abcAnalysis.metrics.cItems/abcAnalysis.metrics.totalItems)*100).toFixed(1)}%)</span>
-                      </div>
-                    </div>
+      {/* Analysis Results */}
+      {analysisResults && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Classification Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                  <div>
+                    <div className="font-semibold">Class A Items</div>
+                    <div className="text-sm text-gray-600">High value items</div>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Value Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={chartData}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, count }) => `${name}: ${count}`}
-                      >
-                        {chartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => [`$${Number(value).toLocaleString()}`, "Value"]} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {abcAnalysis && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Detailed Classification Results</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="border border-gray-300 px-4 py-2 text-left">SKU</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left">Description</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right">Unit Cost</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right">Annual Demand</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right">Annual Value</th>
-                        <th className="border border-gray-300 px-4 py-2 text-center">Classification</th>
-                        <th className="border border-gray-300 px-4 py-2 text-right">Cumulative %</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {abcAnalysis.items.map((result, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="border border-gray-300 px-4 py-2">{result.item.sku}</td>
-                          <td className="border border-gray-300 px-4 py-2">{result.item.description}</td>
-                          <td className="border border-gray-300 px-4 py-2 text-right">${result.item.unitCost}</td>
-                          <td className="border border-gray-300 px-4 py-2 text-right">{result.item.annualDemand || result.item.demandRate * 12}</td>
-                          <td className="border border-gray-300 px-4 py-2 text-right">${result.annualValue.toLocaleString()}</td>
-                          <td className="border border-gray-300 px-4 py-2 text-center">
-                            <Badge className={getClassificationColor(result.classification)}>
-                              {result.classification}
-                            </Badge>
-                          </td>
-                          <td className="border border-gray-300 px-4 py-2 text-right">{result.cumulativePercentage.toFixed(1)}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="text-right">
+                    <div className="font-bold text-red-600">{analysisResults.aItems}</div>
+                    <div className="text-sm text-gray-600">{analysisResults.classAValuePercentage.toFixed(1)}% of value</div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                  <div>
+                    <div className="font-semibold">Class B Items</div>
+                    <div className="text-sm text-gray-600">Medium value items</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-yellow-600">{analysisResults.bItems}</div>
+                    <div className="text-sm text-gray-600">{analysisResults.classBValuePercentage.toFixed(1)}% of value</div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                  <div>
+                    <div className="font-semibold">Class C Items</div>
+                    <div className="text-sm text-gray-600">Low value items</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-green-600">{analysisResults.cItems}</div>
+                    <div className="text-sm text-gray-600">{analysisResults.classCValuePercentage.toFixed(1)}% of value</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Value Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, count }) => `${name}: ${count} items`}
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Items Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Inventory Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item Name</TableHead>
+                  <TableHead>Annual Usage</TableHead>
+                  <TableHead>Unit Cost</TableHead>
+                  <TableHead>Annual Value</TableHead>
+                  <TableHead>Value %</TableHead>
+                  <TableHead>Cumulative %</TableHead>
+                  <TableHead>Classification</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>{item.annualUsage.toLocaleString()}</TableCell>
+                    <TableCell>${item.unitCost.toFixed(2)}</TableCell>
+                    <TableCell>${item.annualValue.toFixed(2)}</TableCell>
+                    <TableCell>{item.percentage.toFixed(1)}%</TableCell>
+                    <TableCell>{item.cumulativePercentage.toFixed(1)}%</TableCell>
+                    <TableCell>
+                      <Badge className={getClassificationColor(item.classification)}>
+                        Class {item.classification}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
