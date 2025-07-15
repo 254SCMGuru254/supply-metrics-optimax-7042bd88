@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Send,
   MessageSquare,
-  Clipboard
+  ClipboardList
 } from 'lucide-react';
 
 const ChatAssistant = () => {
@@ -39,7 +38,7 @@ const ChatAssistant = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Clipboard className="mr-2 h-5 w-5" />
+              <ClipboardList className="mr-2 h-5 w-5" />
               Knowledge Base
             </CardTitle>
             <CardDescription>Access our comprehensive documentation and guides.</CardDescription>

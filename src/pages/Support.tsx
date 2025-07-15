@@ -1,104 +1,126 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Send,
-  MessageSquare,
-  PhoneCall
+  HelpCircle,
+  Mail,
+  Phone,
+  MessageCircle,
+  FileText,
+  Users,
+  Clock,
+  Video
 } from 'lucide-react';
 
 const Support = () => {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold mb-4">Support & Contact</h2>
+        <h2 className="text-3xl font-bold mb-4">Support Center</h2>
         <p className="text-muted-foreground">
-          Need assistance? Contact our support team or schedule a meeting with our experts.
+          Get help when you need it. Our support team is here to assist you.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Contact Support Card */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <MessageSquare className="mr-2 h-5 w-5" />
-              Contact Support
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Live Chat
             </CardTitle>
-            <CardDescription>Get in touch with our support team for technical assistance.</CardDescription>
+            <CardDescription>Get instant help from our support team</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center">
-              <Send className="mr-2 h-4 w-4 text-muted-foreground" />
-              <a href="mailto:support@chainalyze.io" className="text-sm text-blue-500 hover:underline">
-                support@chainalyze.io
-              </a>
+            <div className="flex items-center text-sm text-green-600">
+              <Clock className="mr-2 h-4 w-4" />
+              Available 24/7
             </div>
-            <div className="flex items-center">
-              <PhoneCall className="mr-2 h-4 w-4 text-muted-foreground" />
-              <a href="tel:+254700123456" className="text-sm text-blue-500 hover:underline">
-                +254 700 123456
-              </a>
-            </div>
-            <Button>Contact Support</Button>
+            <Button className="w-full">Start Chat</Button>
           </CardContent>
         </Card>
 
-        {/* Schedule Meeting Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <PhoneCall className="mr-2 h-5 w-5" />
-              Schedule a Meeting
+              <Mail className="mr-2 h-5 w-5" />
+              Email Support
             </CardTitle>
-            <CardDescription>Book a virtual meeting with our supply chain experts.</CardDescription>
+            <CardDescription>Send us a detailed message</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="mr-2 h-4 w-4" />
+              Response within 24 hours
+            </div>
+            <Button className="w-full">Send Email</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Phone className="mr-2 h-5 w-5" />
+              Phone Support
+            </CardTitle>
+            <CardDescription>Speak directly with our experts</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="mr-2 h-4 w-4" />
+              Mon-Fri 9AM-6PM EST
+            </div>
+            <Button className="w-full">Call Now</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileText className="mr-2 h-5 w-5" />
+              Documentation
+            </CardTitle>
+            <CardDescription>Browse our comprehensive guides</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Discuss your specific needs and challenges with our team.
+              Find answers in our detailed documentation.
             </p>
-            <Button>Schedule Meeting</Button>
+            <Button className="w-full">View Docs</Button>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="mt-12">
-        <h3 className="text-xl font-semibold mb-4">Frequently Asked Questions</h3>
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>What is Supply Chain Optimization?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Supply chain optimization involves streamlining processes, reducing costs, and improving efficiency across the entire supply chain, from sourcing raw materials to delivering finished products to customers.
-              </p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Users className="mr-2 h-5 w-5" />
+              Community
+            </CardTitle>
+            <CardDescription>Connect with other users</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Join our community forum for discussions and tips.
+            </p>
+            <Button className="w-full">Join Community</Button>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>How can Chain.io help my business?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Chain.io provides tools and solutions to optimize your supply chain, including route optimization, network design, inventory management, and cost modeling. Our platform helps you make data-driven decisions to improve performance and reduce costs.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>What kind of support do you offer?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                We offer technical support via email and phone, as well as virtual meetings with our supply chain experts. Our team is dedicated to helping you get the most out of our platform and achieve your business goals.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Video className="mr-2 h-5 w-5" />
+              Video Tutorials
+            </CardTitle>
+            <CardDescription>Learn through step-by-step videos</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Watch detailed tutorials and walkthroughs.
+            </p>
+            <Button className="w-full">Watch Videos</Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
