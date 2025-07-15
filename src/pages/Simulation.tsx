@@ -1,168 +1,121 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { Play, Pause, RotateCcw, Settings, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useParams } from 'react-router-dom';
+import { 
+  Play, 
+  Square, 
+  RotateCcw, 
+  Settings, 
+  Activity, 
+  TrendingUp, 
+  BarChart3,
+  Timer,
+  Zap
+} from 'lucide-react';
 
 const Simulation = () => {
-  const { projectId } = useParams<{ projectId: string }>();
   const [isRunning, setIsRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [simulationData, setSimulationData] = useState<any[]>([]);
-  const [scenarios, setScenarios] = useState<any[]>([]);
-  const { toast } = useToast();
+  const [simulationSpeed, setSimulationSpeed] = useState(1);
+  const [iterationCount, setIterationCount] = useState(0);
+  const [dataPoints, setDataPoints] = useState([5, 10, 15, 8, 12]);
 
-  const runSimulation = () => {
-    setIsRunning(true);
-    setProgress(0);
-    
-    // Simulate running Monte Carlo simulation
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsRunning(false);
-          generateResults();
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 500);
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isRunning) {
+      intervalId = setInterval(() => {
+        setIterationCount((prevCount) => prevCount + 1);
+        // Simulate data changes
+        setDataPoints((prevData) => {
+          const newData = prevData.map((point) => point + Math.floor(Math.random() * 4) - 1);
+          return newData;
+        });
+      }, 1000 / simulationSpeed);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isRunning, simulationSpeed]);
+
+  const toggleSimulation = () => {
+    setIsRunning(!isRunning);
   };
 
-  const generateResults = () => {
-    const results = Array.from({ length: 12 }, (_, i) => ({
-      month: `Month ${i + 1}`,
-      cost: Math.random() * 100000 + 50000,
-      demand: Math.random() * 1000 + 500,
-      serviceLevel: Math.random() * 20 + 80
-    }));
-    setSimulationData(results);
-    
-    toast({
-      title: "Simulation Complete",
-      description: "Monte Carlo simulation finished successfully"
-    });
+  const resetSimulation = () => {
+    setIsRunning(false);
+    setIterationCount(0);
+    setDataPoints([5, 10, 15, 8, 12]);
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Supply Chain Simulation
-        </h1>
-        <p className="text-gray-600 max-w-3xl mx-auto">
-          Run Monte Carlo simulations and scenario analysis to test different supply chain configurations
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold">Supply Chain Simulation</h1>
+        <p className="text-muted-foreground mt-2">
+          Model and simulate supply chain dynamics in real-time
         </p>
       </div>
 
-      <Tabs defaultValue="monte-carlo" className="space-y-6">
-        <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="monte-carlo">Monte Carlo</TabsTrigger>
-          <TabsTrigger value="scenarios">Scenario Analysis</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-        </TabsList>
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Simulation Controls
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Simulation Speed</Label>
+            <Input
+              type="number"
+              value={simulationSpeed}
+              onChange={(e) => setSimulationSpeed(parseFloat(e.target.value))}
+              className="w-24"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label>Iteration Count</Label>
+            <Badge variant="secondary">{iterationCount}</Badge>
+          </div>
+          <div className="flex justify-around">
+            <Button onClick={toggleSimulation} variant={isRunning ? "destructive" : "outline"}>
+              {isRunning ? <Square className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
+              {isRunning ? "Stop" : "Start"}
+            </Button>
+            <Button onClick={resetSimulation} variant="secondary">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="monte-carlo" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Play className="h-5 w-5" />
-                Monte Carlo Simulation
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="iterations">Iterations</Label>
-                  <Input id="iterations" type="number" defaultValue="1000" />
-                </div>
-                <div>
-                  <Label htmlFor="confidence">Confidence Level (%)</Label>
-                  <Input id="confidence" type="number" defaultValue="95" />
-                </div>
-                <div>
-                  <Label htmlFor="timeHorizon">Time Horizon (months)</Label>
-                  <Input id="timeHorizon" type="number" defaultValue="12" />
-                </div>
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Real-time Data Visualization
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-around">
+            {dataPoints.map((point, index) => (
+              <div key={index} className="text-center">
+                <div className="text-sm">Data Point {index + 1}</div>
+                <div className="text-2xl font-bold">{point}</div>
               </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="flex gap-4">
-                <Button 
-                  onClick={runSimulation}
-                  disabled={isRunning}
-                  className="flex items-center gap-2"
-                >
-                  {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  {isRunning ? 'Running...' : 'Run Simulation'}
-                </Button>
-                <Button variant="outline">
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
-              </div>
-
-              {isRunning && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Progress</span>
-                    <span>{progress}%</span>
-                  </div>
-                  <Progress value={progress} />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="results" className="space-y-6">
-          {simulationData.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Cost Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={simulationData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Cost']} />
-                      <Line type="monotone" dataKey="cost" stroke="#8884d8" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Service Level Analysis</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={simulationData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value: any) => [`${value.toFixed(1)}%`, 'Service Level']} />
-                      <Bar dataKey="serviceLevel" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      <div className="text-center">
+        <p className="text-sm text-muted-foreground">
+          Simulating supply chain dynamics with real-time data updates
+        </p>
+      </div>
     </div>
   );
 };

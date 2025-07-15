@@ -120,15 +120,14 @@ export const AdvancedAnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={usageData}>
+                <BarChart data={usageData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
+                  <YAxis />
                   <Tooltip />
-                  <Bar yAxisId="left" dataKey="optimizations" fill="#3B82F6" />
-                  <Line yAxisId="right" type="monotone" dataKey="savings" stroke="#10B981" strokeWidth={2} />
-                </LineChart>
+                  <Bar dataKey="optimizations" fill="#3B82F6" name="Optimizations" />
+                  <Bar dataKey="savings" fill="#10B981" name="Savings ($)" />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -144,18 +143,18 @@ export const AdvancedAnalyticsDashboard = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
+                      data={modelData}
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
                       fill="#8884d8"
                       dataKey="usage"
-                      label={({ model, usage }) => `${model}: ${usage}`}
                     >
                       {modelData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip formatter={(value) => [`${value}`, 'Usage Count']} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>

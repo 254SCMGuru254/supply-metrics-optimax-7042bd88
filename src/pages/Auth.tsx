@@ -8,15 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
-  LogIn, 
+  LogIn as Login, 
   UserPlus, 
-  Mail, 
-  Lock, 
+  AtSign, 
+  KeyRound, 
   Eye, 
   EyeOff,
   Loader2,
   CheckCircle,
-  Star,
+  StarIcon,
   Zap,
   TrendingUp
 } from 'lucide-react';
@@ -30,7 +30,8 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: ''
+    fullName: '',
+    company: ''
   });
   const { signIn, signUp, user } = useAuth();
   const { toast } = useToast();
@@ -99,6 +100,7 @@ const Auth = () => {
     try {
       const { error } = await signUp(formData.email, formData.password, {
         full_name: formData.fullName,
+        company: formData.company || 'Not specified',
       });
       
       if (error) {
@@ -132,7 +134,7 @@ const Auth = () => {
     { icon: TrendingUp, title: "Advanced Analytics", description: "Real-time supply chain insights" },
     { icon: Zap, title: "AI-Powered Optimization", description: "Intelligent route and inventory optimization" },
     { icon: CheckCircle, title: "Enterprise Ready", description: "Scalable solutions for any business size" },
-    { icon: Star, title: "World-Class Support", description: "24/7 expert assistance" }
+    { icon: StarIcon, title: "World-Class Support", description: "24/7 expert assistance" }
   ];
 
   return (
@@ -185,7 +187,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signin-email">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <AtSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-email"
                           type="email"
@@ -201,7 +203,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signin-password">Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <KeyRound className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-password"
                           type={showPassword ? "text" : "password"}
@@ -229,7 +231,7 @@ const Auth = () => {
                         </>
                       ) : (
                         <>
-                          <LogIn className="mr-2 h-4 w-4" />
+                          <Login className="mr-2 h-4 w-4" />
                           Sign In
                         </>
                       )}
@@ -252,9 +254,20 @@ const Auth = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="signup-company">Company (Optional)</Label>
+                      <Input
+                        id="signup-company"
+                        type="text"
+                        placeholder="Enter your company name"
+                        value={formData.company}
+                        onChange={(e) => handleInputChange('company', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <AtSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-email"
                           type="email"
@@ -270,7 +283,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <KeyRound className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-password"
                           type={showPassword ? "text" : "password"}
@@ -293,7 +306,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirm Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <KeyRound className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="confirm-password"
                           type={showPassword ? "text" : "password"}

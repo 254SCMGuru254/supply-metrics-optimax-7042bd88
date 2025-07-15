@@ -156,6 +156,7 @@ const AnalyticsDashboard = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
+                      data={costBreakdownData}
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
@@ -245,16 +246,15 @@ const AnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={usageTrends}>
+                <BarChart data={usageTrends}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
+                  <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="users" fill="#8884d8" name="Users" />
-                  <Line yAxisId="right" type="monotone" dataKey="optimizations" stroke="#82ca9d" strokeWidth={2} name="Optimizations" />
-                </LineChart>
+                  <Bar dataKey="users" fill="#8884d8" name="Users" />
+                  <Bar dataKey="optimizations" fill="#82ca9d" name="Optimizations" />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>

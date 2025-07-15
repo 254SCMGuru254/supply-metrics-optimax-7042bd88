@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   MessageSquare, 
   Send, 
-  Bot, 
+  BotIcon as Bot, 
   User, 
   Zap, 
   BarChart3,

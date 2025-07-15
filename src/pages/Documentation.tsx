@@ -12,7 +12,7 @@ import {
   TrendingUp, 
   Settings,
   ArrowRight,
-  Code,
+  FileCode,
   FileText,
   HelpCircle,
   Lightbulb
@@ -199,7 +199,7 @@ const Documentation = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Code className="h-6 w-6" />
+                <FileCode className="h-6 w-6" />
                 API Reference
               </CardTitle>
             </CardHeader>

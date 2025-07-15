@@ -2,11 +2,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Phone as PhoneIcon, 
-  Mail as MailIcon, 
-  Github as GithubIcon, 
-  Twitter as TwitterIcon, 
-  Linkedin as LinkedinIcon 
+  Smartphone, 
+  AtSign, 
+  Github, 
+  Twitter, 
+  Linkedin 
 } from 'lucide-react';
 
 export const ProfessionalFooter = () => {
@@ -22,13 +22,13 @@ export const ProfessionalFooter = () => {
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <TwitterIcon className="h-5 w-5" />
+                <Twitter className="h-5 w-5" />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <LinkedinIcon className="h-5 w-5" />
+                <Linkedin className="h-5 w-5" />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <GithubIcon className="h-5 w-5" />
+                <Github className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -92,11 +92,11 @@ export const ProfessionalFooter = () => {
             <h4 className="text-lg font-semibold mb-4">Contact</h4>
             <div className="space-y-2">
               <div className="flex items-center text-gray-300 text-sm">
-                <PhoneIcon className="h-4 w-4 mr-2" />
+                <Smartphone className="h-4 w-4 mr-2" />
                 +1 (555) 123-4567
               </div>
               <div className="flex items-center text-gray-300 text-sm">
-                <MailIcon className="h-4 w-4 mr-2" />
+                <AtSign className="h-4 w-4 mr-2" />
                 support@optimax.com
               </div>
             </div>
