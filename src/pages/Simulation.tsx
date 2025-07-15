@@ -1,187 +1,214 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Toggle } from '@/components/ui/toggle';
-import {
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
   Play, 
-  Square as Stop, 
-  RotateCcw as Reset,
-  Settings,
+  Square, 
+  RefreshCcw,
   BarChart3,
-  Timer as Clock,
-  Zap as Lightning
+  Activity,
+  Clock,
+  Zap,
+  Settings,
+  AlertTriangle
 } from 'lucide-react';
 
 const Simulation = () => {
-  const [isRunning, setIsRunning] = useState(false);
+  const [simulationStatus, setSimulationStatus] = useState<'idle' | 'running' | 'paused' | 'completed'>('idle');
   const [progress, setProgress] = useState(0);
-  const [simulationSpeed, setSimulationSpeed] = useState(1);
-  const [algorithm, setAlgorithm] = useState('genetic');
-  const [dataPoints, setDataPoints] = useState(100);
-  const [realTime, setRealTime] = useState(true);
+  const [results, setResults] = useState({
+    totalOrders: 12500,
+    fulfilledOrders: 11875,
+    averageDeliveryTime: 2.3,
+    costSavings: 45000,
+  });
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let interval: NodeJS.Timeout;
 
-    if (isRunning && progress < 100) {
-      intervalId = setInterval(() => {
+    if (simulationStatus === 'running' && progress < 100) {
+      interval = setInterval(() => {
         setProgress((prevProgress) => {
-          const newProgress = prevProgress + simulationSpeed;
-          return Math.min(newProgress, 100);
+          const newProgress = Math.min(prevProgress + 10, 100);
+          if (newProgress === 100) {
+            setSimulationStatus('completed');
+            clearInterval(interval);
+          }
+          return newProgress;
         });
-      }, 100);
-    } else {
-      setIsRunning(false);
+      }, 500);
     }
 
-    return () => clearInterval(intervalId);
-  }, [isRunning, simulationSpeed]);
+    return () => clearInterval(interval);
+  }, [simulationStatus, progress]);
 
   const startSimulation = () => {
-    setIsRunning(true);
+    setSimulationStatus('running');
+    setProgress(0);
   };
 
-  const stopSimulation = () => {
-    setIsRunning(false);
+  const pauseSimulation = () => {
+    setSimulationStatus('paused');
+  };
+
+  const resumeSimulation = () => {
+    setSimulationStatus('running');
   };
 
   const resetSimulation = () => {
-    setIsRunning(false);
+    setSimulationStatus('idle');
     setProgress(0);
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-          <Lightning className="h-6 w-6" />
+        <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2 text-foreground">
+          <Activity className="h-8 w-8" />
           Supply Chain Simulation
         </h1>
-        <p className="text-muted-foreground">Model and analyze supply chain scenarios in real-time</p>
+        <p className="text-muted-foreground">
+          Simulate and analyze your supply chain performance under various conditions
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Simulation Controls */}
-        <div className="lg:col-span-1">
-          <Card className="shadow-lg">
+      <Tabs defaultValue="control" className="space-y-6">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <TabsTrigger value="control" className="flex items-center gap-2">
+            <Play className="h-4 w-4" />
+            Simulation Control
+          </TabsTrigger>
+          <TabsTrigger value="status" className="flex items-center gap-2">
+            <Square className="h-4 w-4" />
+            Simulation Status
+          </TabsTrigger>
+          <TabsTrigger value="results" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Simulation Results
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Simulation Settings
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="control">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Simulation Configuration
-              </CardTitle>
+              <CardTitle>Simulation Control Panel</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="algorithm" className="text-foreground">Algorithm</Label>
-                <Select value={algorithm} onValueChange={setAlgorithm}>
-                  <SelectTrigger className="bg-background text-foreground">
-                    <SelectValue placeholder="Select algorithm" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-border">
-                    <SelectItem value="genetic">Genetic Algorithm</SelectItem>
-                    <SelectItem value="simulated-annealing">Simulated Annealing</SelectItem>
-                    <SelectItem value="monte-carlo">Monte Carlo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="dataPoints" className="text-foreground">Data Points</Label>
-                <Input
-                  id="dataPoints"
-                  type="number"
-                  value={dataPoints}
-                  onChange={(e) => setDataPoints(Number(e.target.value))}
-                  className="bg-background text-foreground"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="simulationSpeed" className="text-foreground">Simulation Speed</Label>
-                <Input
-                  id="simulationSpeed"
-                  type="number"
-                  value={simulationSpeed}
-                  onChange={(e) => setSimulationSpeed(Number(e.target.value))}
-                  className="bg-background text-foreground"
-                />
-              </div>
-
               <div className="flex items-center justify-between">
-                <Label htmlFor="realTime" className="text-foreground">Real-time Analysis</Label>
-                <Toggle id="realTime" checked={realTime} onCheckedChange={setRealTime} />
+                <span>Simulation Progress:</span>
+                <Badge variant="secondary">{progress}%</Badge>
               </div>
-
-              <div className="flex justify-between">
-                <Button
-                  onClick={startSimulation}
-                  disabled={isRunning || progress === 100}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  Start
-                </Button>
-                <Button
-                  onClick={stopSimulation}
-                  disabled={!isRunning}
-                  variant="destructive"
-                >
-                  <Stop className="h-4 w-4 mr-2" />
-                  Stop
-                </Button>
-                <Button
-                  onClick={resetSimulation}
-                  disabled={isRunning}
-                  variant="secondary"
-                >
-                  <Reset className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
+              <Progress value={progress} />
+              <div className="flex justify-center gap-4">
+                {simulationStatus === 'idle' && (
+                  <Button onClick={startSimulation}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Simulation
+                  </Button>
+                )}
+                {simulationStatus === 'running' && (
+                  <Button variant="outline" onClick={pauseSimulation}>
+                    <Square className="h-4 w-4 mr-2" />
+                    Pause Simulation
+                  </Button>
+                )}
+                {simulationStatus === 'paused' && (
+                  <Button onClick={resumeSimulation}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Resume Simulation
+                  </Button>
+                )}
+                {(simulationStatus === 'paused' || simulationStatus === 'completed') && (
+                  <Button variant="destructive" onClick={resetSimulation}>
+                    <RefreshCcw className="h-4 w-4 mr-2" />
+                    Reset Simulation
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
-        </div>
+        </TabsContent>
 
-        {/* Simulation Progress */}
-        <div className="lg:col-span-2">
-          <Card className="shadow-lg">
+        <TabsContent value="status">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Simulation Progress
-              </CardTitle>
+              <CardTitle>Real-time Simulation Status</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <span>Status:</span>
+                <Badge variant={simulationStatus === 'running' ? 'default' : simulationStatus === 'completed' ? 'success' : 'secondary'}>
+                  {simulationStatus}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-muted-foreground" />
+                <span>Progress:</span>
+                <span>{progress}%</span>
+              </div>
+              {simulationStatus === 'completed' && (
+                <div className="flex items-center gap-2 text-green-500">
+                  <CheckCircle className="h-5 w-5" />
+                  <span>Simulation Completed Successfully!</span>
+                </div>
+              )}
+              {simulationStatus === 'paused' && (
+                <div className="flex items-center gap-2 text-yellow-500">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span>Simulation Paused. Resume to continue.</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="results">
+          <Card>
+            <CardHeader>
+              <CardTitle>Key Simulation Results</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Total Orders</div>
+                  <div className="text-2xl font-bold text-foreground">{results.totalOrders}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Fulfilled Orders</div>
+                  <div className="text-2xl font-bold text-green-600">{results.fulfilledOrders}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Average Delivery Time (Days)</div>
+                  <div className="text-2xl font-bold text-blue-600">{results.averageDeliveryTime}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Cost Savings ($)</div>
+                  <div className="text-2xl font-bold text-green-600">${results.costSavings}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Simulation Configuration</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-4">
-                <Progress value={progress} />
-              </div>
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>0%</span>
-                <span>100%</span>
-              </div>
+              <p className="text-muted-foreground">Configure simulation parameters and scenarios.</p>
             </CardContent>
           </Card>
-
-          {/* Simulation Results */}
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Simulation Results
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Detailed simulation results and analytics will be displayed here.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

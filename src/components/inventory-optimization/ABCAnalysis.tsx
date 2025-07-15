@@ -11,7 +11,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line 
 } from 'recharts';
 import { 
-  SlidersHorizontal, Package, TrendingUp, AlertTriangle, 
+  Settings, Package, TrendingUp, AlertTriangle, 
   CheckCircle, Calculator, Download, Upload 
 } from 'lucide-react';
 
@@ -150,9 +150,8 @@ export const ABCAnalysis = () => {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
+                  <PieChart data={categoryStats}>
                     <Pie
-                      data={categoryStats}
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
@@ -177,7 +176,7 @@ export const ABCAnalysis = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={abcAnalysis.slice(0, 10)}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip formatter={(value) => [`${value}%`, 'Cumulative %']} />
                     <Line type="monotone" dataKey="cumulativePercentage" stroke="#8884d8" strokeWidth={2} />
@@ -323,3 +322,5 @@ export const ABCAnalysis = () => {
     </div>
   );
 };
+
+export default ABCAnalysis;

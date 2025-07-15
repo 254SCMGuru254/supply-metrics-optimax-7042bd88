@@ -1,198 +1,163 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  MessageCircle as MessageSquare, 
+  HelpCircle, 
+  MessageSquare, 
   Mail, 
-  Phone, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
-  Send, 
-  FileText, 
-  Video, 
-  Users 
+  Phone,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Video,
+  FileText,
+  Users
 } from 'lucide-react';
-
-const faqs = [
-  {
-    question: "How do I optimize my supply chain network?",
-    answer: "You can use our Network Optimization tool to model your supply chain and identify cost-saving opportunities.",
-  },
-  {
-    question: "What is the Center of Gravity method?",
-    answer: "The Center of Gravity method helps you determine the optimal location for a new facility based on weighted distances.",
-  },
-  {
-    question: "How can I reduce inventory costs?",
-    answer: "Our Inventory Management tool provides insights into your inventory levels and helps you optimize your ordering policies.",
-  },
-  {
-    question: "What kind of support do you offer?",
-    answer: "We offer email, phone, and chat support. We also have a comprehensive documentation library.",
-  },
-];
 
 const Support = () => {
   const [message, setMessage] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setMessage('');
-    setTimeout(() => setIsSubmitted(false), 3000);
+    console.log('Form submitted', { name, email, message });
+    setSubmitted(true);
   };
 
   return (
-    <div className="min-h-screen bg-muted">
-      <div className="container mx-auto py-12 px-6">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Need Assistance? We're Here to Help!
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Contact our support team or browse our FAQs for quick answers.
-          </p>
-        </div>
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2 text-foreground">
+          <HelpCircle className="h-8 w-8" />
+          Support Center
+        </h1>
+        <p className="text-muted-foreground">
+          Get help with our platform or contact our support team
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Contact Support Section */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <MessageSquare className="h-5 w-5" />
-                  Contact Support
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+      <Tabs defaultValue="contact" className="space-y-6">
+        <TabsList className="grid grid-cols-1 md:grid-cols-3 w-full">
+          <TabsTrigger value="contact">Contact Support</TabsTrigger>
+          <TabsTrigger value="faq">FAQ</TabsTrigger>
+          <TabsTrigger value="documentation">Documentation</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="contact">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Contact Our Support Team
+              </CardTitle>
+              <CardDescription>
+                Fill out the form below and we'll get back to you as soon as possible.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {submitted ? (
+                <div className="text-center">
+                  <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
+                  <h3 className="text-xl font-semibold mt-4 text-foreground">Message Sent!</h3>
+                  <p className="text-muted-foreground">We'll get back to you shortly.</p>
+                </div>
+              ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="name" className="text-foreground">Your Name</Label>
-                    <Input type="text" id="name" placeholder="John Doe" className="bg-background text-foreground" />
-                  </div>
-                  <div>
-                    <Label htmlFor="email" className="text-foreground">Email Address</Label>
-                    <Input type="email" id="email" placeholder="john.doe@example.com" className="bg-background text-foreground" />
-                  </div>
-                  <div>
-                    <Label htmlFor="message" className="text-foreground">Message</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="How can we help you?"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      className="bg-background text-foreground"
+                    <Label htmlFor="name">Your Name</Label>
+                    <Input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name"
+                      required
                     />
                   </div>
-                  <Button disabled={isSubmitted} className="w-full">
-                    {isSubmitted ? (
-                      <>
-                        <Clock className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
+                  <div>
+                    <Label htmlFor="email">Your Email</Label>
+                    <Input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="message">Message</Label>
+                    <Textarea
+                      id="message"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Enter your message"
+                      rows={4}
+                      required
+                    />
+                  </div>
+                  <Button type="submit">Send Message</Button>
                 </form>
-              </CardContent>
-            </Card>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            {/* Live Chat */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Users className="h-5 w-5" />
-                  Team Availability
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="Support Agent 1" />
-                  <AvatarFallback>SA</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-sm font-medium text-foreground">Jane Doe</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Support Agent <Badge className="ml-2">Online</Badge>
-                  </p>
-                </div>
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="Support Agent 2" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-sm font-medium text-foreground">John Smith</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Support Agent <Badge variant="outline">Offline</Badge>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <TabsContent value="faq">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5" />
+                Frequently Asked Questions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium text-foreground">How do I reset my password?</h4>
+                <p className="text-muted-foreground">
+                  You can reset your password by clicking the "Forgot Password" link on the login page.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium text-foreground">How do I contact support?</h4>
+                <p className="text-muted-foreground">
+                  You can contact support by filling out the form in the "Contact Support" tab or by emailing us at support@example.com.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium text-foreground">What are the supported data formats?</h4>
+                <p className="text-muted-foreground">
+                  We support CSV, Excel, and JSON data formats.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          {/* FAQ and Contact Info */}
-          <div className="space-y-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <FileText className="h-5 w-5" />
-                  Frequently Asked Questions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Accordion type="single" collapsible className="space-y-2">
-                  {faqs.map((faq, index) => (
-                    <AccordionItem value={`item-${index}`} key={index}>
-                      <AccordionTrigger className="text-foreground">{faq.question}</AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Phone className="h-5 w-5" />
-                  Contact Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span>support@supplymetricsoptimax.com</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Phone className="h-4 w-4" />
-                  <span>+254 700 000 000</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>Mon-Fri, 9am-5pm (EAT)</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+        <TabsContent value="documentation">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Documentation
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                View our comprehensive documentation to learn how to use our platform.
+              </p>
+              <Button variant="outline">View Documentation</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

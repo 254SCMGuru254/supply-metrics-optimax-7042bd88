@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -77,9 +76,8 @@ export const ComprehensiveCostModeling = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+              <PieChart data={costBreakdown}>
                 <Pie
-                  data={costBreakdown}
                   cx="50%"
                   cy="50%"
                   outerRadius={100}

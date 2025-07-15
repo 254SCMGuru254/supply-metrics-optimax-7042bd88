@@ -1,10 +1,14 @@
-﻿import { useParams } from "react-router-dom";
+
+import { useParams } from "react-router-dom";
 import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigContent";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building } from "lucide-react";
+import { useState } from "react";
+import { Node } from "@/integrations/supabase/types";
 
 const WarehousePage = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const [nodes, setNodes] = useState<Node[]>([]);
 
   if (!projectId) {
     return (
@@ -27,7 +31,11 @@ const WarehousePage = () => {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <WarehouseConfigContent projectId={projectId} />
+                <WarehouseConfigContent 
+                  projectId={projectId} 
+                  nodes={nodes}
+                  setNodes={setNodes}
+                />
             </CardContent>
         </Card>
     </div>

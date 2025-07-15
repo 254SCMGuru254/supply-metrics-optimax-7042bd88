@@ -153,9 +153,8 @@ const AnalyticsDashboard = () => {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
+                  <PieChart data={costBreakdownData}>
                     <Pie
-                      data={costBreakdownData}
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
