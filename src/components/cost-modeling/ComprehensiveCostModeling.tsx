@@ -1,250 +1,121 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Calculator, DollarSign, TrendingUp, FileText } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { DollarSign, TrendingUp, Package, Truck } from 'lucide-react';
 
-interface CostModelInputs {
-  transportationCost: number;
-  warehouseCost: number;
-  inventoryCost: number;
-  laborCost: number;
-  fuelCost: number;
-  maintenanceCost: number;
+interface CostBreakdownItem {
+  name: string;
+  value: number;
+  color: string;
 }
 
-const ComprehensiveCostModeling = () => {
-  const [inputs, setInputs] = useState<CostModelInputs>({
-    transportationCost: 50000,
-    warehouseCost: 30000,
-    inventoryCost: 25000,
-    laborCost: 40000,
-    fuelCost: 15000,
-    maintenanceCost: 10000,
-  });
+const costBreakdown: CostBreakdownItem[] = [
+  { name: 'Transportation', value: 35000, color: '#0088FE' },
+  { name: 'Warehousing', value: 25000, color: '#00C49F' },
+  { name: 'Inventory', value: 15000, color: '#FFBB28' },
+  { name: 'Labor', value: 20000, color: '#FF8042' },
+];
 
-  const [results, setResults] = useState<any>(null);
+const performanceMetrics = [
+  { name: 'Cost Reduction', value: 23, target: 25 },
+  { name: 'Service Level', value: 97, target: 95 },
+  { name: 'Processing Speed', value: 87, target: 90 },
+];
 
-  const costBreakdown = [
-    { name: 'Transportation', value: inputs.transportationCost, color: '#0088FE' },
-    { name: 'Warehouse', value: inputs.warehouseCost, color: '#00C49F' },
-    { name: 'Inventory', value: inputs.inventoryCost, color: '#FFBB28' },
-    { name: 'Labor', value: inputs.laborCost, color: '#FF8042' },
-    { name: 'Fuel', value: inputs.fuelCost, color: '#8884D8' },
-    { name: 'Maintenance', value: inputs.maintenanceCost, color: '#82CA9D' },
-  ];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-  const calculateTotalCost = () => {
-    const totalCost = Object.values(inputs).reduce((sum, cost) => sum + cost, 0);
-    const breakdown = costBreakdown.map(item => ({
-      ...item,
-      percentage: ((item.value / totalCost) * 100).toFixed(1)
-    }));
-
-    // Cost optimization recommendations
-    const recommendations = [];
-    if (inputs.transportationCost > totalCost * 0.35) {
-      recommendations.push("Consider route optimization to reduce transportation costs");
-    }
-    if (inputs.inventoryCost > totalCost * 0.20) {
-      recommendations.push("Implement just-in-time inventory management");
-    }
-    if (inputs.fuelCost > totalCost * 0.15) {
-      recommendations.push("Evaluate fuel-efficient vehicles or alternative transportation modes");
-    }
-
-    setResults({
-      totalCost,
-      breakdown,
-      recommendations,
-      costPerUnit: (totalCost / 1000).toFixed(2), // Assuming 1000 units
-      potentialSavings: totalCost * 0.15, // 15% potential savings
-    });
-  };
-
-  const handleInputChange = (field: keyof CostModelInputs, value: string) => {
-    setInputs(prev => ({
-      ...prev,
-      [field]: parseFloat(value) || 0
-    }));
-  };
-
+export const ComprehensiveCostModeling = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Comprehensive Cost Modeling Suite</h1>
-        <p className="text-muted-foreground mt-2">
-          Advanced supply chain cost analysis and optimization tools
-        </p>
+        <h2 className="text-3xl font-bold text-foreground mb-4">Comprehensive Cost Modeling</h2>
+        <p className="text-muted-foreground">Analyze and optimize your supply chain costs with detailed insights</p>
       </div>
 
-      <Tabs defaultValue="inputs" className="space-y-6">
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="inputs">Cost Inputs</TabsTrigger>
-          <TabsTrigger value="analysis">Cost Analysis</TabsTrigger>
-          <TabsTrigger value="optimization">Optimization</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="inputs">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="h-5 w-5" />
-                Cost Input Parameters
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(inputs).map(([key, value]) => (
-                  <div key={key} className="space-y-2">
-                    <Label htmlFor={key}>
-                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                    </Label>
-                    <Input
-                      id={key}
-                      type="number"
-                      value={value}
-                      onChange={(e) => handleInputChange(key as keyof CostModelInputs, e.target.value)}
-                      placeholder="Enter cost"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6">
-                <Button onClick={calculateTotalCost} className="w-full">
-                  <Calculator className="h-4 w-4 mr-2" />
-                  Calculate Total Cost
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analysis">
-          {results && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
-                    Cost Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={results.breakdown}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {results.breakdown.map((entry: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Cost']} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Cost Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <div className="text-sm text-blue-600">Total Cost</div>
-                      <div className="text-xl font-bold text-blue-900">
-                        ${results.totalCost.toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <div className="text-sm text-green-600">Cost per Unit</div>
-                      <div className="text-xl font-bold text-green-900">
-                        ${results.costPerUnit}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-yellow-50 rounded-lg">
-                    <div className="text-sm text-yellow-600">Potential Savings</div>
-                    <div className="text-xl font-bold text-yellow-900">
-                      ${results.potentialSavings.toLocaleString()}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="shadow-lg">
+          <CardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-blue-600 mb-2">$1.25M</div>
+            <div className="text-sm text-muted-foreground">Total Annual Costs</div>
+            <div className="flex items-center justify-center mt-2">
+              <DollarSign className="h-4 w-4 text-green-500 mr-1" />
+              <span className="text-xs text-green-500">+5.2% YOY</span>
             </div>
-          )}
-        </TabsContent>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="optimization">
-          {results && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Cost Optimization Recommendations
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {results.recommendations.map((recommendation: string, index: number) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <Badge variant="outline">{index + 1}</Badge>
-                        <p className="text-sm">{recommendation}</p>
-                      </div>
-                    </div>
+        <Card className="shadow-lg">
+          <CardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-green-600 mb-2">23%</div>
+            <div className="text-sm text-muted-foreground">Cost Reduction</div>
+            <div className="flex items-center justify-center mt-2">
+              <TrendingUp className="h-4 w-4 text-blue-500 mr-1" />
+              <span className="text-xs text-blue-500">Target: 25%</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-purple-600 mb-2">97%</div>
+            <div className="text-sm text-muted-foreground">Service Level</div>
+            <div className="flex items-center justify-center mt-2">
+              <Package className="h-4 w-4 text-green-500 mr-1" />
+              <span className="text-xs text-green-500">Exceeds Target</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Cost Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={costBreakdown}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {costBreakdown.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+                </Pie>
+                <Tooltip formatter={(value) => [`$${value}`, 'Cost']} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="reports">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Cost Analysis Report
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium mb-2">Executive Summary</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Comprehensive cost analysis reveals optimization opportunities across
-                    transportation, inventory, and operational expenses.
-                  </p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Performance Metrics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {performanceMetrics.map((metric, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-foreground">{metric.name}</div>
+                    <Badge variant="secondary">{metric.value}%</Badge>
+                  </div>
+                  <Progress value={metric.value} max={100} />
+                  <div className="text-xs text-muted-foreground">Target: {metric.target}%</div>
                 </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium mb-2">Key Findings</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Transportation costs represent the largest expense category</li>
-                    <li>• Inventory carrying costs can be reduced through better forecasting</li>
-                    <li>• Fuel efficiency improvements can yield significant savings</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
-
-export default ComprehensiveCostModeling;

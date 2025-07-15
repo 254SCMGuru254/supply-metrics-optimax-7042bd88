@@ -10,10 +10,10 @@ export const GeneralDataContent: React.FC<GeneralDataContentProps> = ({ projectI
   return (
     <Card>
       <CardHeader>
-        <CardTitle>General Data Input</CardTitle>
+        <CardTitle className="text-foreground">General Data Input</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>General data input for project {projectId}</p>
+        <p className="text-muted-foreground">General data input interface for project: {projectId}</p>
       </CardContent>
     </Card>
   );

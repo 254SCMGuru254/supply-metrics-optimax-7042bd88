@@ -1,150 +1,195 @@
-
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
-import { ArrowRight, HelpCircle, MessageCircle, BookOpen, Users } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { 
+  MessageCircle as MessageSquare, 
+  Mail, 
+  Phone, 
+  Clock, 
+  CheckCircle, 
+  AlertCircle, 
+  Send, 
+  FileText, 
+  Video, 
+  Users 
+} from 'lucide-react';
+
+const faqs = [
+  {
+    question: "How do I optimize my supply chain network?",
+    answer: "You can use our Network Optimization tool to model your supply chain and identify cost-saving opportunities.",
+  },
+  {
+    question: "What is the Center of Gravity method?",
+    answer: "The Center of Gravity method helps you determine the optimal location for a new facility based on weighted distances.",
+  },
+  {
+    question: "How can I reduce inventory costs?",
+    answer: "Our Inventory Management tool provides insights into your inventory levels and helps you optimize your ordering policies.",
+  },
+  {
+    question: "What kind of support do you offer?",
+    answer: "We offer email, phone, and chat support. We also have a comprehensive documentation library.",
+  },
+];
 
 const Support = () => {
-  const supportCategories = [
-    {
-      title: "Documentation",
-      description: "Comprehensive guides and API references",
-      icon: BookOpen,
-      link: "/documentation",
-      badge: "Updated"
-    },
-    {
-      title: "Community Forum",
-      description: "Connect with other users and experts",
-      icon: Users,
-      link: "/documentation",
-      badge: "Active"
-    },
-    {
-      title: "Help Center",
-      description: "FAQs and troubleshooting guides",
-      icon: HelpCircle,
-      link: "/documentation",
-      badge: "24/7"
-    },
-    {
-      title: "Live Chat",
-      description: "Direct support for urgent issues",
-      icon: MessageCircle,
-      link: "/auth",
-      badge: "Premium"
-    }
-  ];
+  const [message, setMessage] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+    setMessage('');
+    setTimeout(() => setIsSubmitted(false), 3000);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="container mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            How can we help you?
+    <div className="min-h-screen bg-muted">
+      <div className="container mx-auto py-12 px-6">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Need Assistance? We're Here to Help!
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Get the support you need to maximize your supply chain optimization success
+          <p className="text-muted-foreground text-lg">
+            Contact our support team or browse our FAQs for quick answers.
           </p>
         </div>
 
-        {/* Support Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          {supportCategories.map((category) => (
-            <Card key={category.title} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200">
-              <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <category.icon className="h-8 w-8 text-white" />
-                </div>
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <CardTitle className="text-lg">{category.title}</CardTitle>
-                  <Badge variant="secondary" className="text-xs">
-                    {category.badge}
-                  </Badge>
-                </div>
-                <p className="text-gray-600 text-sm">{category.description}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Contact Support Section */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <MessageSquare className="h-5 w-5" />
+                  Contact Support
+                </CardTitle>
               </CardHeader>
-              <CardContent className="text-center">
-                <Link to={category.link}>
-                  <Button variant="outline" className="w-full group-hover:bg-blue-50">
-                    Access <ArrowRight className="ml-2 h-4 w-4" />
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="name" className="text-foreground">Your Name</Label>
+                    <Input type="text" id="name" placeholder="John Doe" className="bg-background text-foreground" />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="text-foreground">Email Address</Label>
+                    <Input type="email" id="email" placeholder="john.doe@example.com" className="bg-background text-foreground" />
+                  </div>
+                  <div>
+                    <Label htmlFor="message" className="text-foreground">Message</Label>
+                    <Textarea
+                      id="message"
+                      placeholder="How can we help you?"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="bg-background text-foreground"
+                    />
+                  </div>
+                  <Button disabled={isSubmitted} className="w-full">
+                    {isSubmitted ? (
+                      <>
+                        <Clock className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Send Message
+                      </>
+                    )}
                   </Button>
-                </Link>
+                </form>
               </CardContent>
             </Card>
-          ))}
-        </div>
 
-        {/* Contact Form */}
-        <div className="max-w-2xl mx-auto">
-          <Card className="shadow-xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-gray-900">Get Personal Support</CardTitle>
-              <p className="text-gray-600">
-                Can't find what you're looking for? Send us a message and we'll get back to you within 24 hours.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" placeholder="Your full name" />
+            {/* Live Chat */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Users className="h-5 w-5" />
+                  Team Availability
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center space-x-4">
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" alt="Support Agent 1" />
+                  <AvatarFallback>SA</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">Jane Doe</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Support Agent <Badge className="ml-2">Online</Badge>
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" placeholder="your@email.com" />
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" alt="Support Agent 2" />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">John Smith</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Support Agent <Badge variant="outline">Offline</Badge>
+                  </p>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="company">Company (Optional)</Label>
-                <Input id="company" placeholder="Your company name" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" placeholder="Brief description of your issue" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea 
-                  id="message" 
-                  placeholder="Please describe your issue or question in detail..."
-                  rows={6}
-                />
-              </div>
-              
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg py-6">
-                Send Message
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Quick Links */}
-        <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-8">Popular Resources</h3>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/documentation">
-              <Button variant="outline">Getting Started Guide</Button>
-            </Link>
-            <Link to="/documentation">
-              <Button variant="outline">API Documentation</Button>
-            </Link>
-            <Link to="/kenya-supply-chain">
-              <Button variant="outline">Kenya Solutions</Button>
-            </Link>
-            <Link to="/business-value">
-              <Button variant="outline">ROI Calculator</Button>
-            </Link>
+          {/* FAQ and Contact Info */}
+          <div className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <FileText className="h-5 w-5" />
+                  Frequently Asked Questions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="space-y-2">
+                  {faqs.map((faq, index) => (
+                    <AccordionItem value={`item-${index}`} key={index}>
+                      <AccordionTrigger className="text-foreground">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Phone className="h-5 w-5" />
+                  Contact Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  <span>support@supplymetricsoptimax.com</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                  <span>+254 700 000 000</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>Mon-Fri, 9am-5pm (EAT)</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

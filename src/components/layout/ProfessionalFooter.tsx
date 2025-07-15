@@ -1,112 +1,68 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { 
-  Smartphone, 
-  AtSign, 
-  Github, 
-  Twitter, 
-  Linkedin 
+  Phone as SmartphoneIcon, 
+  Mail,
+  Github,
+  Twitter,
+  Linkedin
 } from 'lucide-react';
 
 export const ProfessionalFooter = () => {
   return (
-    <footer className="bg-gray-900 text-white py-12 mt-16">
-      <div className="container mx-auto px-4">
+    <footer className="bg-muted/50 border-t mt-20">
+      <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div>
-            <h3 className="text-xl font-bold mb-4">Supply Metrics Optimax</h3>
-            <p className="text-gray-300 text-sm mb-4">
-              Advanced supply chain optimization platform for modern enterprises.
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">Supply Metrics Optimax</h3>
+            <p className="text-sm text-muted-foreground">
+              Advanced supply chain optimization platform for enterprise solutions.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Github className="h-5 w-5" />
-              </a>
+          </div>
+          
+          <div className="space-y-4">
+            <h4 className="font-medium text-foreground">Solutions</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/center-of-gravity" className="text-muted-foreground hover:text-foreground">Center of Gravity</Link></li>
+              <li><Link to="/route-optimization" className="text-muted-foreground hover:text-foreground">Route Optimization</Link></li>
+              <li><Link to="/inventory-management" className="text-muted-foreground hover:text-foreground">Inventory Management</Link></li>
+              <li><Link to="/network-design" className="text-muted-foreground hover:text-foreground">Network Design</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium text-foreground">Resources</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/documentation" className="text-muted-foreground hover:text-foreground">Documentation</Link></li>
+              <li><Link to="/support" className="text-muted-foreground hover:text-foreground">Support</Link></li>
+              <li><Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium text-foreground">Contact</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <SmartphoneIcon className="h-4 w-4" />
+                <span>+254 700 000 000</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                <span>info@supplymetricsoptimax.com</span>
+              </div>
             </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/dashboard" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/analytics" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Analytics
-                </Link>
-              </li>
-              <li>
-                <Link to="/documentation" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link to="/support" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Support
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Solutions */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Solutions</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/route-optimization/new" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Route Optimization
-                </Link>
-              </li>
-              <li>
-                <Link to="/inventory-management/new" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Inventory Management
-                </Link>
-              </li>
-              <li>
-                <Link to="/network-optimization/new" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Network Optimization
-                </Link>
-              </li>
-              <li>
-                <Link to="/simulation/new" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Simulation
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Contact</h4>
-            <div className="space-y-2">
-              <div className="flex items-center text-gray-300 text-sm">
-                <Smartphone className="h-4 w-4 mr-2" />
-                +1 (555) 123-4567
-              </div>
-              <div className="flex items-center text-gray-300 text-sm">
-                <AtSign className="h-4 w-4 mr-2" />
-                support@optimax.com
-              </div>
+            <div className="flex space-x-4">
+              <Github className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer" />
+              <Twitter className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer" />
+              <Linkedin className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer" />
             </div>
           </div>
         </div>
-
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400 text-sm">
-            © 2024 Supply Metrics Optimax. All rights reserved.
-          </p>
+        
+        <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
+          <p>&copy; 2024 Supply Metrics Optimax. All rights reserved.</p>
         </div>
       </div>
     </footer>

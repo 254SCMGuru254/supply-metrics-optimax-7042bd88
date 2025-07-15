@@ -1,429 +1,429 @@
 
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Plus, Edit, Trash2, Save } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import L from 'leaflet';
-
-interface MapNode {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  node_type: string;
-  capacity?: number;
-  demand?: number;
-  fixed_cost?: number;
-  variable_cost?: number;
-  service_level?: number;
-  is_editable: boolean;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MapPin, Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { Node } from '@/integrations/supabase/types';
 
 interface EditableMapPointsProps {
   projectId: string;
-  onNodesChange?: (nodes: MapNode[]) => void;
+  onNodesChange: (nodes: Node[]) => void;
 }
 
-export const EditableMapPoints = ({ projectId, onNodesChange }: EditableMapPointsProps) => {
-  const [nodes, setNodes] = useState<MapNode[]>([]);
-  const [selectedNode, setSelectedNode] = useState<MapNode | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isAddMode, setIsAddMode] = useState(false);
-  const [newNodePosition, setNewNodePosition] = useState<[number, number] | null>(null);
-  const { toast } = useToast();
+// Create custom icon
+const createCustomIcon = (color: string) => {
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: ${color};
+      border: 2px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    "></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  });
+};
 
-  useEffect(() => {
-    loadNodes();
-  }, [projectId]);
+// Map click handler component
+function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
 
-  const loadNodes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('supply_nodes')
-        .select('*')
-        .eq('project_id', projectId);
+export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({ 
+  projectId, 
+  onNodesChange 
+}) => {
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [isAddingNode, setIsAddingNode] = useState(false);
+  const [editingNode, setEditingNode] = useState<Node | null>(null);
+  const [newNodeData, setNewNodeData] = useState({
+    name: '',
+    type: 'warehouse' as Node['type'],
+    latitude: 0,
+    longitude: 0,
+    capacity: 0,
+    demand: 0
+  });
 
-      if (error) throw error;
-      setNodes(data || []);
-      onNodesChange?.(data || []);
-    } catch (error) {
-      console.error('Error loading nodes:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load map nodes",
-        variant: "destructive"
+  // Draggable edit form component
+  const EditForm = ({ node, onSave, onCancel }: { 
+    node: Node; 
+    onSave: (updatedNode: Node) => void; 
+    onCancel: () => void; 
+  }) => {
+    const [formData, setFormData] = useState(node);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [position, setPosition] = useState({ x: 20, y: 20 });
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y
       });
-    }
-  };
-
-  const saveNode = async (nodeData: Partial<MapNode>) => {
-    try {
-      if (selectedNode?.id) {
-        // Update existing node
-        const { error } = await supabase
-          .from('supply_nodes')
-          .update(nodeData)
-          .eq('id', selectedNode.id);
-
-        if (error) throw error;
-
-        setNodes(nodes.map(n => n.id === selectedNode.id ? { ...n, ...nodeData } : n));
-        toast({
-          title: "Success",
-          description: "Node updated successfully"
-        });
-      } else {
-        // Create new node
-        const { data, error } = await supabase
-          .from('supply_nodes')
-          .insert({
-            project_id: projectId,
-            ...nodeData
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        setNodes([...nodes, data]);
-        toast({
-          title: "Success",
-          description: "Node created successfully"
-        });
-      }
-
-      setIsEditDialogOpen(false);
-      setSelectedNode(null);
-      setNewNodePosition(null);
-      loadNodes();
-    } catch (error) {
-      console.error('Error saving node:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save node",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const deleteNode = async (nodeId: string) => {
-    if (!confirm('Are you sure you want to delete this node?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('supply_nodes')
-        .delete()
-        .eq('id', nodeId);
-
-      if (error) throw error;
-
-      setNodes(nodes.filter(n => n.id !== nodeId));
-      toast({
-        title: "Success",
-        description: "Node deleted successfully"
-      });
-      loadNodes();
-    } catch (error) {
-      console.error('Error deleting node:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete node",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const getNodeIcon = (nodeType: string) => {
-    const iconConfig = {
-      supplier: { color: 'blue', icon: '🏭' },
-      warehouse: { color: 'green', icon: '🏬' },
-      distribution_center: { color: 'orange', icon: '📦' },
-      customer: { color: 'red', icon: '🏪' },
-      facility: { color: 'purple', icon: '🏢' },
-      demand_point: { color: 'pink', icon: '📍' }
     };
 
-    const config = iconConfig[nodeType as keyof typeof iconConfig] || iconConfig.customer;
-    
-    return L.divIcon({
-      html: `<div style="background-color: ${config.color}; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${config.icon}</div>`,
-      className: 'custom-marker',
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
-    });
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    useEffect(() => {
+      if (isDragging) {
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+      }
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }, [isDragging, dragStart]);
+
+    return (
+      <div 
+        className="fixed bg-card border border-border rounded-lg shadow-xl p-4 z-[1000] min-w-[300px]"
+        style={{ 
+          left: `${position.x}px`, 
+          top: `${position.y}px`,
+          cursor: isDragging ? 'grabbing' : 'grab'
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-foreground">Edit Node</h3>
+          <Button variant="ghost" size="sm" onClick={onCancel}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="nodeName" className="text-foreground">Name</Label>
+            <Input
+              id="nodeName"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="bg-background text-foreground"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="nodeType" className="text-foreground">Type</Label>
+            <Select 
+              value={formData.type} 
+              onValueChange={(value: Node['type']) => setFormData({ ...formData, type: value })}
+            >
+              <SelectTrigger className="bg-background text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background border-border">
+                <SelectItem value="warehouse">Warehouse</SelectItem>
+                <SelectItem value="factory">Factory</SelectItem>
+                <SelectItem value="retail">Retail</SelectItem>
+                <SelectItem value="distribution">Distribution</SelectItem>
+                <SelectItem value="supplier">Supplier</SelectItem>
+                <SelectItem value="demand">Demand Point</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="capacity" className="text-foreground">Capacity</Label>
+              <Input
+                id="capacity"
+                type="number"
+                value={formData.capacity || ''}
+                onChange={(e) => setFormData({ ...formData, capacity: Number(e.target.value) })}
+                className="bg-background text-foreground"
+              />
+            </div>
+            <div>
+              <Label htmlFor="demand" className="text-foreground">Demand</Label>
+              <Input
+                id="demand"
+                type="number"
+                value={formData.demand || ''}
+                onChange={(e) => setFormData({ ...formData, demand: Number(e.target.value) })}
+                className="bg-background text-foreground"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => onSave(formData)}
+              className="flex-1"
+              size="sm"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={onCancel}
+              className="flex-1"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  const MapClickHandler = () => {
-    useMapEvents({
-      click: (e) => {
-        if (isAddMode) {
-          setNewNodePosition([e.latlng.lat, e.latlng.lng]);
-          setSelectedNode(null);
-          setIsEditDialogOpen(true);
-        }
-      }
-    });
-    return null;
+  const handleMapClick = (lat: number, lng: number) => {
+    if (isAddingNode) {
+      setNewNodeData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+    }
+  };
+
+  const handleAddNode = () => {
+    if (newNodeData.name && newNodeData.latitude && newNodeData.longitude) {
+      const newNode: Node = {
+        id: `node-${Date.now()}`,
+        ...newNodeData
+      };
+      const updatedNodes = [...nodes, newNode];
+      setNodes(updatedNodes);
+      onNodesChange(updatedNodes);
+      setIsAddingNode(false);
+      setNewNodeData({
+        name: '',
+        type: 'warehouse',
+        latitude: 0,
+        longitude: 0,
+        capacity: 0,
+        demand: 0
+      });
+    }
+  };
+
+  const handleEditNode = (node: Node) => {
+    setEditingNode(node);
+  };
+
+  const handleSaveEdit = (updatedNode: Node) => {
+    const updatedNodes = nodes.map(n => n.id === updatedNode.id ? updatedNode : n);
+    setNodes(updatedNodes);
+    onNodesChange(updatedNodes);
+    setEditingNode(null);
+  };
+
+  const handleDeleteNode = (nodeId: string) => {
+    const updatedNodes = nodes.filter(n => n.id !== nodeId);
+    setNodes(updatedNodes);
+    onNodesChange(updatedNodes);
+  };
+
+  const getMarkerColor = (type: string) => {
+    switch (type) {
+      case 'warehouse': return '#ef4444';
+      case 'factory': return '#f59e0b';
+      case 'retail': return '#3b82f6';
+      case 'distribution': return '#8b5cf6';
+      case 'supplier': return '#10b981';
+      case 'demand': return '#f97316';
+      default: return '#6b7280';
+    }
   };
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Interactive Map Editor
-            </CardTitle>
-            <div className="flex gap-2">
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <MapPin className="h-5 w-5" />
+            Interactive Map Editor
+            <Badge variant="outline" className="ml-auto">
+              {nodes.length} nodes
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="relative">
+            <div className="absolute top-4 left-4 z-[1000] space-x-2">
               <Button
-                variant={isAddMode ? "default" : "outline"}
-                onClick={() => setIsAddMode(!isAddMode)}
+                onClick={() => setIsAddingNode(!isAddingNode)}
+                variant={isAddingNode ? "default" : "outline"}
+                size="sm"
+                className="bg-background/90 backdrop-blur-sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {isAddMode ? 'Exit Add Mode' : 'Add Node'}
+                {isAddingNode ? 'Click Map to Add' : 'Add Node'}
               </Button>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isAddMode && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                Click anywhere on the map to add a new node at that location.
-              </p>
-            </div>
-          )}
-          
-          <div className="h-96 rounded-lg overflow-hidden border">
-            <MapContainer
-              center={[-1.286389, 36.817223]} // Nairobi coordinates
-              zoom={7}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <MapClickHandler />
-              
-              {nodes.map((node) => (
-                <Marker
-                  key={node.id}
-                  position={[node.latitude, node.longitude]}
-                  icon={getNodeIcon(node.node_type)}
-                >
-                  <Popup>
-                    <div className="space-y-2 min-w-48">
-                      <div>
-                        <h3 className="font-semibold">{node.name}</h3>
-                        <Badge variant="outline">{node.node_type}</Badge>
-                      </div>
-                      
-                      <div className="text-sm space-y-1">
-                        {node.demand && <p>Demand: {node.demand}</p>}
-                        {node.capacity && <p>Capacity: {node.capacity}</p>}
-                        {node.fixed_cost && <p>Fixed Cost: KSh {node.fixed_cost}</p>}
-                      </div>
-                      
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedNode(node);
-                            setIsEditDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        {node.is_editable && (
+
+            <div className="h-[500px] w-full rounded-b-lg overflow-hidden">
+              <MapContainer
+                center={[-1.2921, 36.8219]}
+                zoom={6}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                
+                <MapClickHandler onMapClick={handleMapClick} />
+                
+                {nodes.map((node) => (
+                  <Marker
+                    key={node.id}
+                    position={[node.latitude, node.longitude]}
+                    icon={createCustomIcon(getMarkerColor(node.type))}
+                  >
+                    <Popup>
+                      <div className="p-2 min-w-[200px]">
+                        <h3 className="font-bold text-foreground">{node.name}</h3>
+                        <p className="text-sm text-muted-foreground capitalize">{node.type}</p>
+                        {node.capacity && <p className="text-sm">Capacity: {node.capacity}</p>}
+                        {node.demand && <p className="text-sm">Demand: {node.demand}</p>}
+                        <div className="flex gap-1 mt-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => deleteNode(node.id)}
+                            onClick={() => handleEditNode(node)}
                           >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            Delete
+                            <Edit className="h-3 w-3" />
                           </Button>
-                        )}
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteNode(node.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedNode ? 'Edit Node' : 'Add New Node'}
-            </DialogTitle>
-          </DialogHeader>
-          <NodeEditForm
-            node={selectedNode}
-            position={newNodePosition}
-            onSave={saveNode}
-            onCancel={() => {
-              setIsEditDialogOpen(false);
-              setSelectedNode(null);
-              setNewNodePosition(null);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
+      {/* Add Node Form */}
+      {isAddingNode && (
+        <Card className="border-blue-500">
+          <CardHeader>
+            <CardTitle className="text-foreground">Add New Node</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="newNodeName" className="text-foreground">Node Name</Label>
+              <Input
+                id="newNodeName"
+                value={newNodeData.name}
+                onChange={(e) => setNewNodeData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter node name"
+                className="bg-background text-foreground"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="newNodeType" className="text-foreground">Node Type</Label>
+              <Select 
+                value={newNodeData.type} 
+                onValueChange={(value: Node['type']) => setNewNodeData(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger className="bg-background text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-border">
+                  <SelectItem value="warehouse">Warehouse</SelectItem>
+                  <SelectItem value="factory">Factory</SelectItem>
+                  <SelectItem value="retail">Retail</SelectItem>
+                  <SelectItem value="distribution">Distribution</SelectItem>
+                  <SelectItem value="supplier">Supplier</SelectItem>
+                  <SelectItem value="demand">Demand Point</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-interface NodeEditFormProps {
-  node?: MapNode | null;
-  position?: [number, number] | null;
-  onSave: (nodeData: Partial<MapNode>) => void;
-  onCancel: () => void;
-}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="newCapacity" className="text-foreground">Capacity</Label>
+                <Input
+                  id="newCapacity"
+                  type="number"
+                  value={newNodeData.capacity}
+                  onChange={(e) => setNewNodeData(prev => ({ ...prev, capacity: Number(e.target.value) }))}
+                  className="bg-background text-foreground"
+                />
+              </div>
+              <div>
+                <Label htmlFor="newDemand" className="text-foreground">Demand</Label>
+                <Input
+                  id="newDemand"
+                  type="number"
+                  value={newNodeData.demand}
+                  onChange={(e) => setNewNodeData(prev => ({ ...prev, demand: Number(e.target.value) }))}
+                  className="bg-background text-foreground"
+                />
+              </div>
+            </div>
 
-const NodeEditForm = ({ node, position, onSave, onCancel }: NodeEditFormProps) => {
-  const [formData, setFormData] = useState({
-    name: node?.name || '',
-    node_type: node?.node_type || 'customer',
-    latitude: node?.latitude || position?.[0] || 0,
-    longitude: node?.longitude || position?.[1] || 0,
-    capacity: node?.capacity || 0,
-    demand: node?.demand || 0,
-    fixed_cost: node?.fixed_cost || 0,
-    variable_cost: node?.variable_cost || 0,
-    service_level: node?.service_level || 95
-  });
+            {newNodeData.latitude !== 0 && (
+              <div className="text-sm text-muted-foreground">
+                Location: {newNodeData.latitude.toFixed(4)}, {newNodeData.longitude.toFixed(4)}
+              </div>
+            )}
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
-      return;
-    }
-    onSave({
-      ...formData,
-      is_editable: true
-    });
-  };
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleAddNode}
+                disabled={!newNodeData.name || !newNodeData.latitude}
+                className="flex-1"
+              >
+                Add Node
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAddingNode(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="name">Node Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Enter node name"
-          required
+      {/* Draggable Edit Form */}
+      {editingNode && (
+        <EditForm
+          node={editingNode}
+          onSave={handleSaveEdit}
+          onCancel={() => setEditingNode(null)}
         />
-      </div>
-
-      <div>
-        <Label htmlFor="node_type">Node Type</Label>
-        <Select value={formData.node_type} onValueChange={(value) => setFormData({ ...formData, node_type: value })}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="supplier">Supplier</SelectItem>
-            <SelectItem value="warehouse">Warehouse</SelectItem>
-            <SelectItem value="distribution_center">Distribution Center</SelectItem>
-            <SelectItem value="customer">Customer</SelectItem>
-            <SelectItem value="facility">Facility</SelectItem>
-            <SelectItem value="demand_point">Demand Point</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label htmlFor="latitude">Latitude</Label>
-          <Input
-            id="latitude"
-            type="number"
-            step="any"
-            value={formData.latitude}
-            onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) })}
-          />
-        </div>
-        <div>
-          <Label htmlFor="longitude">Longitude</Label>
-          <Input
-            id="longitude"
-            type="number"
-            step="any"
-            value={formData.longitude}
-            onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) })}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label htmlFor="capacity">Capacity</Label>
-          <Input
-            id="capacity"
-            type="number"
-            value={formData.capacity}
-            onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })}
-          />
-        </div>
-        <div>
-          <Label htmlFor="demand">Demand</Label>
-          <Input
-            id="demand"
-            type="number"
-            value={formData.demand}
-            onChange={(e) => setFormData({ ...formData, demand: parseInt(e.target.value) || 0 })}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label htmlFor="fixed_cost">Fixed Cost (KSh)</Label>
-          <Input
-            id="fixed_cost"
-            type="number"
-            value={formData.fixed_cost}
-            onChange={(e) => setFormData({ ...formData, fixed_cost: parseInt(e.target.value) || 0 })}
-          />
-        </div>
-        <div>
-          <Label htmlFor="variable_cost">Variable Cost (KSh)</Label>
-          <Input
-            id="variable_cost"
-            type="number"
-            value={formData.variable_cost}
-            onChange={(e) => setFormData({ ...formData, variable_cost: parseInt(e.target.value) || 0 })}
-          />
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        <Button type="submit" className="flex-1">
-          <Save className="h-4 w-4 mr-2" />
-          Save
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+      )}
+    </div>
   );
 };

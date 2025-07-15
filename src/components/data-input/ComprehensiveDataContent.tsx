@@ -10,10 +10,10 @@ export const ComprehensiveDataContent: React.FC<ComprehensiveDataContentProps> =
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Comprehensive Data Analysis</CardTitle>
+        <CardTitle className="text-foreground">Comprehensive Data Input</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Comprehensive data analysis for project {projectId}</p>
+        <p className="text-muted-foreground">Data input interface for project: {projectId}</p>
       </CardContent>
     </Card>
   );

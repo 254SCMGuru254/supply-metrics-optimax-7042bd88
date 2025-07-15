@@ -1,231 +1,268 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useToast } from "@/components/ui/use-toast"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 import { 
-  MessageSquare, 
   Send, 
-  BotIcon as Bot, 
+  MessageSquare, 
+  Bot, 
   User, 
-  Zap, 
-  BarChart3,
-  Network,
-  TrendingUp,
-  Settings
+  Zap as Lightning,
+  Download,
+  Copy,
+  RefreshCw
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
-interface Message {
-  id: string;
-  content: string;
-  sender: 'user' | 'assistant';
-  timestamp: Date;
-  type?: 'text' | 'chart' | 'recommendation';
-}
 
 const ChatAssistant = () => {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState([
     {
-      id: '1',
-      content: "Hello! I'm your Supply Chain AI Assistant. I can help you with optimization strategies, data analysis, and answering questions about supply chain management. How can I assist you today?",
-      sender: 'assistant',
-      timestamp: new Date(),
-      type: 'text'
-    }
+      id: 'initial-bot',
+      sender: 'bot',
+      text: "Hello! I'm your AI assistant. How can I help you today?",
+    },
   ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const [input, setInput] = useState('');
+  const chatBoxRef = useRef<HTMLDivElement>(null);
+  const [isThinking, setIsThinking] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gpt-3.5-turbo');
+  const [apiKey, setApiKey] = useState('');
+  const [codeBlocks, setCodeBlocks] = useState<{ id: string; content: string }[]>([]);
+  const toast = useToast()
 
   useEffect(() => {
-    scrollToBottom();
+    // Scroll to bottom on new messages
+    chatBoxRef.current?.scrollTo({
+      top: chatBoxRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!input.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputValue,
+    const userMessage = {
+      id: `user-${Date.now()}`,
       sender: 'user',
-      timestamp: new Date(),
-      type: 'text'
+      text: input,
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    setIsTyping(true);
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setInput('');
+    setIsThinking(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputValue);
-      setMessages(prev => [...prev, aiResponse]);
-      setIsTyping(false);
-    }, 1500);
-  };
+    try {
+      // Simulate delay for demonstration
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-  const generateAIResponse = (userInput: string): Message => {
-    const input = userInput.toLowerCase();
-    
-    let response = "";
-    let type: 'text' | 'chart' | 'recommendation' = 'text';
+      const botResponse = {
+        id: `bot-${Date.now()}`,
+        sender: 'bot',
+        text: `This is a simulated response for: "${input}".\n\nHere's a code snippet:\n\`\`\`javascript\nconsole.log("Hello, world!");\n\`\`\``,
+      };
 
-    if (input.includes('optimization') || input.includes('optimize')) {
-      response = "I can help you optimize your supply chain! Here are some key strategies:\n\n1. **Network Optimization**: Use the Center of Gravity model to find optimal facility locations\n2. **Inventory Management**: Implement ABC analysis for better inventory control\n3. **Route Optimization**: Use TSP and VRP algorithms to minimize transportation costs\n4. **Demand Forecasting**: Leverage machine learning for accurate demand prediction\n\nWhich area would you like to focus on?";
-      type = 'recommendation';
-    } else if (input.includes('cost') || input.includes('savings')) {
-      response = "Cost optimization is crucial for supply chain efficiency. Based on industry benchmarks:\n\n• Transportation typically accounts for 35-50% of total logistics costs\n• Inventory holding costs usually represent 20-30% of inventory value annually\n• Warehouse operations can be optimized to reduce costs by 15-25%\n\nWould you like me to run a cost analysis for your specific case?";
-      type = 'recommendation';
-    } else if (input.includes('inventory') || input.includes('stock')) {
-      response = "Inventory management is a critical component of supply chain optimization. Here's what I recommend:\n\n**ABC Analysis**: Categorize items based on value contribution\n**EOQ Model**: Calculate optimal order quantities\n**Safety Stock**: Maintain appropriate buffer levels\n**Reorder Points**: Set automatic replenishment triggers\n\nThe system can perform these calculations automatically. Would you like me to guide you through setting up inventory optimization?";
-      type = 'recommendation';
-    } else if (input.includes('route') || input.includes('delivery')) {
-      response = "Route optimization can significantly reduce transportation costs and improve delivery times. Our system uses:\n\n🚚 **TSP (Traveling Salesman Problem)**: For single vehicle routing\n🚛 **VRP (Vehicle Routing Problem)**: For multi-vehicle optimization\n📍 **Real-time Traffic**: Integration with traffic data for dynamic routing\n⏱️ **Time Windows**: Delivery scheduling optimization\n\nWould you like to set up route optimization for your delivery network?";
-      type = 'recommendation';
-    } else if (input.includes('forecast') || input.includes('demand')) {
-      response = "Demand forecasting is essential for supply chain planning. Our AI models include:\n\n📊 **Time Series Analysis**: ARIMA, Exponential Smoothing\n🧠 **Machine Learning**: Neural Networks, Random Forest\n📈 **Seasonal Patterns**: Automatic seasonality detection\n🔍 **External Factors**: Economic indicators, weather data\n\nThe system can achieve 85-95% accuracy depending on data quality. Would you like to set up demand forecasting for your products?";
-      type = 'recommendation';
-    } else if (input.includes('help') || input.includes('how')) {
-      response = "I'm here to help with all aspects of supply chain optimization! Here's what I can assist you with:\n\n🔧 **Setup & Configuration**: Guide you through system setup\n📊 **Data Analysis**: Help interpret results and metrics\n🎯 **Optimization Strategies**: Recommend best practices\n📈 **Performance Monitoring**: Track KPIs and improvements\n🔍 **Troubleshooting**: Resolve issues and errors\n\nWhat specific area would you like help with?";
-    } else {
-      response = "I understand you're asking about supply chain optimization. Let me provide you with some relevant insights:\n\nOur platform offers comprehensive supply chain optimization tools including network design, inventory management, route optimization, and demand forecasting. Each module uses advanced algorithms and AI to deliver optimal solutions.\n\nFor more specific help, you could ask about:\n• Network optimization strategies\n• Inventory management techniques\n• Route and logistics optimization\n• Cost analysis and reduction\n• Demand forecasting methods\n\nWhat would you like to explore first?";
-    }
+      setMessages(prevMessages => [...prevMessages, botResponse]);
 
-    return {
-      id: Date.now().toString(),
-      content: response,
-      sender: 'assistant',
-      timestamp: new Date(),
-      type
-    };
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+      // Extract code blocks
+      const newCodeBlocks = extractCodeBlocks(botResponse.text, botResponse.id);
+      setCodeBlocks(prevCodeBlocks => [...prevCodeBlocks, ...newCodeBlocks]);
+    } catch (error: any) {
+      const errorResponse = {
+        id: `bot-error-${Date.now()}`,
+        sender: 'bot',
+        text: `Error: ${error.message}`,
+      };
+      setMessages(prevMessages => [...prevMessages, errorResponse]);
+    } finally {
+      setIsThinking(false);
     }
   };
 
-  const quickActions = [
-    { label: "Optimize Network", icon: Network, action: () => setInputValue("How can I optimize my supply chain network?") },
-    { label: "Reduce Costs", icon: TrendingUp, action: () => setInputValue("What are the best ways to reduce supply chain costs?") },
-    { label: "Inventory Analysis", icon: BarChart3, action: () => setInputValue("Help me with inventory optimization") },
-    { label: "Route Planning", icon: Settings, action: () => setInputValue("How do I optimize delivery routes?") }
-  ];
+  const extractCodeBlocks = (text: string, messageId: string) => {
+    const codeRegex = /```(\w+)?\n([\s\S]*?)\n```/g;
+    let match;
+    const blocks = [];
+    let index = 0;
+
+    while ((match = codeRegex.exec(text)) !== null) {
+      const [fullMatch, language, content] = match;
+      const id = `${messageId}-code-${index++}`;
+      blocks.push({ id, content, language });
+    }
+
+    return blocks.map(block => ({
+      id: block.id,
+      content: block.content.trim(),
+      language: block.language,
+    }));
+  };
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast({
+      title: "Code Copied",
+      description: "Code snippet copied to clipboard!",
+    })
+  };
+
+  const handleRegenerateResponse = async () => {
+    // Find the last user message
+    const lastUserMessage = messages
+      .slice()
+      .reverse()
+      .find(msg => msg.sender === 'user');
+
+    if (!lastUserMessage) return;
+
+    // Remove the last bot and user messages
+    setMessages(prevMessages => {
+      const lastUserIndex = prevMessages.findIndex(
+        msg => msg.id === lastUserMessage.id
+      );
+      if (lastUserIndex === -1) return prevMessages;
+
+      return prevMessages.slice(0, lastUserIndex);
+    });
+
+    // Re-send the user message
+    setInput(lastUserMessage.text);
+    await sendMessage();
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            AI Supply Chain Assistant
-          </h1>
-          <p className="text-xl text-gray-600">
-            Get expert guidance on supply chain optimization strategies
-          </p>
-        </div>
-
-        {/* Chat Interface */}
-        <Card className="shadow-lg bg-white/90 backdrop-blur-sm h-[600px] flex flex-col">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-blue-600" />
-              Chat with Supply Chain Expert
-              <Badge variant="secondary" className="ml-auto">
-                AI Powered
-              </Badge>
+    <div className="min-h-screen bg-muted">
+      <div className="container mx-auto py-6 px-4 space-y-4">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-foreground">
+              <MessageSquare className="h-5 w-5" />
+              AI Chat Assistant
             </CardTitle>
           </CardHeader>
-          
-          <CardContent className="flex-1 flex flex-col">
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="model-select" className="text-sm text-muted-foreground">
+                  Model:
+                </Label>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="text-sm bg-background">
+                    <SelectValue placeholder="Select Model" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border">
+                    <SelectItem value="gpt-3.5-turbo">GPT 3.5 Turbo</SelectItem>
+                    <SelectItem value="gpt-4">GPT 4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Badge variant="secondary">
+                <Lightning className="h-3 w-3 mr-1.5" />
+                Optimized for Supply Chain
+              </Badge>
+            </div>
+
+            <ScrollArea ref={chatBoxRef} className="h-[400px] p-2 rounded-md">
+              <div className="space-y-3">
+                {messages.map(message => (
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
-                      message.sender === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : message.type === 'recommendation'
-                        ? 'bg-gradient-to-r from-green-50 to-blue-50 border border-green-200'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
+                    key={message.id}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'
+                      }`}
                   >
-                    <div className="flex items-start gap-2">
-                      {message.sender === 'assistant' && (
-                        <Bot className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
-                      )}
-                      {message.sender === 'user' && (
-                        <User className="h-4 w-4 text-white mt-1 flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <div className="whitespace-pre-wrap text-sm">{message.content}</div>
-                        <div className="text-xs opacity-70 mt-1">
-                          {message.timestamp.toLocaleTimeString()}
-                        </div>
-                      </div>
+                    <div
+                      className={`rounded-lg p-3 w-fit max-w-[80%] ${message.sender === 'user'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
+                        }`}
+                    >
+                      {message.text.split('\n').map((line, index) => {
+                        const codeBlock = codeBlocks.find(cb =>
+                          message.text.includes(cb.content)
+                        );
+
+                        if (codeBlock) {
+                          return (
+                            <div key={index} className="relative">
+                              <div className="flex items-center justify-between p-2 bg-gray-800 text-white rounded-md">
+                                <span className="text-sm">Code Snippet</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleCopyCode(codeBlock.content)}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                  <span className="sr-only">Copy code</span>
+                                </Button>
+                              </div>
+                              <pre className="bg-gray-900 text-green-300 p-4 rounded-md mt-2 overflow-x-auto">
+                                <code className="text-sm">
+                                  {codeBlock.content}
+                                </code>
+                              </pre>
+                            </div>
+                          );
+                        } else {
+                          return <p key={index}>{line}</p>;
+                        }
+                      })}
                     </div>
                   </div>
-                </div>
-              ))}
-              
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                    <div className="flex items-center gap-2">
-                      <Bot className="h-4 w-4 text-blue-600" />
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
+                ))}
+                {isThinking && (
+                  <div className="flex justify-start">
+                    <div className="rounded-lg p-3 bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
+                      Thinking...
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+                )}
+              </div>
+            </ScrollArea>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-              {quickActions.map((action, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  size="sm"
-                  onClick={action.action}
-                  className="text-xs"
-                >
-                  <action.icon className="h-3 w-3 mr-1" />
-                  {action.label}
-                </Button>
-              ))}
-            </div>
+            <Separator />
 
-            {/* Input */}
-            <div className="flex gap-2">
+            <div className="flex items-center space-x-2">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src="https://github.com/shadcn.png" alt="user avatar" />
+                <AvatarFallback>SC</AvatarFallback>
+              </Avatar>
               <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask about supply chain optimization..."
-                className="flex-1"
-                disabled={isTyping}
+                type="text"
+                placeholder="Enter your message..."
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    sendMessage();
+                  }
+                }}
+                className="bg-background"
               />
-              <Button onClick={sendMessage} disabled={isTyping || !inputValue.trim()}>
-                <Send className="h-4 w-4" />
+              <Button onClick={sendMessage} disabled={isThinking}>
+                Send
+                <Send className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="ghost"
+                onClick={handleRegenerateResponse}
+                disabled={isThinking}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Regenerate
               </Button>
             </div>
           </CardContent>

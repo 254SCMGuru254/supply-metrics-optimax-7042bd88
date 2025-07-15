@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -93,11 +92,11 @@ const AnalyticsDashboard = () => {
   return (
     <div className="container mx-auto p-6 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2 text-foreground">
           <BarChart3 className="h-8 w-8" />
           Analytics Dashboard
         </h1>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Real-time supply chain performance insights and metrics
         </p>
       </div>
@@ -107,7 +106,7 @@ const AnalyticsDashboard = () => {
         <Card className="shadow-lg">
           <CardContent className="p-6 text-center">
             <div className="text-3xl font-bold text-blue-600 mb-2">{realTimeData.activeUsers}</div>
-            <div className="text-sm text-gray-600">Active Users</div>
+            <div className="text-sm text-muted-foreground">Active Users</div>
             <div className="flex items-center justify-center mt-2">
               <Activity className="h-4 w-4 text-green-500 mr-1" />
               <span className="text-xs text-green-500">Live</span>
@@ -150,7 +149,7 @@ const AnalyticsDashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Cost Breakdown</CardTitle>
+                <CardTitle className="text-foreground">Cost Breakdown</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
