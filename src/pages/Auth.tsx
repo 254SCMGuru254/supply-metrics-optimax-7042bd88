@@ -11,12 +11,12 @@ import {
   Eye, 
   EyeOff, 
   Send, 
-  Key, 
+  Lock, 
   User,
-  AtSign,
-  Star,
+  Mail,
+  Lightbulb,
   Sparkles,
-  Zap
+  Activity
 } from 'lucide-react';
 
 const Auth = () => {
@@ -121,7 +121,7 @@ const Auth = () => {
             )}
             <div>
               <Label htmlFor="email" className="flex items-center space-x-2">
-                <AtSign className="h-4 w-4 mr-2" />
+                <Mail className="h-4 w-4 mr-2" />
                 <span>Email</span>
               </Label>
               <Input
@@ -135,7 +135,7 @@ const Auth = () => {
             </div>
             <div>
               <Label htmlFor="password" className="flex items-center space-x-2">
-                <Key className="h-4 w-4 mr-2" />
+                <Lock className="h-4 w-4 mr-2" />
                 <span>Password</span>
               </Label>
               <div className="relative">

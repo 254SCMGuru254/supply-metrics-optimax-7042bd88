@@ -143,9 +143,9 @@ export const ABCAnalysis: React.FC = () => {
   }));
 
   const pieData = [
-    { name: 'Category A', count: abcResults.summary.categoryACount, color: '#ef4444' },
-    { name: 'Category B', count: abcResults.summary.categoryBCount, color: '#f59e0b' },
-    { name: 'Category C', count: abcResults.summary.categoryCCount, color: '#10b981' }
+    { name: 'Category A', value: abcResults.summary.categoryACount, color: '#ef4444' },
+    { name: 'Category B', value: abcResults.summary.categoryBCount, color: '#f59e0b' },
+    { name: 'Category C', value: abcResults.summary.categoryCCount, color: '#10b981' }
   ];
 
   const COLORS = ['#ef4444', '#f59e0b', '#10b981'];
@@ -322,7 +322,8 @@ export const ABCAnalysis: React.FC = () => {
                           cy="50%"
                           outerRadius={80}
                           fill="#8884d8"
-                          dataKey="count"
+                          dataKey="value"
+                          data={pieData}
                         >
                           {pieData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -343,10 +344,7 @@ export const ABCAnalysis: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                          dataKey="name" 
-                          height={60}
-                        />
+                        <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip />
                         <Bar dataKey="value" fill="#8884d8" />
