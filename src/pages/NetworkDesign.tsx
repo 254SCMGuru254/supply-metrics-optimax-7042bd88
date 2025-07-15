@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,9 +42,6 @@ interface Facility {
   ownership_type: string;
 }
 
-type FacilityType = 'warehouse' | 'distribution_center' | 'manufacturing' | 'retail';
-type OwnershipType = 'owned' | 'leased' | 'third_party';
-
 const NetworkDesign = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -76,7 +74,7 @@ const NetworkDesign = () => {
 
       toast({
         title: "Network Optimization Complete",
-        description: `Optimal network design found with total cost: KES ${optimalNetwork.totalCost.toLocaleString()}`
+        description: `Optimal network design found with total cost: KES ${optimalNetwork.totalCost?.toLocaleString() || 0}`
       });
     } catch (err: any) {
       console.error("Optimization error:", err);

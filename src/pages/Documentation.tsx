@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,7 +9,7 @@ import {
   Calculator, 
   Settings, 
   BarChart3, 
-  Code, 
+  Code2, 
   ExternalLink,
   HelpCircle,
   FileText,
@@ -93,7 +94,7 @@ const Documentation = () => {
                     EOQ = √(2DS / H), where D is annual demand, S is order cost, and H is holding cost.
                   </p>
                   <Badge variant="secondary">
-                    <Code className="h-3 w-3 mr-1" />
+                    <Code2 className="h-3 w-3 mr-1" />
                     Formula
                   </Badge>
                 </div>
@@ -104,7 +105,7 @@ const Documentation = () => {
                     period.
                   </p>
                   <Badge variant="secondary">
-                    <Code className="h-3 w-3 mr-1" />
+                    <Code2 className="h-3 w-3 mr-1" />
                     Formula
                   </Badge>
                 </div>

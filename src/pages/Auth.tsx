@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import {
   Eye, 
   EyeOff, 
   Mail, 
-  Lock, 
+  Key, 
   User,
   AtSign,
   Star,
@@ -65,8 +66,11 @@ const Auth = () => {
           return;
         }
         await signUp(email, password, {
-          data: {
-            name: name,
+          options: {
+            data: {
+              full_name: name,
+              company: '',
+            },
           },
         });
         toast({
@@ -135,7 +139,7 @@ const Auth = () => {
             </div>
             <div>
               <Label htmlFor="password" className="flex items-center space-x-2">
-                <Lock className="h-4 w-4 mr-2" />
+                <Key className="h-4 w-4 mr-2" />
                 <span>Password</span>
               </Label>
               <div className="relative">

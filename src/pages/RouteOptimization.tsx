@@ -7,9 +7,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Calculator, Activity, AlertTriangle } from "lucide-react";
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+
+// Define Node interface locally
+interface Node {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  capacity?: number;
+  demand?: number;
+  fixed_cost?: number;
+  variable_cost?: number;
+}
 
 const RouteOptimization = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const [nodes, setNodes] = useState<Node[]>([]);
 
   if (!projectId) {
     return (
@@ -84,8 +98,9 @@ const RouteOptimization = () => {
             </CardHeader>
             <CardContent>
               <EditableMapPoints 
-                projectId={projectId}
-                onNodesChange={(nodes) => console.log('Nodes updated:', nodes)}
+                nodes={nodes}
+                setNodes={setNodes}
+                onNodeEdit={(node) => console.log('Node updated:', node)}
               />
             </CardContent>
           </Card>

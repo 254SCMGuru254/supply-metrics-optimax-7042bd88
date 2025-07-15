@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,7 @@ import {
   Package, 
   TrendingUp, 
   DollarSign, 
-  Sliders
+  Settings
 } from 'lucide-react';
 
 interface InventoryItem {
@@ -255,8 +254,7 @@ export const ABCAnalysis: React.FC<ABCAnalysisProps> = ({ projectId }) => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="name" 
-                    angle={-45}
-                    textAnchor="end"
+                    tick={{ fontSize: 12 }}
                     height={60}
                   />
                   <YAxis />

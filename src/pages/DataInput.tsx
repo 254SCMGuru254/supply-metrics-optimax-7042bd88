@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,7 +8,18 @@ import { Database, Upload, Settings, Package } from 'lucide-react';
 import { ComprehensiveDataContent } from '@/components/data-input/ComprehensiveDataContent';
 import { GeneralDataContent } from '@/components/data-input/GeneralDataContent';
 import { WarehouseConfigContent } from '@/components/warehouse/WarehouseConfigContent';
-import { Node } from '@/integrations/supabase/types';
+
+// Define Node interface locally
+interface Node {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  capacity?: number;
+  demand?: number;
+  fixed_cost?: number;
+  variable_cost?: number;
+}
 
 const DataInput = () => {
   const { projectId } = useParams<{ projectId: string }>();

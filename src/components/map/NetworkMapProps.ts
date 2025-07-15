@@ -1,18 +1,27 @@
 
-import { Node, Route } from '@/integrations/supabase/types';
+// Define local interfaces for Network Map
+export interface Node {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  capacity?: number;
+  demand?: number;
+  fixed_cost?: number;
+  variable_cost?: number;
+}
+
+export interface Route {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+  ownership?: string;
+}
 
 export interface NetworkMapProps {
-  nodes?: Node[];
+  nodes: Node[];
   routes?: Route[];
-  className?: string;
-  onNodeClick?: (node: Node) => void;
-  onRouteClick?: (route: Route) => void;
-  onMapClick?: (lat: number, lng: number) => void;
-  isOptimized?: boolean;
-  highlightNodes?: string[];
-  selectable?: boolean;
-  onNodeSelect?: (nodes: string[]) => void;
-  disruptionData?: any;
-  resilienceMetrics?: any;
-  airportNodes?: any[];
+  center?: [number, number];
+  zoom?: number;
 }

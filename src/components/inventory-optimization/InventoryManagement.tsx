@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Calculator, BarChart3, Zap } from 'lucide-react';
+import { Package, Calculator, BarChart3, Activity } from 'lucide-react';
 import { EOQCalculator } from './EOQCalculator';
 import { SafetyStockCalculator } from './SafetyStockCalculator';
 import { ABCAnalysis } from './ABCAnalysis';
@@ -90,7 +90,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ projectId }) 
                 <p className="text-sm text-muted-foreground">Turnover Rate</p>
                 <p className="text-2xl font-bold">6.2x</p>
               </div>
-              <Zap className="h-8 w-8 text-primary" />
+              <Activity className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>

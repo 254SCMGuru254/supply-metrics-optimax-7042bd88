@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,13 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Play, 
-  Square, 
+  StopCircle, 
   RotateCcw, 
   Settings, 
   TrendingUp, 
   Timer, 
-  Zap,
-  CheckCircle2
+  Activity,
+  CheckCircle
 } from 'lucide-react';
 
 interface SimulationResult {
@@ -135,7 +136,7 @@ const Simulation = () => {
         
         {results && (
           <div className="text-center">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Simulation Complete!</h3>
             <p className="text-muted-foreground">Results have been generated successfully.</p>
           </div>
@@ -156,7 +157,7 @@ const Simulation = () => {
 
           <Card>
             <CardContent className="p-4 text-center">
-              <Zap className="h-6 w-6 text-green-500 mx-auto mb-2" />
+              <Activity className="h-6 w-6 text-green-500 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">Total Cost</p>
               <p className="text-2xl font-bold">
                 KES {results.totalCost.toLocaleString()}
@@ -166,7 +167,7 @@ const Simulation = () => {
 
           <Card>
             <CardContent className="p-4 text-center">
-              <CheckCircle2 className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
+              <CheckCircle className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">Success Rate</p>
               <p className="text-2xl font-bold">
                 {(results.successRate * 100).toFixed(1)}%
