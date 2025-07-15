@@ -1,306 +1,315 @@
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NetworkMap } from "@/components/NetworkMap";
-import { CompleteCogCalculation, CogCalculationResult } from "@/components/cog/CompleteCogCalculation";
-import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
-import { CogFormulaSelector } from "@/components/cog/CogFormulaSelector";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { AlertCircle, Package, Loader2, MapPin, Calculator, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
-// Define local interfaces
-interface Node {
+import React, { useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Calculator, MapPin, Download, Plus, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NetworkMap, { Node as MapNode, Route } from "@/components/NetworkMap";
+import { Node as MapTypesNode } from "@/components/map/MapTypes";
+
+interface DemandPoint {
   id: string;
   name: string;
-  type: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
   latitude: number;
   longitude: number;
+  demand: number;
   weight?: number;
-  capacity?: number;
-  demand?: number;
-  fixed_cost?: number;
-  variable_cost?: number;
-  ownership: OwnershipType;
 }
 
-interface Route {
-  id: string;
-  from: string;
-  to: string;
-  label?: string;
-  volume?: number;
-  mode?: 'truck' | 'rail' | 'ship' | 'air';
-  transitTime?: number;
-  ownership: OwnershipType;
-  isOptimized?: boolean;
+interface COGResult {
+  latitude: number;
+  longitude: number;
+  totalDemand: number;
+  totalWeight: number;
+  method: string;
 }
-
-type OwnershipType = 'owned' | 'leased' | 'partner' | 'proposed';
 
 const CenterOfGravity = () => {
-  const { projectId } = useParams<{ projectId: string }>();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  
-  const [cogResult, setCogResult] = useState<CogCalculationResult | null>(null);
-  const [optimizedRoutes, setOptimizedRoutes] = useState<Route[]>([]);
-  const [mapNodes, setMapNodes] = useState<Node[]>([]);
-  const [selectedFormulaId, setSelectedFormulaId] = useState("weighted-center-gravity");
+  const [demandPoints, setDemandPoints] = useState<DemandPoint[]>([
+    { id: "1", name: "Nairobi", latitude: -1.2921, longitude: 36.8219, demand: 1000, weight: 1 },
+    { id: "2", name: "Mombasa", latitude: -4.0435, longitude: 39.6682, demand: 800, weight: 1 },
+    { id: "3", name: "Kisumu", latitude: -0.1022, longitude: 34.7617, demand: 600, weight: 1 }
+  ]);
 
-  const cogModel = modelFormulaRegistry.find(m => m.id === "center-of-gravity");
-
-  const { data: demandPoints, isLoading } = useQuery<Node[]>({
-    queryKey: ['demandPoints', projectId],
-    queryFn: async () => {
-      if (!projectId) return [];
-      const { data, error } = await supabase
-        .from('supply_nodes')
-        .select('*')
-        .eq('project_id', projectId)
-        .eq('node_type', 'demand');
-
-      if (error) throw new Error(error.message);
-      
-      return data.map(n => ({
-        id: n.id,
-        name: n.name,
-        type: 'demand' as const,
-        latitude: n.latitude,
-        longitude: n.longitude,
-        weight: n.demand,
-        ownership: 'owned' as OwnershipType
-      }));
-    },
-    enabled: !!projectId
+  const [newPoint, setNewPoint] = useState<Partial<DemandPoint>>({
+    name: "",
+    latitude: 0,
+    longitude: 0,
+    demand: 0,
+    weight: 1
   });
 
-  const addNodeMutation = useMutation({
-    mutationFn: async (newNode: { latitude: number; longitude: number }) => {
-      const { data, error } = await supabase.from('supply_nodes').insert([{ 
-        ...newNode, 
-        project_id: projectId, 
-        user_id: user?.id,
-        name: `New Demand Point ${(demandPoints?.length || 0) + 1}`,
-        node_type: 'demand',
-        demand: 100, // Default demand
-       }]).select();
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandPoints', projectId] });
-      toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
-    }
-  });
+  const [cogResult, setCogResult] = useState<COGResult | null>(null);
+  const { toast } = useToast();
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    let currentNodes: Node[] = [...(demandPoints || [])];
-    if (cogResult) {
-      currentNodes.push({
-        id: 'cog-result',
-        type: 'facility',
-        name: 'Optimized Location',
-        latitude: cogResult.latitude,
-        longitude: cogResult.longitude,
-        ownership: 'proposed' as OwnershipType
+  const calculateCOG = () => {
+    if (demandPoints.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one demand point.",
+        variant: "destructive",
       });
+      return;
     }
-    setMapNodes(currentNodes);
-  }, [demandPoints, cogResult]);
 
-  const handleResultsCalculated = (results: CogCalculationResult) => {
-    setCogResult(results);
-    const newOptimizedRoutes = (demandPoints || []).map(dp => ({
-      id: `route-${dp.id}-cog`,
-      from: dp.id,
-      to: 'cog-result',
-      label: `Optimized route to ${dp.name}`,
-      ownership: 'proposed' as OwnershipType
-    }));
-    setOptimizedRoutes(newOptimizedRoutes);
+    let totalWeightedLat = 0;
+    let totalWeightedLng = 0;
+    let totalWeight = 0;
+    let totalDemand = 0;
+
+    demandPoints.forEach(point => {
+      const weight = point.demand * (point.weight || 1);
+      totalWeightedLat += point.latitude * weight;
+      totalWeightedLng += point.longitude * weight;
+      totalWeight += weight;
+      totalDemand += point.demand;
+    });
+
+    const cogLat = totalWeightedLat / totalWeight;
+    const cogLng = totalWeightedLng / totalWeight;
+
+    const result: COGResult = {
+      latitude: cogLat,
+      longitude: cogLng,
+      totalDemand,
+      totalWeight,
+      method: "Weighted Center of Gravity"
+    };
+
+    setCogResult(result);
+    
+    toast({
+      title: "Calculation Complete",
+      description: "Center of gravity has been calculated successfully.",
+    });
   };
 
-  const handleMapClick = (lat: number, lng: number) => {
-    addNodeMutation.mutate({ latitude: lat, longitude: lng });
+  const addDemandPoint = () => {
+    if (!newPoint.name || !newPoint.latitude || !newPoint.longitude || !newPoint.demand) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const point: DemandPoint = {
+      id: Date.now().toString(),
+      name: newPoint.name,
+      latitude: newPoint.latitude,
+      longitude: newPoint.longitude,
+      demand: newPoint.demand,
+      weight: newPoint.weight || 1
+    };
+
+    setDemandPoints([...demandPoints, point]);
+    setNewPoint({ name: "", latitude: 0, longitude: 0, demand: 0, weight: 1 });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Loading Demand Points...</span>
-      </div>
-    );
+  const removeDemandPoint = (id: string) => {
+    setDemandPoints(demandPoints.filter(p => p.id !== id));
+  };
+
+  // Convert demand points to map nodes
+  const mapNodes: MapNode[] = demandPoints.map(point => ({
+    id: point.id,
+    name: point.name,
+    type: "demand",
+    latitude: point.latitude,
+    longitude: point.longitude,
+    weight: point.demand
+  }));
+
+  // Add COG result as a node if calculated
+  if (cogResult) {
+    mapNodes.push({
+      id: "cog",
+      name: "Center of Gravity",
+      type: "facility",
+      latitude: cogResult.latitude,
+      longitude: cogResult.longitude,
+      weight: 0
+    });
   }
 
-  if (!demandPoints || demandPoints.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Center of Gravity Analysis</h1>
-                <p className="text-gray-600">Find optimal facility locations using mathematical modeling</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                Mathematical Optimization
-              </Badge>
-              <Badge variant="outline">Kenya Focused</Badge>
-            </div>
-          </div>
-
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader className="text-center">
-              <AlertCircle className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-              <CardTitle className="text-2xl text-gray-900">No Customer Locations Found</CardTitle>
-              <p className="text-gray-600 mt-2">
-                The Center of Gravity model requires customer locations (demand points) to calculate the optimal facility location. 
-                Add some customer locations to get started.
-              </p>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link to={`/data-input/${projectId}`}>
-                  <Button className="w-full">
-                    <Package className="mr-2 h-4 w-4" />
-                    Add Customer Data
-                  </Button>
-                </Link>
-                <Link to="/documentation">
-                  <Button variant="outline" className="w-full">
-                    <Calculator className="mr-2 h-4 w-4" />
-                    View Documentation
-                  </Button>
-                </Link>
-              </div>
-              <p className="text-sm text-gray-500 mt-4">
-                You can also click on the map to add demand points directly once you have the interface loaded.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  // Convert to MapTypes for compatibility
+  const mapTypesNodes: MapTypesNode[] = mapNodes.map(node => ({
+    ...node,
+    ownership: 'owned' as const
+  }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Center of Gravity Analysis</h1>
-              <p className="text-gray-600">Mathematical optimization for optimal facility placement</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              {demandPoints?.length || 0} Demand Points
-            </Badge>
-            <Badge variant="outline">Real-time Optimization</Badge>
-            {cogResult && (
-              <Badge className="bg-green-100 text-green-700">
-                Solution Found
-              </Badge>
-            )}
-          </div>
-        </div>
+    <div className="container mx-auto px-4 py-8 space-y-8" ref={contentRef}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="h-6 w-6" />
+            Center of Gravity Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Calculate the optimal location for facilities based on demand distribution and transportation costs.
+          </p>
+        </CardContent>
+      </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map Section */}
-          <div className="lg:col-span-2">
-            <Card className="h-[600px] shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5 text-blue-600" />
-                  <span>Interactive Supply Chain Map</span>
-                </CardTitle>
-                <p className="text-sm text-gray-600">Click on the map to add new demand points</p>
-              </CardHeader>
-              <CardContent className="p-0 h-[500px]">
-                <NetworkMap 
-                  nodes={mapNodes} 
-                  routes={optimizedRoutes} 
-                  onMapClick={handleMapClick} 
-                />
-              </CardContent>
-            </Card>
-          </div>
+      <Tabs defaultValue="input" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="input">Data Input</TabsTrigger>
+          <TabsTrigger value="calculation">Calculation</TabsTrigger>
+          <TabsTrigger value="visualization">Map View</TabsTrigger>
+        </TabsList>
 
-          {/* Controls Section */}
-          <div className="space-y-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calculator className="h-5 w-5 text-purple-600" />
-                  <span>Model Configuration</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {cogModel && (
-                  <CogFormulaSelector
-                    formulas={cogModel.formulas}
-                    selectedFormulaId={selectedFormulaId}
-                    onFormulaChange={setSelectedFormulaId}
+        <TabsContent value="input" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Add Demand Points</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                  <Label htmlFor="name">Location Name</Label>
+                  <Input
+                    id="name"
+                    value={newPoint.name || ""}
+                    onChange={(e) => setNewPoint({...newPoint, name: e.target.value})}
+                    placeholder="e.g., Nairobi"
                   />
-                )}
-              </CardContent>
-            </Card>
+                </div>
+                <div>
+                  <Label htmlFor="latitude">Latitude</Label>
+                  <Input
+                    id="latitude"
+                    type="number"
+                    step="any"
+                    value={newPoint.latitude || ""}
+                    onChange={(e) => setNewPoint({...newPoint, latitude: parseFloat(e.target.value)})}
+                    placeholder="-1.2921"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="longitude">Longitude</Label>
+                  <Input
+                    id="longitude"
+                    type="number"
+                    step="any"
+                    value={newPoint.longitude || ""}
+                    onChange={(e) => setNewPoint({...newPoint, longitude: parseFloat(e.target.value)})}
+                    placeholder="36.8219"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="demand">Demand</Label>
+                  <Input
+                    id="demand"
+                    type="number"
+                    value={newPoint.demand || ""}
+                    onChange={(e) => setNewPoint({...newPoint, demand: parseFloat(e.target.value)})}
+                    placeholder="1000"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button onClick={addDemandPoint} className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Point
+                  </Button>
+                </div>
+              </div>
 
-            <CompleteCogCalculation
-              demandPoints={demandPoints || []}
-              selectedFormula={selectedFormulaId}
-              onResultsCalculated={handleResultsCalculated}
-            />
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-4">Current Demand Points</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-border">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="border border-border p-2 text-left">Location</th>
+                        <th className="border border-border p-2 text-right">Latitude</th>
+                        <th className="border border-border p-2 text-right">Longitude</th>
+                        <th className="border border-border p-2 text-right">Demand</th>
+                        <th className="border border-border p-2 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {demandPoints.map((point) => (
+                        <tr key={point.id}>
+                          <td className="border border-border p-2">{point.name}</td>
+                          <td className="border border-border p-2 text-right">{point.latitude.toFixed(4)}</td>
+                          <td className="border border-border p-2 text-right">{point.longitude.toFixed(4)}</td>
+                          <td className="border border-border p-2 text-right">{point.demand.toLocaleString()}</td>
+                          <td className="border border-border p-2 text-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeDemandPoint(point.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            {/* Quick Actions */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link to={`/data-input/${projectId}`}>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Package className="mr-2 h-4 w-4" />
-                    Manage Data Input
-                  </Button>
-                </Link>
-                <Link to="/documentation">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calculator className="mr-2 h-4 w-4" />
-                    View Documentation
-                  </Button>
-                </Link>
-                <Link to={`/analytics-dashboard/${projectId}`}>
-                  <Button variant="outline" className="w-full justify-start">
-                    <TrendingUp className="mr-2 h-4 w-4" />
-                    Analytics Dashboard
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+        <TabsContent value="calculation" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Calculate Center of Gravity</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button onClick={calculateCOG} className="w-full md:w-auto">
+                <Calculator className="h-4 w-4 mr-2" />
+                Calculate COG
+              </Button>
+
+              {cogResult && (
+                <div className="mt-6 p-4 bg-muted rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Results</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Optimal Location</p>
+                      <p className="font-semibold">
+                        {cogResult.latitude.toFixed(6)}, {cogResult.longitude.toFixed(6)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Demand</p>
+                      <p className="font-semibold">{cogResult.totalDemand.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Method Used</p>
+                      <Badge>{cogResult.method}</Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Weight</p>
+                      <p className="font-semibold">{cogResult.totalWeight.toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="visualization" className="space-y-4">
+          <NetworkMap 
+            nodes={mapTypesNodes}
+            routes={[]}
+            className="h-96"
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

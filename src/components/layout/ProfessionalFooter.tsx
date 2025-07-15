@@ -4,9 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   Send, 
-  Github, 
-  Twitter, 
-  Linkedin,
   MapPin,
   Clock,
   Shield
@@ -26,13 +23,13 @@ export const ProfessionalFooter = () => {
             </p>
             <div className="flex space-x-2">
               <Button size="sm" variant="outline">
-                <Github className="h-4 w-4" />
+                Social
               </Button>
               <Button size="sm" variant="outline">
-                <Twitter className="h-4 w-4" />
+                Connect
               </Button>
               <Button size="sm" variant="outline">
-                <Linkedin className="h-4 w-4" />
+                Follow
               </Button>
             </div>
           </div>

@@ -316,9 +316,8 @@ export const ABCAnalysis: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
+                      <PieChart data={pieData}>
                         <Pie
-                          data={pieData}
                           cx="50%"
                           cy="50%"
                           outerRadius={80}

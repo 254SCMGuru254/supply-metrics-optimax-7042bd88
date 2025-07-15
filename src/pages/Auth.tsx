@@ -8,14 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
-  Eye, 
-  EyeOff, 
+  EyeIcon, 
+  EyeOffIcon, 
   Send, 
-  Lock, 
+  LockIcon, 
   User,
-  Mail,
+  MailIcon,
   Lightbulb,
-  Sparkles,
+  Star,
   Activity
 } from 'lucide-react';
 
@@ -93,7 +93,7 @@ const Auth = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             {isLogin ? "Sign In" : "Create Account"}
-            <Sparkles className="inline-block h-5 w-5 ml-2 text-yellow-500 animate-spin-slow" />
+            <Star className="inline-block h-5 w-5 ml-2 text-yellow-500 animate-spin-slow" />
           </CardTitle>
           <CardDescription className="text-center text-muted-foreground">
             {isLogin
@@ -121,7 +121,7 @@ const Auth = () => {
             )}
             <div>
               <Label htmlFor="email" className="flex items-center space-x-2">
-                <Mail className="h-4 w-4 mr-2" />
+                <MailIcon className="h-4 w-4 mr-2" />
                 <span>Email</span>
               </Label>
               <Input
@@ -135,7 +135,7 @@ const Auth = () => {
             </div>
             <div>
               <Label htmlFor="password" className="flex items-center space-x-2">
-                <Lock className="h-4 w-4 mr-2" />
+                <LockIcon className="h-4 w-4 mr-2" />
                 <span>Password</span>
               </Label>
               <div className="relative">
@@ -155,9 +155,9 @@ const Auth = () => {
                   onClick={togglePasswordVisibility}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOffIcon className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <EyeIcon className="h-4 w-4" />
                   )}
                   <span className="sr-only">Toggle password visibility</span>
                 </Button>

@@ -1,3 +1,4 @@
+
 import React, { useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +33,7 @@ const InventoryManagement = () => {
     <div className="container mx-auto px-4 py-8 space-y-8" ref={contentRef}>
       <InventoryHeader />
       <InventoryMetricsGrid projectId={projectId} />
-      <InventoryTabsContent projectId={projectId} />
+      <InventoryTabsContent />
       <TabsContent value="advanced-calculators">
         <Card>
           <CardHeader>

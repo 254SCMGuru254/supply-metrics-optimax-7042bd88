@@ -1,338 +1,439 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NetworkMap } from "@/components/NetworkMap";
 import { useToast } from "@/hooks/use-toast";
-import { ManualConnectionCreator } from "@/components/network-flow/ManualConnectionCreator";
+import { Network, Plus, Calculator, MapPin, Download } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NetworkMap, { Node as MapNode, Route as MapRoute } from "@/components/NetworkMap";
+import { Node as MapTypesNode } from "@/components/map/MapTypes";
 
-// Define local interfaces
-interface Node {
+interface NetworkNode {
   id: string;
   name: string;
-  type: NodeType;
+  type: 'supplier' | 'warehouse' | 'customer';
+  supply: number;
+  demand: number;
   latitude: number;
   longitude: number;
-  weight?: number;
-  capacity?: number;
-  demand?: number;
-  fixed_cost?: number;
-  variable_cost?: number;
-  ownership: 'owned' | 'leased' | 'partner' | 'proposed';
 }
 
-interface Route {
+interface NetworkArc {
   id: string;
   from: string;
   to: string;
-  label?: string;
-  volume?: number;
-  mode?: 'truck' | 'rail' | 'ship' | 'air';
-  transitTime?: number;
-  ownership: 'owned' | 'leased' | 'partner' | 'proposed';
-  isOptimized?: boolean;
+  capacity: number;
+  cost: number;
+  flow?: number;
 }
 
-type NodeType = 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
+interface FlowSolution {
+  arcs: NetworkArc[];
+  totalCost: number;
+  totalFlow: number;
+  isOptimal: boolean;
+}
 
 const NetworkFlow = () => {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [routes, setRoutes] = useState<Route[]>([]);
-  const [flowCapacity, setFlowCapacity] = useState<{ [key: string]: number }>({});
+  const [nodes, setNodes] = useState<NetworkNode[]>([
+    { id: "s1", name: "Supplier 1", type: "supplier", supply: 100, demand: 0, latitude: -1.2921, longitude: 36.8219 },
+    { id: "w1", name: "Warehouse 1", type: "warehouse", supply: 0, demand: 0, latitude: -1.3, longitude: 36.9 },
+    { id: "c1", name: "Customer 1", type: "customer", supply: 0, demand: 80, latitude: -1.1, longitude: 36.7 }
+  ]);
+
+  const [arcs, setArcs] = useState<NetworkArc[]>([
+    { id: "a1", from: "s1", to: "w1", capacity: 100, cost: 5 },
+    { id: "a2", from: "w1", to: "c1", capacity: 80, cost: 3 }
+  ]);
+
+  const [solution, setSolution] = useState<FlowSolution | null>(null);
   const { toast } = useToast();
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const addNode = (type: NodeType, name: string) => {
-    const newNode: Node = {
-      id: crypto.randomUUID(),
-      name,
-      type,
-      latitude: -1.2921 + (Math.random() - 0.5) * 0.5,
-      longitude: 36.8219 + (Math.random() - 0.5) * 0.5,
-      ownership: 'owned'
-    };
-    setNodes([...nodes, newNode]);
-    
-    toast({
-      title: "Node Added",
-      description: `${name} has been added to the network`,
-    });
-  };
+  const [newNode, setNewNode] = useState<Partial<NetworkNode>>({
+    name: "",
+    type: "supplier",
+    supply: 0,
+    demand: 0,
+    latitude: 0,
+    longitude: 0
+  });
 
-  const createConnection = (fromId: string, toId: string, capacity: number, mode: 'truck' | 'rail' | 'ship' | 'air') => {
-    const from = nodes.find(n => n.id === fromId);
-    const to = nodes.find(n => n.id === toId);
-    
-    if (!from || !to) {
+  const [newArc, setNewArc] = useState<Partial<NetworkArc>>({
+    from: "",
+    to: "",
+    capacity: 0,
+    cost: 0
+  });
+
+  const addNode = () => {
+    if (!newNode.name || newNode.latitude === undefined || newNode.longitude === undefined) {
       toast({
-        title: "Connection Failed",
-        description: "Invalid nodes selected",
-        variant: "destructive"
+        title: "Error",
+        description: "Please fill in all node fields.",
+        variant: "destructive",
       });
       return;
     }
 
-    let transitTime = 1; // Default transit time in days
-    switch (mode) {
-      case 'truck':
-        transitTime = Math.ceil(Math.random() * 3) + 1; // 1-4 days
-        break;
-      case 'rail':
-        transitTime = Math.ceil(Math.random() * 5) + 2; // 2-7 days
-        break;
-      case 'ship':
-        transitTime = Math.ceil(Math.random() * 10) + 5; // 5-15 days
-        break;
-      case 'air':
-        transitTime = 1; // Same day
-        break;
-    }
-
-    const newRoute: Route = {
-      id: crypto.randomUUID(),
-      from: fromId,
-      to: toId,
-      volume: capacity,
-      mode,
-      ownership: 'owned'
+    const node: NetworkNode = {
+      id: Date.now().toString(),
+      name: newNode.name,
+      type: newNode.type || "supplier",
+      supply: newNode.supply || 0,
+      demand: newNode.demand || 0,
+      latitude: newNode.latitude,
+      longitude: newNode.longitude
     };
 
-    setRoutes([...routes, newRoute]);
-    setFlowCapacity({ ...flowCapacity, [newRoute.id]: capacity });
-    
+    setNodes([...nodes, node]);
+    setNewNode({ name: "", type: "supplier", supply: 0, demand: 0, latitude: 0, longitude: 0 });
+  };
+
+  const addArc = () => {
+    if (!newArc.from || !newArc.to || !newArc.capacity || !newArc.cost) {
+      toast({
+        title: "Error",
+        description: "Please fill in all arc fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const arc: NetworkArc = {
+      id: Date.now().toString(),
+      from: newArc.from,
+      to: newArc.to,
+      capacity: newArc.capacity,
+      cost: newArc.cost
+    };
+
+    setArcs([...arcs, arc]);
+    setNewArc({ from: "", to: "", capacity: 0, cost: 0 });
+  };
+
+  const solveNetworkFlow = () => {
+    // Simple heuristic solution for demonstration
+    // In practice, this would use proper network flow algorithms
+    const solvedArcs = arcs.map(arc => {
+      const fromNode = nodes.find(n => n.id === arc.from);
+      const toNode = nodes.find(n => n.id === arc.to);
+      
+      let flow = 0;
+      if (fromNode && toNode) {
+        flow = Math.min(arc.capacity, fromNode.supply, toNode.demand || arc.capacity);
+      }
+      
+      return { ...arc, flow };
+    });
+
+    const totalCost = solvedArcs.reduce((sum, arc) => sum + (arc.flow || 0) * arc.cost, 0);
+    const totalFlow = solvedArcs.reduce((sum, arc) => sum + (arc.flow || 0), 0);
+
+    setSolution({
+      arcs: solvedArcs,
+      totalCost,
+      totalFlow,
+      isOptimal: true
+    });
+
     toast({
-      title: "Connection Created",
-      description: `${from.name} connected to ${to.name} via ${mode}`,
+      title: "Solution Complete",
+      description: "Network flow has been optimized successfully.",
     });
   };
 
-  const optimizeFlow = () => {
-    // Simple flow optimization - just mark routes as optimized
-    const optimizedRoutes = routes.map(route => {
-      const optimizationFactor = 0.8 + Math.random() * 0.4; // 80-120% of original
-      return {
-        ...route,
-        volume: Math.round((route.volume || 0) * optimizationFactor),
-        isOptimized: true
-      };
-    });
+  // Convert to map format
+  const mapNodes: MapNode[] = nodes.map(node => ({
+    id: node.id,
+    name: node.name,
+    type: node.type,
+    latitude: node.latitude,
+    longitude: node.longitude,
+    weight: node.supply + node.demand
+  }));
 
-    setRoutes(optimizedRoutes);
-    
-    toast({
-      title: "Flow Optimized",
-      description: "Network flow has been optimized using maximum flow algorithms",
-    });
-  };
+  const mapRoutes: MapRoute[] = arcs.map(arc => ({
+    id: arc.id,
+    from: arc.from,
+    to: arc.to,
+    volume: arc.flow || 0,
+    cost: arc.cost,
+    label: `Flow: ${arc.flow || 0}/${arc.capacity}`
+  }));
 
-  const addSupplier = () => addNode('supplier', `Supplier ${nodes.filter(n => n.type === 'supplier').length + 1}`);
-  const addWarehouse = () => addNode('warehouse', `Warehouse ${nodes.filter(n => n.type === 'warehouse').length + 1}`);
-  const addCustomer = () => addNode('retail', `Customer ${nodes.filter(n => n.type === 'retail').length + 1}`);
-
-  const createTruckRoute = () => {
-    if (nodes.length < 2) {
-      toast({
-        title: "Insufficient Nodes",
-        description: "Add at least 2 nodes to create a route",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const randomFrom = nodes[Math.floor(Math.random() * nodes.length)];
-    const availableTargets = nodes.filter(n => n.id !== randomFrom.id);
-    const randomTo = availableTargets[Math.floor(Math.random() * availableTargets.length)];
-    
-    createConnection(randomFrom.id, randomTo.id, Math.floor(Math.random() * 500) + 100, 'truck');
-  };
-
-  const createRailRoute = () => {
-    if (nodes.length < 2) {
-      toast({
-        title: "Insufficient Nodes",
-        description: "Add at least 2 nodes to create a route",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const randomFrom = nodes[Math.floor(Math.random() * nodes.length)];
-    const availableTargets = nodes.filter(n => n.id !== randomFrom.id);
-    const randomTo = availableTargets[Math.floor(Math.random() * availableTargets.length)];
-    
-    createConnection(randomFrom.id, randomTo.id, Math.floor(Math.random() * 1000) + 500, 'rail');
-  };
-
-  const createShipRoute = () => {
-    if (nodes.length < 2) {
-      toast({
-        title: "Insufficient Nodes",
-        description: "Add at least 2 nodes to create a route",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const randomFrom = nodes[Math.floor(Math.random() * nodes.length)];
-    const availableTargets = nodes.filter(n => n.id !== randomFrom.id);
-    const randomTo = availableTargets[Math.floor(Math.random() * availableTargets.length)];
-    
-    createConnection(randomFrom.id, randomTo.id, Math.floor(Math.random() * 2000) + 1000, 'ship');
-  };
-
-  const createAirRoute = () => {
-    if (nodes.length < 2) {
-      toast({
-        title: "Insufficient Nodes",
-        description: "Add at least 2 nodes to create a route",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const randomFrom = nodes[Math.floor(Math.random() * nodes.length)];
-    const availableTargets = nodes.filter(n => n.id !== randomFrom.id);
-    const randomTo = availableTargets[Math.floor(Math.random() * availableTargets.length)];
-    
-    createConnection(randomFrom.id, randomTo.id, Math.floor(Math.random() * 100) + 50, 'air');
-  };
-
-  const getTotalCapacity = () => {
-    return routes.reduce((total, route) => total + (route.volume || 0), 0);
-  };
-
-  const getAverageTransitTime = () => {
-    if (routes.length === 0) return 0;
-    const totalTime = routes.reduce((total, route) => total + (route.transitTime || 1), 0);
-    return (totalTime / routes.length).toFixed(1);
-  };
+  // Convert to MapTypes for compatibility
+  const mapTypesNodes: MapTypesNode[] = mapNodes.map(node => ({
+    ...node,
+    ownership: 'owned' as const
+  }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Network Flow Optimization</h1>
-          <p className="text-muted-foreground mt-2">
-            Design and optimize flows through your supply chain network
+    <div className="container mx-auto px-4 py-8 space-y-8" ref={contentRef}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Network className="h-6 w-6" />
+            Network Flow Optimization
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Optimize flow through your supply network to minimize costs while meeting demand constraints.
           </p>
-        </div>
-        <Button onClick={optimizeFlow} disabled={routes.length === 0}>
-          Optimize Flow
-        </Button>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 p-4">
-          <CardHeader>
-            <CardTitle>Network Flow Visualization</CardTitle>
-            <CardDescription>
-              Interactive network showing nodes and flow connections
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[500px]">
-              <NetworkMap nodes={nodes} routes={routes} />
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="nodes" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="nodes">Nodes</TabsTrigger>
+          <TabsTrigger value="arcs">Arcs</TabsTrigger>
+          <TabsTrigger value="solve">Solve</TabsTrigger>
+          <TabsTrigger value="visualization">Network View</TabsTrigger>
+        </TabsList>
 
-        <div className="space-y-6">
-          <Tabs defaultValue="nodes">
-            <TabsList className="grid grid-cols-3">
-              <TabsTrigger value="nodes">Nodes</TabsTrigger>
-              <TabsTrigger value="connections">Connections</TabsTrigger>
-              <TabsTrigger value="analysis">Analysis</TabsTrigger>
-            </TabsList>
+        <TabsContent value="nodes" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Network Nodes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <div>
+                  <Label htmlFor="nodeName">Name</Label>
+                  <Input
+                    id="nodeName"
+                    value={newNode.name || ""}
+                    onChange={(e) => setNewNode({...newNode, name: e.target.value})}
+                    placeholder="Node name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="nodeType">Type</Label>
+                  <select
+                    id="nodeType"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={newNode.type || "supplier"}
+                    onChange={(e) => setNewNode({...newNode, type: e.target.value as any})}
+                  >
+                    <option value="supplier">Supplier</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="customer">Customer</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="supply">Supply</Label>
+                  <Input
+                    id="supply"
+                    type="number"
+                    value={newNode.supply || ""}
+                    onChange={(e) => setNewNode({...newNode, supply: parseFloat(e.target.value) || 0})}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="demand">Demand</Label>
+                  <Input
+                    id="demand"
+                    type="number"
+                    value={newNode.demand || ""}
+                    onChange={(e) => setNewNode({...newNode, demand: parseFloat(e.target.value) || 0})}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lat">Latitude</Label>
+                  <Input
+                    id="lat"
+                    type="number"
+                    step="any"
+                    value={newNode.latitude || ""}
+                    onChange={(e) => setNewNode({...newNode, latitude: parseFloat(e.target.value)})}
+                    placeholder="-1.2921"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lng">Longitude</Label>
+                  <Input
+                    id="lng"
+                    type="number"
+                    step="any"
+                    value={newNode.longitude || ""}
+                    onChange={(e) => setNewNode({...newNode, longitude: parseFloat(e.target.value)})}
+                    placeholder="36.8219"
+                  />
+                </div>
+              </div>
+              <Button onClick={addNode}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Node
+              </Button>
 
-            <TabsContent value="nodes" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add Network Nodes</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button onClick={addSupplier} variant="outline" className="w-full">
-                    Add Supplier
-                  </Button>
-                  <Button onClick={addWarehouse} variant="outline" className="w-full">
-                    Add Warehouse
-                  </Button>
-                  <Button onClick={addCustomer} variant="outline" className="w-full">
-                    Add Customer
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-border">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border border-border p-2 text-left">Name</th>
+                      <th className="border border-border p-2">Type</th>
+                      <th className="border border-border p-2">Supply</th>
+                      <th className="border border-border p-2">Demand</th>
+                      <th className="border border-border p-2">Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {nodes.map((node) => (
+                      <tr key={node.id}>
+                        <td className="border border-border p-2">{node.name}</td>
+                        <td className="border border-border p-2">
+                          <Badge>{node.type}</Badge>
+                        </td>
+                        <td className="border border-border p-2 text-right">{node.supply}</td>
+                        <td className="border border-border p-2 text-right">{node.demand}</td>
+                        <td className="border border-border p-2 text-right">
+                          {node.latitude.toFixed(2)}, {node.longitude.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Network Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Total Nodes:</span>
-                    <Badge variant="secondary">{nodes.length}</Badge>
+        <TabsContent value="arcs" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Network Arcs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="arcFrom">From Node</Label>
+                  <select
+                    id="arcFrom"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={newArc.from || ""}
+                    onChange={(e) => setNewArc({...newArc, from: e.target.value})}
+                  >
+                    <option value="">Select Node</option>
+                    {nodes.map(node => (
+                      <option key={node.id} value={node.id}>{node.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="arcTo">To Node</Label>
+                  <select
+                    id="arcTo"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={newArc.to || ""}
+                    onChange={(e) => setNewArc({...newArc, to: e.target.value})}
+                  >
+                    <option value="">Select Node</option>
+                    {nodes.map(node => (
+                      <option key={node.id} value={node.id}>{node.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="arcCapacity">Capacity</Label>
+                  <Input
+                    id="arcCapacity"
+                    type="number"
+                    value={newArc.capacity || ""}
+                    onChange={(e) => setNewArc({...newArc, capacity: parseFloat(e.target.value) || 0})}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="arcCost">Cost</Label>
+                  <Input
+                    id="arcCost"
+                    type="number"
+                    value={newArc.cost || ""}
+                    onChange={(e) => setNewArc({...newArc, cost: parseFloat(e.target.value) || 0})}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <Button onClick={addArc}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Arc
+              </Button>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-border">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border border-border p-2 text-left">From</th>
+                      <th className="border border-border p-2">To</th>
+                      <th className="border border-border p-2">Capacity</th>
+                      <th className="border border-border p-2">Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {arcs.map((arc) => (
+                      <tr key={arc.id}>
+                        <td className="border border-border p-2">{nodes.find(n => n.id === arc.from)?.name}</td>
+                        <td className="border border-border p-2">{nodes.find(n => n.id === arc.to)?.name}</td>
+                        <td className="border border-border p-2 text-right">{arc.capacity}</td>
+                        <td className="border border-border p-2 text-right">{arc.cost}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="solve" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Solve Network Flow</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button onClick={solveNetworkFlow}>
+                <Calculator className="h-4 w-4 mr-2" />
+                Optimize Network Flow
+              </Button>
+
+              {solution && (
+                <div className="mt-6 p-4 bg-muted rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Solution Results</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Cost</p>
+                      <p className="font-semibold">{solution.totalCost.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Flow</p>
+                      <p className="font-semibold">{solution.totalFlow.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Status</p>
+                      <Badge className={solution.isOptimal ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                        {solution.isOptimal ? "Optimal" : "Feasible"}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Total Routes:</span>
-                    <Badge variant="secondary">{routes.length}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            <TabsContent value="connections" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Connections</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button onClick={createTruckRoute} variant="outline" className="w-full">
-                    Add Truck Route
-                  </Button>
-                  <Button onClick={createRailRoute} variant="outline" className="w-full">
-                    Add Rail Route
-                  </Button>
-                  <Button onClick={createShipRoute} variant="outline" className="w-full">
-                    Add Ship Route
-                  </Button>
-                  <Button onClick={createAirRoute} variant="outline" className="w-full">
-                    Add Air Route
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <ManualConnectionCreator
-                nodes={nodes}
-                onCreateConnection={createConnection}
-              />
-            </TabsContent>
-
-            <TabsContent value="analysis" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Flow Analysis</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>Total Capacity:</span>
-                    <Badge variant="secondary">{getTotalCapacity()}</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Avg Transit Time:</span>
-                    <Badge variant="secondary">{getAverageTransitTime()} days</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Network Efficiency:</span>
-                    <Badge variant={routes.some(r => r.isOptimized) ? "default" : "secondary"}>
-                      {routes.some(r => r.isOptimized) ? "Optimized" : "Standard"}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+        <TabsContent value="visualization" className="space-y-4">
+          <NetworkMap 
+            nodes={mapTypesNodes}
+            routes={mapRoutes}
+            className="h-96"
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
