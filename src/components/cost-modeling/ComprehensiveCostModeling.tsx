@@ -193,7 +193,7 @@ const ComprehensiveCostModeling: React.FC<CostModelingProps> = ({ projectId }) =
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                      <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Amount']} />
                     </PieChart>
                   </ResponsiveContainer>
                 </CardContent>

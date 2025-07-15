@@ -1,286 +1,301 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { NetworkMap } from '@/components/NetworkMap';
-import { Node, Route } from '@/integrations/supabase/types';
-import { Plus, Trash2, Play, Upload, Download, Building, ShoppingCart, Truck, Loader2 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
-import { useToast } from "@/hooks/use-toast";
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NetworkMap } from '@/components/NetworkMap';
+import { Plus, MapPin, Trash2, Settings, Download, Upload, Truck } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { Node, Route, Facility, FacilityType, OwnershipType } from '@/integrations/supabase/types';
 
-type FacilityType = 'factory' | 'warehouse' | 'retail';
-
-interface Facility extends Node {
-  type: FacilityType;
-  cost: number;
-  capacity: number;
+interface NetworkDesignProps {
+  projectId?: string;
 }
 
-interface Product {
-    id: string;
-    name: string;
-    demand: number;
-}
-
-export default function NetworkDesign() {
-  const { projectId } = useParams<{ projectId: string }>();
+const NetworkDesign: React.FC<NetworkDesignProps> = ({ projectId }) => {
+  const [newFacility, setNewFacility] = useState<Omit<Facility, "id" | "ownership">>({
+    name: 'New Facility',
+    type: 'warehouse',
+    latitude: -1.2921,
+    longitude: 36.8219,
+    cost: 50000,
+    capacity: 10000
+  });
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: facilities = [], isLoading: isLoadingFacilities, error: facilitiesError } = useQuery<Facility[]>({
+  const { data: facilities, isLoading } = useQuery<Facility[]>({
     queryKey: ['facilities', projectId],
     queryFn: async () => {
+      if (!projectId) return [];
       const { data, error } = await supabase
         .from('supply_nodes')
         .select('*')
-        .eq('project_id', projectId);
-      if (error) throw new Error(error.message);
-      return data.map(d => ({...d, cost: d.cost || 0, capacity: d.capacity || 0})) as Facility[];
-    },
-    enabled: !!projectId,
-  });
+        .eq('project_id', projectId)
+        .eq('node_type', 'facility');
 
-  const { data: routes = [], isLoading: isLoadingRoutes, error: routesError } = useQuery<Route[]>({
-    queryKey: ['routes', projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('routes')
-        .select('*')
-        .eq('project_id', projectId);
       if (error) throw new Error(error.message);
-      return data as Route[];
+      return data.map(f => ({
+        id: f.id,
+        name: f.name,
+        type: f.node_type as FacilityType,
+        latitude: f.latitude,
+        longitude: f.longitude,
+        cost: f.fixed_cost,
+        capacity: f.capacity,
+        ownership: 'owned' as OwnershipType
+      }));
     },
-    enabled: !!projectId,
+    enabled: !!projectId
   });
 
   const addFacilityMutation = useMutation({
-    mutationFn: async (newFacility: Omit<Facility, 'id' | 'ownership'>) => {
-      const { data, error } = await supabase.from('supply_nodes').insert([{ ...newFacility, project_id: projectId, user_id: user?.id }]).select();
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['facilities', projectId] });
-      toast({ title: "Facility Added" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: 'destructive' });
-    }
-  });
-
-  const removeFacilityMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('supply_nodes').delete().eq('id', id);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['facilities', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['routes', projectId] });
-      toast({ title: "Facility Removed" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: 'destructive' });
-    }
-  });
-  
-  const addRouteMutation = useMutation({
-    mutationFn: async (newRoute: Omit<Route, 'id' | 'ownership'>) => {
-      const { data, error } = await supabase.from('routes').insert([{ ...newRoute, project_id: projectId, user_id: user?.id }]).select();
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['routes', projectId] });
-      toast({ title: "Route Added" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: 'destructive' });
-    }
-  });
-
-  const removeRouteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('routes').delete().eq('id', id);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['routes', projectId] });
-      toast({ title: "Route Removed" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: 'destructive' });
-    }
-  });
-
-  const [products, setProducts] = useState<Product[]>([{id: 'P1', name: 'Standard Widget', demand: 100}]);
-
-  const handleAddFacility = () => {
-    const newFacility = {
-        name: `New Facility ${facilities.length + 1}`,
-        type: 'warehouse' as FacilityType,
-        latitude: -1.30 + (Math.random() - 0.5) * 0.2,
-        longitude: 36.80 + (Math.random() - 0.5) * 0.2,
-        cost: 10000,
-        capacity: 5000,
-    };
-    addFacilityMutation.mutate(newFacility);
-  };
-  
-  const handleRemoveFacility = (id: string) => {
-    removeFacilityMutation.mutate(id);
-  };
-
-  const handleAddRoute = () => {
-      if (facilities.length < 2) {
-          toast({ title: "Cannot Add Route", description: "You need at least two facilities to create a route.", variant: "destructive" });
-          return;
-      }
-      const newRoute = {
-          from: facilities[0].id,
-          to: facilities[1].id,
+    mutationFn: async (newFacility: Omit<Facility, "id" | "ownership">) => {
+      const facility: Facility = {
+        ...newFacility,
+        id: crypto.randomUUID(),
+        ownership: 'owned' as OwnershipType
       };
-      addRouteMutation.mutate(newRoute);
+      const { data, error } = await supabase.from('supply_nodes').insert([{
+        id: facility.id,
+        project_id: projectId,
+        user_id: user?.id,
+        name: facility.name,
+        latitude: facility.latitude,
+        longitude: facility.longitude,
+        fixed_cost: facility.cost,
+        capacity: facility.capacity,
+        node_type: facility.type,
+      }]).select();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['facilities', projectId] });
+      toast({ title: "Facility Added", description: "New facility has been added to your network." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error adding facility", description: error.message, variant: 'destructive' });
+    }
+  });
+
+  const deleteFacilityMutation = useMutation({
+    mutationFn: async (facilityId: string) => {
+      const { data, error } = await supabase.from('supply_nodes').delete().eq('id', facilityId);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['facilities', projectId] });
+      toast({ title: "Facility Deleted", description: "Facility has been removed from your network." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error deleting facility", description: error.message, variant: 'destructive' });
+    }
+  });
+
+  const handleAddFacility = async () => {
+    try {
+      await addFacilityMutation.mutateAsync(newFacility);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
   };
 
-  const handleRemoveRoute = (id: string) => {
-      removeRouteMutation.mutate(id);
+  const handleDeleteFacility = async (facilityId: string) => {
+    try {
+      await deleteFacilityMutation.mutateAsync(facilityId);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
   };
 
-  const handleOptimize = () => {
-    toast({
-      title: "Optimization Running",
-      description: "This feature is not yet connected to the backend.",
-    });
-  };
+  const mapNodes: Node[] = (facilities || []).map(facility => ({
+    id: facility.id,
+    name: facility.name,
+    type: 'facility',
+    latitude: facility.latitude,
+    longitude: facility.longitude,
+    capacity: facility.capacity,
+    ownership: 'owned' as OwnershipType
+  }));
 
-  if (isLoadingFacilities || isLoadingRoutes) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
-  
-  if (facilitiesError || routesError) {
-      return <div className="flex justify-center items-center h-screen text-red-500">
-          Error loading data: {(facilitiesError as Error)?.message || (routesError as Error)?.message}
-      </div>;
-  }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewFacility(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
-          Supply Chain Network Design
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Network Design
         </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Visually build, analyze, and optimize your end-to-end supply chain network.
+        <p className="text-gray-600 max-w-3xl mx-auto">
+          Design and optimize your supply chain network with interactive tools and real-time feedback
         </p>
       </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[75vh]">
-            <div className="lg:col-span-3 h-full">
-                <Card className="h-full">
-                    <NetworkMap nodes={facilities} routes={routes} />
-                </Card>
-            </div>
-            <div className="lg:col-span-2 h-full flex flex-col gap-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Controls</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex gap-2">
-                         <Button onClick={handleOptimize}><Play className="mr-2 h-4 w-4"/> Analyze Network</Button>
-                         <Button variant="outline"><Download className="mr-2 h-4 w-4"/> Export</Button>
-                         <Button variant="outline"><Upload className="mr-2 h-4 w-4"/> Import</Button>
-                    </CardContent>
-                </Card>
-                <Tabs defaultValue="facilities" className="flex-grow flex flex-col">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="facilities"><Building className="mr-2 h-4 w-4"/>Facilities</TabsTrigger>
-                        <TabsTrigger value="routes"><Truck className="mr-2 h-4 w-4"/>Routes</TabsTrigger>
-                        <TabsTrigger value="products"><ShoppingCart className="mr-2 h-4 w-4"/>Products</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="facilities" className="flex-grow overflow-y-auto">
-                        <Card className="h-full">
-                            <CardContent className="p-4">
-                                <Button onClick={handleAddFacility} size="sm" className="mb-4" disabled={addFacilityMutation.isPending}><Plus className="mr-2 h-4 w-4"/>Add Facility</Button>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>Type</TableHead>
-                                            <TableHead>Capacity</TableHead>
-                                            <TableHead></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {facilities.map(f => (
-                                            <TableRow key={f.id}>
-                                                <TableCell>{f.name}</TableCell>
-                                                <TableCell>{f.type}</TableCell>
-                                                <TableCell>{f.capacity}</TableCell>
-                                                <TableCell>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveFacility(f.id)} disabled={removeFacilityMutation.isPending}>
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="routes" className="flex-grow overflow-y-auto">
-                         <Card className="h-full">
-                            <CardContent className="p-4">
-                                <Button onClick={handleAddRoute} size="sm" className="mb-4" disabled={addRouteMutation.isPending}><Plus className="mr-2 h-4 w-4"/>Add Route</Button>
-                                 <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>From</TableHead>
-                                            <TableHead>To</TableHead>
-                                            <TableHead></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {routes.map(r => (
-                                            <TableRow key={r.id}>
-                                                <TableCell>{facilities.find(f=>f.id === r.from)?.name}</TableCell>
-                                                <TableCell>{facilities.find(f=>f.id === r.to)?.name}</TableCell>
-                                                <TableCell>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveRoute(r.id)} disabled={removeRouteMutation.isPending}>
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="products" className="flex-grow overflow-y-auto">
-                         <Card className="h-full">
-                            <CardContent className="p-4">
-                                <p className="text-muted-foreground">Product management is not yet implemented.</p>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-            </div>
-        </div>
+      <Tabs defaultValue="design" className="space-y-6">
+        <TabsList className="grid grid-cols-1 md:grid-cols-3">
+          <TabsTrigger value="design">Network Design</TabsTrigger>
+          <TabsTrigger value="facilities">Facilities</TabsTrigger>
+          <TabsTrigger value="optimization">Optimization</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="design" className="space-y-6">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Interactive Map
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[600px]">
+                <NetworkMap nodes={mapNodes} routes={[]} />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="facilities" className="space-y-6">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                Manage Facilities
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={newFacility.name}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="type">Type</Label>
+                  <select
+                    id="type"
+                    name="type"
+                    className="w-full rounded-md border border-gray-200 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={newFacility.type}
+                    onChange={handleInputChange}
+                  >
+                    <option value="warehouse">Warehouse</option>
+                    <option value="distribution_center">Distribution Center</option>
+                    <option value="manufacturing">Manufacturing Plant</option>
+                    <option value="retail">Retail Store</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="latitude">Latitude</Label>
+                  <Input
+                    type="number"
+                    id="latitude"
+                    name="latitude"
+                    value={newFacility.latitude}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="longitude">Longitude</Label>
+                  <Input
+                    type="number"
+                    id="longitude"
+                    name="longitude"
+                    value={newFacility.longitude}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cost">Cost</Label>
+                  <Input
+                    type="number"
+                    id="cost"
+                    name="cost"
+                    value={newFacility.cost}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="capacity">Capacity</Label>
+                  <Input
+                    type="number"
+                    id="capacity"
+                    name="capacity"
+                    value={newFacility.capacity}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              <Button onClick={handleAddFacility} className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Facility
+              </Button>
+
+              <h3 className="text-lg font-semibold mt-6">Existing Facilities</h3>
+              <div className="space-y-2">
+                {facilities?.map((facility) => (
+                  <Card key={facility.id} className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                      <div>
+                        <h4 className="font-semibold">{facility.name}</h4>
+                        <p className="text-sm text-gray-500">{facility.type}</p>
+                      </div>
+                      <div className="md:text-center">
+                        <Badge variant="secondary">Capacity: {facility.capacity}</Badge>
+                      </div>
+                      <div className="md:text-right">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteFacility(facility.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {!facilities || facilities.length === 0 && (
+                  <p className="text-gray-500">No facilities added yet.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="optimization">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Optimization Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Configure optimization parameters here.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
+
+export default NetworkDesign;

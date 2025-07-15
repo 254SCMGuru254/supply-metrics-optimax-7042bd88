@@ -1,75 +1,72 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { 
   Shield, 
+  Mail, 
+  Lock, 
+  User, 
+  Building, 
   CheckCircle, 
-  TrendingUp, 
-  Mail,
-  MessageSquare,
-  Network,
-  Activity
+  AlertCircle,
+  Sparkles,
+  Star
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [company, setCompany] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      if (!signIn) {
-        throw new Error("Sign-in function is not available.");
+  useEffect(() => {
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      // Simulate auth check
+      const isAuthenticated = false; // Replace with actual auth check
+      if (isAuthenticated) {
+        navigate('/dashboard');
       }
-      await signIn(email, password);
-      toast({
-        title: "Success!",
-        description: "Signed in successfully.",
-      });
-      navigate("/dashboard");
-    } catch (error: any) {
-      toast({
-        title: "Error!",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+    checkAuth();
+  }, [navigate]);
+
+  const handleAuthAction = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      if (!signUp) {
-        throw new Error("Sign-up function is not available.");
+      if (mode === 'login') {
+        await signIn(email, password);
+        toast({
+          title: "Login Successful",
+          description: "You have successfully logged in!",
+        });
+        navigate('/dashboard');
+      } else {
+        await signUp(email, password, name, company);
+        toast({
+          title: "Registration Successful",
+          description: "You have successfully registered!",
+        });
+        navigate('/dashboard');
       }
-      await signUp(email, password);
-      toast({
-        title: "Success!",
-        description: "Signed up successfully. Please check your email to verify your account.",
-      });
-      navigate("/dashboard");
     } catch (error: any) {
       toast({
-        title: "Error!",
-        description: error.message,
+        title: "Authentication Failed",
+        description: error.message || "Invalid credentials.",
         variant: "destructive",
       });
     } finally {
@@ -78,94 +75,138 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
-            <Network className="inline-block h-6 w-6 mr-2" />
-            Supply Chain Portal
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-6 flex items-center justify-center">
+      <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-2xl font-bold flex items-center gap-2">
+            <Shield className="h-6 w-6 text-blue-600" />
+            {mode === 'login' ? 'Login' : 'Register'}
           </CardTitle>
+          <Sparkles className="h-6 w-6 text-yellow-500 animate-spin-slow" />
         </CardHeader>
-        <CardContent className="grid gap-4">
-          <Tabs defaultValue="sign-in" className="w-full">
+        <CardContent>
+          <Tabs defaultValue={mode} className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="sign-in">Sign In</TabsTrigger>
-              <TabsTrigger value="sign-up">Sign Up</TabsTrigger>
+              <TabsTrigger value="login" onClick={() => setMode('login')}>Login</TabsTrigger>
+              <TabsTrigger value="register" onClick={() => setMode('register')}>Register</TabsTrigger>
             </TabsList>
-            <TabsContent value="sign-in" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  placeholder="Enter your email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  placeholder="Enter your password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button disabled={loading} onClick={handleSignIn} className="w-full">
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing In...
-                  </>
-                ) : (
-                  "Sign In"
-                )}
-              </Button>
-              <div className="text-center text-sm text-gray-500">
-                <Link to="/support" className="hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
+            <TabsContent value="login" className="space-y-4">
+              <form onSubmit={handleAuthAction} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">
+                    <Mail className="h-4 w-4 mr-2 inline-block" />
+                    Email
+                  </Label>
+                  <Input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">
+                    <Lock className="h-4 w-4 mr-2 inline-block" />
+                    Password
+                  </Label>
+                  <Input
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button disabled={loading} className="w-full">
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Logging in...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Login
+                    </>
+                  )}
+                </Button>
+              </form>
             </TabsContent>
-            <TabsContent value="sign-up" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  placeholder="Enter your email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  placeholder="Enter your password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button disabled={loading} onClick={handleSignUp} className="w-full">
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing Up...
-                  </>
-                ) : (
-                  "Sign Up"
-                )}
-              </Button>
+            <TabsContent value="register" className="space-y-4">
+              <form onSubmit={handleAuthAction} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">
+                    <User className="h-4 w-4 mr-2 inline-block" />
+                    Full Name
+                  </Label>
+                  <Input
+                    type="text"
+                    id="name"
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="company">
+                    <Building className="h-4 w-4 mr-2 inline-block" />
+                    Company Name
+                  </Label>
+                  <Input
+                    type="text"
+                    id="company"
+                    placeholder="Enter your company name"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">
+                    <Mail className="h-4 w-4 mr-2 inline-block" />
+                    Email
+                  </Label>
+                  <Input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">
+                    <Lock className="h-4 w-4 mr-2 inline-block" />
+                    Password
+                  </Label>
+                  <Input
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button disabled={loading} className="w-full">
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Registering...
+                    </>
+                  ) : (
+                    <>
+                      <Star className="mr-2 h-4 w-4" />
+                      Register
+                    </>
+                  )}
+                </Button>
+              </form>
             </TabsContent>
           </Tabs>
         </CardContent>

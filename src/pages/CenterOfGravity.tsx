@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,27 +51,27 @@ const CenterOfGravity = () => {
     enabled: !!projectId
   });
 
-  const addNodeMutation = useMutation({
-    mutationFn: async (newNode: { latitude: number; longitude: number }) => {
-      const { data, error } = await supabase.from('nodes').insert([{ 
-        ...newNode, 
-        project_id: projectId, 
-        user_id: user?.id,
-        name: `New Demand Point ${(demandPoints?.length || 0) + 1}`,
-        type: 'demand',
-        demand: 100, // Default demand
-       }]).select();
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandPoints', projectId] });
-      toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
-    }
-  });
+const addNodeMutation = useMutation({
+  mutationFn: async (newNode: { latitude: number; longitude: number }) => {
+    const { data, error } = await supabase.from('nodes').insert([{ 
+      ...newNode, 
+      project_id: projectId, 
+      user_id: user?.id,
+      name: `New Demand Point ${(demandPoints?.length || 0) + 1}`,
+      type: 'demand',
+      demand: 100, // Default demand
+     }]).select();
+    if (error) throw new Error(error.message);
+    return data;
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['demandPoints', projectId] });
+    toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
+  },
+  onError: (error: Error) => {
+    toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
+  }
+});
 
   useEffect(() => {
     let currentNodes: Node[] = [...(demandPoints || [])];

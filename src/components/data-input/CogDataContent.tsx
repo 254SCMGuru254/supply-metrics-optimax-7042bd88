@@ -4,113 +4,81 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Plus, Trash2, Upload, Download } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CogDataContentProps {
   projectId: string;
 }
 
-interface DemandPoint {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  demand: number;
-}
-
 export const CogDataContent: React.FC<CogDataContentProps> = ({ projectId }) => {
-  const [demandPoints, setDemandPoints] = useState<DemandPoint[]>([]);
+  const [demandPoints, setDemandPoints] = useState<any[]>([]);
+  const { toast } = useToast();
 
   const addDemandPoint = () => {
-    const newPoint: DemandPoint = {
-      id: Date.now().toString(),
-      name: `Location ${demandPoints.length + 1}`,
-      latitude: -1.2921,
-      longitude: 36.8219,
-      demand: 100
+    const newPoint = {
+      id: crypto.randomUUID(),
+      name: `Point ${demandPoints.length + 1}`,
+      latitude: -1.2921 + (Math.random() - 0.5) * 2,
+      longitude: 36.8219 + (Math.random() - 0.5) * 2,
+      demand: Math.floor(Math.random() * 500) + 100
     };
     setDemandPoints([...demandPoints, newPoint]);
-  };
-
-  const removeDemandPoint = (id: string) => {
-    setDemandPoints(demandPoints.filter(point => point.id !== id));
-  };
-
-  const updateDemandPoint = (id: string, field: keyof DemandPoint, value: string | number) => {
-    setDemandPoints(demandPoints.map(point =>
-      point.id === id ? { ...point, [field]: value } : point
-    ));
+    
+    toast({
+      title: "Demand Point Added",
+      description: "New demand point has been added to your project"
+    });
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Center of Gravity Data Input</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <MapPin className="h-5 w-5" />
+          Center of Gravity Data Input
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Demand Points</h3>
-          <Button onClick={addDemandPoint} size="sm">
+          <Button onClick={addDemandPoint}>
             <Plus className="h-4 w-4 mr-2" />
             Add Point
           </Button>
         </div>
-        
-        {demandPoints.map((point) => (
-          <div key={point.id} className="grid grid-cols-5 gap-4 p-4 border rounded-lg">
-            <div>
-              <Label htmlFor={`name-${point.id}`}>Name</Label>
-              <Input
-                id={`name-${point.id}`}
-                value={point.name}
-                onChange={(e) => updateDemandPoint(point.id, 'name', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor={`lat-${point.id}`}>Latitude</Label>
-              <Input
-                id={`lat-${point.id}`}
-                type="number"
-                step="0.0001"
-                value={point.latitude}
-                onChange={(e) => updateDemandPoint(point.id, 'latitude', parseFloat(e.target.value))}
-              />
-            </div>
-            <div>
-              <Label htmlFor={`lng-${point.id}`}>Longitude</Label>
-              <Input
-                id={`lng-${point.id}`}
-                type="number"
-                step="0.0001"
-                value={point.longitude}
-                onChange={(e) => updateDemandPoint(point.id, 'longitude', parseFloat(e.target.value))}
-              />
-            </div>
-            <div>
-              <Label htmlFor={`demand-${point.id}`}>Demand</Label>
-              <Input
-                id={`demand-${point.id}`}
-                type="number"
-                value={point.demand}
-                onChange={(e) => updateDemandPoint(point.id, 'demand', parseInt(e.target.value))}
-              />
-            </div>
-            <div className="flex items-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => removeDemandPoint(point.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-        
+
+        <div className="grid gap-4">
+          {demandPoints.map((point, index) => (
+            <Card key={point.id} className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label>Name</Label>
+                  <Input value={point.name} readOnly />
+                </div>
+                <div>
+                  <Label>Latitude</Label>
+                  <Input value={point.latitude.toFixed(6)} readOnly />
+                </div>
+                <div>
+                  <Label>Longitude</Label>
+                  <Input value={point.longitude.toFixed(6)} readOnly />
+                </div>
+                <div>
+                  <Label>Demand</Label>
+                  <Input value={point.demand} readOnly />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
         {demandPoints.length === 0 && (
-          <p className="text-gray-500 text-center py-8">
+          <div className="text-center py-8 text-gray-500">
             No demand points added yet. Click "Add Point" to get started.
-          </p>
+          </div>
         )}
       </CardContent>
     </Card>
