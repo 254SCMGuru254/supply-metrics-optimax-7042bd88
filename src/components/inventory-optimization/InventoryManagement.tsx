@@ -41,7 +41,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ projectId }) 
         </TabsList>
 
         <TabsContent value="overview">
-          <InventoryTabsContent projectId={projectId} />
+          <InventoryTabsContent />
         </TabsContent>
 
         <TabsContent value="eoq">
@@ -53,7 +53,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ projectId }) 
         </TabsContent>
 
         <TabsContent value="abc-analysis">
-          <ABCAnalysis projectId={projectId} />
+          <ABCAnalysis />
         </TabsContent>
       </Tabs>
 

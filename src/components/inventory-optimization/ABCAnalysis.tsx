@@ -143,9 +143,9 @@ export const ABCAnalysis: React.FC = () => {
   }));
 
   const pieData = [
-    { name: 'Category A', value: abcResults.summary.categoryACount, color: '#ef4444' },
-    { name: 'Category B', value: abcResults.summary.categoryBCount, color: '#f59e0b' },
-    { name: 'Category C', value: abcResults.summary.categoryCCount, color: '#10b981' }
+    { name: 'Category A', value: abcResults.summary.categoryACount },
+    { name: 'Category B', value: abcResults.summary.categoryBCount },
+    { name: 'Category C', value: abcResults.summary.categoryCCount }
   ];
 
   const COLORS = ['#ef4444', '#f59e0b', '#10b981'];
@@ -318,12 +318,12 @@ export const ABCAnalysis: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
                         <Pie
+                          data={pieData}
                           cx="50%"
                           cy="50%"
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
-                          data={pieData}
                         >
                           {pieData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

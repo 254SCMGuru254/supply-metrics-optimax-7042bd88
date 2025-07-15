@@ -9,7 +9,7 @@ import {
   Calculator, 
   Settings, 
   BarChart3, 
-  Code2, 
+  Code, 
   ArrowRight,
   HelpCircle,
   FileText,
@@ -94,7 +94,7 @@ const Documentation = () => {
                     EOQ = √(2DS / H), where D is annual demand, S is order cost, and H is holding cost.
                   </p>
                   <Badge variant="secondary">
-                    <Code2 className="h-3 w-3 mr-1" />
+                    <Code className="h-3 w-3 mr-1" />
                     Formula
                   </Badge>
                 </div>
@@ -105,7 +105,7 @@ const Documentation = () => {
                     period.
                   </p>
                   <Badge variant="secondary">
-                    <Code2 className="h-3 w-3 mr-1" />
+                    <Code className="h-3 w-3 mr-1" />
                     Formula
                   </Badge>
                 </div>

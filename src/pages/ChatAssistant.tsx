@@ -23,7 +23,7 @@ import {
   User, 
   Lightbulb,
   Download,
-  Clipboard,
+  Copy,
   RefreshCcw
 } from 'lucide-react';
 
@@ -203,7 +203,7 @@ const ChatAssistant = () => {
                                   size="icon"
                                   onClick={() => handleCopyCode(codeBlock.content)}
                                 >
-                                  <Clipboard className="h-4 w-4" />
+                                  <Copy className="h-4 w-4" />
                                   <span className="sr-only">Copy code</span>
                                 </Button>
                               </div>

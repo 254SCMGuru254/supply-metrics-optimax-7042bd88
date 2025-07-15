@@ -22,7 +22,7 @@ interface Node {
 
 interface EditableMapPointsProps {
   nodes: Node[];
-  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  setNodes: (nodes: Node[]) => void;
   onNodeEdit?: (node: Node) => void;
 }
 
@@ -33,9 +33,18 @@ export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingNode, setEditingNode] = useState<Node | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    type: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
+    latitude: number;
+    longitude: number;
+    capacity: number;
+    demand: number;
+    fixed_cost: number;
+    variable_cost: number;
+  }>({
     name: '',
-    type: 'demand' as const,
+    type: 'demand',
     latitude: 0,
     longitude: 0,
     capacity: 0,
@@ -53,16 +62,16 @@ export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({
     };
 
     if (editingNode) {
-      setNodes(prev => prev.map(n => n.id === editingNode.id ? nodeData : n));
+      setNodes(nodes.map(n => n.id === editingNode.id ? nodeData : n));
     } else {
-      setNodes(prev => [...prev, nodeData]);
+      setNodes([...nodes, nodeData]);
     }
 
     setIsDialogOpen(false);
     setEditingNode(null);
     setFormData({
       name: '',
-      type: 'demand' as const,
+      type: 'demand',
       latitude: 0,
       longitude: 0,
       capacity: 0,

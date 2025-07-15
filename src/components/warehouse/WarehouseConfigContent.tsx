@@ -19,7 +19,7 @@ interface Node {
 interface WarehouseConfigProps {
   projectId: string;
   nodes: Node[];
-  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  setNodes: (nodes: Node[]) => void;
 }
 
 export const WarehouseConfigContent: React.FC<WarehouseConfigProps> = ({

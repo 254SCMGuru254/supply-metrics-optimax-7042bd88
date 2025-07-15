@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { 
-  PlayCircle, 
-  StopCircle, 
+  Play, 
+  Square, 
   RefreshCcw, 
   Activity, 
   Clock, 
@@ -88,7 +88,7 @@ const Simulation = () => {
                       disabled={isRunning}
                       className="flex items-center space-x-2"
                     >
-                      <PlayCircle className="h-4 w-4" />
+                      <Play className="h-4 w-4" />
                       <span>Start Simulation</span>
                     </Button>
                     <Button 
@@ -97,7 +97,7 @@ const Simulation = () => {
                       variant="destructive"
                       className="flex items-center space-x-2"
                     >
-                      <StopCircle className="h-4 w-4" />
+                      <Square className="h-4 w-4" />
                       <span>Stop</span>
                     </Button>
                     <Button 

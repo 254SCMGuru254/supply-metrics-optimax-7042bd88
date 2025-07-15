@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,11 +22,9 @@ interface Node {
   variable_cost?: number;
 }
 
-interface InventoryTabsContentProps {
-  projectId: string;
-}
+export const InventoryTabsContent: React.FC = () => {
+  const projectId = 'default-project';
 
-export const InventoryTabsContent: React.FC<InventoryTabsContentProps> = ({ projectId }) => {
   const { data: supplyNodes, isLoading } = useQuery<Node[]>({
     queryKey: ['supplyNodes', projectId],
     queryFn: async () => {
@@ -53,7 +52,7 @@ export const InventoryTabsContent: React.FC<InventoryTabsContentProps> = ({ proj
 
   return (
     <Tabs defaultValue="abc-analysis" className="space-y-4">
-      <TabsList className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <TabsList className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <TabsTrigger value="abc-analysis" className="flex items-center gap-2">
           <Activity className="h-4 w-4" />
           ABC Analysis
