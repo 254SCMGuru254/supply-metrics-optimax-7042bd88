@@ -3,9 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Mail,
-  Phone,
-  MessageCircle,
+  Send,
+  Smartphone,
+  MessageSquare,
   Video
 } from 'lucide-react';
 
@@ -24,20 +24,20 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <MessageCircle className="mr-2 h-5 w-5" />
+              <MessageSquare className="mr-2 h-5 w-5" />
               Contact Support
             </CardTitle>
             <CardDescription>Get in touch with our support team for technical assistance.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center">
-              <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+              <Send className="mr-2 h-4 w-4 text-muted-foreground" />
               <a href="mailto:support@chainalyze.io" className="text-sm text-blue-500 hover:underline">
                 support@chainalyze.io
               </a>
             </div>
             <div className="flex items-center">
-              <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+              <Smartphone className="mr-2 h-4 w-4 text-muted-foreground" />
               <a href="tel:+254700123456" className="text-sm text-blue-500 hover:underline">
                 +254 700 123456
               </a>

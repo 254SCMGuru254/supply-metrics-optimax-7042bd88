@@ -11,7 +11,7 @@ import {
   RotateCcw, 
   Settings, 
   TrendingUp, 
-  Timer, 
+  Clock, 
   Activity,
   CheckCircle
 } from 'lucide-react';
@@ -115,7 +115,7 @@ const Simulation = () => {
           >
             {running ? (
               <>
-                <Timer className="mr-2 h-4 w-4 animate-spin" />
+                <Clock className="mr-2 h-4 w-4 animate-spin" />
                 Running...
               </>
             ) : (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -254,7 +255,7 @@ export const ABCAnalysis: React.FC<ABCAnalysisProps> = ({ projectId }) => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="name" 
-                    tick={{ fontSize: 12 }}
+                    fontSize={12}
                     height={60}
                   />
                   <YAxis />

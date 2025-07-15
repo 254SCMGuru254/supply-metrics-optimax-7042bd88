@@ -3,8 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
-  Phone, 
-  Mail, 
+  Smartphone, 
+  Send, 
   Github, 
   Twitter, 
   Linkedin,
@@ -65,11 +65,11 @@ export const ProfessionalFooter = () => {
             <h4 className="font-semibold text-foreground">Contact</h4>
             <div className="space-y-3 text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4" />
+                <Send className="h-4 w-4" />
                 <span>info@optimax.co.ke</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4" />
+                <Smartphone className="h-4 w-4" />
                 <span>+254 700 123 456</span>
               </div>
               <div className="flex items-center space-x-2">

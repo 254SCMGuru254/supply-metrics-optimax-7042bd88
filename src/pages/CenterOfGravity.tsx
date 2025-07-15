@@ -4,15 +4,43 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NetworkMap } from "@/components/NetworkMap";
 import { CompleteCogCalculation, CogCalculationResult } from "@/components/cog/CompleteCogCalculation";
 import { modelFormulaRegistry } from "@/data/modelFormulaRegistry";
-import { Node, Route, OwnershipType } from "@/integrations/supabase/types";
 import { CogFormulaSelector } from "@/components/cog/CogFormulaSelector";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AlertCircle, Package, Loader2, MapPin, Calculator, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
+// Define local interfaces
+interface Node {
+  id: string;
+  name: string;
+  type?: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
+  latitude: number;
+  longitude: number;
+  weight?: number;
+  capacity?: number;
+  demand?: number;
+  fixed_cost?: number;
+  variable_cost?: number;
+  ownership: OwnershipType;
+}
+
+interface Route {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+  volume?: number;
+  mode?: 'truck' | 'rail' | 'ship' | 'air';
+  transitTime?: number;
+  ownership: OwnershipType;
+  isOptimized?: boolean;
+}
+
+type OwnershipType = 'owned' | 'leased' | 'partner' | 'proposed';
 
 const CenterOfGravity = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -31,17 +59,17 @@ const CenterOfGravity = () => {
     queryFn: async () => {
       if (!projectId) return [];
       const { data, error } = await supabase
-        .from('nodes')
+        .from('supply_nodes')
         .select('*')
         .eq('project_id', projectId)
-        .eq('type', 'demand');
+        .eq('node_type', 'demand');
 
       if (error) throw new Error(error.message);
       
       return data.map(n => ({
         id: n.id,
         name: n.name,
-        type: n.type as any,
+        type: n.node_type as any,
         latitude: n.latitude,
         longitude: n.longitude,
         weight: n.demand,
@@ -51,27 +79,27 @@ const CenterOfGravity = () => {
     enabled: !!projectId
   });
 
-const addNodeMutation = useMutation({
-  mutationFn: async (newNode: { latitude: number; longitude: number }) => {
-    const { data, error } = await supabase.from('nodes').insert([{ 
-      ...newNode, 
-      project_id: projectId, 
-      user_id: user?.id,
-      name: `New Demand Point ${(demandPoints?.length || 0) + 1}`,
-      type: 'demand',
-      demand: 100, // Default demand
-     }]).select();
-    if (error) throw new Error(error.message);
-    return data;
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['demandPoints', projectId] });
-    toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
-  },
-  onError: (error: Error) => {
-    toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
-  }
-});
+  const addNodeMutation = useMutation({
+    mutationFn: async (newNode: { latitude: number; longitude: number }) => {
+      const { data, error } = await supabase.from('supply_nodes').insert([{ 
+        ...newNode, 
+        project_id: projectId, 
+        user_id: user?.id,
+        name: `New Demand Point ${(demandPoints?.length || 0) + 1}`,
+        node_type: 'demand',
+        demand: 100, // Default demand
+       }]).select();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['demandPoints', projectId] });
+      toast({ title: "Demand Point Added", description: "A new location has been added to your project." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error adding point", description: error.message, variant: 'destructive' });
+    }
+  });
 
   useEffect(() => {
     let currentNodes: Node[] = [...(demandPoints || [])];

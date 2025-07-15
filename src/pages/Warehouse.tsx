@@ -4,7 +4,18 @@ import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigCo
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building } from "lucide-react";
 import { useState } from "react";
-import { Node } from "@/integrations/supabase/types";
+
+// Define Node interface locally
+interface Node {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  capacity?: number;
+  demand?: number;
+  fixed_cost?: number;
+  variable_cost?: number;
+}
 
 const WarehousePage = () => {
   const { projectId } = useParams<{ projectId: string }>();

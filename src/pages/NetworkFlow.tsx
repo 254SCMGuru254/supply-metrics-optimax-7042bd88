@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NetworkMap } from "@/components/NetworkMap";
 import { useToast } from "@/hooks/use-toast";
 import { ManualConnectionCreator } from "@/components/network-flow/ManualConnectionCreator";
-import { Node, Route, NodeType } from "@/integrations/supabase/types";
+
+// Define local interfaces
+interface Node {
+  id: string;
+  name: string;
+  type?: NodeType;
+  latitude: number;
+  longitude: number;
+  weight?: number;
+  capacity?: number;
+  demand?: number;
+  fixed_cost?: number;
+  variable_cost?: number;
+  ownership: 'owned' | 'leased' | 'partner' | 'proposed';
+}
+
+interface Route {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+  volume?: number;
+  mode?: 'truck' | 'rail' | 'ship' | 'air';
+  transitTime?: number;
+  ownership: 'owned' | 'leased' | 'partner' | 'proposed';
+  isOptimized?: boolean;
+}
+
+type NodeType = 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
 
 const NetworkFlow = () => {
   const [nodes, setNodes] = useState<Node[]>([]);

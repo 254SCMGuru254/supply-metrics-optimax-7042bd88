@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NetworkMap } from "@/components/NetworkMap";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -13,14 +13,42 @@ import {
   MapPin, 
   Settings,
   Calculator,
-  Zap as Lightning,
+  Lightbulb,
   Activity,
   Target,
   Layers
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Node, Route, OwnershipType } from "@/integrations/supabase/types";
+
+// Define local interfaces
+interface Node {
+  id: string;
+  name: string;
+  type?: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
+  latitude: number;
+  longitude: number;
+  weight?: number;
+  capacity?: number;
+  demand?: number;
+  fixed_cost?: number;
+  variable_cost?: number;
+  ownership: OwnershipType;
+}
+
+interface Route {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+  volume?: number;
+  mode?: 'truck' | 'rail' | 'ship' | 'air';
+  transitTime?: number;
+  ownership: OwnershipType;
+  isOptimized?: boolean;
+}
+
+type OwnershipType = 'owned' | 'leased' | 'partner' | 'proposed';
 
 // Simple optimization form component
 const OptimizationForm = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
@@ -67,17 +95,17 @@ const NetworkOptimization = () => {
     queryFn: async () => {
       if (!projectId) return [];
       const { data, error } = await supabase
-        .from('nodes')
+        .from('supply_nodes')
         .select('*')
         .eq('project_id', projectId)
-        .eq('type', 'demand');
+        .eq('node_type', 'demand');
 
       if (error) throw new Error(error.message);
       
       return data.map(n => ({
         id: n.id,
         name: n.name,
-        type: n.type as any,
+        type: n.node_type as any,
         latitude: n.latitude,
         longitude: n.longitude,
         weight: n.demand,
@@ -125,7 +153,7 @@ const NetworkOptimization = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-4">
             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Lightning className="h-6 w-6 text-white" />
+              <Lightbulb className="h-6 w-6 text-white" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Network Optimization</h1>

@@ -8,14 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Key, 
+  EyeIcon, 
+  EyeOffIcon, 
+  Send, 
+  KeyRound, 
   User,
-  AtSign,
-  Star,
-  Sparkles,
+  AtSignIcon,
+  StarIcon,
+  Sparkle,
   Zap
 } from 'lucide-react';
 
@@ -66,11 +66,9 @@ const Auth = () => {
           return;
         }
         await signUp(email, password, {
-          options: {
-            data: {
-              full_name: name,
-              company: '',
-            },
+          data: {
+            full_name: name,
+            company: '',
           },
         });
         toast({
@@ -97,7 +95,7 @@ const Auth = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             {isLogin ? "Sign In" : "Create Account"}
-            <Sparkles className="inline-block h-5 w-5 ml-2 text-yellow-500 animate-spin-slow" />
+            <Sparkle className="inline-block h-5 w-5 ml-2 text-yellow-500 animate-spin-slow" />
           </CardTitle>
           <CardDescription className="text-center text-muted-foreground">
             {isLogin
@@ -125,7 +123,7 @@ const Auth = () => {
             )}
             <div>
               <Label htmlFor="email" className="flex items-center space-x-2">
-                <AtSign className="h-4 w-4 mr-2" />
+                <AtSignIcon className="h-4 w-4 mr-2" />
                 <span>Email</span>
               </Label>
               <Input
@@ -139,7 +137,7 @@ const Auth = () => {
             </div>
             <div>
               <Label htmlFor="password" className="flex items-center space-x-2">
-                <Key className="h-4 w-4 mr-2" />
+                <KeyRound className="h-4 w-4 mr-2" />
                 <span>Password</span>
               </Label>
               <div className="relative">
@@ -159,9 +157,9 @@ const Auth = () => {
                   onClick={togglePasswordVisibility}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOffIcon className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <EyeIcon className="h-4 w-4" />
                   )}
                   <span className="sr-only">Toggle password visibility</span>
                 </Button>

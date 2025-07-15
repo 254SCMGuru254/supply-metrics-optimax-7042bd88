@@ -1,4 +1,4 @@
-import React, { useState, Dispatch, SetStateAction } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,7 @@ interface Node {
 
 interface EditableMapPointsProps {
   nodes: Node[];
-  setNodes: Dispatch<SetStateAction<Node[]>>;
+  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   onNodeEdit?: (node: Node) => void;
 }
 

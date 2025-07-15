@@ -19,9 +19,9 @@ import { Badge } from "@/components/ui/badge"
 import { 
   Send, 
   MessageSquare, 
-  Bot, 
+  Activity, 
   User, 
-  Zap as Lightning,
+  Lightbulb,
   Download,
   Copy,
   RefreshCcw
@@ -169,7 +169,7 @@ const ChatAssistant = () => {
                 </Select>
               </div>
               <Badge variant="secondary">
-                <Lightning className="h-3 w-3 mr-1.5" />
+                <Lightbulb className="h-3 w-3 mr-1.5" />
                 Optimized for Supply Chain
               </Badge>
             </div>

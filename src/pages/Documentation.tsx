@@ -9,8 +9,8 @@ import {
   Calculator, 
   Settings, 
   BarChart3, 
-  Code2, 
-  ExternalLink,
+  Code, 
+  ArrowUpRight,
   HelpCircle,
   FileText,
   Lightbulb,
@@ -69,7 +69,7 @@ const Documentation = () => {
                 <li><strong>Network Design:</strong> Designing the optimal network of facilities and transportation links.</li>
               </ul>
               <Button variant="link" className="pl-0">
-                Read More <ExternalLink className="h-4 w-4 ml-2" />
+                Read More <ArrowUpRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
@@ -94,7 +94,7 @@ const Documentation = () => {
                     EOQ = √(2DS / H), where D is annual demand, S is order cost, and H is holding cost.
                   </p>
                   <Badge variant="secondary">
-                    <Code2 className="h-3 w-3 mr-1" />
+                    <Code className="h-3 w-3 mr-1" />
                     Formula
                   </Badge>
                 </div>
@@ -105,13 +105,13 @@ const Documentation = () => {
                     period.
                   </p>
                   <Badge variant="secondary">
-                    <Code2 className="h-3 w-3 mr-1" />
+                    <Code className="h-3 w-3 mr-1" />
                     Formula
                   </Badge>
                 </div>
               </div>
               <Button variant="link" className="pl-0">
-                Explore All Formulas <ExternalLink className="h-4 w-4 ml-2" />
+                Explore All Formulas <ArrowUpRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
@@ -152,7 +152,7 @@ const Documentation = () => {
                 </div>
               </div>
               <Button variant="link" className="pl-0">
-                View Detailed Analytics <ExternalLink className="h-4 w-4 ml-2" />
+                View Detailed Analytics <ArrowUpRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
