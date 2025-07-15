@@ -1,89 +1,112 @@
+
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { 
-  Smartphone, 
-  Mail, 
-  Github, 
-  Twitter, 
-  Linkedin 
+  Phone as PhoneIcon, 
+  Mail as MailIcon, 
+  Github as GithubIcon, 
+  Twitter as TwitterIcon, 
+  Linkedin as LinkedinIcon 
 } from 'lucide-react';
 
 export const ProfessionalFooter = () => {
   return (
-    <footer className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-12">
-      <div className="container mx-auto px-6">
+    <footer className="bg-gray-900 text-white py-12 mt-16">
+      <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Supply Metrics Optimax
-            </h3>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Advanced supply chain optimization platform leveraging AI and mathematical modeling for enterprise-grade solutions.
+          <div>
+            <h3 className="text-xl font-bold mb-4">Supply Metrics Optimax</h3>
+            <p className="text-gray-300 text-sm mb-4">
+              Advanced supply chain optimization platform for modern enterprises.
             </p>
-            <div className="flex space-x-3">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-700">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-700">
-                <Linkedin className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-700">
-                <Github className="h-4 w-4" />
-              </Button>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <TwitterIcon className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <LinkedinIcon className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <GithubIcon className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
-          {/* Solutions */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-400">Solutions</h4>
-            <ul className="space-y-2 text-sm text-slate-300">
-              <li><a href="#" className="hover:text-white transition-colors">Network Optimization</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Inventory Management</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Route Planning</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Cost Modeling</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">AI Analytics</a></li>
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/dashboard" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link to="/analytics" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <Link to="/documentation" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Documentation
+                </Link>
+              </li>
+              <li>
+                <Link to="/support" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Support
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Industries */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-400">Industries</h4>
-            <ul className="space-y-2 text-sm text-slate-300">
-              <li><a href="#" className="hover:text-white transition-colors">Manufacturing</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Retail & E-commerce</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Agriculture</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Healthcare</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Logistics</a></li>
+          {/* Solutions */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Solutions</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/route-optimization/new" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Route Optimization
+                </Link>
+              </li>
+              <li>
+                <Link to="/inventory-management/new" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Inventory Management
+                </Link>
+              </li>
+              <li>
+                <Link to="/network-optimization/new" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Network Optimization
+                </Link>
+              </li>
+              <li>
+                <Link to="/simulation/new" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Simulation
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Contact */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-400">Contact</h4>
-            <div className="space-y-3 text-sm text-slate-300">
-              <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4 text-blue-400" />
-                <span>support@supplymetricsoptmax.com</span>
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Contact</h4>
+            <div className="space-y-2">
+              <div className="flex items-center text-gray-300 text-sm">
+                <PhoneIcon className="h-4 w-4 mr-2" />
+                +1 (555) 123-4567
               </div>
-              <div className="flex items-center space-x-2">
-                <Smartphone className="h-4 w-4 text-blue-400" />
-                <span>+254 700 000 000</span>
+              <div className="flex items-center text-gray-300 text-sm">
+                <MailIcon className="h-4 w-4 mr-2" />
+                support@optimax.com
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-slate-400 text-sm">
-            © 2025 Supply Metrics Optimax. All rights reserved.
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+          <p className="text-gray-400 text-sm">
+            © 2024 Supply Metrics Optimax. All rights reserved.
           </p>
-          <div className="flex space-x-6 mt-4 md:mt-0 text-sm text-slate-400">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
-          </div>
         </div>
       </div>
     </footer>
