@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   LogIn, 
   UserPlus, 
-  AtSign as Mail, 
-  KeyRound as Lock, 
+  Mail, 
+  Lock, 
   Eye, 
   EyeOff,
   Shield,
@@ -66,7 +67,6 @@ const Auth = () => {
         throw new Error(error.message);
       }
 
-      // Redirect to dashboard or another page upon successful login
       navigate('/dashboard');
     } catch (error: any) {
       setError(error.message);
@@ -134,7 +134,7 @@ const Auth = () => {
             )}
 
             {success && (
-              <Alert variant="success">
+              <Alert>
                 <CheckCircle className="h-4 w-4" />
                 <AlertDescription>{success}</AlertDescription>
               </Alert>

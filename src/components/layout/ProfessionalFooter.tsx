@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { 
-  Phone as SmartphoneIcon, 
+  Smartphone, 
   Mail,
   Github,
   Twitter,
@@ -45,7 +45,7 @@ export const ProfessionalFooter = () => {
             <h4 className="font-medium text-foreground">Contact</h4>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <SmartphoneIcon className="h-4 w-4" />
+                <Smartphone className="h-4 w-4" />
                 <span>+254 700 000 000</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">

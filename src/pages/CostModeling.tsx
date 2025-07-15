@@ -1,6 +1,6 @@
 
 import React from "react";
-import ComprehensiveCostModeling from "@/components/cost-modeling/ComprehensiveCostModeling";
+import { ComprehensiveCostModeling } from "@/components/cost-modeling/ComprehensiveCostModeling";
 
 const CostModeling = () => {
   return (

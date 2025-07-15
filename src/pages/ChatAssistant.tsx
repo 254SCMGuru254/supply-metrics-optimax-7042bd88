@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import {
   Select,
   SelectContent,
@@ -23,7 +24,7 @@ import {
   Zap as Lightning,
   Download,
   Copy,
-  RefreshCw
+  RefreshCcw
 } from 'lucide-react';
 
 const ChatAssistant = () => {
@@ -40,7 +41,7 @@ const ChatAssistant = () => {
   const [selectedModel, setSelectedModel] = useState('gpt-3.5-turbo');
   const [apiKey, setApiKey] = useState('');
   const [codeBlocks, setCodeBlocks] = useState<{ id: string; content: string }[]>([]);
-  const toast = useToast()
+  const { toast } = useToast();
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -114,7 +115,7 @@ const ChatAssistant = () => {
     toast({
       title: "Code Copied",
       description: "Code snippet copied to clipboard!",
-    })
+    });
   };
 
   const handleRegenerateResponse = async () => {
@@ -261,7 +262,7 @@ const ChatAssistant = () => {
                 onClick={handleRegenerateResponse}
                 disabled={isThinking}
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCcw className="w-4 h-4 mr-2" />
                 Regenerate
               </Button>
             </div>

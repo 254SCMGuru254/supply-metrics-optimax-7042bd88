@@ -117,7 +117,7 @@ const AnalyticsDashboard = () => {
         <Card className="shadow-lg">
           <CardContent className="p-6 text-center">
             <div className="text-3xl font-bold text-green-600 mb-2">{realTimeData.runningOptimizations}</div>
-            <div className="text-sm text-gray-600">Running Optimizations</div>
+            <div className="text-sm text-muted-foreground">Running Optimizations</div>
             <div className="flex items-center justify-center mt-2">
               <TrendingUp className="h-4 w-4 text-blue-500 mr-1" />
               <span className="text-xs text-blue-500">Processing</span>
@@ -128,7 +128,7 @@ const AnalyticsDashboard = () => {
         <Card className="shadow-lg">
           <CardContent className="p-6 text-center">
             <div className="text-3xl font-bold text-purple-600 mb-2">${realTimeData.totalSavings.toLocaleString()}</div>
-            <div className="text-sm text-gray-600">Total Savings</div>
+            <div className="text-sm text-muted-foreground">Total Savings</div>
             <div className="flex items-center justify-center mt-2">
               <DollarSign className="h-4 w-4 text-green-500 mr-1" />
               <span className="text-xs text-green-500">+$1.2K today</span>
@@ -204,9 +204,9 @@ const AnalyticsDashboard = () => {
                         {metric.value}%
                       </Badge>
                     </div>
-                    <div className="text-sm font-medium text-gray-900 mb-2">{metric.name}</div>
+                    <div className="text-sm font-medium text-foreground mb-2">{metric.name}</div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-gray-500">
+                      <div className="flex justify-between text-xs text-muted-foreground">
                         <span>Current</span>
                         <span>Target: {metric.target}%</span>
                       </div>

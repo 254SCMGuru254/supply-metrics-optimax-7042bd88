@@ -5,110 +5,93 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
-  Package, 
-  TrendingUp, 
-  DollarSign, 
-  AlertTriangle,
-  Sliders as SlidersHorizontal,
-  Download,
-  Upload
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  PieChart, Pie, Cell, LineChart, Line 
+} from 'recharts';
+import { 
+  SlidersHorizontal, Package, TrendingUp, AlertTriangle, 
+  CheckCircle, Calculator, Download, Upload 
 } from 'lucide-react';
 
-interface InventoryItem {
+interface ABCItem {
   id: string;
   name: string;
+  annualUsage: number;
   unitCost: number;
-  annualDemand: number;
-}
-
-interface ABCItem {
-  name: string;
+  totalValue: number;
+  category: 'A' | 'B' | 'C';
   percentage: number;
   cumulativePercentage: number;
-  category: string;
-  color: string;
 }
 
-const initialInventoryData: InventoryItem[] = [
-  { id: 'item-1', name: 'Product A', unitCost: 50, annualDemand: 1000 },
-  { id: 'item-2', name: 'Product B', unitCost: 30, annualDemand: 2000 },
-  { id: 'item-3', name: 'Product C', unitCost: 100, annualDemand: 500 },
-  { id: 'item-4', name: 'Product D', unitCost: 25, annualDemand: 3000 },
-  { id: 'item-5', name: 'Product E', unitCost: 75, annualDemand: 750 },
-  { id: 'item-6', name: 'Product F', unitCost: 40, annualDemand: 1500 },
-  { id: 'item-7', name: 'Product G', unitCost: 60, annualDemand: 900 },
-  { id: 'item-8', name: 'Product H', unitCost: 35, annualDemand: 2500 },
-  { id: 'item-9', name: 'Product I', unitCost: 90, annualDemand: 600 },
-  { id: 'item-10', name: 'Product J', unitCost: 45, annualDemand: 1200 },
+const sampleData: Omit<ABCItem, 'totalValue' | 'category' | 'percentage' | 'cumulativePercentage'>[] = [
+  { id: '1', name: 'Premium Engine Oil', annualUsage: 5000, unitCost: 25 },
+  { id: '2', name: 'Brake Pads', annualUsage: 3000, unitCost: 45 },
+  { id: '3', name: 'Air Filters', annualUsage: 8000, unitCost: 12 },
+  { id: '4', name: 'Spark Plugs', annualUsage: 10000, unitCost: 8 },
+  { id: '5', name: 'Transmission Fluid', annualUsage: 2000, unitCost: 35 },
 ];
 
 export const ABCAnalysis = () => {
-  const [inventoryData, setInventoryData] = useState<InventoryItem[]>(initialInventoryData);
-  const [aThreshold, setAThreshold] = useState<number>(80);
-  const [bThreshold, setBThreshold] = useState<number>(95);
-
-  const totalAnnualRevenue = useMemo(() => {
-    return inventoryData.reduce((sum, item) => sum + item.unitCost * item.annualDemand, 0);
-  }, [inventoryData]);
-
-  const sortedInventory = useMemo(() => {
-    return [...inventoryData].sort((a, b) => (b.unitCost * b.annualDemand) - (a.unitCost * a.annualDemand));
-  }, [inventoryData]);
+  const [items, setItems] = useState<Omit<ABCItem, 'totalValue' | 'category' | 'percentage' | 'cumulativePercentage'>[]>(sampleData);
+  const [newItem, setNewItem] = useState({ name: '', annualUsage: '', unitCost: '' });
+  const [thresholds, setThresholds] = useState({ categoryA: 80, categoryB: 95 });
 
   const abcAnalysis = useMemo(() => {
-    let cumulativeRevenue = 0;
-    let cumulativePercentage = 0;
-    
-    return sortedInventory.map(item => {
-      const annualRevenue = item.unitCost * item.annualDemand;
-      cumulativeRevenue += annualRevenue;
-      cumulativePercentage = (cumulativeRevenue / totalAnnualRevenue) * 100;
+    const itemsWithValues = items.map(item => ({
+      ...item,
+      totalValue: item.annualUsage * item.unitCost
+    }));
 
-      let category = 'C';
-      let color = '#6b7280'; // Gray
-      if (cumulativePercentage <= aThreshold) {
+    const sortedItems = itemsWithValues.sort((a, b) => b.totalValue - a.totalValue);
+    const totalValue = sortedItems.reduce((sum, item) => sum + item.totalValue, 0);
+
+    let cumulativeValue = 0;
+    const analyzedItems: ABCItem[] = sortedItems.map(item => {
+      cumulativeValue += item.totalValue;
+      const percentage = (item.totalValue / totalValue) * 100;
+      const cumulativePercentage = (cumulativeValue / totalValue) * 100;
+      
+      let category: 'A' | 'B' | 'C' = 'C';
+      if (cumulativePercentage <= thresholds.categoryA) {
         category = 'A';
-        color = '#ef4444'; // Red
-      } else if (cumulativePercentage <= bThreshold) {
+      } else if (cumulativePercentage <= thresholds.categoryB) {
         category = 'B';
-        color = '#f59e0b'; // Amber
       }
 
       return {
-        name: item.name,
-        percentage: (annualRevenue / totalAnnualRevenue) * 100,
-        cumulativePercentage: cumulativePercentage,
-        category: category,
-        color: color,
+        ...item,
+        category,
+        percentage,
+        cumulativePercentage
       };
     });
-  }, [sortedInventory, totalAnnualRevenue, aThreshold, bThreshold]);
 
-  const abcData = useMemo(() => {
-    const aCount = abcAnalysis.filter(item => item.category === 'A').length;
-    const bCount = abcAnalysis.filter(item => item.category === 'B').length;
-    const cCount = abcAnalysis.filter(item => item.category === 'C').length;
+    return analyzedItems;
+  }, [items, thresholds]);
 
-    return [
-      { name: 'A', count: aCount, color: '#ef4444' },
-      { name: 'B', count: bCount, color: '#f59e0b' },
-      { name: 'C', count: cCount, color: '#6b7280' },
-    ];
+  const categoryStats = useMemo(() => {
+    const stats = { A: 0, B: 0, C: 0 };
+    abcAnalysis.forEach(item => {
+      stats[item.category]++;
+    });
+    return Object.entries(stats).map(([name, count]) => ({ 
+      name: `Category ${name}`, 
+      count, 
+      color: name === 'A' ? '#ef4444' : name === 'B' ? '#f59e0b' : '#10b981' 
+    }));
   }, [abcAnalysis]);
 
-  const totalItems = inventoryData.length;
-  const aItemsPercentage = (abcData[0].count / totalItems) * 100;
-  const bItemsPercentage = (abcData[1].count / totalItems) * 100;
-  const cItemsPercentage = (abcData[2].count / totalItems) * 100;
+  const COLORS = ['#ef4444', '#f59e0b', '#10b981'];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">ABC Analysis</h2>
-          <p className="text-muted-foreground">Classify inventory items by importance and value</p>
+          <p className="text-muted-foreground">Categorize inventory items based on their importance</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
@@ -122,90 +105,65 @@ export const ABCAnalysis = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-foreground">
-            <SlidersHorizontal className="h-5 w-5" />
-            Analysis Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="a-threshold" className="text-foreground">A Threshold (%)</Label>
-              <Input
-                id="a-threshold"
-                type="number"
-                value={aThreshold}
-                onChange={(e) => setAThreshold(Number(e.target.value))}
-                className="bg-background text-foreground"
-              />
-            </div>
-            <div>
-              <Label htmlFor="b-threshold" className="text-foreground">B Threshold (%)</Label>
-              <Input
-                id="b-threshold"
-                type="number"
-                value={bThreshold}
-                onChange={(e) => setBThreshold(Number(e.target.value))}
-                className="bg-background text-foreground"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-green-50 border-green-200">
-              <CardContent className="text-center">
-                <div className="text-2xl font-bold text-green-700">{totalItems}</div>
-                <div className="text-sm text-muted-foreground">Total Items</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="text-center">
-                <div className="text-2xl font-bold text-blue-700">{aItemsPercentage.toFixed(1)}%</div>
-                <div className="text-sm text-muted-foreground">A Items</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-yellow-50 border-yellow-200">
-              <CardContent className="text-center">
-                <div className="text-2xl font-bold text-yellow-700">{bItemsPercentage.toFixed(1)}%</div>
-                <div className="text-sm text-muted-foreground">B Items</div>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="classification" className="space-y-4">
-        <TabsList className="grid grid-cols-1 md:grid-cols-3">
-          <TabsTrigger value="classification">Classification</TabsTrigger>
-          <TabsTrigger value="chart">Revenue Chart</TabsTrigger>
-          <TabsTrigger value="table">Data Table</TabsTrigger>
+      <Tabs defaultValue="analysis" className="space-y-4">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="analysis">Analysis</TabsTrigger>
+          <TabsTrigger value="data">Data Management</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="classification">
+        <TabsContent value="analysis" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-6 text-center">
+                <div className="text-2xl font-bold text-red-600 mb-2">
+                  {categoryStats.find(s => s.name === 'Category A')?.count || 0}
+                </div>
+                <div className="text-sm text-muted-foreground">Category A Items</div>
+                <div className="text-xs text-red-600 mt-1">High Value (80%)</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <div className="text-2xl font-bold text-yellow-600 mb-2">
+                  {categoryStats.find(s => s.name === 'Category B')?.count || 0}
+                </div>
+                <div className="text-sm text-muted-foreground">Category B Items</div>
+                <div className="text-xs text-yellow-600 mt-1">Medium Value (15%)</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <div className="text-2xl font-bold text-green-600 mb-2">
+                  {categoryStats.find(s => s.name === 'Category C')?.count || 0}
+                </div>
+                <div className="text-sm text-muted-foreground">Category C Items</div>
+                <div className="text-xs text-green-600 mt-1">Low Value (5%)</div>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-foreground">ABC Distribution</CardTitle>
+                <CardTitle className="text-foreground">Category Distribution</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={abcData}
+                      data={categoryStats}
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
                       fill="#8884d8"
                       dataKey="count"
                     >
-                      {abcData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      {categoryStats.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => [`${value}`, 'Items']} />
-                    <Legend />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -213,86 +171,150 @@ export const ABCAnalysis = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-foreground">Cumulative Revenue</CardTitle>
+                <CardTitle className="text-foreground">Cumulative Value Analysis</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={abcAnalysis}>
+                  <LineChart data={abcAnalysis.slice(0, 10)}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`${value.toFixed(2)}%`, 'Revenue']} />
-                    <Bar dataKey="percentage" fill="#8884d8" />
-                  </BarChart>
+                    <Tooltip formatter={(value) => [`${value}%`, 'Cumulative %']} />
+                    <Line type="monotone" dataKey="cumulativePercentage" stroke="#8884d8" strokeWidth={2} />
+                  </LineChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
 
-        <TabsContent value="chart">
           <Card>
             <CardHeader>
-              <CardTitle className="text-foreground">Revenue by Item</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={abcAnalysis}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => [`${value.toFixed(2)}%`, 'Revenue']} />
-                  <Legend />
-                  <Bar dataKey="percentage" fill="#82ca9d" name="Revenue (%)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="table">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-foreground">Inventory Data</CardTitle>
+              <CardTitle className="text-foreground">Detailed Analysis Results</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Item Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Unit Cost
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Annual Demand
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Revenue (%)
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Category
-                      </th>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Item Name</th>
+                      <th className="text-right p-2">Annual Usage</th>
+                      <th className="text-right p-2">Unit Cost</th>
+                      <th className="text-right p-2">Total Value</th>
+                      <th className="text-center p-2">Category</th>
+                      <th className="text-right p-2">Cumulative %</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {abcAnalysis.map((item, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          ${inventoryData.find(i => i.name === item.name)?.unitCost}
+                  <tbody>
+                    {abcAnalysis.map((item) => (
+                      <tr key={item.id} className="border-b">
+                        <td className="p-2 font-medium">{item.name}</td>
+                        <td className="p-2 text-right">{item.annualUsage.toLocaleString()}</td>
+                        <td className="p-2 text-right">${item.unitCost.toFixed(2)}</td>
+                        <td className="p-2 text-right">${item.totalValue.toLocaleString()}</td>
+                        <td className="p-2 text-center">
+                          <Badge variant={item.category === 'A' ? 'destructive' : item.category === 'B' ? 'secondary' : 'default'}>
+                            {item.category}
+                          </Badge>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {inventoryData.find(i => i.name === item.name)?.annualDemand}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.percentage.toFixed(2)}%</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
+                        <td className="p-2 text-right">{item.cumulativePercentage.toFixed(1)}%</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="data">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-foreground">Add New Item</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <Label htmlFor="itemName">Item Name</Label>
+                  <Input
+                    id="itemName"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                    placeholder="Enter item name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="annualUsage">Annual Usage</Label>
+                  <Input
+                    id="annualUsage"
+                    type="number"
+                    value={newItem.annualUsage}
+                    onChange={(e) => setNewItem({ ...newItem, annualUsage: e.target.value })}
+                    placeholder="Enter annual usage"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="unitCost">Unit Cost ($)</Label>
+                  <Input
+                    id="unitCost"
+                    type="number"
+                    step="0.01"
+                    value={newItem.unitCost}
+                    onChange={(e) => setNewItem({ ...newItem, unitCost: e.target.value })}
+                    placeholder="Enter unit cost"
+                  />
+                </div>
+              </div>
+              <Button 
+                onClick={() => {
+                  if (newItem.name && newItem.annualUsage && newItem.unitCost) {
+                    setItems([...items, {
+                      id: Date.now().toString(),
+                      name: newItem.name,
+                      annualUsage: parseInt(newItem.annualUsage),
+                      unitCost: parseFloat(newItem.unitCost)
+                    }]);
+                    setNewItem({ name: '', annualUsage: '', unitCost: '' });
+                  }
+                }}
+                disabled={!newItem.name || !newItem.annualUsage || !newItem.unitCost}
+              >
+                Add Item
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-foreground">Analysis Thresholds</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="categoryA">Category A Threshold (%)</Label>
+                  <Input
+                    id="categoryA"
+                    type="number"
+                    value={thresholds.categoryA}
+                    onChange={(e) => setThresholds({ ...thresholds, categoryA: parseInt(e.target.value) })}
+                    min="1"
+                    max="100"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Items contributing to this percentage of total value</p>
+                </div>
+                <div>
+                  <Label htmlFor="categoryB">Category B Threshold (%)</Label>
+                  <Input
+                    id="categoryB"
+                    type="number"
+                    value={thresholds.categoryB}
+                    onChange={(e) => setThresholds({ ...thresholds, categoryB: parseInt(e.target.value) })}
+                    min="1"
+                    max="100"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Items contributing up to this percentage (remaining are Category C)</p>
+                </div>
               </div>
             </CardContent>
           </Card>
