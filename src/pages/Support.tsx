@@ -1,163 +1,105 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  HelpCircle, 
-  MessageSquare, 
-  Mail, 
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Mail,
   Phone,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Video,
-  FileText,
-  Users
+  MessageCircle,
+  Video
 } from 'lucide-react';
 
 const Support = () => {
-  const [message, setMessage] = useState('');
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submitted', { name, email, message });
-    setSubmitted(true);
-  };
-
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2 text-foreground">
-          <HelpCircle className="h-8 w-8" />
-          Support Center
-        </h1>
+    <div className="container mx-auto px-4 py-16">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold mb-4">Support & Contact</h2>
         <p className="text-muted-foreground">
-          Get help with our platform or contact our support team
+          Need assistance? Contact our support team or schedule a meeting with our experts.
         </p>
       </div>
 
-      <Tabs defaultValue="contact" className="space-y-6">
-        <TabsList className="grid grid-cols-1 md:grid-cols-3 w-full">
-          <TabsTrigger value="contact">Contact Support</TabsTrigger>
-          <TabsTrigger value="faq">FAQ</TabsTrigger>
-          <TabsTrigger value="documentation">Documentation</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Contact Support Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Contact Support
+            </CardTitle>
+            <CardDescription>Get in touch with our support team for technical assistance.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center">
+              <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+              <a href="mailto:support@chainalyze.io" className="text-sm text-blue-500 hover:underline">
+                support@chainalyze.io
+              </a>
+            </div>
+            <div className="flex items-center">
+              <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+              <a href="tel:+254700123456" className="text-sm text-blue-500 hover:underline">
+                +254 700 123456
+              </a>
+            </div>
+            <Button>Contact Support</Button>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="contact">
+        {/* Schedule Meeting Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Video className="mr-2 h-5 w-5" />
+              Schedule a Meeting
+            </CardTitle>
+            <CardDescription>Book a virtual meeting with our supply chain experts.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Discuss your specific needs and challenges with our team.
+            </p>
+            <Button>Schedule Meeting</Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-12">
+        <h3 className="text-xl font-semibold mb-4">Frequently Asked Questions</h3>
+        <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Contact Our Support Team
-              </CardTitle>
-              <CardDescription>
-                Fill out the form below and we'll get back to you as soon as possible.
-              </CardDescription>
+              <CardTitle>What is Supply Chain Optimization?</CardTitle>
             </CardHeader>
             <CardContent>
-              {submitted ? (
-                <div className="text-center">
-                  <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-                  <h3 className="text-xl font-semibold mt-4 text-foreground">Message Sent!</h3>
-                  <p className="text-muted-foreground">We'll get back to you shortly.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Your Name</Label>
-                    <Input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your name"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Your Email</Label>
-                    <Input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Enter your message"
-                      rows={4}
-                      required
-                    />
-                  </div>
-                  <Button type="submit">Send Message</Button>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="faq">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <HelpCircle className="h-5 w-5" />
-                Frequently Asked Questions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="font-medium text-foreground">How do I reset my password?</h4>
-                <p className="text-muted-foreground">
-                  You can reset your password by clicking the "Forgot Password" link on the login page.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-medium text-foreground">How do I contact support?</h4>
-                <p className="text-muted-foreground">
-                  You can contact support by filling out the form in the "Contact Support" tab or by emailing us at support@example.com.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-medium text-foreground">What are the supported data formats?</h4>
-                <p className="text-muted-foreground">
-                  We support CSV, Excel, and JSON data formats.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="documentation">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Documentation
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                View our comprehensive documentation to learn how to use our platform.
+              <p className="text-sm text-muted-foreground">
+                Supply chain optimization involves streamlining processes, reducing costs, and improving efficiency across the entire supply chain, from sourcing raw materials to delivering finished products to customers.
               </p>
-              <Button variant="outline">View Documentation</Button>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>How can Chain.io help my business?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Chain.io provides tools and solutions to optimize your supply chain, including route optimization, network design, inventory management, and cost modeling. Our platform helps you make data-driven decisions to improve performance and reduce costs.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>What kind of support do you offer?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                We offer technical support via email and phone, as well as virtual meetings with our supply chain experts. Our team is dedicated to helping you get the most out of our platform and achieve your business goals.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

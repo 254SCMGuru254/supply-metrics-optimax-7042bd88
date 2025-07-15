@@ -1,214 +1,180 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Play, 
   Square, 
-  RefreshCcw,
-  BarChart3,
-  Activity,
-  Clock,
+  RotateCcw, 
+  Settings, 
+  TrendingUp, 
+  Timer, 
   Zap,
-  Settings,
-  AlertTriangle
+  CheckCircle2
 } from 'lucide-react';
 
+interface SimulationResult {
+  averageDeliveryTime: number;
+  totalCost: number;
+  successRate: number;
+}
+
 const Simulation = () => {
-  const [simulationStatus, setSimulationStatus] = useState<'idle' | 'running' | 'paused' | 'completed'>('idle');
-  const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState({
-    totalOrders: 12500,
-    fulfilledOrders: 11875,
-    averageDeliveryTime: 2.3,
-    costSavings: 45000,
-  });
+  const [duration, setDuration] = useState<number>(30);
+  const [numIterations, setNumIterations] = useState<number>(100);
+  const [strategy, setStrategy] = useState<string>('optimize_cost');
+  const [results, setResults] = useState<SimulationResult | null>(null);
+  const [running, setRunning] = useState<boolean>(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    if (running) {
+      const timer = setTimeout(() => {
+        // Simulate running the simulation
+        const simulatedResults: SimulationResult = {
+          averageDeliveryTime: Math.random() * 24 + 12,
+          totalCost: Math.random() * 10000 + 5000,
+          successRate: Math.random() * 0.4 + 0.6,
+        };
 
-    if (simulationStatus === 'running' && progress < 100) {
-      interval = setInterval(() => {
-        setProgress((prevProgress) => {
-          const newProgress = Math.min(prevProgress + 10, 100);
-          if (newProgress === 100) {
-            setSimulationStatus('completed');
-            clearInterval(interval);
-          }
-          return newProgress;
-        });
-      }, 500);
+        setResults(simulatedResults);
+        setRunning(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
-
-    return () => clearInterval(interval);
-  }, [simulationStatus, progress]);
+  }, [running]);
 
   const startSimulation = () => {
-    setSimulationStatus('running');
-    setProgress(0);
+    setRunning(true);
+    setResults(null);
   };
 
-  const pauseSimulation = () => {
-    setSimulationStatus('paused');
-  };
-
-  const resumeSimulation = () => {
-    setSimulationStatus('running');
+  const stopSimulation = () => {
+    setRunning(false);
   };
 
   const resetSimulation = () => {
-    setSimulationStatus('idle');
-    setProgress(0);
+    setResults(null);
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2 text-foreground">
-          <Activity className="h-8 w-8" />
-          Supply Chain Simulation
-        </h1>
-        <p className="text-muted-foreground">
-          Simulate and analyze your supply chain performance under various conditions
-        </p>
-      </div>
+    <div className="container mx-auto py-12">
+      <Card className="max-w-3xl mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Supply Chain Simulation
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="duration">Simulation Duration (days)</Label>
+              <Input
+                type="number"
+                id="duration"
+                value={duration}
+                onChange={(e) => setDuration(parseInt(e.target.value))}
+                min="1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="iterations">Number of Iterations</Label>
+              <Input
+                type="number"
+                id="iterations"
+                value={numIterations}
+                onChange={(e) => setNumIterations(parseInt(e.target.value))}
+                min="10"
+              />
+            </div>
+          </div>
 
-      <Tabs defaultValue="control" className="space-y-6">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <TabsTrigger value="control" className="flex items-center gap-2">
-            <Play className="h-4 w-4" />
-            Simulation Control
-          </TabsTrigger>
-          <TabsTrigger value="status" className="flex items-center gap-2">
-            <Square className="h-4 w-4" />
-            Simulation Status
-          </TabsTrigger>
-          <TabsTrigger value="results" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Simulation Results
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Simulation Settings
-          </TabsTrigger>
-        </TabsList>
+          <div>
+            <Label htmlFor="strategy">Optimization Strategy</Label>
+            <Select value={strategy} onValueChange={setStrategy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select strategy" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="optimize_cost">Optimize Cost</SelectItem>
+                <SelectItem value="minimize_time">Minimize Delivery Time</SelectItem>
+                <SelectItem value="maximize_success">Maximize Success Rate</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
 
-        <TabsContent value="control">
+        <CardContent className="flex items-center justify-between">
+          <Button
+            disabled={running}
+            onClick={startSimulation}
+          >
+            {running ? (
+              <>
+                <Timer className="mr-2 h-4 w-4 animate-spin" />
+                Running...
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4 mr-2" />
+                Start Simulation
+              </>
+            )}
+          </Button>
+          <Button 
+            variant="secondary"
+            onClick={resetSimulation}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+        </CardContent>
+        
+        {results && (
+          <div className="text-center">
+            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Simulation Complete!</h3>
+            <p className="text-muted-foreground">Results have been generated successfully.</p>
+          </div>
+        )}
+      </Card>
+
+      {results && (
+        <div className="max-w-3xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Simulation Control Panel</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span>Simulation Progress:</span>
-                <Badge variant="secondary">{progress}%</Badge>
-              </div>
-              <Progress value={progress} />
-              <div className="flex justify-center gap-4">
-                {simulationStatus === 'idle' && (
-                  <Button onClick={startSimulation}>
-                    <Play className="h-4 w-4 mr-2" />
-                    Start Simulation
-                  </Button>
-                )}
-                {simulationStatus === 'running' && (
-                  <Button variant="outline" onClick={pauseSimulation}>
-                    <Square className="h-4 w-4 mr-2" />
-                    Pause Simulation
-                  </Button>
-                )}
-                {simulationStatus === 'paused' && (
-                  <Button onClick={resumeSimulation}>
-                    <Play className="h-4 w-4 mr-2" />
-                    Resume Simulation
-                  </Button>
-                )}
-                {(simulationStatus === 'paused' || simulationStatus === 'completed') && (
-                  <Button variant="destructive" onClick={resetSimulation}>
-                    <RefreshCcw className="h-4 w-4 mr-2" />
-                    Reset Simulation
-                  </Button>
-                )}
-              </div>
+            <CardContent className="p-4 text-center">
+              <TrendingUp className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Avg. Delivery Time</p>
+              <p className="text-2xl font-bold">
+                {results.averageDeliveryTime.toFixed(1)} hours
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="status">
           <Card>
-            <CardHeader>
-              <CardTitle>Real-time Simulation Status</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <span>Status:</span>
-                <Badge variant={simulationStatus === 'running' ? 'default' : simulationStatus === 'completed' ? 'success' : 'secondary'}>
-                  {simulationStatus}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-muted-foreground" />
-                <span>Progress:</span>
-                <span>{progress}%</span>
-              </div>
-              {simulationStatus === 'completed' && (
-                <div className="flex items-center gap-2 text-green-500">
-                  <CheckCircle className="h-5 w-5" />
-                  <span>Simulation Completed Successfully!</span>
-                </div>
-              )}
-              {simulationStatus === 'paused' && (
-                <div className="flex items-center gap-2 text-yellow-500">
-                  <AlertTriangle className="h-5 w-5" />
-                  <span>Simulation Paused. Resume to continue.</span>
-                </div>
-              )}
+            <CardContent className="p-4 text-center">
+              <Zap className="h-6 w-6 text-green-500 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Total Cost</p>
+              <p className="text-2xl font-bold">
+                KES {results.totalCost.toLocaleString()}
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="results">
           <Card>
-            <CardHeader>
-              <CardTitle>Key Simulation Results</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Total Orders</div>
-                  <div className="text-2xl font-bold text-foreground">{results.totalOrders}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Fulfilled Orders</div>
-                  <div className="text-2xl font-bold text-green-600">{results.fulfilledOrders}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Average Delivery Time (Days)</div>
-                  <div className="text-2xl font-bold text-blue-600">{results.averageDeliveryTime}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Cost Savings ($)</div>
-                  <div className="text-2xl font-bold text-green-600">${results.costSavings}</div>
-                </div>
-              </div>
+            <CardContent className="p-4 text-center">
+              <CheckCircle2 className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Success Rate</p>
+              <p className="text-2xl font-bold">
+                {(results.successRate * 100).toFixed(1)}%
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Simulation Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Configure simulation parameters and scenarios.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 };

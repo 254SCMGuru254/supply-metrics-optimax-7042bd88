@@ -1,68 +1,102 @@
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Link } from 'react-router-dom';
 import { 
-  Phone, 
-  Mail,
-  Github,
-  Twitter,
-  Linkedin
+  Smartphone, 
+  AtSign, 
+  Github, 
+  Twitter, 
+  Linkedin,
+  MapPin,
+  Clock,
+  Shield
 } from 'lucide-react';
 
 export const ProfessionalFooter = () => {
   return (
-    <footer className="bg-muted/50 border-t mt-20">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="bg-background border-t border-border py-12">
+      <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Supply Metrics Optimax</h3>
-            <p className="text-sm text-muted-foreground">
-              Advanced supply chain optimization platform for enterprise solutions.
+            <h3 className="text-lg font-bold text-foreground">Supply Metrics Optimax</h3>
+            <p className="text-muted-foreground text-sm">
+              Advanced supply chain optimization platform for East Africa, 
+              providing cutting-edge analytics and AI-driven solutions.
             </p>
-          </div>
-          
-          <div className="space-y-4">
-            <h4 className="font-medium text-foreground">Solutions</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/center-of-gravity" className="text-muted-foreground hover:text-foreground">Center of Gravity</Link></li>
-              <li><Link to="/route-optimization" className="text-muted-foreground hover:text-foreground">Route Optimization</Link></li>
-              <li><Link to="/inventory-management" className="text-muted-foreground hover:text-foreground">Inventory Management</Link></li>
-              <li><Link to="/network-design" className="text-muted-foreground hover:text-foreground">Network Design</Link></li>
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-medium text-foreground">Resources</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/documentation" className="text-muted-foreground hover:text-foreground">Documentation</Link></li>
-              <li><Link to="/support" className="text-muted-foreground hover:text-foreground">Support</Link></li>
-              <li><Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link></li>
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-medium text-foreground">Contact</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>+254 700 000 000</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>info@supplymetricsoptimax.com</span>
-              </div>
+            <div className="flex space-x-2">
+              <Button size="sm" variant="outline">
+                <Github className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="outline">
+                <Twitter className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="outline">
+                <Linkedin className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="flex space-x-4">
-              <Github className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer" />
-              <Twitter className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer" />
-              <Linkedin className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer" />
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h4 className="font-semibold text-foreground">Quick Links</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><a href="/dashboard" className="hover:text-primary transition-colors">Dashboard</a></li>
+              <li><a href="/analytics" className="hover:text-primary transition-colors">Analytics</a></li>
+              <li><a href="/documentation" className="hover:text-primary transition-colors">Documentation</a></li>
+              <li><a href="/support" className="hover:text-primary transition-colors">Support</a></li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div className="space-y-4">
+            <h4 className="font-semibold text-foreground">Services</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><a href="/route-optimization" className="hover:text-primary transition-colors">Route Optimization</a></li>
+              <li><a href="/network-design" className="hover:text-primary transition-colors">Network Design</a></li>
+              <li><a href="/inventory-management" className="hover:text-primary transition-colors">Inventory Management</a></li>
+              <li><a href="/cost-modeling" className="hover:text-primary transition-colors">Cost Modeling</a></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div className="space-y-4">
+            <h4 className="font-semibold text-foreground">Contact</h4>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-2">
+                <AtSign className="h-4 w-4" />
+                <span>info@optimax.co.ke</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Smartphone className="h-4 w-4" />
+                <span>+254 700 123 456</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-4 w-4" />
+                <span>Nairobi, Kenya</span>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 Supply Metrics Optimax. All rights reserved.</p>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-border mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-1">
+                <Shield className="h-4 w-4" />
+                <span>Enterprise Security</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Clock className="h-4 w-4" />
+                <span>24/7 Support</span>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2024 Supply Metrics Optimax. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

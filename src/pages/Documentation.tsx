@@ -12,7 +12,8 @@ import {
   ExternalLink,
   HelpCircle,
   FileText,
-  Lightbulb
+  Lightbulb,
+  Sliders
 } from 'lucide-react';
 
 const Documentation = () => {

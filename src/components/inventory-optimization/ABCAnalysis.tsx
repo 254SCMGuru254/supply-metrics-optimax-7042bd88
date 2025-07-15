@@ -1,324 +1,370 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, LineChart, Line 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend 
 } from 'recharts';
 import { 
-  Settings, Package, TrendingUp, AlertTriangle, 
-  CheckCircle, Calculator, Download, Upload 
+  Package, 
+  TrendingUp, 
+  DollarSign, 
+  Sliders
 } from 'lucide-react';
 
-interface ABCItem {
+interface InventoryItem {
   id: string;
+  sku: string;
   name: string;
-  annualUsage: number;
   unitCost: number;
-  totalValue: number;
-  category: 'A' | 'B' | 'C';
-  percentage: number;
-  cumulativePercentage: number;
+  annualDemand: number;
+  annualValue: number;
+  classification?: 'A' | 'B' | 'C';
+  cumulativePercentage?: number;
 }
 
-const sampleData: Omit<ABCItem, 'totalValue' | 'category' | 'percentage' | 'cumulativePercentage'>[] = [
-  { id: '1', name: 'Premium Engine Oil', annualUsage: 5000, unitCost: 25 },
-  { id: '2', name: 'Brake Pads', annualUsage: 3000, unitCost: 45 },
-  { id: '3', name: 'Air Filters', annualUsage: 8000, unitCost: 12 },
-  { id: '4', name: 'Spark Plugs', annualUsage: 10000, unitCost: 8 },
-  { id: '5', name: 'Transmission Fluid', annualUsage: 2000, unitCost: 35 },
-];
+interface ABCAnalysisProps {
+  projectId: string;
+}
 
-export const ABCAnalysis = () => {
-  const [items, setItems] = useState<Omit<ABCItem, 'totalValue' | 'category' | 'percentage' | 'cumulativePercentage'>[]>(sampleData);
-  const [newItem, setNewItem] = useState({ name: '', annualUsage: '', unitCost: '' });
-  const [thresholds, setThresholds] = useState({ categoryA: 80, categoryB: 95 });
+export const ABCAnalysis: React.FC<ABCAnalysisProps> = ({ projectId }) => {
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [newItem, setNewItem] = useState({
+    sku: '',
+    name: '',
+    unitCost: 0,
+    annualDemand: 0
+  });
 
-  const abcAnalysis = useMemo(() => {
-    const itemsWithValues = items.map(item => ({
+  // Sample data for demonstration
+  useEffect(() => {
+    const sampleItems: InventoryItem[] = [
+      { id: '1', sku: 'SKU001', name: 'Product A', unitCost: 100, annualDemand: 1000, annualValue: 100000 },
+      { id: '2', sku: 'SKU002', name: 'Product B', unitCost: 50, annualDemand: 800, annualValue: 40000 },
+      { id: '3', sku: 'SKU003', name: 'Product C', unitCost: 200, annualDemand: 300, annualValue: 60000 },
+      { id: '4', sku: 'SKU004', name: 'Product D', unitCost: 25, annualDemand: 1200, annualValue: 30000 },
+      { id: '5', sku: 'SKU005', name: 'Product E', unitCost: 150, annualDemand: 400, annualValue: 60000 },
+    ];
+    
+    setItems(performABCAnalysis(sampleItems));
+  }, []);
+
+  const performABCAnalysis = (itemList: InventoryItem[]): InventoryItem[] => {
+    // Calculate annual value for each item
+    const itemsWithValue = itemList.map(item => ({
       ...item,
-      totalValue: item.annualUsage * item.unitCost
+      annualValue: item.unitCost * item.annualDemand
     }));
 
-    const sortedItems = itemsWithValues.sort((a, b) => b.totalValue - a.totalValue);
-    const totalValue = sortedItems.reduce((sum, item) => sum + item.totalValue, 0);
+    // Sort by annual value in descending order
+    const sortedItems = itemsWithValue.sort((a, b) => b.annualValue - a.annualValue);
 
+    // Calculate total value
+    const totalValue = sortedItems.reduce((sum, item) => sum + item.annualValue, 0);
+
+    // Calculate cumulative percentages and classify
     let cumulativeValue = 0;
-    const analyzedItems: ABCItem[] = sortedItems.map(item => {
-      cumulativeValue += item.totalValue;
-      const percentage = (item.totalValue / totalValue) * 100;
+    return sortedItems.map((item, index) => {
+      cumulativeValue += item.annualValue;
       const cumulativePercentage = (cumulativeValue / totalValue) * 100;
       
-      let category: 'A' | 'B' | 'C' = 'C';
-      if (cumulativePercentage <= thresholds.categoryA) {
-        category = 'A';
-      } else if (cumulativePercentage <= thresholds.categoryB) {
-        category = 'B';
+      let classification: 'A' | 'B' | 'C';
+      if (cumulativePercentage <= 80) {
+        classification = 'A';
+      } else if (cumulativePercentage <= 95) {
+        classification = 'B';
+      } else {
+        classification = 'C';
       }
 
       return {
         ...item,
-        category,
-        percentage,
-        cumulativePercentage
+        cumulativePercentage,
+        classification
       };
     });
+  };
 
-    return analyzedItems;
-  }, [items, thresholds]);
+  const addItem = () => {
+    if (newItem.sku && newItem.name && newItem.unitCost > 0 && newItem.annualDemand > 0) {
+      const item: InventoryItem = {
+        id: Date.now().toString(),
+        sku: newItem.sku,
+        name: newItem.name,
+        unitCost: newItem.unitCost,
+        annualDemand: newItem.annualDemand,
+        annualValue: newItem.unitCost * newItem.annualDemand
+      };
+      
+      const updatedItems = performABCAnalysis([...items, item]);
+      setItems(updatedItems);
+      setNewItem({ sku: '', name: '', unitCost: 0, annualDemand: 0 });
+    }
+  };
 
-  const categoryStats = useMemo(() => {
-    const stats = { A: 0, B: 0, C: 0 };
-    abcAnalysis.forEach(item => {
-      stats[item.category]++;
-    });
-    return Object.entries(stats).map(([name, count]) => ({ 
-      name: `Category ${name}`, 
-      count, 
-      color: name === 'A' ? '#ef4444' : name === 'B' ? '#f59e0b' : '#10b981' 
-    }));
-  }, [abcAnalysis]);
+  // Prepare data for charts
+  const classificationSummary = items.reduce((acc, item) => {
+    const key = item.classification!;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {} as Record<'A' | 'B' | 'C', number>);
 
-  const COLORS = ['#ef4444', '#f59e0b', '#10b981'];
+  const pieData = Object.entries(classificationSummary).map(([name, count]) => ({
+    name,
+    count,
+    color: name === 'A' ? '#ef4444' : name === 'B' ? '#f59e0b' : '#10b981'
+  }));
+
+  const barData = items.map(item => ({
+    name: item.sku,
+    value: item.annualValue,
+    classification: item.classification
+  }));
+
+  const getClassificationColor = (classification: 'A' | 'B' | 'C') => {
+    switch (classification) {
+      case 'A': return 'bg-red-100 text-red-800 border-red-200';
+      case 'B': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'C': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">ABC Analysis</h2>
-          <p className="text-muted-foreground">Categorize inventory items based on their importance</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Upload className="h-4 w-4 mr-2" />
-            Import Data
+      {/* Header */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            ABC Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Classify inventory items based on their annual consumption value to optimize inventory management strategies.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Add New Item */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Add Inventory Item</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="sku">SKU</Label>
+              <Input
+                id="sku"
+                value={newItem.sku}
+                onChange={(e) => setNewItem(prev => ({ ...prev, sku: e.target.value }))}
+                placeholder="Enter SKU"
+              />
+            </div>
+            <div>
+              <Label htmlFor="name">Product Name</Label>
+              <Input
+                id="name"
+                value={newItem.name}
+                onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter product name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="unitCost">Unit Cost (KES)</Label>
+              <Input
+                id="unitCost"
+                type="number"
+                value={newItem.unitCost}
+                onChange={(e) => setNewItem(prev => ({ ...prev, unitCost: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <Label htmlFor="annualDemand">Annual Demand</Label>
+              <Input
+                id="annualDemand"
+                type="number"
+                value={newItem.annualDemand}
+                onChange={(e) => setNewItem(prev => ({ ...prev, annualDemand: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <Button onClick={addItem} className="mt-4">
+            Add Item
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Results
-          </Button>
-        </div>
+        </CardContent>
+      </Card>
+
+      {/* Analysis Results */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Classification Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Classification Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="count"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Value Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Annual Value by Item</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Tabs defaultValue="analysis" className="space-y-4">
-        <TabsList className="grid grid-cols-3 w-full">
-          <TabsTrigger value="analysis">Analysis</TabsTrigger>
-          <TabsTrigger value="data">Data Management</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="analysis" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-red-600 mb-2">
-                  {categoryStats.find(s => s.name === 'Category A')?.count || 0}
-                </div>
-                <div className="text-sm text-muted-foreground">Category A Items</div>
-                <div className="text-xs text-red-600 mt-1">High Value (80%)</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-yellow-600 mb-2">
-                  {categoryStats.find(s => s.name === 'Category B')?.count || 0}
-                </div>
-                <div className="text-sm text-muted-foreground">Category B Items</div>
-                <div className="text-xs text-yellow-600 mt-1">Medium Value (15%)</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-green-600 mb-2">
-                  {categoryStats.find(s => s.name === 'Category C')?.count || 0}
-                </div>
-                <div className="text-sm text-muted-foreground">Category C Items</div>
-                <div className="text-xs text-green-600 mt-1">Low Value (5%)</div>
-              </CardContent>
-            </Card>
+      {/* Items Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Inventory Items Classification</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-border">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="border border-border p-2 text-left">SKU</th>
+                  <th className="border border-border p-2 text-left">Product Name</th>
+                  <th className="border border-border p-2 text-right">Unit Cost</th>
+                  <th className="border border-border p-2 text-right">Annual Demand</th>
+                  <th className="border border-border p-2 text-right">Annual Value</th>
+                  <th className="border border-border p-2 text-center">Classification</th>
+                  <th className="border border-border p-2 text-right">Cumulative %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id} className="hover:bg-muted/50">
+                    <td className="border border-border p-2 font-mono">{item.sku}</td>
+                    <td className="border border-border p-2">{item.name}</td>
+                    <td className="border border-border p-2 text-right">KES {item.unitCost.toLocaleString()}</td>
+                    <td className="border border-border p-2 text-right">{item.annualDemand.toLocaleString()}</td>
+                    <td className="border border-border p-2 text-right">KES {item.annualValue.toLocaleString()}</td>
+                    <td className="border border-border p-2 text-center">
+                      <Badge className={getClassificationColor(item.classification!)}>
+                        {item.classification}
+                      </Badge>
+                    </td>
+                    <td className="border border-border p-2 text-right">
+                      {item.cumulativePercentage?.toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-foreground">Category Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart data={categoryStats}>
-                    <Pie
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="count"
-                    >
-                      {categoryStats.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value}`, 'Items']} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-foreground">Cumulative Value Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={abcAnalysis.slice(0, 10)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`${value}%`, 'Cumulative %']} />
-                    <Line type="monotone" dataKey="cumulativePercentage" stroke="#8884d8" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-foreground">Detailed Analysis Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Item Name</th>
-                      <th className="text-right p-2">Annual Usage</th>
-                      <th className="text-right p-2">Unit Cost</th>
-                      <th className="text-right p-2">Total Value</th>
-                      <th className="text-center p-2">Category</th>
-                      <th className="text-right p-2">Cumulative %</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {abcAnalysis.map((item) => (
-                      <tr key={item.id} className="border-b">
-                        <td className="p-2 font-medium">{item.name}</td>
-                        <td className="p-2 text-right">{item.annualUsage.toLocaleString()}</td>
-                        <td className="p-2 text-right">${item.unitCost.toFixed(2)}</td>
-                        <td className="p-2 text-right">${item.totalValue.toLocaleString()}</td>
-                        <td className="p-2 text-center">
-                          <Badge variant={item.category === 'A' ? 'destructive' : item.category === 'B' ? 'secondary' : 'default'}>
-                            {item.category}
-                          </Badge>
-                        </td>
-                        <td className="p-2 text-right">{item.cumulativePercentage.toFixed(1)}%</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Class A Items</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {classificationSummary.A || 0}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <TrendingUp className="h-8 w-8 text-red-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              High value items (80% of total value)
+            </p>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="data">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-foreground">Add New Item</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <Label htmlFor="itemName">Item Name</Label>
-                  <Input
-                    id="itemName"
-                    value={newItem.name}
-                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                    placeholder="Enter item name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="annualUsage">Annual Usage</Label>
-                  <Input
-                    id="annualUsage"
-                    type="number"
-                    value={newItem.annualUsage}
-                    onChange={(e) => setNewItem({ ...newItem, annualUsage: e.target.value })}
-                    placeholder="Enter annual usage"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="unitCost">Unit Cost ($)</Label>
-                  <Input
-                    id="unitCost"
-                    type="number"
-                    step="0.01"
-                    value={newItem.unitCost}
-                    onChange={(e) => setNewItem({ ...newItem, unitCost: e.target.value })}
-                    placeholder="Enter unit cost"
-                  />
-                </div>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Class B Items</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {classificationSummary.B || 0}
+                </p>
               </div>
-              <Button 
-                onClick={() => {
-                  if (newItem.name && newItem.annualUsage && newItem.unitCost) {
-                    setItems([...items, {
-                      id: Date.now().toString(),
-                      name: newItem.name,
-                      annualUsage: parseInt(newItem.annualUsage),
-                      unitCost: parseFloat(newItem.unitCost)
-                    }]);
-                    setNewItem({ name: '', annualUsage: '', unitCost: '' });
-                  }
-                }}
-                disabled={!newItem.name || !newItem.annualUsage || !newItem.unitCost}
-              >
-                Add Item
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <DollarSign className="h-8 w-8 text-yellow-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Medium value items (15% of total value)
+            </p>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-foreground">Analysis Thresholds</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="categoryA">Category A Threshold (%)</Label>
-                  <Input
-                    id="categoryA"
-                    type="number"
-                    value={thresholds.categoryA}
-                    onChange={(e) => setThresholds({ ...thresholds, categoryA: parseInt(e.target.value) })}
-                    min="1"
-                    max="100"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Items contributing to this percentage of total value</p>
-                </div>
-                <div>
-                  <Label htmlFor="categoryB">Category B Threshold (%)</Label>
-                  <Input
-                    id="categoryB"
-                    type="number"
-                    value={thresholds.categoryB}
-                    onChange={(e) => setThresholds({ ...thresholds, categoryB: parseInt(e.target.value) })}
-                    min="1"
-                    max="100"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Items contributing up to this percentage (remaining are Category C)</p>
-                </div>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Class C Items</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {classificationSummary.C || 0}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <Package className="h-8 w-8 text-green-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Low value items (5% of total value)
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
