@@ -12,7 +12,7 @@ import { ManualConnectionCreator } from "@/components/network-flow/ManualConnect
 interface Node {
   id: string;
   name: string;
-  type?: NodeType;
+  type: NodeType;
   latitude: number;
   longitude: number;
   weight?: number;

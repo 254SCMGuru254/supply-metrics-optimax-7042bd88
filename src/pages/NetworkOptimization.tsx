@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge";
 interface Node {
   id: string;
   name: string;
-  type?: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
+  type: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
   latitude: number;
   longitude: number;
   weight?: number;
@@ -105,7 +105,7 @@ const NetworkOptimization = () => {
       return data.map(n => ({
         id: n.id,
         name: n.name,
-        type: n.node_type as any,
+        type: 'demand' as const,
         latitude: n.latitude,
         longitude: n.longitude,
         weight: n.demand,

@@ -10,7 +10,7 @@ import {
   Settings, 
   BarChart3, 
   Code, 
-  ArrowUpRight,
+  ArrowRight,
   HelpCircle,
   FileText,
   Lightbulb,
@@ -69,7 +69,7 @@ const Documentation = () => {
                 <li><strong>Network Design:</strong> Designing the optimal network of facilities and transportation links.</li>
               </ul>
               <Button variant="link" className="pl-0">
-                Read More <ArrowUpRight className="h-4 w-4 ml-2" />
+                Read More <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
@@ -111,7 +111,7 @@ const Documentation = () => {
                 </div>
               </div>
               <Button variant="link" className="pl-0">
-                Explore All Formulas <ArrowUpRight className="h-4 w-4 ml-2" />
+                Explore All Formulas <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
@@ -152,7 +152,7 @@ const Documentation = () => {
                 </div>
               </div>
               <Button variant="link" className="pl-0">
-                View Detailed Analytics <ArrowUpRight className="h-4 w-4 ml-2" />
+                View Detailed Analytics <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>

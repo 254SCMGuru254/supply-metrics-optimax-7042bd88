@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   Send,
-  Smartphone,
+  Phone,
   MessageSquare,
   Video
 } from 'lucide-react';
@@ -37,7 +37,7 @@ const Support = () => {
               </a>
             </div>
             <div className="flex items-center">
-              <Smartphone className="mr-2 h-4 w-4 text-muted-foreground" />
+              <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
               <a href="tel:+254700123456" className="text-sm text-blue-500 hover:underline">
                 +254 700 123456
               </a>

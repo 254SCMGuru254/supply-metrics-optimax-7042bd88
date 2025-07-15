@@ -8,14 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
-  EyeIcon, 
-  EyeOffIcon, 
+  Eye, 
+  EyeOff, 
   Send, 
-  KeyRound, 
+  Key, 
   User,
-  AtSignIcon,
-  StarIcon,
-  Sparkle,
+  AtSign,
+  Star,
+  Sparkles,
   Zap
 } from 'lucide-react';
 
@@ -66,10 +66,8 @@ const Auth = () => {
           return;
         }
         await signUp(email, password, {
-          data: {
-            full_name: name,
-            company: '',
-          },
+          full_name: name,
+          company: '',
         });
         toast({
           title: "Success",
@@ -95,7 +93,7 @@ const Auth = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             {isLogin ? "Sign In" : "Create Account"}
-            <Sparkle className="inline-block h-5 w-5 ml-2 text-yellow-500 animate-spin-slow" />
+            <Sparkles className="inline-block h-5 w-5 ml-2 text-yellow-500 animate-spin-slow" />
           </CardTitle>
           <CardDescription className="text-center text-muted-foreground">
             {isLogin
@@ -123,7 +121,7 @@ const Auth = () => {
             )}
             <div>
               <Label htmlFor="email" className="flex items-center space-x-2">
-                <AtSignIcon className="h-4 w-4 mr-2" />
+                <AtSign className="h-4 w-4 mr-2" />
                 <span>Email</span>
               </Label>
               <Input
@@ -137,7 +135,7 @@ const Auth = () => {
             </div>
             <div>
               <Label htmlFor="password" className="flex items-center space-x-2">
-                <KeyRound className="h-4 w-4 mr-2" />
+                <Key className="h-4 w-4 mr-2" />
                 <span>Password</span>
               </Label>
               <div className="relative">
@@ -157,9 +155,9 @@ const Auth = () => {
                   onClick={togglePasswordVisibility}
                 >
                   {showPassword ? (
-                    <EyeOffIcon className="h-4 w-4" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <EyeIcon className="h-4 w-4" />
+                    <Eye className="h-4 w-4" />
                   )}
                   <span className="sr-only">Toggle password visibility</span>
                 </Button>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 interface Node {
   id: string;
   name: string;
+  type: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
   latitude: number;
   longitude: number;
   capacity?: number;

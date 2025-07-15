@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { Plus, MapPin, Edit } from 'lucide-react';
 interface Node {
   id: string;
   name: string;
+  type: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
   latitude: number;
   longitude: number;
   capacity?: number;
@@ -33,6 +35,7 @@ export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({
   const [editingNode, setEditingNode] = useState<Node | null>(null);
   const [formData, setFormData] = useState({
     name: '',
+    type: 'demand' as const,
     latitude: 0,
     longitude: 0,
     capacity: 0,
@@ -59,6 +62,7 @@ export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({
     setEditingNode(null);
     setFormData({
       name: '',
+      type: 'demand' as const,
       latitude: 0,
       longitude: 0,
       capacity: 0,
@@ -76,6 +80,7 @@ export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({
     setEditingNode(node);
     setFormData({
       name: node.name,
+      type: node.type,
       latitude: node.latitude,
       longitude: node.longitude,
       capacity: node.capacity || 0,
@@ -95,7 +100,7 @@ export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({
             Add New Location
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-background border border-border draggable">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
               {editingNode ? 'Edit Location' : 'Add New Location'}
@@ -154,27 +159,6 @@ export const EditableMapPoints: React.FC<EditableMapPointsProps> = ({
                   type="number"
                   value={formData.demand}
                   onChange={(e) => setFormData(prev => ({ ...prev, demand: parseFloat(e.target.value) }))}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fixed_cost">Fixed Cost</Label>
-                <Input
-                  id="fixed_cost"
-                  type="number"
-                  value={formData.fixed_cost}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fixed_cost: parseFloat(e.target.value) }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="variable_cost">Variable Cost</Label>
-                <Input
-                  id="variable_cost"
-                  type="number"
-                  value={formData.variable_cost}
-                  onChange={(e) => setFormData(prev => ({ ...prev, variable_cost: parseFloat(e.target.value) }))}
                 />
               </div>
             </div>

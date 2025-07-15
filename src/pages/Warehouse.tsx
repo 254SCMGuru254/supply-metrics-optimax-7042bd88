@@ -1,14 +1,14 @@
 
-import { useParams } from "react-router-dom";
-import { WarehouseConfigContent } from "@/components/warehouse/WarehouseConfigContent";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { WarehouseConfigContent } from '@/components/warehouse/WarehouseConfigContent';
 
 // Define Node interface locally
 interface Node {
   id: string;
   name: string;
+  type: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
   latitude: number;
   longitude: number;
   capacity?: number;
@@ -17,40 +17,34 @@ interface Node {
   variable_cost?: number;
 }
 
-const WarehousePage = () => {
+const Warehouse = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [nodes, setNodes] = useState<Node[]>([]);
 
   if (!projectId) {
     return (
-        <div className="flex items-center justify-center h-full">
-            <p>Please select a project to continue.</p>
-        </div>
-    )
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p>No project selected. Please go back to the dashboard and select a project.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-        <Card className="shadow-lg">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Building className="h-6 w-6" />
-                    Warehouse Configuration
-                </CardTitle>
-                <CardDescription>
-                    Manage and configure your warehouse nodes for this project.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <WarehouseConfigContent 
-                  projectId={projectId} 
-                  nodes={nodes}
-                  setNodes={setNodes}
-                />
-            </CardContent>
-        </Card>
+    <div className="container mx-auto px-4 py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Warehouse Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <WarehouseConfigContent 
+            projectId={projectId}
+            nodes={nodes}
+            setNodes={setNodes}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default WarehousePage;
+export default Warehouse;

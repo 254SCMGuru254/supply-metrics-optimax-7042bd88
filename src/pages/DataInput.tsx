@@ -11,6 +11,7 @@ import { EditableMapPoints } from '@/components/interactive-editing/EditableMapP
 interface Node {
   id: string;
   name: string;
+  type: 'supplier' | 'warehouse' | 'retail' | 'demand' | 'facility';
   latitude: number;
   longitude: number;
   capacity?: number;
