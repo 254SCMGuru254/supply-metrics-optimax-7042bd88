@@ -1,15 +1,15 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  HelpCircle,
-  Mail,
-  Phone,
-  MessageCircle,
-  FileText,
-  Users,
-  Clock,
-  Video
+  help-circle,
+  mail,
+  phone,
+  message-circle,
+  book,
+  external-link,
+  video
 } from 'lucide-react';
 
 const Support = () => {
@@ -18,7 +18,7 @@ const Support = () => {
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold mb-4">Support Center</h2>
         <p className="text-muted-foreground">
-          Get help when you need it. Our support team is here to assist you.
+          Get help and support for your supply chain optimization needs.
         </p>
       </div>
 
@@ -26,99 +26,114 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <MessageCircle className="mr-2 h-5 w-5" />
-              Live Chat
+              <help-circle className="mr-2 h-5 w-5" />
+              Help Center
             </CardTitle>
-            <CardDescription>Get instant help from our support team</CardDescription>
+            <CardDescription>Browse our knowledge base and FAQs</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center text-sm text-green-600">
-              <Clock className="mr-2 h-4 w-4" />
-              Available 24/7
-            </div>
-            <Button className="w-full">Start Chat</Button>
+            <p className="text-sm text-muted-foreground">
+              Find answers to common questions and browse our comprehensive help articles.
+            </p>
+            <Button className="w-full">
+              <book className="mr-2 h-4 w-4" />
+              Browse Help Articles
+            </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Mail className="mr-2 h-5 w-5" />
+              <message-circle className="mr-2 h-5 w-5" />
+              Live Chat
+            </CardTitle>
+            <CardDescription>Chat with our support team</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Get instant help from our support specialists through live chat.
+            </p>
+            <Button className="w-full">
+              <message-circle className="mr-2 h-4 w-4" />
+              Start Chat
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <mail className="mr-2 h-5 w-5" />
               Email Support
             </CardTitle>
             <CardDescription>Send us a detailed message</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Clock className="mr-2 h-4 w-4" />
-              Response within 24 hours
-            </div>
-            <Button className="w-full">Send Email</Button>
+            <p className="text-sm text-muted-foreground">
+              Submit a support ticket and we'll get back to you within 24 hours.
+            </p>
+            <Button className="w-full">
+              <mail className="mr-2 h-4 w-4" />
+              Send Email
+            </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Phone className="mr-2 h-5 w-5" />
+              <phone className="mr-2 h-5 w-5" />
               Phone Support
             </CardTitle>
-            <CardDescription>Speak directly with our experts</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Clock className="mr-2 h-4 w-4" />
-              Mon-Fri 9AM-6PM EST
-            </div>
-            <Button className="w-full">Call Now</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="mr-2 h-5 w-5" />
-              Documentation
-            </CardTitle>
-            <CardDescription>Browse our comprehensive guides</CardDescription>
+            <CardDescription>Call our support hotline</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Find answers in our detailed documentation.
+              Speak directly with our technical support team for urgent issues.
             </p>
-            <Button className="w-full">View Docs</Button>
+            <Button className="w-full">
+              <phone className="mr-2 h-4 w-4" />
+              Call Support
+            </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Users className="mr-2 h-5 w-5" />
-              Community
+              <video className="mr-2 h-5 w-5" />
+              Video Tutorials
+            </CardTitle>
+            <CardDescription>Watch step-by-step guides</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Learn how to use our platform with comprehensive video tutorials.
+            </p>
+            <Button className="w-full">
+              <video className="mr-2 h-4 w-4" />
+              Watch Tutorials
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <external-link className="mr-2 h-5 w-5" />
+              Community Forum
             </CardTitle>
             <CardDescription>Connect with other users</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Join our community forum for discussions and tips.
+              Join our community forum to share experiences and get peer support.
             </p>
-            <Button className="w-full">Join Community</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Video className="mr-2 h-5 w-5" />
-              Video Tutorials
-            </CardTitle>
-            <CardDescription>Learn through step-by-step videos</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Watch detailed tutorials and walkthroughs.
-            </p>
-            <Button className="w-full">Watch Videos</Button>
+            <Button className="w-full">
+              <external-link className="mr-2 h-4 w-4" />
+              Visit Forum
+            </Button>
           </CardContent>
         </Card>
       </div>

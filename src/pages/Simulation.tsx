@@ -1,11 +1,14 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Play,
-  StopCircle,
-  RotateCcw,
-  Settings
+  play,
+  stop-circle,
+  rotate-ccw,
+  activity,
+  settings,
+  bar-chart-3
 } from 'lucide-react';
 
 const Simulation = () => {
@@ -14,23 +17,26 @@ const Simulation = () => {
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold mb-4">Supply Chain Simulation</h2>
         <p className="text-muted-foreground">
-          Run simulations to test different scenarios and optimize your supply chain performance.
+          Run advanced simulations to test and optimize your supply chain strategies.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Play className="mr-2 h-5 w-5" />
-              Run Simulation
+              <play className="mr-2 h-5 w-5" />
+              Start Simulation
             </CardTitle>
-            <CardDescription>Start a new simulation with your current configuration.</CardDescription>
+            <CardDescription>Run new simulation scenarios</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Create and execute simulation models to test different supply chain configurations.
+            </p>
             <Button className="w-full">
-              <Play className="mr-2 h-4 w-4" />
-              Start Simulation
+              <play className="mr-2 h-4 w-4" />
+              New Simulation
             </Button>
           </CardContent>
         </Card>
@@ -38,15 +44,56 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Settings className="mr-2 h-5 w-5" />
-              Configuration
+              <stop-circle className="mr-2 h-5 w-5" />
+              Control Center
             </CardTitle>
-            <CardDescription>Configure simulation parameters and scenarios.</CardDescription>
+            <CardDescription>Monitor running simulations</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              View and control active simulation processes in real-time.
+            </p>
             <Button className="w-full">
-              <Settings className="mr-2 h-4 w-4" />
-              Configure
+              <activity className="mr-2 h-4 w-4" />
+              Monitor Simulations
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <rotate-ccw className="mr-2 h-5 w-5" />
+              Results Analysis
+            </CardTitle>
+            <CardDescription>Analyze simulation outcomes</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Review and compare results from completed simulation runs.
+            </p>
+            <Button className="w-full">
+              <bar-chart-3 className="mr-2 h-4 w-4" />
+              View Results
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <settings className="mr-2 h-5 w-5" />
+              Configuration
+            </CardTitle>
+            <CardDescription>Simulation parameters and settings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Configure simulation parameters, scenarios, and optimization objectives.
+            </p>
+            <Button className="w-full">
+              <settings className="mr-2 h-4 w-4" />
+              Configure Settings
             </Button>
           </CardContent>
         </Card>
