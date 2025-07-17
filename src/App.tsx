@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import { ThemeProvider } from "./components/ui/theme-provider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import DataInput from "./pages/DataInput";
 import RouteOptimization from "./pages/RouteOptimization";
 import NetworkDesign from "./pages/NetworkDesign";
@@ -53,6 +53,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/data-input" element={<DataInput />} />
               <Route path="/route-optimization" element={<RouteOptimization />} />
               <Route path="/network-design" element={<NetworkDesign />} />

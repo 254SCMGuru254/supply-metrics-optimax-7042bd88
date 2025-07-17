@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   send,
-  message-square,
-  clipboard-list
+  messageSquare,
+  clipboardList
 } from 'lucide-react';
 
 const ChatAssistant = () => {
@@ -22,7 +22,7 @@ const ChatAssistant = () => {
         <Card className="bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center text-gray-900 dark:text-white">
-              <message-square className="mr-2 h-5 w-5" />
+              <messageSquare className="mr-2 h-5 w-5" />
               Chat with AI
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">Ask questions about optimization strategies and best practices.</CardDescription>
@@ -39,7 +39,7 @@ const ChatAssistant = () => {
         <Card className="bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center text-gray-900 dark:text-white">
-              <clipboard-list className="mr-2 h-5 w-5" />
+              <clipboardList className="mr-2 h-5 w-5" />
               Knowledge Base
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">Access our comprehensive documentation and guides.</CardDescription>

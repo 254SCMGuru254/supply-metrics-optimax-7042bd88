@@ -3,12 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  help-circle,
+  helpCircle,
   mail,
   phone,
-  message-circle,
+  messageCircle,
   book,
-  external-link,
+  externalLink,
   video
 } from 'lucide-react';
 
@@ -26,7 +26,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <help-circle className="mr-2 h-5 w-5" />
+              <helpCircle className="mr-2 h-5 w-5" />
               Help Center
             </CardTitle>
             <CardDescription>Browse our knowledge base and FAQs</CardDescription>
@@ -45,7 +45,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <message-circle className="mr-2 h-5 w-5" />
+              <messageCircle className="mr-2 h-5 w-5" />
               Live Chat
             </CardTitle>
             <CardDescription>Chat with our support team</CardDescription>
@@ -55,7 +55,7 @@ const Support = () => {
               Get instant help from our support specialists through live chat.
             </p>
             <Button className="w-full">
-              <message-circle className="mr-2 h-4 w-4" />
+              <messageCircle className="mr-2 h-4 w-4" />
               Start Chat
             </Button>
           </CardContent>
@@ -121,7 +121,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <external-link className="mr-2 h-5 w-5" />
+              <externalLink className="mr-2 h-5 w-5" />
               Community Forum
             </CardTitle>
             <CardDescription>Connect with other users</CardDescription>
@@ -131,7 +131,7 @@ const Support = () => {
               Join our community forum to share experiences and get peer support.
             </p>
             <Button className="w-full">
-              <external-link className="mr-2 h-4 w-4" />
+              <externalLink className="mr-2 h-4 w-4" />
               Visit Forum
             </Button>
           </CardContent>

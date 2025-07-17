@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   play,
-  stop-circle,
-  rotate-ccw,
+  stopCircle,
+  rotateCcw,
   activity,
   settings,
-  bar-chart-3
+  barChart3
 } from 'lucide-react';
 
 const Simulation = () => {
@@ -44,7 +44,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <stop-circle className="mr-2 h-5 w-5" />
+              <stopCircle className="mr-2 h-5 w-5" />
               Control Center
             </CardTitle>
             <CardDescription>Monitor running simulations</CardDescription>
@@ -63,7 +63,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <rotate-ccw className="mr-2 h-5 w-5" />
+              <rotateCcw className="mr-2 h-5 w-5" />
               Results Analysis
             </CardTitle>
             <CardDescription>Analyze simulation outcomes</CardDescription>
@@ -73,7 +73,7 @@ const Simulation = () => {
               Review and compare results from completed simulation runs.
             </p>
             <Button className="w-full">
-              <bar-chart-3 className="mr-2 h-4 w-4" />
+              <barChart3 className="mr-2 h-4 w-4" />
               View Results
             </Button>
           </CardContent>

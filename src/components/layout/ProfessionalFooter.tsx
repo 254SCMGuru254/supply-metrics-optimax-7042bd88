@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   send, 
-  map-pin,
+  mapPin,
   clock,
   shield
 } from 'lucide-react';
@@ -69,7 +69,7 @@ export const ProfessionalFooter = () => {
                 <span>+254 700 123 456</span>
               </div>
               <div className="flex items-center space-x-2">
-                <map-pin className="h-4 w-4" />
+                <mapPin className="h-4 w-4" />
                 <span>Nairobi, Kenya</span>
               </div>
             </div>

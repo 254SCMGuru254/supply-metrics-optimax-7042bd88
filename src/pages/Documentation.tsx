@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   book,
-  file-text,
+  fileText,
   code,
   play,
   download,
-  external-link,
+  externalLink,
   settings,
   lightbulb
 } from 'lucide-react';
@@ -56,7 +56,7 @@ const Documentation = () => {
               Detailed reference for all endpoints and data structures.
             </p>
             <Button className="w-full">
-              <external-link className="mr-2 h-4 w-4" />
+              <externalLink className="mr-2 h-4 w-4" />
               View API Docs
             </Button>
           </CardContent>
@@ -75,7 +75,7 @@ const Documentation = () => {
               Learn how to configure and customize your optimization models.
             </p>
             <Button className="w-full">
-              <file-text className="mr-2 h-4 w-4" />
+              <fileText className="mr-2 h-4 w-4" />
               Configuration Guide
             </Button>
           </CardContent>
