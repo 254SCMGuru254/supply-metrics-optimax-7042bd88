@@ -1,135 +1,136 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, Download } from 'lucide-react';
+import { Upload, FileSpreadsheet, Database } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FileImportProps {
   projectId: string;
 }
 
 export const FileImport: React.FC<FileImportProps> = ({ projectId }) => {
-  const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-    }
-  };
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const handleUpload = async () => {
-    if (!file) {
+    if (!file.name.endsWith('.csv') && !file.name.endsWith('.xlsx')) {
       toast({
-        title: "No File Selected",
-        description: "Please select a file to upload.",
-        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please upload a CSV or Excel file.",
+        variant: "destructive"
       });
       return;
     }
 
     setUploading(true);
-    
+
     try {
-      // Here you would typically process the file and save to Supabase
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate upload
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      // Upload file to Supabase Storage
+      const fileName = `${Date.now()}_${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('data-imports')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Record import in database
+      const { error: dbError } = await supabase
+        .from('data_imports')
+        .insert({
+          project_id: projectId,
+          user_id: user.id,
+          file_name: file.name,
+          file_type: file.name.split('.').pop(),
+          file_size_bytes: file.size,
+          status: 'uploaded'
+        });
+
+      if (dbError) throw dbError;
+
       toast({
-        title: "File Uploaded",
-        description: "Your file has been processed successfully!",
+        title: "File uploaded successfully",
+        description: "Your data is being processed and will be available shortly."
       });
-      
-      setFile(null);
-    } catch (error) {
+
+    } catch (error: any) {
       toast({
-        title: "Upload Failed",
-        description: "There was an error processing your file.",
-        variant: "destructive",
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive"
       });
     } finally {
       setUploading(false);
     }
-  };
-
-  const downloadTemplate = () => {
-    // Create a simple CSV template
-    const csvContent = "name,type,latitude,longitude,capacity,demand\nExample Location,warehouse,-1.2921,36.8219,1000,500\n";
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'supply_chain_template.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+  }, [projectId, toast]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Upload className="h-5 w-5" />
-          <span>File Import</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="file">Select CSV File</Label>
-          <Input
-            id="file"
-            type="file"
-            accept=".csv,.xlsx,.xls"
-            onChange={handleFileChange}
-          />
-          {file && (
-            <p className="text-sm text-muted-foreground">
-              Selected: {file.name}
-            </p>
-          )}
-        </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Import Data from File
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-lg font-medium text-gray-900 mb-2">Upload your data file</p>
+            <p className="text-gray-600 mb-4">Support for CSV and Excel files</p>
+            
+            <input
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              onChange={handleFileUpload}
+              disabled={uploading}
+              className="hidden"
+              id="file-upload"
+            />
+            
+            <label htmlFor="file-upload">
+              <Button disabled={uploading} asChild>
+                <span className="cursor-pointer">
+                  {uploading ? "Uploading..." : "Choose File"}
+                </span>
+              </Button>
+            </label>
+          </div>
 
-        <div className="flex space-x-2">
-          <Button 
-            onClick={handleUpload} 
-            disabled={!file || uploading}
-            className="flex-1"
-          >
-            {uploading ? (
-              <>
-                <Upload className="h-4 w-4 mr-2 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="h-4 w-4 mr-2" />
-                Upload File
-              </>
-            )}
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <FileSpreadsheet className="h-8 w-8 text-green-600" />
+                  <div>
+                    <h3 className="font-medium">CSV Format</h3>
+                    <p className="text-sm text-gray-600">Comma-separated values</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Button 
-            variant="outline" 
-            onClick={downloadTemplate}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Template
-          </Button>
-        </div>
-
-        <div className="text-sm text-muted-foreground">
-          <p className="font-medium">Supported formats:</p>
-          <ul className="list-disc list-inside mt-1">
-            <li>CSV files (.csv)</li>
-            <li>Excel files (.xlsx, .xls)</li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Database className="h-8 w-8 text-blue-600" />
+                  <div>
+                    <h3 className="font-medium">Excel Format</h3>
+                    <p className="text-sm text-gray-600">.xlsx and .xls files</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
-
-export default FileImport;
