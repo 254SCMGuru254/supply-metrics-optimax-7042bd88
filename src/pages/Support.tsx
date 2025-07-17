@@ -3,13 +3,13 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  helpCircle,
-  mail,
-  phone,
-  messageCircle,
-  book,
-  externalLink,
-  video
+  HelpCircle,
+  Mail,
+  Phone,
+  MessageCircle,
+  Book,
+  ExternalLink,
+  Video
 } from 'lucide-react';
 
 const Support = () => {
@@ -26,7 +26,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <helpCircle className="mr-2 h-5 w-5" />
+              <HelpCircle className="mr-2 h-5 w-5" />
               Help Center
             </CardTitle>
             <CardDescription>Browse our knowledge base and FAQs</CardDescription>
@@ -36,7 +36,7 @@ const Support = () => {
               Find answers to common questions and browse our comprehensive help articles.
             </p>
             <Button className="w-full">
-              <book className="mr-2 h-4 w-4" />
+              <Book className="mr-2 h-4 w-4" />
               Browse Help Articles
             </Button>
           </CardContent>
@@ -45,7 +45,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <messageCircle className="mr-2 h-5 w-5" />
+              <MessageCircle className="mr-2 h-5 w-5" />
               Live Chat
             </CardTitle>
             <CardDescription>Chat with our support team</CardDescription>
@@ -55,7 +55,7 @@ const Support = () => {
               Get instant help from our support specialists through live chat.
             </p>
             <Button className="w-full">
-              <messageCircle className="mr-2 h-4 w-4" />
+              <MessageCircle className="mr-2 h-4 w-4" />
               Start Chat
             </Button>
           </CardContent>
@@ -64,7 +64,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <mail className="mr-2 h-5 w-5" />
+              <Mail className="mr-2 h-5 w-5" />
               Email Support
             </CardTitle>
             <CardDescription>Send us a detailed message</CardDescription>
@@ -74,7 +74,7 @@ const Support = () => {
               Submit a support ticket and we'll get back to you within 24 hours.
             </p>
             <Button className="w-full">
-              <mail className="mr-2 h-4 w-4" />
+              <Mail className="mr-2 h-4 w-4" />
               Send Email
             </Button>
           </CardContent>
@@ -83,7 +83,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <phone className="mr-2 h-5 w-5" />
+              <Phone className="mr-2 h-5 w-5" />
               Phone Support
             </CardTitle>
             <CardDescription>Call our support hotline</CardDescription>
@@ -93,7 +93,7 @@ const Support = () => {
               Speak directly with our technical support team for urgent issues.
             </p>
             <Button className="w-full">
-              <phone className="mr-2 h-4 w-4" />
+              <Phone className="mr-2 h-4 w-4" />
               Call Support
             </Button>
           </CardContent>
@@ -102,7 +102,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <video className="mr-2 h-5 w-5" />
+              <Video className="mr-2 h-5 w-5" />
               Video Tutorials
             </CardTitle>
             <CardDescription>Watch step-by-step guides</CardDescription>
@@ -112,7 +112,7 @@ const Support = () => {
               Learn how to use our platform with comprehensive video tutorials.
             </p>
             <Button className="w-full">
-              <video className="mr-2 h-4 w-4" />
+              <Video className="mr-2 h-4 w-4" />
               Watch Tutorials
             </Button>
           </CardContent>
@@ -121,7 +121,7 @@ const Support = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <externalLink className="mr-2 h-5 w-5" />
+              <ExternalLink className="mr-2 h-5 w-5" />
               Community Forum
             </CardTitle>
             <CardDescription>Connect with other users</CardDescription>
@@ -131,7 +131,7 @@ const Support = () => {
               Join our community forum to share experiences and get peer support.
             </p>
             <Button className="w-full">
-              <externalLink className="mr-2 h-4 w-4" />
+              <ExternalLink className="mr-2 h-4 w-4" />
               Visit Forum
             </Button>
           </CardContent>

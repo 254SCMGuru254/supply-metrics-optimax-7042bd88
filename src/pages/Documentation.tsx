@@ -3,14 +3,14 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  book,
-  fileText,
-  code,
-  play,
-  download,
-  externalLink,
-  settings,
-  lightbulb
+  Book,
+  FileText,
+  Code,
+  Play,
+  Download,
+  ExternalLink,
+  Settings,
+  Lightbulb
 } from 'lucide-react';
 
 const Documentation = () => {
@@ -27,7 +27,7 @@ const Documentation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <book className="mr-2 h-5 w-5" />
+              <Book className="mr-2 h-5 w-5" />
               Getting Started
             </CardTitle>
             <CardDescription>Quick start guide and tutorials</CardDescription>
@@ -37,7 +37,7 @@ const Documentation = () => {
               Learn the basics of supply chain optimization and get up and running quickly.
             </p>
             <Button className="w-full">
-              <play className="mr-2 h-4 w-4" />
+              <Play className="mr-2 h-4 w-4" />
               Start Tutorial
             </Button>
           </CardContent>
@@ -46,7 +46,7 @@ const Documentation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <code className="mr-2 h-5 w-5" />
+              <Code className="mr-2 h-5 w-5" />
               API Reference
             </CardTitle>
             <CardDescription>Complete API documentation</CardDescription>
@@ -56,7 +56,7 @@ const Documentation = () => {
               Detailed reference for all endpoints and data structures.
             </p>
             <Button className="w-full">
-              <externalLink className="mr-2 h-4 w-4" />
+              <ExternalLink className="mr-2 h-4 w-4" />
               View API Docs
             </Button>
           </CardContent>
@@ -65,7 +65,7 @@ const Documentation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <settings className="mr-2 h-5 w-5" />
+              <Settings className="mr-2 h-5 w-5" />
               Configuration
             </CardTitle>
             <CardDescription>Setup and configuration guides</CardDescription>
@@ -75,7 +75,7 @@ const Documentation = () => {
               Learn how to configure and customize your optimization models.
             </p>
             <Button className="w-full">
-              <fileText className="mr-2 h-4 w-4" />
+              <FileText className="mr-2 h-4 w-4" />
               Configuration Guide
             </Button>
           </CardContent>
@@ -84,7 +84,7 @@ const Documentation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <lightbulb className="mr-2 h-5 w-5" />
+              <Lightbulb className="mr-2 h-5 w-5" />
               Examples
             </CardTitle>
             <CardDescription>Sample implementations and use cases</CardDescription>
@@ -94,7 +94,7 @@ const Documentation = () => {
               Real-world examples and best practices for common scenarios.
             </p>
             <Button className="w-full">
-              <download className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-4 w-4" />
               Download Examples
             </Button>
           </CardContent>

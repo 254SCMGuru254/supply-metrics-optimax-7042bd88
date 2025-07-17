@@ -3,12 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  play,
-  stopCircle,
-  rotateCcw,
-  activity,
-  settings,
-  barChart3
+  Play,
+  StopCircle,
+  RotateCcw,
+  Activity,
+  Settings,
+  BarChart3
 } from 'lucide-react';
 
 const Simulation = () => {
@@ -25,7 +25,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <play className="mr-2 h-5 w-5" />
+              <Play className="mr-2 h-5 w-5" />
               Start Simulation
             </CardTitle>
             <CardDescription>Run new simulation scenarios</CardDescription>
@@ -35,7 +35,7 @@ const Simulation = () => {
               Create and execute simulation models to test different supply chain configurations.
             </p>
             <Button className="w-full">
-              <play className="mr-2 h-4 w-4" />
+              <Play className="mr-2 h-4 w-4" />
               New Simulation
             </Button>
           </CardContent>
@@ -44,7 +44,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <stopCircle className="mr-2 h-5 w-5" />
+              <StopCircle className="mr-2 h-5 w-5" />
               Control Center
             </CardTitle>
             <CardDescription>Monitor running simulations</CardDescription>
@@ -54,7 +54,7 @@ const Simulation = () => {
               View and control active simulation processes in real-time.
             </p>
             <Button className="w-full">
-              <activity className="mr-2 h-4 w-4" />
+              <Activity className="mr-2 h-4 w-4" />
               Monitor Simulations
             </Button>
           </CardContent>
@@ -63,7 +63,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <rotateCcw className="mr-2 h-5 w-5" />
+              <RotateCcw className="mr-2 h-5 w-5" />
               Results Analysis
             </CardTitle>
             <CardDescription>Analyze simulation outcomes</CardDescription>
@@ -73,7 +73,7 @@ const Simulation = () => {
               Review and compare results from completed simulation runs.
             </p>
             <Button className="w-full">
-              <barChart3 className="mr-2 h-4 w-4" />
+              <BarChart3 className="mr-2 h-4 w-4" />
               View Results
             </Button>
           </CardContent>
@@ -82,7 +82,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <settings className="mr-2 h-5 w-5" />
+              <Settings className="mr-2 h-5 w-5" />
               Configuration
             </CardTitle>
             <CardDescription>Simulation parameters and settings</CardDescription>
@@ -92,7 +92,7 @@ const Simulation = () => {
               Configure simulation parameters, scenarios, and optimization objectives.
             </p>
             <Button className="w-full">
-              <settings className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" />
               Configure Settings
             </Button>
           </CardContent>
