@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_data: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_data: Json | null
+          metric_name: string
+          metric_value: number | null
+          project_id: string
+          recorded_at: string | null
+          time_period: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_name: string
+          metric_value?: number | null
+          project_id: string
+          recorded_at?: string | null
+          time_period?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_name?: string
+          metric_value?: number | null
+          project_id?: string
+          recorded_at?: string | null
+          time_period?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_data_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_conversations: {
+        Row: {
+          context_data: Json | null
+          created_at: string | null
+          id: string
+          messages: Json | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          context_data?: Json | null
+          created_at?: string | null
+          id?: string
+          messages?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          context_data?: Json | null
+          created_at?: string | null
+          id?: string
+          messages?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cost_model_inputs: {
         Row: {
           created_at: string
@@ -941,6 +1015,56 @@ export type Database = {
           },
         ]
       }
+      route_optimization_results: {
+        Row: {
+          algorithm_used: string
+          cost_savings_percentage: number | null
+          created_at: string | null
+          execution_time_ms: number | null
+          id: string
+          input_parameters: Json
+          optimization_results: Json
+          performance_metrics: Json | null
+          project_id: string
+          route_data: Json | null
+          user_id: string
+        }
+        Insert: {
+          algorithm_used: string
+          cost_savings_percentage?: number | null
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_parameters: Json
+          optimization_results: Json
+          performance_metrics?: Json | null
+          project_id: string
+          route_data?: Json | null
+          user_id: string
+        }
+        Update: {
+          algorithm_used?: string
+          cost_savings_percentage?: number | null
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_parameters?: Json
+          optimization_results?: Json
+          performance_metrics?: Json | null
+          project_id?: string
+          route_data?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_optimization_results_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routes: {
         Row: {
           cost_per_unit: number | null
@@ -1321,6 +1445,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       vehicle_locations: {
         Row: {
           event: Json | null
@@ -1522,9 +1670,16 @@ export type Database = {
           current_usage_count: number
         }[]
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1651,6 +1806,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

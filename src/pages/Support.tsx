@@ -7,7 +7,7 @@ import {
   Mail,
   Phone,
   MessageCircle,
-  Book,
+  BookOpen,
   ExternalLink,
   Video
 } from 'lucide-react';
@@ -18,7 +18,7 @@ const Support = () => {
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold mb-4">Support Center</h2>
         <p className="text-muted-foreground">
-          Get help and support for your supply chain optimization needs.
+          Get help with your supply chain optimization needs.
         </p>
       </div>
 
@@ -29,15 +29,15 @@ const Support = () => {
               <HelpCircle className="mr-2 h-5 w-5" />
               Help Center
             </CardTitle>
-            <CardDescription>Browse our knowledge base and FAQs</CardDescription>
+            <CardDescription>Browse our knowledge base</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Find answers to common questions and browse our comprehensive help articles.
+              Find answers to frequently asked questions and troubleshooting guides.
             </p>
             <Button className="w-full">
-              <Book className="mr-2 h-4 w-4" />
-              Browse Help Articles
+              <BookOpen className="mr-2 h-4 w-4" />
+              Browse Articles
             </Button>
           </CardContent>
         </Card>
@@ -52,7 +52,7 @@ const Support = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Get instant help from our support specialists through live chat.
+              Get instant help from our support representatives during business hours.
             </p>
             <Button className="w-full">
               <MessageCircle className="mr-2 h-4 w-4" />
@@ -71,7 +71,7 @@ const Support = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Submit a support ticket and we'll get back to you within 24 hours.
+              For complex issues or detailed inquiries, send us an email and we'll respond within 24 hours.
             </p>
             <Button className="w-full">
               <Mail className="mr-2 h-4 w-4" />
@@ -94,7 +94,7 @@ const Support = () => {
             </p>
             <Button className="w-full">
               <Phone className="mr-2 h-4 w-4" />
-              Call Support
+              Call Now
             </Button>
           </CardContent>
         </Card>
@@ -112,8 +112,8 @@ const Support = () => {
               Learn how to use our platform with comprehensive video tutorials.
             </p>
             <Button className="w-full">
-              <Video className="mr-2 h-4 w-4" />
-              Watch Tutorials
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Watch Videos
             </Button>
           </CardContent>
         </Card>
@@ -128,7 +128,7 @@ const Support = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Join our community forum to share experiences and get peer support.
+              Join our community to share experiences and get peer support.
             </p>
             <Button className="w-full">
               <ExternalLink className="mr-2 h-4 w-4" />

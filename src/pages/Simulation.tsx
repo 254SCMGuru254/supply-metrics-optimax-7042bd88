@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   Play,
-  StopCircle,
+  Square,
   RotateCcw,
   Activity,
   Settings,
@@ -44,7 +44,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <StopCircle className="mr-2 h-5 w-5" />
+              <Square className="mr-2 h-5 w-5" />
               Control Center
             </CardTitle>
             <CardDescription>Monitor running simulations</CardDescription>

@@ -3,12 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Book,
+  BookOpen,
   FileText,
-  Code,
+  CodeSquare,
   Play,
   Download,
-  ExternalLink,
+  Link,
   Settings,
   Lightbulb
 } from 'lucide-react';
@@ -27,7 +27,7 @@ const Documentation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Book className="mr-2 h-5 w-5" />
+              <BookOpen className="mr-2 h-5 w-5" />
               Getting Started
             </CardTitle>
             <CardDescription>Quick start guide and tutorials</CardDescription>
@@ -46,7 +46,7 @@ const Documentation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Code className="mr-2 h-5 w-5" />
+              <CodeSquare className="mr-2 h-5 w-5" />
               API Reference
             </CardTitle>
             <CardDescription>Complete API documentation</CardDescription>
@@ -56,7 +56,7 @@ const Documentation = () => {
               Detailed reference for all endpoints and data structures.
             </p>
             <Button className="w-full">
-              <ExternalLink className="mr-2 h-4 w-4" />
+              <Link className="mr-2 h-4 w-4" />
               View API Docs
             </Button>
           </CardContent>
