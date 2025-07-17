@@ -3,10 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
-  Send, 
-  MapPin,
-  Clock,
-  Shield
+  send, 
+  map-pin,
+  clock,
+  shield
 } from 'lucide-react';
 
 export const ProfessionalFooter = () => {
@@ -61,15 +61,15 @@ export const ProfessionalFooter = () => {
             <h4 className="font-semibold text-foreground">Contact</h4>
             <div className="space-y-3 text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
-                <Send className="h-4 w-4" />
+                <send className="h-4 w-4" />
                 <span>info@optimax.co.ke</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Send className="h-4 w-4" />
+                <send className="h-4 w-4" />
                 <span>+254 700 123 456</span>
               </div>
               <div className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4" />
+                <map-pin className="h-4 w-4" />
                 <span>Nairobi, Kenya</span>
               </div>
             </div>
@@ -81,11 +81,11 @@ export const ProfessionalFooter = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center space-x-4 text-sm text-muted-foreground">
               <div className="flex items-center space-x-1">
-                <Shield className="h-4 w-4" />
+                <shield className="h-4 w-4" />
                 <span>Enterprise Security</span>
               </div>
               <div className="flex items-center space-x-1">
-                <Clock className="h-4 w-4" />
+                <clock className="h-4 w-4" />
                 <span>24/7 Support</span>
               </div>
             </div>

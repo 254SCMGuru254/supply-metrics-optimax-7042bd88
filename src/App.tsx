@@ -1,67 +1,93 @@
 
-import React from 'react';
-import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/components/auth/AuthProvider';
-import { ThemeProvider } from '@/components/ui/theme-provider';
-import { MainLayout } from '@/components/layout/MainLayout';
-import Index from '@/pages/Index';
-import Dashboard from '@/pages/Dashboard';
-import DataInput from '@/pages/DataInput';
-import CenterOfGravity from '@/pages/CenterOfGravity';
-import RouteOptimization from '@/pages/RouteOptimization';
-import NetworkDesign from '@/pages/NetworkDesign';
-import NetworkFlow from '@/pages/NetworkFlow';
-import NetworkOptimization from '@/pages/NetworkOptimization';
-import InventoryManagement from '@/pages/InventoryManagement';
-import CostModeling from '@/pages/CostModeling';
-import AnalyticsDashboard from '@/pages/AnalyticsDashboard';
-import Documentation from '@/pages/Documentation';
-import Isohedron from '@/pages/Isohedron';
-import Auth from '@/pages/Auth';
-import Support from '@/pages/Support';
-import Simulation from '@/pages/Simulation';
-import ChatAssistant from '@/pages/ChatAssistant';
-import Pricing from '@/pages/Pricing';
-import KenyaSupplyChain from '@/pages/KenyaSupplyChain';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import { ThemeProvider } from "./components/ui/theme-provider";
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
+import DataInput from "./pages/DataInput";
+import RouteOptimization from "./pages/RouteOptimization";
+import NetworkDesign from "./pages/NetworkDesign";
+import CenterOfGravity from "./pages/CenterOfGravity";
+import Heuristic from "./pages/Heuristic";
+import Isohedron from "./pages/Isohedron";
+import NetworkOptimization from "./pages/NetworkOptimization";
+import NetworkFlow from "./pages/NetworkFlow";
+import InventoryManagement from "./pages/InventoryManagement";
+import Simulation from "./pages/Simulation";
+import CostModeling from "./pages/CostModeling";
+import FleetManagement from "./pages/FleetManagement";
+import Analytics from "./pages/Analytics";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import BusinessValue from "./pages/BusinessValue";
+import HorticulturalOptimization from "./pages/HorticulturalOptimization";
+import KenyaSupplyChain from "./pages/KenyaSupplyChain";
+import DataManagement from "./pages/DataManagement";
+import DemandForecasting from "./pages/DemandForecasting";
+import Pricing from "./pages/Pricing";
+import Onboarding from "./pages/Onboarding";
+import Introduction from "./pages/Introduction";
+import ProjectDashboard from "./pages/ProjectDashboard";
+import Warehouse from "./pages/Warehouse";
+import Documentation from "./pages/Documentation";
+import Support from "./pages/Support";
+import ChatAssistant from "./pages/ChatAssistant";
+import DesignAssistant from "./pages/DesignAssistant";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <Router>
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/data-input" element={<DataInput />} />
+              <Route path="/route-optimization" element={<RouteOptimization />} />
+              <Route path="/network-design" element={<NetworkDesign />} />
+              <Route path="/center-of-gravity" element={<CenterOfGravity />} />
+              <Route path="/heuristic" element={<Heuristic />} />
+              <Route path="/isohedron" element={<Isohedron />} />
+              <Route path="/network-optimization" element={<NetworkOptimization />} />
+              <Route path="/network-flow" element={<NetworkFlow />} />
+              <Route path="/inventory-management" element={<InventoryManagement />} />
+              <Route path="/simulation" element={<Simulation />} />
+              <Route path="/cost-modeling" element={<CostModeling />} />
+              <Route path="/fleet-management" element={<FleetManagement />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
+              <Route path="/business-value" element={<BusinessValue />} />
+              <Route path="/horticultural-optimization" element={<HorticulturalOptimization />} />
               <Route path="/kenya-supply-chain" element={<KenyaSupplyChain />} />
-              <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-              <Route path="/data-input/:projectId" element={<MainLayout><DataInput /></MainLayout>} />
-              <Route path="/center-of-gravity/:projectId" element={<MainLayout><CenterOfGravity /></MainLayout>} />
-              <Route path="/route-optimization/:projectId" element={<MainLayout><RouteOptimization /></MainLayout>} />
-              <Route path="/network-design/:projectId" element={<MainLayout><NetworkDesign /></MainLayout>} />
-              <Route path="/network-flow/:projectId" element={<MainLayout><NetworkFlow /></MainLayout>} />
-              <Route path="/network-optimization/:projectId" element={<MainLayout><NetworkOptimization /></MainLayout>} />
-              <Route path="/inventory-management/:projectId" element={<MainLayout><InventoryManagement /></MainLayout>} />
-              <Route path="/cost-modeling/:projectId" element={<MainLayout><CostModeling /></MainLayout>} />
-              <Route path="/analytics-dashboard/:projectId" element={<MainLayout><AnalyticsDashboard /></MainLayout>} />
-              <Route path="/simulation/:projectId" element={<MainLayout><Simulation /></MainLayout>} />
-              <Route path="/chat-assistant" element={<MainLayout><ChatAssistant /></MainLayout>} />
-              <Route path="/documentation" element={<MainLayout><Documentation /></MainLayout>} />
-              <Route path="/isohedron/:projectId" element={<MainLayout><Isohedron /></MainLayout>} />
+              <Route path="/data-management" element={<DataManagement />} />
+              <Route path="/demand-forecasting" element={<DemandForecasting />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/introduction" element={<Introduction />} />
+              <Route path="/project-dashboard" element={<ProjectDashboard />} />
+              <Route path="/warehouse" element={<Warehouse />} />
+              <Route path="/documentation" element={<Documentation />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/chat-assistant" element={<ChatAssistant />} />
+              <Route path="/design-assistant" element={<DesignAssistant />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
-            <Toaster />
-          </Router>
-        </ThemeProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
-}
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
 
 export default App;
