@@ -58,6 +58,8 @@ const App = () => (
               <Route path="/route-optimization" element={<RouteOptimization />} />
               <Route path="/network-design" element={<NetworkDesign />} />
               <Route path="/center-of-gravity" element={<CenterOfGravity />} />
+              <Route path="/center-of-gravity/new" element={<CenterOfGravity />} />
+              <Route path="/center-of-gravity/:projectId" element={<CenterOfGravity />} />
               <Route path="/heuristic" element={<Heuristic />} />
               <Route path="/isohedron" element={<Isohedron />} />
               <Route path="/network-optimization" element={<NetworkOptimization />} />
