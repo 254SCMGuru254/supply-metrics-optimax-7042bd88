@@ -227,15 +227,15 @@ const CenterOfGravity = () => {
                 <h3 className="text-lg font-semibold mb-4">Current Demand Points</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border border-border">
-                    <thead>
-                      <tr className="bg-muted">
-                        <th className="border border-border p-2 text-left">Location</th>
-                        <th className="border border-border p-2 text-right">Latitude</th>
-                        <th className="border border-border p-2 text-right">Longitude</th>
-                        <th className="border border-border p-2 text-right">Demand</th>
-                        <th className="border border-border p-2 text-center">Actions</th>
-                      </tr>
-                    </thead>
+                     <thead>
+                       <tr className="bg-muted/50">
+                         <th className="border border-border p-2 text-left text-foreground">Location</th>
+                         <th className="border border-border p-2 text-right text-foreground">Latitude</th>
+                         <th className="border border-border p-2 text-right text-foreground">Longitude</th>
+                         <th className="border border-border p-2 text-right text-foreground">Demand</th>
+                         <th className="border border-border p-2 text-center text-foreground">Actions</th>
+                       </tr>
+                     </thead>
                     <tbody>
                       {demandPoints.map((point) => (
                         <tr key={point.id}>
