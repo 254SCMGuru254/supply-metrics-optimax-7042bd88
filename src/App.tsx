@@ -84,6 +84,7 @@ const App = () => (
               <Route path="/support" element={<Support />} />
               <Route path="/chat-assistant" element={<ChatAssistant />} />
               <Route path="/design-assistant" element={<DesignAssistant />} />
+              <Route path="/route-advanced" element={<RouteAdvanced />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

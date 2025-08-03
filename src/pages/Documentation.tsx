@@ -8,7 +8,9 @@ import {
   Play,
   Download,
   ExternalLink,
-  Settings,
+  Settings
+} from '@/utils/iconImports';
+import {
   Lightbulb
 } from 'lucide-react';
 

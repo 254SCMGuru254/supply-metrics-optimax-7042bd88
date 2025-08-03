@@ -5,8 +5,10 @@ import {
   Play,
   Square,
   RotateCcw,
+  Settings
+} from '@/utils/iconImports';
+import {
   Activity,
-  Settings,
   BarChart3
 } from 'lucide-react';
 

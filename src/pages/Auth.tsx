@@ -9,14 +9,16 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Eye,
   EyeOff,
-  Users,
   Lock,
-  TrendingUp,
   Mail,
   User,
   Star,
   Sparkles,
-  Zap,
+  Zap
+} from '@/utils/iconImports';
+import {
+  Users,
+  TrendingUp,
   Shield,
   BarChart3,
   Globe

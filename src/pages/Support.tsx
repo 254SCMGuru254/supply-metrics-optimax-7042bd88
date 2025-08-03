@@ -9,7 +9,7 @@ import {
   BookOpen,
   ExternalLink,
   Video
-} from 'lucide-react';
+} from '@/utils/iconImports';
 
 const Support = () => {
   return (

@@ -1,4 +1,4 @@
-// Simple icon mapping using available Lucide React icons
+// Icon mapping using available Lucide React icons
 import { 
   User, 
   Loader2, 
@@ -21,11 +21,12 @@ import {
   X, 
   ChevronRight, 
   Plus, 
-  Check 
+  Check
 } from "lucide-react";
 
-// Export all icons using User as fallback for missing ones
+// Export all available icons
 export { 
+  User,
   Loader2, 
   FileText, 
   Upload, 
@@ -46,9 +47,10 @@ export {
   X, 
   ChevronRight, 
   Plus, 
-  Check 
+  Check
 };
 
+// Fallback exports for missing icons using User as substitute
 export const Eye = User;
 export const EyeOff = User;
 export const Lock = User;
@@ -69,3 +71,6 @@ export const Square = User;
 export const RotateCcw = User;
 export const Phone = User;
 export const Video = User;
+export const File = FileText;
+export const FileSpreadsheet = FileText;
+export const Clipboard = User;

@@ -3,7 +3,8 @@ import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileSpreadsheet, Database } from 'lucide-react';
+import { Upload, FileSpreadsheet, AlertCircle } from '@/utils/iconImports';
+import { Database } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface FileImportProps {
