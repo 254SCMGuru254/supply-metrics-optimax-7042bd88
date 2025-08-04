@@ -26,24 +26,26 @@ const DataInput = () => {
 
   if (!projectId) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <p>No project selected. Please go back to the dashboard and select a project.</p>
+      <div className="container mx-auto px-4 py-8 text-center bg-background text-foreground">
+        <div className="p-8 rounded-lg border border-border bg-card">
+          <p className="text-foreground">No project selected. Please go back to the dashboard and select a project.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card>
+    <div className="container mx-auto px-4 py-8 bg-background text-foreground min-h-screen">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Data Input & Management</CardTitle>
+          <CardTitle className="text-foreground">Data Input & Management</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manual" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="manual">Manual Entry</TabsTrigger>
-              <TabsTrigger value="import">File Import</TabsTrigger>
-              <TabsTrigger value="map">Interactive Map</TabsTrigger>
+            <TabsList className="bg-muted">
+              <TabsTrigger value="manual" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Manual Entry</TabsTrigger>
+              <TabsTrigger value="import" className="data-[state=active]:bg-background data-[state=active]:text-foreground">File Import</TabsTrigger>
+              <TabsTrigger value="map" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Interactive Map</TabsTrigger>
             </TabsList>
 
             <TabsContent value="manual">

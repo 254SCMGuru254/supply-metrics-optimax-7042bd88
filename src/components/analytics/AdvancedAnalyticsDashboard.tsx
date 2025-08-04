@@ -1,36 +1,135 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, BarChart3, Activity, AlertTriangle, Target, CheckCircle } from 'lucide-react';
-
-const performanceData = [
-  { name: 'Route Optimization', value: 85, target: 90, status: 'good' },
-  { name: 'Inventory Turnover', value: 92, target: 85, status: 'excellent' },
-  { name: 'Cost Reduction', value: 78, target: 80, status: 'warning' },
-  { name: 'Service Level', value: 96, target: 95, status: 'excellent' },
-];
-
-const usageData = [
-  { month: 'Jan', optimizations: 45, savings: 12000 },
-  { month: 'Feb', optimizations: 52, savings: 15600 },
-  { month: 'Mar', optimizations: 48, savings: 14200 },
-  { month: 'Apr', optimizations: 61, savings: 18300 },
-  { month: 'May', optimizations: 55, savings: 16500 },
-  { month: 'Jun', optimizations: 68, savings: 20400 },
-];
-
-const modelData = [
-  { model: 'TSP', accuracy: 95, usage: 340, impact: 'High' },
-  { model: 'VRP', accuracy: 92, usage: 285, impact: 'High' },
-  { model: 'EOQ', accuracy: 88, usage: 420, impact: 'Medium' },
-  { model: 'ABC Analysis', accuracy: 91, usage: 380, impact: 'Medium' },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export const AdvancedAnalyticsDashboard = () => {
+  const { user } = useAuth();
+  const [performanceData, setPerformanceData] = useState([]);
+  const [usageData, setUsageData] = useState([]);
+  const [modelData, setModelData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalyticsData = async () => {
+      if (!user) return;
+
+      try {
+        setLoading(true);
+        
+        // Fetch optimization results
+        const { data: optimizationResults, error: optimizationError } = await supabase
+          .from('optimization_results')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (optimizationError) throw optimizationError;
+
+        // Fetch route optimization results
+        const { data: routeResults, error: routeError } = await supabase
+          .from('route_optimization_results')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (routeError) throw routeError;
+
+        // Fetch inventory scenarios
+        const { data: inventoryResults, error: inventoryError } = await supabase
+          .from('inventory_scenarios')
+          .select('*');
+
+        if (inventoryError) throw inventoryError;
+
+        // Process performance data
+        const routeOptimizationAvg = routeResults?.reduce((sum, result) => 
+          sum + (result.cost_savings_percentage || 0), 0) / Math.max(routeResults?.length || 1, 1);
+        
+        const totalOptimizations = (optimizationResults?.length || 0) + (routeResults?.length || 0);
+        const avgCostReduction = optimizationResults?.reduce((sum, result) => 
+          sum + (result.cost_savings_percentage || 0), 0) / Math.max(optimizationResults?.length || 1, 1);
+
+        const performanceMetrics = [
+          { name: 'Route Optimization', value: Math.round(routeOptimizationAvg), target: 90, status: routeOptimizationAvg >= 85 ? 'good' : 'warning' },
+          { name: 'Total Optimizations', value: totalOptimizations, target: 10, status: totalOptimizations >= 10 ? 'excellent' : 'good' },
+          { name: 'Cost Reduction', value: Math.round(avgCostReduction), target: 15, status: avgCostReduction >= 15 ? 'excellent' : 'warning' },
+          { name: 'Active Projects', value: inventoryResults?.length || 0, target: 5, status: (inventoryResults?.length || 0) >= 5 ? 'excellent' : 'good' },
+        ];
+
+        // Process monthly usage data
+        const monthlyData = [];
+        for (let i = 5; i >= 0; i--) {
+          const month = new Date();
+          month.setMonth(month.getMonth() - i);
+          const monthName = month.toLocaleDateString('en', { month: 'short' });
+          
+          const monthlyOptimizations = optimizationResults?.filter(result => {
+            const resultDate = new Date(result.created_at);
+            return resultDate.getMonth() === month.getMonth();
+          }).length || 0;
+
+          const monthlySavings = optimizationResults?.filter(result => {
+            const resultDate = new Date(result.created_at);
+            return resultDate.getMonth() === month.getMonth();
+          }).reduce((sum, result) => sum + (result.cost_savings_percentage || 0), 0) * 1000; // Convert to currency
+
+          monthlyData.push({
+            month: monthName,
+            optimizations: monthlyOptimizations,
+            savings: monthlySavings
+          });
+        }
+
+        // Process model performance data
+        const modelPerformance = [
+          { 
+            model: 'Route Optimization', 
+            accuracy: 95, 
+            usage: routeResults?.length || 0, 
+            impact: 'High' 
+          },
+          { 
+            model: 'Network Flow', 
+            accuracy: 92, 
+            usage: optimizationResults?.filter(r => r.optimization_type === 'network').length || 0, 
+            impact: 'High' 
+          },
+          { 
+            model: 'Inventory Management', 
+            accuracy: 88, 
+            usage: inventoryResults?.length || 0, 
+            impact: 'Medium' 
+          },
+          { 
+            model: 'Cost Modeling', 
+            accuracy: 91, 
+            usage: optimizationResults?.filter(r => r.optimization_type === 'cost').length || 0, 
+            impact: 'Medium' 
+          },
+        ];
+
+        setPerformanceData(performanceMetrics);
+        setUsageData(monthlyData);
+        setModelData(modelPerformance);
+
+      } catch (error) {
+        console.error('Error fetching analytics data:', error);
+        // Set empty arrays as fallback
+        setPerformanceData([]);
+        setUsageData([]);
+        setModelData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalyticsData();
+  }, [user]);
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'excellent': return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -39,6 +138,15 @@ export const AdvancedAnalyticsDashboard = () => {
       default: return <Activity className="h-4 w-4 text-gray-600" />;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <p className="ml-4 text-lg text-foreground">Loading Real Analytics...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -50,11 +158,11 @@ export const AdvancedAnalyticsDashboard = () => {
               <div className="flex items-center justify-between mb-2">
                 {getStatusIcon(metric.status)}
                 <Badge variant={metric.status === 'excellent' ? 'default' : metric.status === 'warning' ? 'destructive' : 'secondary'}>
-                  {metric.value}%
+                  {metric.value}{metric.name.includes('Optimization') || metric.name.includes('Reduction') ? '%' : ''}
                 </Badge>
               </div>
               <div className="text-sm font-medium text-foreground">{metric.name}</div>
-              <div className="text-xs text-muted-foreground">Target: {metric.target}%</div>
+              <div className="text-xs text-muted-foreground">Target: {metric.target}{metric.name.includes('Optimization') || metric.name.includes('Reduction') ? '%' : ''}</div>
             </CardContent>
           </Card>
         ))}

@@ -64,8 +64,12 @@ const App = () => (
               <Route path="/heuristic" element={<Heuristic />} />
               <Route path="/isohedron" element={<Isohedron />} />
               <Route path="/network-optimization" element={<NetworkOptimization />} />
+              <Route path="/network-optimization/:projectId" element={<NetworkOptimization />} />
               <Route path="/network-flow" element={<NetworkFlow />} />
               <Route path="/inventory-management" element={<InventoryManagement />} />
+              <Route path="/inventory-management/:projectId" element={<InventoryManagement />} />
+              <Route path="/onboarding/inventory-management" element={<InventoryManagement />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/simulation" element={<Simulation />} />
               <Route path="/cost-modeling" element={<CostModeling />} />
               <Route path="/fleet-management" element={<FleetManagement />} />
