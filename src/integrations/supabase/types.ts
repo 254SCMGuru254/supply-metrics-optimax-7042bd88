@@ -631,6 +631,42 @@ export type Database = {
           },
         ]
       }
+      model_backups: {
+        Row: {
+          backup_path: string | null
+          backup_type: string
+          checksum: string | null
+          created_at: string | null
+          file_size: number | null
+          id: string
+          model_data: Json
+          model_type: string
+          user_id: string
+        }
+        Insert: {
+          backup_path?: string | null
+          backup_type?: string
+          checksum?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          model_data: Json
+          model_type: string
+          user_id: string
+        }
+        Update: {
+          backup_path?: string | null
+          backup_type?: string
+          checksum?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          model_data?: Json
+          model_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       model_constraints: {
         Row: {
           constraint_name: string
@@ -1670,12 +1706,20 @@ export type Database = {
           current_usage_count: number
         }[]
       }
+      create_daily_backup: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
+      }
+      restore_model_backup: {
+        Args: { backup_id: string }
+        Returns: Json
       }
     }
     Enums: {
