@@ -100,20 +100,21 @@ const RouteOptimization = () => {
     ) : [];
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8" ref={contentRef}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Route className="h-6 w-6" />
-            Vehicle Route Optimization
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Optimize vehicle routes to minimize travel distance and cost while meeting customer demands.
-          </p>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="container mx-auto px-4 py-8 space-y-8" ref={contentRef}>
+        <Card className="bg-card text-card-foreground border-border">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Route className="h-6 w-6 text-primary" />
+              Vehicle Route Optimization
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              Optimize vehicle routes to minimize travel distance and cost while meeting customer demands.
+            </p>
+          </CardContent>
+        </Card>
 
       <Tabs defaultValue="locations" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
@@ -125,30 +126,30 @@ const RouteOptimization = () => {
 
         <TabsContent value="locations" className="space-y-4">
           {/* Location management content */}
-          <Card>
+          <Card className="bg-card text-card-foreground border-border">
             <CardHeader>
-              <CardTitle>Customer Locations</CardTitle>
+              <CardTitle className="text-card-foreground">Customer Locations</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-border">
                   <thead>
                     <tr className="bg-muted">
-                      <th className="border border-border p-2 text-left">Name</th>
-                      <th className="border border-border p-2">Type</th>
-                      <th className="border border-border p-2">Demand</th>
-                      <th className="border border-border p-2">Location</th>
+                      <th className="border border-border p-2 text-left text-foreground">Name</th>
+                      <th className="border border-border p-2 text-foreground">Type</th>
+                      <th className="border border-border p-2 text-foreground">Demand</th>
+                      <th className="border border-border p-2 text-foreground">Location</th>
                     </tr>
                   </thead>
                   <tbody>
                     {nodes.map((node) => (
                       <tr key={node.id}>
-                        <td className="border border-border p-2">{node.name}</td>
+                        <td className="border border-border p-2 text-foreground">{node.name}</td>
                         <td className="border border-border p-2">
                           <Badge>{node.type}</Badge>
                         </td>
-                        <td className="border border-border p-2 text-right">{node.demand || 0}</td>
-                        <td className="border border-border p-2 text-right">
+                        <td className="border border-border p-2 text-right text-foreground">{node.demand || 0}</td>
+                        <td className="border border-border p-2 text-right text-foreground">
                           {node.latitude.toFixed(2)}, {node.longitude.toFixed(2)}
                         </td>
                       </tr>
@@ -162,28 +163,28 @@ const RouteOptimization = () => {
 
         <TabsContent value="vehicles" className="space-y-4">
           {/* Vehicle management content */}
-          <Card>
+          <Card className="bg-card text-card-foreground border-border">
             <CardHeader>
-              <CardTitle>Vehicle Fleet</CardTitle>
+              <CardTitle className="text-card-foreground">Vehicle Fleet</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-border">
                   <thead>
                     <tr className="bg-muted">
-                      <th className="border border-border p-2 text-left">Vehicle ID</th>
-                      <th className="border border-border p-2">Capacity</th>
-                      <th className="border border-border p-2">Start</th>
-                      <th className="border border-border p-2">End</th>
+                      <th className="border border-border p-2 text-left text-foreground">Vehicle ID</th>
+                      <th className="border border-border p-2 text-foreground">Capacity</th>
+                      <th className="border border-border p-2 text-foreground">Start</th>
+                      <th className="border border-border p-2 text-foreground">End</th>
                     </tr>
                   </thead>
                   <tbody>
                     {vehicles.map((vehicle) => (
                       <tr key={vehicle.id}>
-                        <td className="border border-border p-2">{vehicle.id}</td>
-                        <td className="border border-border p-2 text-right">{vehicle.capacity}</td>
-                        <td className="border border-border p-2">{vehicle.startLocation}</td>
-                        <td className="border border-border p-2">{vehicle.endLocation}</td>
+                        <td className="border border-border p-2 text-foreground">{vehicle.id}</td>
+                        <td className="border border-border p-2 text-right text-foreground">{vehicle.capacity}</td>
+                        <td className="border border-border p-2 text-foreground">{vehicle.startLocation}</td>
+                        <td className="border border-border p-2 text-foreground">{vehicle.endLocation}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -194,9 +195,9 @@ const RouteOptimization = () => {
         </TabsContent>
 
         <TabsContent value="optimize" className="space-y-4">
-          <Card>
+          <Card className="bg-card text-card-foreground border-border">
             <CardHeader>
-              <CardTitle>Route Optimization</CardTitle>
+              <CardTitle className="text-card-foreground">Route Optimization</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button onClick={optimizeRoutes}>
@@ -206,19 +207,19 @@ const RouteOptimization = () => {
 
               {solution && (
                 <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4">Optimization Results</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-foreground">Optimization Results</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Distance</p>
-                      <p className="font-semibold">{solution.totalDistance} km</p>
+                      <p className="font-semibold text-foreground">{solution.totalDistance} km</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Total Cost</p>
-                      <p className="font-semibold">KES {solution.totalCost.toLocaleString()}</p>
+                      <p className="font-semibold text-foreground">KES {solution.totalCost.toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Number of Routes</p>
-                      <p className="font-semibold">{solution.routes.length}</p>
+                      <p className="font-semibold text-foreground">{solution.routes.length}</p>
                     </div>
                   </div>
                 </div>
@@ -236,6 +237,7 @@ const RouteOptimization = () => {
           />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };
