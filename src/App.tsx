@@ -38,7 +38,7 @@ import Support from "./pages/Support";
 import ChatAssistant from "./pages/ChatAssistant";
 import DesignAssistant from "./pages/DesignAssistant";
 import NotFound from "./pages/NotFound";
-import RouteAdvancedPage from "./pages/route-advanced";
+
 
 const queryClient = new QueryClient();
 
@@ -89,7 +89,7 @@ const App = () => (
               <Route path="/support" element={<Support />} />
               <Route path="/chat-assistant" element={<ChatAssistant />} />
               <Route path="/design-assistant" element={<DesignAssistant />} />
-              <Route path="/route-advanced" element={<RouteAdvancedPage />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

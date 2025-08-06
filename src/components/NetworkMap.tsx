@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,203 +49,315 @@ export interface NetworkMapProps {
   airportNodes?: any[];
 }
 
-const NetworkMap: React.FC<NetworkMapProps> = ({ 
-  nodes = [], 
-  routes = [], 
+// Icon configurations for different node types
+const getNodeIcon = (type: string) => {
+  const iconColors = {
+    depot: '#ef4444',    // red
+    customer: '#3b82f6', // blue
+    warehouse: '#10b981', // green
+    supplier: '#f59e0b',  // yellow
+    default: '#6b7280'   // gray
+  };
+
+  const color = iconColors[type as keyof typeof iconColors] || iconColors.default;
+  
+  return L.divIcon({
+    html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+    className: 'custom-marker',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  });
+};
+
+// Map click handler component
+const MapClickHandler = ({ onMapClick }: { onMapClick?: (lat: number, lng: number) => void }) => {
+  useMapEvents({
+    click: (e) => {
+      if (onMapClick) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      }
+    }
+  });
+  return null;
+};
+
+const NetworkMap = ({
+  nodes = [],
+  routes = [],
   className = "",
   onNodeClick,
   onRouteClick,
   onMapClick,
-  isOptimized,
-  highlightNodes,
-  selectable,
+  isOptimized = false,
+  highlightNodes = [],
+  selectable = false,
   onNodeSelect,
   disruptionData,
   resilienceMetrics,
-  airportNodes
-}) => {
-  const [mapNodes, setMapNodes] = useState(nodes);
-  const [mapRoutes, setMapRoutes] = useState(routes);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newNode, setNewNode] = useState({
+  airportNodes = []
+}: NetworkMapProps) => {
+  const [localNodes, setLocalNodes] = useState<Node[]>(nodes);
+  const [localRoutes, setLocalRoutes] = useState<Route[]>(routes);
+  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+  const [showNodeForm, setShowNodeForm] = useState(false);
+  const [showRouteForm, setShowRouteForm] = useState(false);
+  const [newNodeData, setNewNodeData] = useState({
     name: '',
     type: 'customer',
-    latitude: -1.2921,
-    longitude: 36.8219,
+    latitude: 0,
+    longitude: 0,
     weight: 0
   });
-
-  // Remove the mapRef since MapContainer doesn't support it directly
-  const center: [number, number] = [-1.2921, 36.8219]; // Nairobi coordinates
+  const [newRouteData, setNewRouteData] = useState({
+    from: '',
+    to: '',
+    volume: 0,
+    cost: 0
+  });
 
   useEffect(() => {
-    setMapNodes(nodes);
-    setMapRoutes(routes);
-  }, [nodes, routes]);
+    setLocalNodes(nodes);
+  }, [nodes]);
 
-  // Map click handler component
-  const MapClickHandler = () => {
-    useMapEvents({
-      click: (e) => {
-        if (onMapClick) {
-          onMapClick(e.latlng.lat, e.latlng.lng);
-        }
-        setNewNode(prev => ({
-          ...prev,
-          latitude: e.latlng.lat,
-          longitude: e.latlng.lng
-        }));
-      }
-    });
-    return null;
+  useEffect(() => {
+    setLocalRoutes(routes);
+  }, [routes]);
+
+  // Calculate map center
+  const center: [number, number] = localNodes.length > 0 
+    ? [
+        localNodes.reduce((sum, node) => sum + node.latitude, 0) / localNodes.length,
+        localNodes.reduce((sum, node) => sum + node.longitude, 0) / localNodes.length
+      ]
+    : [-1.2921, 36.8219]; // Default to Nairobi
+
+  // Convert data for map rendering
+  const mapNodes = [...localNodes, ...airportNodes].map(node => ({
+    id: node.id,
+    name: node.name,
+    type: node.type,
+    latitude: node.latitude,
+    longitude: node.longitude,
+    weight: node.weight || 0
+  }));
+
+  const mapRoutes = localRoutes.map(route => ({
+    id: route.id,
+    from: route.from,
+    to: route.to,
+    volume: route.volume || 0,
+    cost: route.cost || 0,
+    label: route.label || `${route.from} → ${route.to}`,
+    isOptimized: route.isOptimized || isOptimized
+  }));
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setNewNodeData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+    if (onMapClick) {
+      onMapClick(lat, lng);
+    }
   };
 
   const handleAddNode = () => {
-    const nodeId = `node-${Date.now()}`;
-    const newNodeData: Node = {
-      id: nodeId,
-      name: newNode.name,
-      type: newNode.type,
-      latitude: newNode.latitude,
-      longitude: newNode.longitude,
-      weight: newNode.weight
-    };
-    
-    setMapNodes(prev => [...prev, newNodeData]);
-    
-    if (onNodeClick) {
-      onNodeClick(newNodeData);
+    if (newNodeData.name && newNodeData.latitude && newNodeData.longitude) {
+      const newNode: Node = {
+        id: `node-${Date.now()}`,
+        name: newNodeData.name,
+        type: newNodeData.type,
+        latitude: newNodeData.latitude,
+        longitude: newNodeData.longitude,
+        weight: newNodeData.weight
+      };
+      
+      setLocalNodes(prev => [...prev, newNode]);
+      setNewNodeData({ name: '', type: 'customer', latitude: 0, longitude: 0, weight: 0 });
+      setShowNodeForm(false);
     }
-    
-    setShowAddForm(false);
-    setNewNode({
-      name: '',
-      type: 'customer',
-      latitude: -1.2921,
-      longitude: 36.8219,
-      weight: 0
-    });
   };
 
-  // Create custom icons for different node types
-  const getNodeIcon = (nodeType: string) => {
-    const colors: Record<string, string> = {
-      depot: '#ef4444',
-      customer: '#3b82f6',
-      warehouse: '#10b981',
-      supplier: '#f59e0b',
-      default: '#6b7280'
-    };
-    
-    return L.divIcon({
-      className: 'custom-div-icon',
-      html: `<div style="background-color: ${colors[nodeType] || colors.default}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-      iconSize: [16, 16],
-      iconAnchor: [8, 8]
-    });
+  const handleAddRoute = () => {
+    if (newRouteData.from && newRouteData.to) {
+      const newRoute: Route = {
+        id: `route-${Date.now()}`,
+        from: newRouteData.from,
+        to: newRouteData.to,
+        volume: newRouteData.volume,
+        cost: newRouteData.cost
+      };
+      
+      setLocalRoutes(prev => [...prev, newRoute]);
+      setNewRouteData({ from: '', to: '', volume: 0, cost: 0 });
+      setShowRouteForm(false);
+    }
+  };
+
+  const getNodeName = (nodeId: string) => {
+    const node = mapNodes.find(n => n.id === nodeId);
+    return node ? node.name : nodeId;
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Network className="h-5 w-5" />
-            Network Map
-          </div>
-          <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline">
-                <Plus className="h-4 w-4 mr-1" />
-                Add Node
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Node</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="nodeName">Name</Label>
-                  <Input
-                    id="nodeName"
-                    value={newNode.name}
-                    onChange={(e) => setNewNode(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter node name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="nodeType">Type</Label>
-                  <select
-                    id="nodeType"
-                    value={newNode.type}
-                    onChange={(e) => setNewNode(prev => ({ ...prev, type: e.target.value }))}
-                    className="w-full px-3 py-2 border border-input bg-background rounded-md"
-                  >
-                    <option value="customer">Customer</option>
-                    <option value="depot">Depot</option>
-                    <option value="warehouse">Warehouse</option>
-                    <option value="supplier">Supplier</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label htmlFor="latitude">Latitude</Label>
-                    <Input
-                      id="latitude"
-                      type="number"
-                      step="0.000001"
-                      value={newNode.latitude}
-                      onChange={(e) => setNewNode(prev => ({ ...prev, latitude: parseFloat(e.target.value) }))}
-                    />
+    <Card className={`w-full ${className}`}>
+      <CardContent className="p-6">
+        <div className="space-y-6">
+          {/* Header with controls */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Network className="w-6 h-6 text-primary" />
+              <h3 className="text-lg font-semibold">Supply Network Visualization</h3>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Dialog open={showNodeForm} onOpenChange={setShowNodeForm}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Node
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Node</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Name</Label>
+                      <Input
+                        value={newNodeData.name}
+                        onChange={(e) => setNewNodeData(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Enter node name"
+                      />
+                    </div>
+                    <div>
+                      <Label>Type</Label>
+                      <select
+                        value={newNodeData.type}
+                        onChange={(e) => setNewNodeData(prev => ({ ...prev, type: e.target.value }))}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="customer">Customer</option>
+                        <option value="depot">Depot</option>
+                        <option value="warehouse">Warehouse</option>
+                        <option value="supplier">Supplier</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Latitude</Label>
+                        <Input
+                          type="number"
+                          step="0.0001"
+                          value={newNodeData.latitude}
+                          onChange={(e) => setNewNodeData(prev => ({ ...prev, latitude: parseFloat(e.target.value) }))}
+                          placeholder="Latitude"
+                        />
+                      </div>
+                      <div>
+                        <Label>Longitude</Label>
+                        <Input
+                          type="number"
+                          step="0.0001"
+                          value={newNodeData.longitude}
+                          onChange={(e) => setNewNodeData(prev => ({ ...prev, longitude: parseFloat(e.target.value) }))}
+                          placeholder="Longitude"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Weight/Demand</Label>
+                      <Input
+                        type="number"
+                        value={newNodeData.weight}
+                        onChange={(e) => setNewNodeData(prev => ({ ...prev, weight: parseInt(e.target.value) }))}
+                        placeholder="Weight or demand"
+                      />
+                    </div>
+                    <Button onClick={handleAddNode} className="w-full">
+                      <Save className="w-4 h-4 mr-2" />
+                      Add Node
+                    </Button>
                   </div>
-                  <div>
-                    <Label htmlFor="longitude">Longitude</Label>
-                    <Input
-                      id="longitude"
-                      type="number"
-                      step="0.000001"
-                      value={newNode.longitude}
-                      onChange={(e) => setNewNode(prev => ({ ...prev, longitude: parseFloat(e.target.value) }))}
-                    />
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={showRouteForm} onOpenChange={setShowRouteForm}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Route
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Route</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>From Node</Label>
+                      <select
+                        value={newRouteData.from}
+                        onChange={(e) => setNewRouteData(prev => ({ ...prev, from: e.target.value }))}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="">Select origin node</option>
+                        {mapNodes.map(node => (
+                          <option key={node.id} value={node.id}>{node.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label>To Node</Label>
+                      <select
+                        value={newRouteData.to}
+                        onChange={(e) => setNewRouteData(prev => ({ ...prev, to: e.target.value }))}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="">Select destination node</option>
+                        {mapNodes.map(node => (
+                          <option key={node.id} value={node.id}>{node.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Volume</Label>
+                        <Input
+                          type="number"
+                          value={newRouteData.volume}
+                          onChange={(e) => setNewRouteData(prev => ({ ...prev, volume: parseInt(e.target.value) }))}
+                          placeholder="Volume"
+                        />
+                      </div>
+                      <div>
+                        <Label>Cost</Label>
+                        <Input
+                          type="number"
+                          value={newRouteData.cost}
+                          onChange={(e) => setNewRouteData(prev => ({ ...prev, cost: parseFloat(e.target.value) }))}
+                          placeholder="Cost"
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handleAddRoute} className="w-full">
+                      <Save className="w-4 h-4 mr-2" />
+                      Add Route
+                    </Button>
                   </div>
-                </div>
-                <div>
-                  <Label htmlFor="weight">Weight/Demand</Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    value={newNode.weight}
-                    onChange={(e) => setNewNode(prev => ({ ...prev, weight: parseInt(e.target.value) || 0 }))}
-                    placeholder="0"
-                  />
-                </div>
-                <Button onClick={handleAddNode} className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  Add Node
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Node Statistics */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">{mapNodes.length} nodes</Badge>
-            <Badge variant="outline">{mapRoutes.length} routes</Badge>
-            {isOptimized && <Badge className="bg-green-100 text-green-800">✓ Optimized</Badge>}
+                </DialogContent>
+              </Dialog>
+              
+              {isOptimized && <Badge className="bg-green-100 text-green-800">✓ Optimized</Badge>}
+            </div>
           </div>
 
           {/* Interactive Leaflet Map */}
-          <div className="relative h-96 bg-muted rounded-lg overflow-hidden">
+          <div className="relative h-96 bg-muted rounded-lg overflow-hidden z-0">
             <MapContainer
               center={center}
               zoom={10}
               style={{ height: '100%', width: '100%' }}
             >
-              <MapClickHandler />
+              <MapClickHandler onMapClick={handleMapClick} />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -324,6 +435,81 @@ const NetworkMap: React.FC<NetworkMapProps> = ({
               <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
               <span>Supplier</span>
             </div>
+          </div>
+
+          {/* Data Tables with proper z-index */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
+            {/* Nodes Table */}
+            <Card className="relative z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  Supply Network Nodes ({mapNodes.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-64 overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left p-2">Name</th>
+                        <th className="text-left p-2">Type</th>
+                        <th className="text-left p-2">Location</th>
+                        <th className="text-left p-2">Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mapNodes.map((node) => (
+                        <tr key={node.id} className="border-b hover:bg-muted/30">
+                          <td className="p-2 font-medium">{node.name}</td>
+                          <td className="p-2">
+                            <Badge variant="secondary">{node.type}</Badge>
+                          </td>
+                          <td className="p-2 text-xs text-muted-foreground">
+                            {node.latitude.toFixed(4)}, {node.longitude.toFixed(4)}
+                          </td>
+                          <td className="p-2">{node.weight || 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Routes Table */}
+            <Card className="relative z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Network className="w-5 h-5" />
+                  Supply Routes ({mapRoutes.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-64 overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left p-2">From</th>
+                        <th className="text-left p-2">To</th>
+                        <th className="text-left p-2">Volume</th>
+                        <th className="text-left p-2">Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mapRoutes.map((route) => (
+                        <tr key={route.id} className="border-b hover:bg-muted/30">
+                          <td className="p-2 font-medium">{getNodeName(route.from)}</td>
+                          <td className="p-2 font-medium">{getNodeName(route.to)}</td>
+                          <td className="p-2">{route.volume || '-'}</td>
+                          <td className="p-2">{route.cost ? `$${route.cost}` : '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </CardContent>
