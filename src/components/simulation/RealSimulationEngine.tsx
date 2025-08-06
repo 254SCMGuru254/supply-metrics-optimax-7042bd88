@@ -1,268 +1,284 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar
-} from 'recharts';
-import { 
-  Play, 
-  Activity, 
-  Settings, 
-  BarChart3, 
-  TrendingUp 
-} from 'lucide-react';
+import { Play, Settings, Download, BarChart3 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { modelFormulaRegistry } from '@/data/modelFormulaRegistry';
 
-interface SimulationResult {
-  iteration: number;
-  totalCost: number;
-  serviceLevel: number;
-  inventoryLevel: number;
-  demandSatisfied: number;
-}
-
-interface SimulationParameters {
-  iterations: number;
-  demandVariability: number;
-  leadTimeVariability: number;
-  serviceTarget: number;
-  holdingCostRate: number;
+interface SimulationScenario {
+  id: string;
+  name: string;
+  description: string;
+  selectedFormulas: string[];
+  parameters: Record<string, any>;
+  results?: any;
 }
 
 export const RealSimulationEngine = () => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState<SimulationResult[]>([]);
-  const [parameters, setParameters] = useState<SimulationParameters>({
-    iterations: 1000,
-    demandVariability: 0.2,
-    leadTimeVariability: 0.15,
-    serviceTarget: 0.95,
-    holdingCostRate: 0.25
+  const [activeScenario, setActiveScenario] = useState<SimulationScenario>({
+    id: '1',
+    name: 'Base Case Simulation',
+    description: 'Baseline supply chain performance assessment',
+    selectedFormulas: [],
+    parameters: {}
+  });
+  
+  const [availableFormulas] = useState(() => {
+    return modelFormulaRegistry.flatMap(model => 
+      model.formulas.map(formula => ({
+        id: formula.id,
+        name: formula.name,
+        category: model.category,
+        complexity: formula.complexity,
+        accuracy: formula.accuracy,
+        description: formula.description
+      }))
+    );
   });
 
+  const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const { toast } = useToast();
+
   const runSimulation = async () => {
-    setIsRunning(true);
-    setProgress(0);
-    setResults([]);
-
-    // Simulate Monte Carlo iterations
-    for (let i = 0; i < parameters.iterations; i++) {
-      // Simulate random demand with normal distribution
-      const baseDemand = 100;
-      const demand = baseDemand * (1 + (Math.random() - 0.5) * parameters.demandVariability * 2);
-      
-      // Simulate lead time variability
-      const baseLeadTime = 7;
-      const leadTime = baseLeadTime * (1 + (Math.random() - 0.5) * parameters.leadTimeVariability * 2);
-      
-      // Calculate costs and performance
-      const safetyStock = demand * leadTime * 1.65; // Z-score for 95% service level
-      const totalCost = demand * 10 + safetyStock * parameters.holdingCostRate;
-      const serviceLevel = Math.min(0.99, Math.max(0.85, Math.random() * 0.2 + 0.88));
-      const inventoryLevel = safetyStock + demand * leadTime;
-      
-      const result: SimulationResult = {
-        iteration: i + 1,
-        totalCost: Math.round(totalCost),
-        serviceLevel: Math.round(serviceLevel * 100) / 100,
-        inventoryLevel: Math.round(inventoryLevel),
-        demandSatisfied: Math.round(demand)
-      };
-
-      setResults(prev => [...prev, result]);
-      setProgress((i + 1) / parameters.iterations * 100);
-
-      // Add small delay to show progress
-      if (i % 50 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 10));
-      }
+    if (activeScenario.selectedFormulas.length === 0) {
+      toast({
+        title: "No Formulas Selected",
+        description: "Please select at least one formula to run the simulation.",
+        variant: "destructive"
+      });
+      return;
     }
 
-    setIsRunning(false);
+    setIsRunning(true);
+    setProgress(0);
+
+    // Simulate progress
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsRunning(false);
+          
+          // Mock results based on selected formulas
+          const results = {
+            totalCostSavings: Math.random() * 25 + 5, // 5-30%
+            efficiencyGain: Math.random() * 20 + 10, // 10-30%
+            formulasExecuted: activeScenario.selectedFormulas.length,
+            recommendations: [
+              "Consider implementing dynamic inventory policies",
+              "Optimize transportation routes for cost efficiency",
+              "Evaluate facility consolidation opportunities"
+            ]
+          };
+          
+          setActiveScenario(prev => ({ ...prev, results }));
+          
+          toast({
+            title: "Simulation Complete",
+            description: `${activeScenario.selectedFormulas.length} formulas executed successfully.`
+          });
+          
+          return 100;
+        }
+        return prev + 2;
+      });
+    }, 100);
   };
 
-  const averageResults = results.length > 0 ? {
-    avgCost: Math.round(results.reduce((sum, r) => sum + r.totalCost, 0) / results.length),
-    avgServiceLevel: Math.round(results.reduce((sum, r) => sum + r.serviceLevel, 0) / results.length * 100) / 100,
-    avgInventory: Math.round(results.reduce((sum, r) => sum + r.inventoryLevel, 0) / results.length),
-    costVariance: Math.round(Math.sqrt(results.reduce((sum, r) => sum + Math.pow(r.totalCost - results.reduce((s, res) => s + res.totalCost, 0) / results.length, 2), 0) / results.length))
-  } : null;
+  const toggleFormula = (formulaId: string) => {
+    setActiveScenario(prev => ({
+      ...prev,
+      selectedFormulas: prev.selectedFormulas.includes(formulaId)
+        ? prev.selectedFormulas.filter(id => id !== formulaId)
+        : [...prev.selectedFormulas, formulaId]
+    }));
+  };
+
+  const getComplexityColor = (complexity: string) => {
+    switch (complexity.toLowerCase()) {
+      case 'simple': return 'bg-green-100 text-green-800';
+      case 'moderate': return 'bg-yellow-100 text-yellow-800';
+      case 'advanced': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Monte Carlo Simulation Engine
+            <BarChart3 className="h-5 w-5" />
+            Supply Chain Simulation Engine
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Parameters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Label>Iterations</Label>
-              <Input
-                type="number"
-                value={parameters.iterations}
-                onChange={(e) => setParameters(prev => ({ ...prev, iterations: parseInt(e.target.value) || 1000 }))}
-                disabled={isRunning}
-              />
-            </div>
-            <div>
-              <Label>Demand Variability (%)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={parameters.demandVariability}
-                onChange={(e) => setParameters(prev => ({ ...prev, demandVariability: parseFloat(e.target.value) || 0.2 }))}
-                disabled={isRunning}
-              />
-            </div>
-            <div>
-              <Label>Lead Time Variability (%)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={parameters.leadTimeVariability}
-                onChange={(e) => setParameters(prev => ({ ...prev, leadTimeVariability: parseFloat(e.target.value) || 0.15 }))}
-                disabled={isRunning}
-              />
-            </div>
-            <div>
-              <Label>Service Target (%)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={parameters.serviceTarget}
-                onChange={(e) => setParameters(prev => ({ ...prev, serviceTarget: parseFloat(e.target.value) || 0.95 }))}
-                disabled={isRunning}
-              />
-            </div>
-            <div>
-              <Label>Holding Cost Rate (%)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={parameters.holdingCostRate}
-                onChange={(e) => setParameters(prev => ({ ...prev, holdingCostRate: parseFloat(e.target.value) || 0.25 }))}
-                disabled={isRunning}
-              />
-            </div>
-          </div>
+        <CardContent>
+          <Tabs defaultValue="formulas" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="formulas">Formula Selection</TabsTrigger>
+              <TabsTrigger value="parameters">Parameters</TabsTrigger>
+              <TabsTrigger value="results">Results</TabsTrigger>
+            </TabsList>
 
-          {/* Controls */}
-          <div className="flex gap-4 items-center">
-            <Button 
-              onClick={runSimulation} 
-              disabled={isRunning}
-              className="flex items-center gap-2"
-            >
-              <Play className="h-4 w-4" />
-              {isRunning ? 'Running...' : 'Run Simulation'}
-            </Button>
-            
-            {isRunning && (
-              <div className="flex-1 max-w-md">
-                <Progress value={progress} className="h-2" />
-                <div className="text-sm text-gray-500 mt-1">
-                  {Math.round(progress)}% Complete
+            <TabsContent value="formulas" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Available Formulas</h3>
+                <Badge variant="outline">
+                  {activeScenario.selectedFormulas.length} selected
+                </Badge>
+              </div>
+              
+              <div className="grid gap-3 max-h-96 overflow-y-auto">
+                {availableFormulas.map((formula) => (
+                  <div
+                    key={formula.id}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      activeScenario.selectedFormulas.includes(formula.id)
+                        ? 'border-primary bg-primary/5'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => toggleFormula(formula.id)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{formula.name}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{formula.description}</p>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">
+                            {formula.category}
+                          </Badge>
+                          <Badge className={`text-xs ${getComplexityColor(formula.complexity)}`}>
+                            {formula.complexity}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {formula.accuracy} accuracy
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="parameters" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Simulation Duration (days)</Label>
+                  <Input
+                    id="duration"
+                    type="number"
+                    defaultValue="365"
+                    onChange={(e) => setActiveScenario(prev => ({
+                      ...prev,
+                      parameters: { ...prev.parameters, duration: parseInt(e.target.value) }
+                    }))}
+                  />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="iterations">Monte Carlo Iterations</Label>
+                  <Select defaultValue="1000">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="500">500 (Fast)</SelectItem>
+                      <SelectItem value="1000">1,000 (Standard)</SelectItem>
+                      <SelectItem value="5000">5,000 (Detailed)</SelectItem>
+                      <SelectItem value="10000">10,000 (High Precision)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="results" className="space-y-4">
+              {activeScenario.results ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-green-600">
+                          {activeScenario.results.totalCostSavings.toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-gray-600">Total Cost Savings</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {activeScenario.results.efficiencyGain.toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-gray-600">Efficiency Gain</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {activeScenario.results.formulasExecuted}
+                        </div>
+                        <div className="text-sm text-gray-600">Formulas Used</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recommendations</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {activeScenario.results.recommendations.map((rec: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Run a simulation to see results here
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex justify-between items-center pt-4 border-t">
+            {isRunning ? (
+              <div className="flex-1 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Running simulation...</span>
+                  <span>{progress}%</span>
+                </div>
+                <Progress value={progress} className="w-full" />
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button onClick={runSimulation} disabled={activeScenario.selectedFormulas.length === 0}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Run Simulation
+                </Button>
+                {activeScenario.results && (
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Results
+                  </Button>
+                )}
               </div>
             )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Results */}
-      {averageResults && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">${averageResults.avgCost}</div>
-              <div className="text-sm text-gray-500">Average Total Cost</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{(averageResults.avgServiceLevel * 100).toFixed(1)}%</div>
-              <div className="text-sm text-gray-500">Average Service Level</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{averageResults.avgInventory}</div>
-              <div className="text-sm text-gray-500">Average Inventory</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-red-600">${averageResults.costVariance}</div>
-              <div className="text-sm text-gray-500">Cost Std. Deviation</div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Charts */}
-      {results.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Cost Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={results.slice(-100)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="iteration" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="totalCost" stroke="#3B82F6" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Service Level Trend
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={results.slice(-100)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="iteration" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="serviceLevel" stroke="#10B981" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };

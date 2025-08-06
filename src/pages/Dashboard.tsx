@@ -61,31 +61,44 @@ const Dashboard = () => {
       try {
         setLoading(true);
         
-        // Fetch projects
-        const { data: projectsData, error: projectsError } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('updated_at', { ascending: false });
+        // Parallel data fetching for performance
+        const [projectsResult, optimizationResult, routeResult] = await Promise.all([
+          supabase
+            .from('projects')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('updated_at', { ascending: false })
+            .limit(10), // Limit for performance
+          
+          supabase
+            .from('optimization_results')
+            .select('cost_savings_percentage, created_at')
+            .eq('user_id', user.id)
+            .limit(50), // Limit for performance
+            
+          supabase
+            .from('route_optimization_results')
+            .select('cost_savings_percentage, created_at')
+            .eq('user_id', user.id)
+            .limit(50) // Limit for performance
+        ]);
 
-        if (projectsError) throw projectsError;
+        if (projectsResult.error) throw projectsResult.error;
+        if (optimizationResult.error) throw optimizationResult.error;
 
-        // Fetch optimization results for metrics
-        const { data: optimizationData, error: optimizationError } = await supabase
-          .from('optimization_results')
-          .select('cost_savings_percentage, created_at')
-          .eq('user_id', user.id);
-
-        if (optimizationError) throw optimizationError;
-
-        // Calculate real metrics
-        const totalSavings = optimizationData?.reduce((sum, result) => 
+        // Calculate metrics efficiently
+        const allOptimizations = [
+          ...(optimizationResult.data || []),
+          ...(routeResult.data || [])
+        ];
+        
+        const totalSavings = allOptimizations.reduce((sum, result) => 
           sum + (result.cost_savings_percentage || 0), 0) || 0;
 
-        setProjects(projectsData || []);
+        setProjects(projectsResult.data || []);
         setRealTimeMetrics({
-          totalProjects: projectsData?.length || 0,
-          activeOptimizations: projectsData?.filter(p => p.status === 'active').length || 0,
+          totalProjects: projectsResult.data?.length || 0,
+          activeOptimizations: projectsResult.data?.filter(p => p.status === 'active').length || 0,
           totalSavings: Math.round(totalSavings),
           systemHealth: 98
         });
