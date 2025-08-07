@@ -93,12 +93,12 @@ const Pricing = () => {
           <PricingTable tiers={pricingTiers} region="kenya" />
 
           {subscription && (
-            <div className="mt-8 bg-green-50 p-6 rounded-lg border border-green-200">
-              <h3 className="font-semibold mb-2 flex items-center text-green-800">
+            <div className="mt-8 bg-success/10 p-6 rounded-lg border border-success/20">
+              <h3 className="font-semibold mb-2 flex items-center text-success">
                 <Check className="h-5 w-5 mr-2" />
                 Current Subscription: {subscription.plan_tier.charAt(0).toUpperCase() + subscription.plan_tier.slice(1)}
               </h3>
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-success-foreground">
                 Your subscription is active and all features are available according to your plan.
               </p>
             </div>
