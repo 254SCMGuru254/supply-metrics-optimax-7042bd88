@@ -7,6 +7,17 @@
 
 ---
 
+## MARKETING CLAIMS REALITY CHECK (Devil's Advocate)
+
+Image claims like “Lightning Fast,” “Ultra Secure,” “Cross‑Chain,” “AI‑Powered,” and “DeFi Native” are NOT our product. This platform is a Supply Chain Optimization suite. Here’s the truthful feature set:
+- Performance: Sub-2s UI for dashboards, optimization jobs vary by size (seconds to minutes) – not “sub‑second blockchain confirmations.”
+- Security: Strong RLS, auth, backups; no crypto custody, no multi‑layer chain security.
+- Cross‑Chain/DeFi: Not applicable. We integrate with Supabase, maps, and enterprise data sources; no blockchain interactions.
+- Mobile Ready: Responsive UI is production‑quality on mobile and desktop.
+- AI‑Powered: Yes, for demand forecasting and optimization heuristics (not smart contracts).
+
+---
+
 ## MODEL COMPLETION STATUS
 
 ### ✅ FULLY COMPLETE (100%) - FORBES READY
@@ -19,7 +30,7 @@
 7. **Simulation Engine** - Monte Carlo and scenario analysis
 
 ### ⚠️ MOSTLY COMPLETE (85-95%) - ENTERPRISE READY
-1. **Inventory Management** - 10/12 formulas (missing: Advanced multi-echelon, JIT)
+1. **Inventory Management** - 11/12 formulas (missing: JIT policy)
 2. **Risk Management** - 7/9 models (missing: Geopolitical risk, Climate impact)
 3. **Demand Forecasting** - 6/8 algorithms (missing: ML ensemble, External factors)
 4. **Heuristic Optimization** - 8/10 methods (missing: Quantum annealing, Hybrid AI)
