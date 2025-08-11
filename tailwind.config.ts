@@ -45,12 +45,12 @@ export default {
           foreground: "hsl(var(--destructive-foreground))",
         },
         success: {
-          DEFAULT: "142 76% 36%",
-          foreground: "355 20% 99%",
+          DEFAULT: "hsl(142 76% 36%)",
+          foreground: "hsl(355 20% 99%)",
         },
         warning: {
-          DEFAULT: "48 96% 53%",
-          foreground: "26 83% 14%",
+          DEFAULT: "hsl(48 96% 53%)",
+          foreground: "hsl(26 83% 14%)",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
