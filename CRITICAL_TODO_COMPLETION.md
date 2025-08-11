@@ -30,7 +30,7 @@ Image claims like “Lightning Fast,” “Ultra Secure,” “Cross‑Chain,”
 7. **Simulation Engine** - Monte Carlo and scenario analysis
 
 ### ⚠️ MOSTLY COMPLETE (85-95%) - ENTERPRISE READY
-1. **Inventory Management** - 11/12 formulas (missing: JIT policy)
+1. **Inventory Management** - 12/12 formulas complete (EOQ, Safety Stock, ABC, Multi‑Echelon, JIT)
 2. **Risk Management** - 7/9 models (missing: Geopolitical risk, Climate impact)
 3. **Demand Forecasting** - 6/8 algorithms (missing: ML ensemble, External factors)
 4. **Heuristic Optimization** - 8/10 methods (missing: Quantum annealing, Hybrid AI)
@@ -114,7 +114,7 @@ Image claims like “Lightning Fast,” “Ultra Secure,” “Cross‑Chain,”
 ## COMPLETION TIMELINE
 
 ### IMMEDIATE (0-3 months) - Get to 85%
-- [ ] Complete all inventory formulas (JIT, Advanced multi-echelon)
+- [x] Completed all inventory formulas (JIT, Advanced multi-echelon)
 - [ ] Implement missing risk management models
 - [ ] Add enterprise pricing tiers
 - [ ] Create Fortune 500 demo environment

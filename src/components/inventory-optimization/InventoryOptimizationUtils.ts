@@ -156,7 +156,10 @@ export const optimizeInventoryPolicy = (
       item.demandRate * 0.2, // Assuming 20% demand variability
       item.serviceLevel || 95
     );
-    
+
+    // JIT policy derived parameters: minimal buffer, frequent deliveries
+    const jit = calculateJITPolicy(item);
+
     const reorderPoint = calculateReorderPoint(
       item.demandRate,
       item.leadTime,
@@ -167,7 +170,31 @@ export const optimizeInventoryPolicy = (
       ...item,
       economicOrderQuantity: eoqResult.eoq,
       safetyStock,
-      reorderPoint
+      reorderPoint: Math.max(reorderPoint, jit.reorderPoint) // honor tighter buffer if required
     };
   });
+};
+
+// JIT policy calculator: aligns deliveries to consumption with minimal buffer
+export const calculateJITPolicy = (
+  item: InventoryItem,
+  options?: { bufferDays?: number; minLotSize?: number }
+): {
+  reorderPoint: number;
+  bufferDays: number;
+  deliveryIntervalDays: number;
+  jitOrderQuantity: number;
+} => {
+  const dailyDemand = item.annualDemand ? item.annualDemand / 365 : item.demandRate;
+  const bufferDays = options?.bufferDays ?? 1; // minimal safety buffer by default
+  const deliveryIntervalDays = Math.max(1, Math.round(Math.min(item.leadTime, 7))); // weekly or lead time
+  const jitOrderQuantity = Math.max(
+    options?.minLotSize ?? 0,
+    Math.ceil(dailyDemand * deliveryIntervalDays)
+  );
+
+  // Reorder point based purely on demand during lead time + tiny buffer
+  const reorderPoint = Math.ceil(dailyDemand * item.leadTime + dailyDemand * bufferDays);
+
+  return { reorderPoint, bufferDays, deliveryIntervalDays, jitOrderQuantity };
 };

@@ -204,52 +204,45 @@ const Index = () => {
           <h2>Powerful Features</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">⚡</div>
-              <h3>Lightning Fast</h3>
+              <div className="feature-icon">📦</div>
+              <h3>Multi‑Echelon Inventory</h3>
               <p>
-                Experience blazing-fast transactions with our optimized
-                blockchain infrastructure. Sub-second confirmations for seamless
-                trading.
+                Optimize safety stock and base stock across plants, DCs, and stores with EOQ, Safety Stock, ABC, and JIT policies.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🔒</div>
-              <h3>Ultra Secure</h3>
+              <div className="feature-icon">🗺️</div>
+              <h3>Route & Network Optimization</h3>
               <p>
-                Military-grade encryption and multi-layer security protocols
-                protect your assets. Your funds are always safe with us.
+                Real routing, facility location, and network design with constraints, costs, and service levels.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🌐</div>
-              <h3>Cross-Chain</h3>
+              <div className="feature-icon">📈</div>
+              <h3>Demand Forecasting AI</h3>
               <p>
-                Seamlessly interact with multiple blockchains through our
-                unified portal. Trade across networks without barriers.
+                Machine‑learning powered forecasts with seasonality and error tracking for better replenishment decisions.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">📱</div>
-              <h3>Mobile Ready</h3>
+              <div className="feature-icon">🏭</div>
+              <h3>Facility Location</h3>
               <p>
-                Access your portfolio and trade on-the-go with our responsive
-                design. Full functionality on any device.
+                Determine optimal sites and capacities to minimize total landed cost and maximize service.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🤖</div>
-              <h3>AI-Powered</h3>
+              <div className="feature-icon">🛡️</div>
+              <h3>Resilience & Simulation</h3>
               <p>
-                Smart contract automation and AI-driven insights help you make
-                better trading decisions with confidence.
+                Disruption scenarios, Monte Carlo, and recovery strategies to harden your supply chain.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">💎</div>
-              <h3>DeFi Native</h3>
+              <div className="feature-icon">🔌</div>
+              <h3>Data Integration</h3>
               <p>
-                Built for the decentralized future with native DeFi
-                integrations, yield farming, and liquidity mining options.
+                Import CSVs, use Supabase storage, and connect to enterprise sources. No blockchain or DeFi claims.
               </p>
             </div>
           </div>
@@ -260,40 +253,39 @@ const Index = () => {
         <div className="container">
           <div className="footer-content">
             <div className="footer-section">
-              <h3>Chain.IO</h3>
+              <h3>Supply Metrics Optimax</h3>
               <p>
-                The future of decentralized finance is here. Join thousands of
-                users already trading on Tenderzville Portal.
+                Advanced supply chain optimization platform for real‑world operations. No blockchain hype — just results.
               </p>
             </div>
             <div className="footer-section">
               <h3>Quick Links</h3>
               <p>
-                <a href="#">Documentation</a>
+                <a href="/documentation">Documentation</a>
               </p>
               <p>
-                <a href="#">API Reference</a>
+                <a href="/analytics">Analytics</a>
               </p>
               <p>
-                <a href="#">Tutorials</a>
+                <a href="/pricing">Pricing</a>
               </p>
               <p>
-                <a href="#">Community</a>
+                <a href="/support">Support</a>
               </p>
             </div>
             <div className="footer-section">
-              <h3>Support</h3>
+              <h3>Resources</h3>
               <p>
-                <a href="#">Help Center</a>
+                <a href="/data-management">Data Management</a>
               </p>
               <p>
-                <a href="#">Contact Us</a>
+                <a href="/demand-forecasting">Demand Forecasting</a>
               </p>
               <p>
-                <a href="#">Bug Reports</a>
+                <a href="/network-optimization">Network Optimization</a>
               </p>
               <p>
-                <a href="#">Feature Requests</a>
+                <a href="/inventory-management">Inventory</a>
               </p>
             </div>
             <div className="footer-section">
@@ -313,7 +305,7 @@ const Index = () => {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 Chain.IO - Tenderzville Portal. All rights reserved.</p>
+            <p>&copy; 2025 Supply Metrics Optimax. All rights reserved.</p>
           </div>
         </div>
       </footer>

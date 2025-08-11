@@ -13,6 +13,7 @@ import { ColdChainOptimizer } from './ColdChainOptimizer';
 import { RetailSupplyChainOptimizer } from './RetailSupplyChainOptimizer';
 import { HorticulturalEOQCalculator } from './HorticulturalEOQCalculator';
 import { AdvancedEOQCalculators } from './AdvancedEOQCalculators';
+import { JITCalculator } from './JITCalculator';
 import { Package, Calculator, BarChart3, Activity, Store, Truck, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -238,12 +239,13 @@ const ComprehensiveInventoryManagement: React.FC<InventoryManagementProps> = ({ 
 
       {/* Main Inventory Management Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="eoq">EOQ</TabsTrigger>
           <TabsTrigger value="safety-stock">Safety Stock</TabsTrigger>
           <TabsTrigger value="abc-analysis">ABC Analysis</TabsTrigger>
           <TabsTrigger value="multi-echelon">Multi-Echelon</TabsTrigger>
+          <TabsTrigger value="jit">JIT</TabsTrigger>
           <TabsTrigger value="cold-chain">Cold Chain</TabsTrigger>
           <TabsTrigger value="retail">Retail</TabsTrigger>
           <TabsTrigger value="agriculture">Agriculture</TabsTrigger>
@@ -323,6 +325,10 @@ const ComprehensiveInventoryManagement: React.FC<InventoryManagementProps> = ({ 
 
         <TabsContent value="multi-echelon">
           <MultiEchelonVisualization />
+        </TabsContent>
+
+        <TabsContent value="jit">
+          <JITCalculator />
         </TabsContent>
 
         <TabsContent value="cold-chain">
