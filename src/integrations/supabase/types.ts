@@ -1697,6 +1697,23 @@ export type Database = {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
       }
+      calculate_eoq: {
+        Args: {
+          annual_demand: number
+          ordering_cost: number
+          holding_cost_rate: number
+          unit_cost: number
+        }
+        Returns: Json
+      }
+      calculate_safety_stock: {
+        Args: {
+          service_level: number
+          demand_std_dev: number
+          lead_time_days: number
+        }
+        Returns: number
+      }
       check_feature_access: {
         Args: { feature_name: string; current_usage?: number }
         Returns: {
@@ -1716,6 +1733,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
+      }
+      optimize_inventory_multi_echelon: {
+        Args: { inventory_data: Json }
+        Returns: Json
       }
       restore_model_backup: {
         Args: { backup_id: string }
