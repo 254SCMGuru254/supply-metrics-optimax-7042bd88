@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -304,6 +304,60 @@ export type Database = {
           longitude?: number
           name?: string
           service_level?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      facility_location_results: {
+        Row: {
+          capacitated_results: Json | null
+          cost_analysis: Json | null
+          created_at: string | null
+          demand_points: Json
+          facilities: Json
+          hub_location_results: Json | null
+          id: string
+          model_type: string
+          optimization_parameters: Json
+          optimization_results: Json
+          p_median_results: Json | null
+          project_id: string
+          selected_facilities: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          capacitated_results?: Json | null
+          cost_analysis?: Json | null
+          created_at?: string | null
+          demand_points?: Json
+          facilities?: Json
+          hub_location_results?: Json | null
+          id?: string
+          model_type: string
+          optimization_parameters?: Json
+          optimization_results?: Json
+          p_median_results?: Json | null
+          project_id: string
+          selected_facilities?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          capacitated_results?: Json | null
+          cost_analysis?: Json | null
+          created_at?: string | null
+          demand_points?: Json
+          facilities?: Json
+          hub_location_results?: Json | null
+          id?: string
+          model_type?: string
+          optimization_parameters?: Json
+          optimization_results?: Json
+          p_median_results?: Json | null
+          project_id?: string
+          selected_facilities?: Json | null
           updated_at?: string | null
           user_id?: string
         }
@@ -913,6 +967,54 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      risk_assessments: {
+        Row: {
+          assessment_results: Json
+          confidence_level: number | null
+          created_at: string | null
+          id: string
+          input_parameters: Json
+          monte_carlo_results: Json | null
+          project_id: string
+          risk_type: string
+          scenario_analysis: Json | null
+          supplier_risks: Json | null
+          updated_at: string | null
+          user_id: string
+          var_calculations: Json | null
+        }
+        Insert: {
+          assessment_results?: Json
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          input_parameters?: Json
+          monte_carlo_results?: Json | null
+          project_id: string
+          risk_type: string
+          scenario_analysis?: Json | null
+          supplier_risks?: Json | null
+          updated_at?: string | null
+          user_id: string
+          var_calculations?: Json | null
+        }
+        Update: {
+          assessment_results?: Json
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          input_parameters?: Json
+          monte_carlo_results?: Json | null
+          project_id?: string
+          risk_type?: string
+          scenario_analysis?: Json | null
+          supplier_risks?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          var_calculations?: Json | null
         }
         Relationships: []
       }
@@ -1694,33 +1796,33 @@ export type Database = {
         }[]
       }
       calculate_distance: {
-        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
       calculate_eoq: {
         Args: {
           annual_demand: number
-          ordering_cost: number
           holding_cost_rate: number
+          ordering_cost: number
           unit_cost: number
         }
         Returns: Json
       }
       calculate_safety_stock: {
         Args: {
-          service_level: number
           demand_std_dev: number
           lead_time_days: number
+          service_level: number
         }
         Returns: number
       }
       check_feature_access: {
-        Args: { feature_name: string; current_usage?: number }
+        Args: { current_usage?: number; feature_name: string }
         Returns: {
-          has_access: boolean
           current_plan: string
-          usage_limit: number
           current_usage_count: number
+          has_access: boolean
+          usage_limit: number
         }[]
       }
       create_daily_backup: {
@@ -1729,8 +1831,8 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
         }
         Returns: boolean
       }
