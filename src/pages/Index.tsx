@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import "../Landing.css";
-
 const Index = () => {
   useEffect(() => {
     // Create animated particles with full page coverage
@@ -10,7 +9,6 @@ const Index = () => {
 
       // Clear any existing particles
       particlesContainer.innerHTML = '';
-
       const particleCount = 80; // Increased for better coverage
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement("div");
@@ -24,14 +22,14 @@ const Index = () => {
     }
 
     // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener("click", function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute("href") as string);
         if (target) {
           target.scrollIntoView({
             behavior: "smooth",
-            block: "start",
+            block: "start"
           });
         }
       });
@@ -41,7 +39,6 @@ const Index = () => {
     function animateCounter(element: HTMLElement, target: number, duration = 2000) {
       let start = 0;
       const increment = target / (duration / 16);
-
       function updateCounter() {
         start += increment;
         if (start < target) {
@@ -53,110 +50,105 @@ const Index = () => {
       }
       updateCounter();
     }
-    
+
     // Animate stats when they come into view
-    const statsObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                const stat = entry.target as HTMLElement;
-                const value = stat.textContent || '';
-                if (value.includes('M+')) {
-                    const num = parseFloat(value) * 1000000;
-                    stat.dataset.suffix = 'M+';
-                    stat.textContent = '0';
-                    animateCounter(stat, num);
-                } else if (value.includes('K+')) {
-                    const num = parseFloat(value) * 1000;
-                    stat.dataset.suffix = 'K+';
-                    stat.textContent = '0';
-                    animateCounter(stat, num);
-                } else if (value.includes('%')) {
-                    const num = parseFloat(value);
-                    stat.dataset.suffix = '%';
-                    stat.textContent = '0%';
-                     let start = 0;
-                        const timer = setInterval(() => {
-                            start += 0.1;
-                            if (start >= num) {
-                                stat.textContent = value;
-                                clearInterval(timer);
-                            } else {
-                                stat.textContent = start.toFixed(1) + '%';
-                            }
-                        }, 20);
-                }
-                statsObserver.unobserve(stat);
-            }
-        });
-    }, { threshold: 0.5 });
-
-
-    document.querySelectorAll('.stat-number').forEach(stat => {
-        if(stat.textContent !== "24/7") {
-             statsObserver.observe(stat);
-        }
-    });
-
-
-    // Intersection Observer for feature cards
-    const cardObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+    const statsObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
-            const card = entry.target as HTMLElement;
-            card.style.opacity = "1";
-            card.style.transform = "translateY(0)";
-            cardObserver.unobserve(card);
+          const stat = entry.target as HTMLElement;
+          const value = stat.textContent || '';
+          if (value.includes('M+')) {
+            const num = parseFloat(value) * 1000000;
+            stat.dataset.suffix = 'M+';
+            stat.textContent = '0';
+            animateCounter(stat, num);
+          } else if (value.includes('K+')) {
+            const num = parseFloat(value) * 1000;
+            stat.dataset.suffix = 'K+';
+            stat.textContent = '0';
+            animateCounter(stat, num);
+          } else if (value.includes('%')) {
+            const num = parseFloat(value);
+            stat.dataset.suffix = '%';
+            stat.textContent = '0%';
+            let start = 0;
+            const timer = setInterval(() => {
+              start += 0.1;
+              if (start >= num) {
+                stat.textContent = value;
+                clearInterval(timer);
+              } else {
+                stat.textContent = start.toFixed(1) + '%';
+              }
+            }, 20);
+          }
+          statsObserver.unobserve(stat);
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    }, {
+      threshold: 0.5
+    });
+    document.querySelectorAll('.stat-number').forEach(stat => {
+      if (stat.textContent !== "24/7") {
+        statsObserver.observe(stat);
+      }
+    });
 
+    // Intersection Observer for feature cards
+    const cardObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const card = entry.target as HTMLElement;
+          card.style.opacity = "1";
+          card.style.transform = "translateY(0)";
+          cardObserver.unobserve(card);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
     document.querySelectorAll('.feature-card').forEach(card => {
-        const htmlCard = card as HTMLElement;
-        htmlCard.style.opacity = '0';
-        htmlCard.style.transform = 'translateY(50px)';
-        htmlCard.style.transition = 'all 0.6s ease';
-        cardObserver.observe(card);
+      const htmlCard = card as HTMLElement;
+      htmlCard.style.opacity = '0';
+      htmlCard.style.transform = 'translateY(50px)';
+      htmlCard.style.transition = 'all 0.6s ease';
+      cardObserver.observe(card);
     });
 
     // Dynamic glow effect for hero title
     const heroTitle = document.querySelector('.hero h1') as HTMLElement;
     let glowIntensity = 0;
     let glowDirection = 1;
-
     const glowInterval = setInterval(() => {
-        glowIntensity += glowDirection * 0.02;
-        if (glowIntensity >= 1) glowDirection = -1;
-        if (glowIntensity <= 0) glowDirection = 1;
-        
-        const glowValue = 20 + (glowIntensity * 20);
-        if(heroTitle) {
-            heroTitle.style.filter = `drop-shadow(0 0 ${glowValue}px rgba(0, 212, 255, ${0.3 + glowIntensity * 0.3}))`;
-        }
+      glowIntensity += glowDirection * 0.02;
+      if (glowIntensity >= 1) glowDirection = -1;
+      if (glowIntensity <= 0) glowDirection = 1;
+      const glowValue = 20 + glowIntensity * 20;
+      if (heroTitle) {
+        heroTitle.style.filter = `drop-shadow(0 0 ${glowValue}px rgba(0, 212, 255, ${0.3 + glowIntensity * 0.3}))`;
+      }
     }, 50);
-
 
     // Initial setup
     createParticles();
 
     // Cleanup function
     return () => {
-        clearInterval(glowInterval);
-        statsObserver.disconnect();
-        cardObserver.disconnect();
-        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-             anchor.removeEventListener("click", () => {});
-        });
-    }
-
+      clearInterval(glowInterval);
+      statsObserver.disconnect();
+      cardObserver.disconnect();
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.removeEventListener("click", () => {});
+      });
+    };
   }, []);
-
-  return (
-    <>
+  return <>
       <div className="particles fixed inset-0 w-full h-full z-0" id="particles"></div>
       <header className="relative z-10">
         <div className="container">
           <nav>
-            <div className="logo">Supply Metrics Optimax</div>
+            <div className="logo">Chain.io</div>
             <ul className="nav-links">
               <li><a href="#features">Features</a></li>
               <li><a href="/analytics">Analytics</a></li>
@@ -309,8 +301,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </>
-  );
+    </>;
 };
-
 export default Index;
