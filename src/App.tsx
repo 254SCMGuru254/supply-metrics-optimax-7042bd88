@@ -38,7 +38,8 @@ import Support from "./pages/Support";
 import ChatAssistant from "./pages/ChatAssistant";
 import DesignAssistant from "./pages/DesignAssistant";
 import NotFound from "./pages/NotFound";
-
+import FacilityLocation from "./pages/FacilityLocation";
+import RiskManagement from "./pages/RiskManagement";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,11 @@ const App = () => (
               <Route path="/fleet-management" element={<FleetManagement />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
+              <Route path="/analytics-dashboard/:projectId" element={<AnalyticsDashboard />} />
+              <Route path="/facility-location" element={<FacilityLocation />} />
+              <Route path="/facility-location/:projectId" element={<FacilityLocation />} />
+              <Route path="/risk-management" element={<RiskManagement />} />
+              <Route path="/risk-management/:projectId" element={<RiskManagement />} />
               <Route path="/business-value" element={<BusinessValue />} />
               <Route path="/horticultural-optimization" element={<HorticulturalOptimization />} />
               <Route path="/kenya-supply-chain" element={<KenyaSupplyChain />} />
