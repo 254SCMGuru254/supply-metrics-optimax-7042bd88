@@ -281,7 +281,7 @@ const Index = () => {
               </p>
             </div>
             <div className="footer-section">
-              <h3>Legal</h3>
+              <h3>2025 Chain.io . All rights reserved.</h3>
               <p>
                 <a href="#">Privacy Policy</a>
               </p>
