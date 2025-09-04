@@ -289,7 +289,7 @@ const Index = () => {
                 <a href="#">Terms of Service</a>
               </p>
               <p>
-                <a href="#">Cookie Policy</a>
+                <a href="#">2025 Chain.io Metrics Optimax. All rights reserved.</a>
               </p>
               <p>
                 <a href="#">Compliance</a>
