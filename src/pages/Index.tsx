@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import "../Landing.css";
 const Index = () => {
   useEffect(() => {
@@ -143,6 +144,29 @@ const Index = () => {
       });
     };
   }, []);
+  const handleLeadSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const payload = {
+      role: data.get('role') as string,
+      industry: data.get('industry') as string,
+      challenge: data.get('challenge') as string,
+      company_size: data.get('company_size') as string,
+      email: data.get('email') as string,
+      source: 'landing',
+      meta: {}
+    };
+    try {
+      const { error } = await supabase.from('leads').insert(payload);
+      if (error) throw error;
+      alert('Thanks! We will send your personalized optimization roadmap shortly.');
+      form.reset();
+    } catch (err) {
+      console.error('Lead submission failed', err);
+      alert('Submission failed. Please try again.');
+    }
+  };
   return <>
       <div className="particles fixed inset-0 w-full h-full z-0" id="particles"></div>
       <header className="relative z-10">
@@ -175,8 +199,8 @@ const Index = () => {
 
           <div className="stats">
             <div className="stat-item">
-              <span className="stat-number">28+</span>
-              <span className="stat-label">Advanced Models</span>
+              <span className="stat-number">50+</span>
+              <span className="stat-label">Models & Formulas</span>
             </div>
             <div className="stat-item">
               <span className="stat-number">98%</span>
@@ -212,13 +236,13 @@ const Index = () => {
             boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
             border: '1px solid #e2e8f0'
           }}>
-            <form id="assessment-form" style={{display: 'grid', gap: '1.5rem'}}>
+            <form id="assessment-form" onSubmit={handleLeadSubmit} style={{display: 'grid', gap: '1.5rem'}}>
               <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                 <div>
                   <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
                     What's your role? *
                   </label>
-                  <select style={{
+                  <select name="role" style={{
                     width: '100%', 
                     padding: '0.75rem', 
                     border: '2px solid #e5e7eb', 
@@ -240,7 +264,7 @@ const Index = () => {
                   <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
                     Industry/Sector *
                   </label>
-                  <select style={{
+                  <select name="industry" style={{
                     width: '100%', 
                     padding: '0.75rem', 
                     border: '2px solid #e5e7eb', 
@@ -263,7 +287,7 @@ const Index = () => {
                 <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
                   What's your biggest supply chain challenge? *
                 </label>
-                <select style={{
+                <select name="challenge" style={{
                   width: '100%', 
                   padding: '0.75rem', 
                   border: '2px solid #e5e7eb', 
@@ -287,7 +311,7 @@ const Index = () => {
                   <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
                     Company size
                   </label>
-                  <select style={{
+                  <select name="company_size" style={{
                     width: '100%', 
                     padding: '0.75rem', 
                     border: '2px solid #e5e7eb', 
@@ -307,6 +331,7 @@ const Index = () => {
                     Email address *
                   </label>
                   <input 
+                    name="email"
                     type="email" 
                     style={{
                       width: '100%', 
