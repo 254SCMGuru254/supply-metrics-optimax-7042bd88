@@ -175,37 +175,194 @@ const Index = () => {
 
           <div className="stats">
             <div className="stat-item">
-              <span className="stat-number">15+</span>
-              <span className="stat-label">Proven Models</span>
+              <span className="stat-number">28+</span>
+              <span className="stat-label">Advanced Models</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">10K+</span>
-              <span className="stat-label">Real Data Points</span>
+              <span className="stat-number">98%</span>
+              <span className="stat-label">Calculation Accuracy</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">85%</span>
-              <span className="stat-label">Avg Cost Savings</span>
+              <span className="stat-number">60%</span>
+              <span className="stat-label">Avg Cost Reduction</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">Open</span>
-              <span className="stat-label">Source Core</span>
+              <span className="stat-number">Enterprise</span>
+              <span className="stat-label">Grade Security</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{padding: '3rem 0', backgroundColor: '#f1f5f9'}}>
+        <div className="container" style={{maxWidth: '800px', margin: '0 auto'}}>
+          <div style={{textAlign: 'center', marginBottom: '2rem'}}>
+            <h2 style={{fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem'}}>
+              Get Your Free Supply Chain Assessment
+            </h2>
+            <p style={{fontSize: '1.1rem', color: '#666', marginBottom: '2rem'}}>
+              Tell us about your supply chain challenges and get a personalized optimization roadmap in 2 minutes.
+            </p>
+          </div>
+          
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '2rem', 
+            borderRadius: '12px', 
+            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <form id="assessment-form" style={{display: 'grid', gap: '1.5rem'}}>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
+                <div>
+                  <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
+                    What's your role? *
+                  </label>
+                  <select style={{
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    border: '2px solid #e5e7eb', 
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }} required>
+                    <option value="">Select your role</option>
+                    <option value="ceo">CEO/Executive</option>
+                    <option value="supply-chain">Supply Chain Manager</option>
+                    <option value="consultant">Supply Chain Consultant</option>
+                    <option value="farmer">Farmer/Cooperative</option>
+                    <option value="operations">Operations Manager</option>
+                    <option value="analyst">Business Analyst</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
+                    Industry/Sector *
+                  </label>
+                  <select style={{
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    border: '2px solid #e5e7eb', 
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }} required>
+                    <option value="">Select industry</option>
+                    <option value="agriculture">Agriculture (Tea, Coffee, Horticulture)</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="retail">Retail/FMCG</option>
+                    <option value="mining">Mining & Heavy Industry</option>
+                    <option value="logistics">Logistics & Transportation</option>
+                    <option value="consulting">Supply Chain Consulting</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
+                  What's your biggest supply chain challenge? *
+                </label>
+                <select style={{
+                  width: '100%', 
+                  padding: '0.75rem', 
+                  border: '2px solid #e5e7eb', 
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }} required>
+                  <option value="">Select primary challenge</option>
+                  <option value="inventory">High inventory costs / Stockouts</option>
+                  <option value="routes">Transportation & delivery optimization</option>
+                  <option value="facilities">Warehouse/facility location planning</option>
+                  <option value="demand">Demand forecasting accuracy</option>
+                  <option value="costs">Overall cost reduction</option>
+                  <option value="risk">Supply chain risk management</option>
+                  <option value="visibility">Lack of supply chain visibility</option>
+                  <option value="multiple">Multiple challenges</option>
+                </select>
+              </div>
+
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
+                <div>
+                  <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
+                    Company size
+                  </label>
+                  <select style={{
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    border: '2px solid #e5e7eb', 
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}>
+                    <option value="">Select size</option>
+                    <option value="small">Small (1-50 employees)</option>
+                    <option value="medium">Medium (51-500 employees)</option>
+                    <option value="large">Large (500+ employees)</option>
+                    <option value="consultant">I'm a consultant</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label style={{fontWeight: '600', fontSize: '0.9rem', color: '#374151', marginBottom: '0.5rem', display: 'block'}}>
+                    Email address *
+                  </label>
+                  <input 
+                    type="email" 
+                    style={{
+                      width: '100%', 
+                      padding: '0.75rem', 
+                      border: '2px solid #e5e7eb', 
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }} 
+                    placeholder="your@email.com"
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div style={{textAlign: 'center', marginTop: '1rem'}}>
+                <button 
+                  type="submit" 
+                  style={{
+                    backgroundColor: '#059669',
+                    color: 'white',
+                    padding: '1rem 2rem',
+                    borderRadius: '8px',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
+                  }}
+                  onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#047857'}
+                  onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#059669'}
+                >
+                  🚀 Get My Free Assessment & Optimization Roadmap
+                </button>
+                
+                <p style={{fontSize: '0.8rem', color: '#6b7280', marginTop: '1rem'}}>
+                  ✓ Personalized recommendations in 2 minutes ✓ No spam, unsubscribe anytime ✓ Free forever
+                </p>
+              </div>
+            </form>
           </div>
         </div>
       </section>
 
       <section className="features" id="features">
         <div className="container">
-          <h2>Python-Powered Optimization Engine</h2>
+          <h2>Advanced Mathematical Optimization Engine</h2>
           <p style={{textAlign: 'center', marginBottom: '2rem', color: '#666'}}>
-            Built with industry-standard libraries: PuLP, SciPy, NumPy, NetworkX, Gurobi, OR-Tools
+            Powered by proven algorithms: Linear Programming, Heuristics, AI/ML, Monte Carlo Simulation
           </p>
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">🏭</div>
               <h3>Multi‑Echelon Inventory</h3>
               <p>
-                <strong>How:</strong> EOQ, Safety Stock, ABC, JIT algorithms with PuLP optimization<br/>
+                <strong>How:</strong> EOQ, Safety Stock, ABC, JIT algorithms with advanced optimization<br/>
                 <strong>When:</strong> Managing 3+ warehouse tiers, seasonal demand<br/>
                 <strong>Why:</strong> Reduces inventory costs by 25-40% while maintaining service levels
               </p>
@@ -214,7 +371,7 @@ const Index = () => {
               <div className="feature-icon">🗺️</div>
               <h3>Network Optimization</h3>
               <p>
-                <strong>How:</strong> Minimum cost flow, P-median algorithms via NetworkX<br/>
+                <strong>How:</strong> Minimum cost flow, P-median algorithms with mathematical programming<br/>
                 <strong>When:</strong> Designing distribution networks, opening new facilities<br/>
                 <strong>Why:</strong> Optimizes total landed costs, improves delivery times by 30%
               </p>
@@ -223,7 +380,7 @@ const Index = () => {
               <div className="feature-icon">📈</div>
               <h3>AI Demand Forecasting</h3>
               <p>
-                <strong>How:</strong> Prophet, ARIMA, LSTM models with scikit-learn<br/>
+                <strong>How:</strong> Prophet, ARIMA, LSTM models with machine learning<br/>
                 <strong>When:</strong> Volatile demand, seasonal products, new market entry<br/>
                 <strong>Why:</strong> Reduces forecast error by 45%, prevents stockouts
               </p>
@@ -232,7 +389,7 @@ const Index = () => {
               <div className="feature-icon">🚛</div>
               <h3>Route Optimization</h3>
               <p>
-                <strong>How:</strong> Vehicle routing, TSP algorithms with OR-Tools<br/>
+                <strong>How:</strong> Vehicle routing, TSP algorithms with advanced heuristics<br/>
                 <strong>When:</strong> Last-mile delivery, field service routing<br/>
                 <strong>Why:</strong> Cuts transportation costs by 20-35%, improves efficiency
               </p>
@@ -241,7 +398,7 @@ const Index = () => {
               <div className="feature-icon">⚠️</div>
               <h3>Risk & Simulation</h3>
               <p>
-                <strong>How:</strong> Monte Carlo simulation, VaR calculations with SciPy<br/>
+                <strong>How:</strong> Monte Carlo simulation, VaR calculations with advanced analytics<br/>
                 <strong>When:</strong> Supply chain disruptions, scenario planning<br/>
                 <strong>Why:</strong> Quantifies risk exposure, builds resilient networks
               </p>
@@ -250,7 +407,7 @@ const Index = () => {
               <div className="feature-icon">📊</div>
               <h3>Real-Time Analytics</h3>
               <p>
-                <strong>How:</strong> Matplotlib visualizations, live dashboards<br/>
+                <strong>How:</strong> Interactive visualizations, real-time dashboards<br/>
                 <strong>When:</strong> Daily operations, performance monitoring<br/>
                 <strong>Why:</strong> Provides actionable insights, tracks KPI performance
               </p>
