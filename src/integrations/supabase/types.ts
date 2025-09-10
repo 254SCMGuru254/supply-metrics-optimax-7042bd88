@@ -685,6 +685,45 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          challenge: string
+          company_size: string | null
+          created_at: string
+          email: string
+          id: string
+          industry: string
+          meta: Json | null
+          role: string
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          challenge: string
+          company_size?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          industry: string
+          meta?: Json | null
+          role: string
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          challenge?: string
+          company_size?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string
+          meta?: Json | null
+          role?: string
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       model_backups: {
         Row: {
           backup_path: string | null

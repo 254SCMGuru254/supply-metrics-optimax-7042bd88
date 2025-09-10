@@ -199,7 +199,7 @@ const Index = () => {
 
           <div className="stats">
             <div className="stat-item">
-              <span className="stat-number">50+</span>
+              <span className="stat-number">86+</span>
               <span className="stat-label">Models & Formulas</span>
             </div>
             <div className="stat-item">

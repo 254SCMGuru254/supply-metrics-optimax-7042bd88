@@ -44,6 +44,10 @@ import facilityLocation from "./model-formulas/facilityLocation";
 import riskManagement from "./model-formulas/riskManagement";
 import costModeling from "./model-formulas/costModeling";
 import fleetManagement from "./model-formulas/fleetManagement";
+import demandForecasting from "./model-formulas/demandForecasting";
+import sustainabilityOptimization from "./model-formulas/sustainabilityOptimization";
+import qualityManagement from "./model-formulas/qualityManagement";
+import supplierManagement from "./model-formulas/supplierManagement";
 
 // Registry export
 export const modelFormulaRegistry: SupplyChainModel[] = [
@@ -57,4 +61,8 @@ export const modelFormulaRegistry: SupplyChainModel[] = [
   riskManagement,
   costModeling,
   fleetManagement,
+  demandForecasting,
+  sustainabilityOptimization,
+  qualityManagement,
+  supplierManagement,
 ];
