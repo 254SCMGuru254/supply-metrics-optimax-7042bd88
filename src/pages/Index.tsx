@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import "../Landing.css";
+import FloatingChatbot from "@/components/chatbot/FloatingChatbot";
 const Index = () => {
   useEffect(() => {
     // Create animated particles with full page coverage
@@ -563,6 +564,7 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      <FloatingChatbot />
     </>;
 };
 export default Index;

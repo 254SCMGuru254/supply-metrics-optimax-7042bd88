@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { 
   MapPin, 
   Package, 
@@ -56,7 +56,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!user) return;
+      if (!user) { setLoading(false); return; }
 
       try {
         setLoading(true);
@@ -112,6 +112,10 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, [user]);
+
+  if (!user) {
+    return <Navigate to="/auth" replace state={{ redirectTo: "/dashboard" }} />;
+  }
 
   const recentAnalytics = [
     { metric: 'Total Projects', value: realTimeMetrics.totalProjects.toString(), trend: 'up' },
