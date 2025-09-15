@@ -7,24 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import {
-<<<<<<< Updated upstream
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  User,
-  Star,
-  Sparkles,
-  Zap
-} from '@/utils/iconImports';
-import {
-  Users,
-  TrendingUp,
-=======
   Users,
   TrendingUp,
   User,
->>>>>>> Stashed changes
   Shield,
   BarChart3,
   Globe

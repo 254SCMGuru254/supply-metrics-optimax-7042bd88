@@ -3,15 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   Send,
-<<<<<<< Updated upstream
-  Clipboard
-} from '@/utils/iconImports';
-import {
-  MessageSquare
-=======
   MessageSquare,
   FileText
->>>>>>> Stashed changes
 } from 'lucide-react';
 
 const ChatAssistant = () => {

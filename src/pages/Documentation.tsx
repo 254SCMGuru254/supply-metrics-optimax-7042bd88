@@ -7,14 +7,7 @@ import {
   Settings,
   Play,
   Download,
-<<<<<<< Updated upstream
-  ExternalLink,
-  Settings
-} from '@/utils/iconImports';
-import {
-=======
   Settings as SettingsIcon,
->>>>>>> Stashed changes
   Lightbulb
 } from 'lucide-react';
 

@@ -7,15 +7,9 @@ import {
   Settings,
   Users,
   BookOpen,
-<<<<<<< Updated upstream
-  ExternalLink,
-  Video
-} from '@/utils/iconImports';
-=======
   Globe,
   FileText
 } from 'lucide-react';
->>>>>>> Stashed changes
 
 const Support = () => {
   return (
