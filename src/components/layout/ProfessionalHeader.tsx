@@ -11,7 +11,7 @@ const ProfessionalHeader = () => {
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16">
           <Link to="/" className="font-bold text-xl text-primary">
-            Supply Metrics Optimax
+            Chain.io
           </Link>
           
           {/* Desktop Navigation */}

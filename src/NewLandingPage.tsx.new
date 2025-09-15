@@ -1,8 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from 'react-router-dom';
 import { 
   TrendingUp, 
   BarChart3, 
@@ -17,42 +16,49 @@ import {
   Globe,
   Settings,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ProfessionalHeader from '@/components/layout/ProfessionalHeader';
 import { ProfessionalFooter } from '@/components/layout/ProfessionalFooter';
 import ComprehensiveQuestionnaire from '@/components/home/ComprehensiveQuestionnaire';
 
-export default function NewLandingPage() {
+const NewLandingPage = () => {
   const features = [
     {
       icon: <BarChart3 className="h-8 w-8" />,
-      title: "Inventory Control",
-      description: "Turn your stock challenges into success - whether you're managing a small shop or large warehouse. Free up money in excess stock (KES 50K to 10M+). Never disappoint customers with stockouts. Perfect for any business selling 5 to 5000+ items."
+      title: "Advanced Analytics",
+      description: "Real-time insights with 40+ optimization models including Center of Gravity, MILP, and Network Flow algorithms."
     },
     {
       icon: <MapPin className="h-8 w-8" />,
-      title: "Route Efficiency",
-      description: "Optimize any delivery operation - from single boda-boda to multiple trucks. Save 30-40% on fuel whether you make 5 or 500 deliveries. Turn chaotic routes into efficient trips. Perfect for businesses making daily deliveries or occasional drop-offs."
+      title: "Interactive Maps",
+      description: "Visualize your supply chain with OpenStreetMap integration, route optimization, and facility location planning."
     },
     {
       icon: <Activity className="h-8 w-8" />,
-      title: "Demand Prediction",
-      description: "Know exactly what your customers want - from corner shop to distribution center. Stop guessing order quantities. Perfect for businesses managing 10 to 10,000 products. Turn confusing sales patterns into clear stocking decisions."
+      title: "AI-Powered Optimization",
+      description: "Machine learning algorithms for demand forecasting, inventory optimization, and predictive analytics."
     },
     {
       icon: <Shield className="h-8 w-8" />,
-      title: "Loss Prevention",
-      description: "Stop losing money on expired products - from small shops to large warehouses. Cut waste by 50-70% whether you're handling fresh produce or packaged goods. Perfect for any business wanting to protect their investment and reduce losses."
+      title: "Enterprise Security",
+      description: "Bank-grade security with role-based access control and comprehensive audit trails."
     },
     {
       icon: <Users className="h-8 w-8" />,
-      title: "Team Performance",
-      description: "Simplify your work - from solo business owners to large teams. Replace paperwork with quick mobile updates. Get WhatsApp alerts for important changes. Perfect for anyone managing inventory, whether alone or with staff."
+      title: "Collaborative Platform",
+      description: "Multi-user environment with project management and real-time collaboration features."
     },
     {
       icon: <Globe className="h-8 w-8" />,
-      title: "Market Impact",
-      description: "Grow your business confidently - from your first 10 customers to 1000+. Build reliable relationships with suppliers and customers. Perfect for new startups and established businesses looking to expand their market reach."
+      title: "Kenya-Focused Solutions",
+      description: "Specialized features for tea, coffee, floriculture, and other key Kenyan industries."
     }
+  ];
+
+  const models = [
+    "Center of Gravity", "Route Optimization", "Network Flow", "MILP", "Facility Location",
+    "Inventory Management", "Demand Forecasting", "Cost Modeling", "Fleet Management",
+    "Simulation Engine", "Heuristic Algorithms", "Risk Management"
   ];
 
   const testimonials = [
@@ -65,7 +71,7 @@ export default function NewLandingPage() {
     },
     {
       name: "David Chen",
-      role: "Operations Manager", 
+      role: "Operations Manager",
       company: "East Africa Logistics",
       content: "The Kenya-specific features helped us optimize our tea supply chain across 50+ collection centers.",
       rating: 5
@@ -107,12 +113,12 @@ export default function NewLandingPage() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#assessment" className="no-underline">
+                <Link to="/dashboard">
                   <Button size="lg" className="px-8 py-4 text-lg bg-[#0067b9] hover:bg-[#005296] text-white">
-                    Get Started
+                    Start Free Trial
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
-                </a>
+                </Link>
                 
                 <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-2 border-[#0067b9] text-[#0067b9] hover:bg-[#f8f9fa]">
                   <Play className="mr-2 h-5 w-5" />
@@ -167,25 +173,6 @@ export default function NewLandingPage() {
         </div>
       </section>
 
-      {/* Assessment Form Section - Moved up for better user guidance */}
-      <section id="assessment" className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 px-4 py-2 bg-blue-100 text-blue-800 border-0">
-              Get Started
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1a1f2f] mb-4">
-              Find Your Perfect Solution
-            </h2>
-            <p className="text-xl text-[#475467] max-w-3xl mx-auto">
-              Answer a few questions about your business and get instant recommendations 
-              tailored to your specific supply chain challenges.
-            </p>
-          </div>
-        </div>
-        <ComprehensiveQuestionnaire />
-      </section>
-
       {/* Features Section */}
       <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -201,19 +188,103 @@ export default function NewLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="group hover:shadow-lg transition-all duration-300 border border-[#e5e7eb] rounded-lg">
-                <div className="p-6">
+                <CardHeader className="pb-4">
                   <div className="w-12 h-12 bg-[#f8f9fa] rounded-lg flex items-center justify-center mb-4">
                     <div className="text-[#0067b9]">
                       {feature.icon}
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-[#1a1f2f] mb-2">{feature.title}</h3>
-                  <p className="text-[#475467] leading-relaxed">
+                  <CardTitle className="text-xl font-semibold text-[#1a1f2f]">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-[#475467] leading-relaxed">
                     {feature.description}
-                  </p>
-                </div>
+                  </CardDescription>
+                </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Models Section */}
+      <section id="models" className="py-20 bg-[#f8f9fa]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1a1f2f] mb-4">
+              Real-World Applications
+            </h2>
+            <p className="text-xl text-[#475467] max-w-3xl mx-auto">
+              How leading Kenyan businesses are transforming their operations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="p-6 bg-white rounded-lg border border-[#e5e7eb] hover:shadow-lg transition-all duration-300">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-[#1a1f2f] mb-2">Center of Gravity Analysis</h3>
+                <p className="text-[#475467] mb-2">Strategic Location Planning</p>
+                <ul className="list-disc pl-5 mt-2 space-y-1 text-[#475467]">
+                  <li>Optimal warehouse placement</li>
+                  <li>Distribution center network design</li>
+                  <li>Hub location optimization</li>
+                  <li>Service area balancing</li>
+                </ul>
+                <p className="mt-3 text-[#475467]">Output Areas:</p>
+                <ul className="list-disc pl-5 mt-1 space-y-1 text-[#475467]">
+                  <li>Geographical coordinates for facilities</li>
+                  <li>Service radius recommendations</li>
+                  <li>Cost-distance analysis</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg border border-[#e5e7eb] hover:shadow-lg transition-all duration-300">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-[#1a1f2f] mb-2">Network Flow Optimization</h3>
+                <p className="text-[#475467] mb-2">Resource Distribution Management</p>
+                <ul className="list-disc pl-5 mt-2 space-y-1 text-[#475467]">
+                  <li>Supply chain network design</li>
+                  <li>Multi-point distribution planning</li>
+                  <li>Capacity utilization</li>
+                  <li>Flow balancing across nodes</li>
+                </ul>
+                <p className="mt-3 text-[#475467]">Output Areas:</p>
+                <ul className="list-disc pl-5 mt-1 space-y-1 text-[#475467]">
+                  <li>Optimal flow paths</li>
+                  <li>Node capacity requirements</li>
+                  <li>Network bottleneck analysis</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg border border-[#e5e7eb] hover:shadow-lg transition-all duration-300">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-[#1a1f2f] mb-2">MILP Optimization</h3>
+                <p className="text-[#475467] mb-2">Complex Decision Making</p>
+                <ul className="list-disc pl-5 mt-2 space-y-1 text-[#475467]">
+                  <li>Resource allocation</li>
+                  <li>Production scheduling</li>
+                  <li>Multi-facility planning</li>
+                  <li>Investment decisions</li>
+                </ul>
+                <p className="mt-3 text-[#475467]">Output Areas:</p>
+                <ul className="list-disc pl-5 mt-1 space-y-1 text-[#475467]">
+                  <li>Optimal resource distribution</li>
+                  <li>Schedule optimization</li>
+                  <li>Cost-benefit scenarios</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to="/documentation">
+              <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2">
+                View All Models
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -252,6 +323,9 @@ export default function NewLandingPage() {
         </div>
       </section>
 
+      {/* Assessment Form Section */}
+      <ComprehensiveQuestionnaire />
+
       {/* CTA Section */}
       <section className="py-20 bg-[#0067b9]">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -282,4 +356,6 @@ export default function NewLandingPage() {
       <ProfessionalFooter />
     </div>
   );
-}
+};
+
+export default NewLandingPage;

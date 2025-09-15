@@ -16,10 +16,9 @@ export const ProfessionalFooter = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-foreground">Supply Metrics Optimax</h3>
+            <h3 className="text-lg font-bold text-foreground">Chain.io</h3>
             <p className="text-muted-foreground text-sm">
-              Advanced supply chain optimization platform for East Africa, 
-              providing cutting-edge analytics and AI-driven solutions.
+              Your strategic partner in transforming supply chain challenges into competitive advantages for East African businesses.
             </p>
             <div className="flex space-x-2">
               <Button size="sm" variant="outline">

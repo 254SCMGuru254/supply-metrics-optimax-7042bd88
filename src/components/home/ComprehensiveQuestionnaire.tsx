@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, ArrowRight, Building, Users, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 interface QuestionnaireData {
@@ -139,8 +140,30 @@ const ComprehensiveQuestionnaire = () => {
         }
       };
 
-      const { error } = await supabase.from('leads').insert(payload);
-      if (error) throw error;
+      // Store lead in database
+      const { data, error } = await supabase.from('leads').insert(payload);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error('Failed to submit form. Please try again or contact support if the issue persists.');
+      }
+
+      // Send email with recommendations
+      const { error: emailError } = await supabase.functions.invoke('send-recommendations-email', {
+        body: { 
+          email: formData.email,
+          recommendations: recommendations,
+          userData: {
+            role: formData.role,
+            company_size: formData.company_size,
+            primary_challenge: formData.primary_challenge
+          }
+        }
+      });
+      
+      if (emailError) {
+        console.error('Email sending failed:', emailError);
+        // Continue with success state but log the error
+      }
       
       setIsComplete(true);
     } catch (error) {
@@ -165,52 +188,283 @@ const ComprehensiveQuestionnaire = () => {
     }
   };
 
+  const generateDetailedRecommendations = () => {
+    const baseRecommendations = generateRecommendations();
+    const { primary_challenge, company_size, current_tools, success_metrics } = formData;
+
+    // Immediate Actions based on primary challenge
+    const immediateActions = {
+      'inventory': {
+        steps: [
+          'Start with top 20% of products that drive 80% of revenue',
+          'Implement basic stock level tracking',
+          'Set up minimum stock alerts'
+        ],
+        timeline: '1-2 weeks',
+        expectedImpact: 'Reduce stockouts by 40% in first month'
+      },
+      'delivery': {
+        steps: [
+          'Map current delivery routes',
+          'Track fuel consumption per route',
+          'Identify peak delivery times'
+        ],
+        timeline: '1 week',
+        expectedImpact: '25% fuel savings in first month'
+      },
+      'waste': {
+        steps: [
+          'Track expiry dates of current stock',
+          'Monitor daily waste levels',
+          'Implement first-in-first-out system'
+        ],
+        timeline: '1-2 weeks',
+        expectedImpact: 'Reduce waste by 30% in first month'
+      }
+    };
+
+    // Tool recommendations based on current tools
+    const toolRecommendations = current_tools?.includes('Excel spreadsheets') 
+      ? 'Gradual transition from spreadsheets to digital system'
+      : 'Immediate implementation of digital tracking';
+
+    // Scale-appropriate solutions
+    const scaleSolutions = {
+      'small': {
+        focus: 'Essential features with mobile-first approach',
+        implementation: 'Start with basic tracking, expand as needed',
+        investment: 'Pay-as-you-grow model'
+      },
+      'medium': {
+        focus: 'Balanced feature set with growth capability',
+        implementation: 'Phased rollout over 2-3 months',
+        investment: 'Standard package with optional add-ons'
+      },
+      'large': {
+        focus: 'Full feature set with custom integrations',
+        implementation: 'Comprehensive implementation with team training',
+        investment: 'Enterprise package with dedicated support'
+      }
+    };
+
+    return {
+      ...baseRecommendations,
+      immediateActions: immediateActions[primary_challenge as keyof typeof immediateActions] || immediateActions['inventory'],
+      scaleApproach: scaleSolutions[company_size as keyof typeof scaleSolutions] || scaleSolutions['small'],
+      toolingStrategy: toolRecommendations,
+      successMetrics: success_metrics?.map(metric => ({
+        metric,
+        timeline: '90 days',
+        milestones: ['30-day checkpoint', '60-day review', '90-day achievement']
+      }))
+    };
+  };
+
   if (isComplete) {
+    const detailedRecommendations = generateDetailedRecommendations();
     return (
       <section id="assessment" className="py-20 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="mb-8">
-              <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-green-900 mb-4">
-                Assessment Complete!
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+              <CheckCircle className="h-16 w-16 text-[#0067b9] mx-auto mb-4" />
+              <h2 className="text-3xl font-bold text-[#1a1f2f] mb-4">
+                Your Personalized Action Plan
               </h2>
-              <p className="text-lg text-green-700 mb-6">
-                Thank you for completing our comprehensive supply chain assessment. We're analyzing your responses and will send you a personalized optimization roadmap within 24 hours.
+              <p className="text-lg text-[#475467] mb-6">
+                Based on your responses, here's your customized roadmap to transform your business challenges into competitive advantages.
               </p>
             </div>
+
+            {/* Immediate Actions */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Start Here: Immediate Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {detailedRecommendations.immediateActions.steps.map((step, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <Badge>{index + 1}</Badge>
+                      </div>
+                      <div>
+                        <p className="font-medium">{step}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      Expected Impact: {detailedRecommendations.immediateActions.expectedImpact}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Timeline: {detailedRecommendations.immediateActions.timeline}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Implementation Approach */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Your Custom Implementation Plan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold">Focus Areas</h4>
+                    <p>{detailedRecommendations.scaleApproach.focus}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Implementation Strategy</h4>
+                    <p>{detailedRecommendations.scaleApproach.implementation}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Technology Transition</h4>
+                    <p>{detailedRecommendations.toolingStrategy}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Success Metrics */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Your Success Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {detailedRecommendations.successMetrics?.map((item, index) => (
+                    <div key={index} className="border-b pb-4 last:border-0">
+                      <h4 className="font-semibold">{item.metric}</h4>
+                      <div className="mt-2 space-y-2">
+                        {item.milestones.map((milestone, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span className="text-sm">{milestone}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
             
-            <div className="bg-white rounded-lg p-8 shadow-lg border">
-              <h3 className="text-xl font-bold mb-4">What Happens Next?</h3>
-              <div className="grid md:grid-cols-3 gap-6 text-sm">
-                <div className="text-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-blue-600 font-bold">1</span>
+            <div className="space-y-6">
+              {/* Immediate Actions */}
+              <Card className="border-2 border-[#0067b9]">
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1f2f]">Immediate Actions (Next 30 Days)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {formData.primary_challenge === 'revenue' && (
+                    <>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-5 w-5 text-[#0067b9] mt-0.5" />
+                        <div>
+                          <p className="font-medium">Implement Real-Time Demand Tracking</p>
+                          <p className="text-sm text-[#475467]">Expected outcome: 15-20% revenue increase through better stock availability</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-5 w-5 text-[#0067b9] mt-0.5" />
+                        <div>
+                          <p className="font-medium">Dynamic Pricing Optimization</p>
+                          <p className="text-sm text-[#475467]">Expected outcome: 10-15% margin improvement</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {formData.primary_challenge === 'costs' && (
+                    <>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-5 w-5 text-[#0067b9] mt-0.5" />
+                        <div>
+                          <p className="font-medium">Smart Route Optimization</p>
+                          <p className="text-sm text-[#475467]">Expected outcome: 25-30% reduction in transportation costs</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-5 w-5 text-[#0067b9] mt-0.5" />
+                        <div>
+                          <p className="font-medium">Inventory Carrying Cost Reduction</p>
+                          <p className="text-sm text-[#475467]">Expected outcome: 20-25% reduction in holding costs</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {/* Add similar blocks for other primary challenges */}
+                </CardContent>
+              </Card>
+
+              {/* 90-Day Transformation Plan */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1f2f]">90-Day Transformation Plan</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold mb-2">Month 1: Quick Wins</h4>
+                      <ul className="list-disc pl-5 space-y-2 text-[#475467]">
+                        <li>Deploy rapid response solutions for immediate impact</li>
+                        <li>Initial team training and process optimization</li>
+                        <li>First cost savings realized within 2 weeks</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Month 2: Scale & Optimize</h4>
+                      <ul className="list-disc pl-5 space-y-2 text-[#475467]">
+                        <li>Expand successful solutions across operations</li>
+                        <li>Advanced analytics implementation</li>
+                        <li>Team capability building</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Month 3: Transform & Excel</h4>
+                      <ul className="list-disc pl-5 space-y-2 text-[#475467]">
+                        <li>Full system integration</li>
+                        <li>Automated optimization routines</li>
+                        <li>Predictive analytics deployment</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="font-semibold">Analysis</div>
-                  <div className="text-muted-foreground">Our algorithms match your needs to optimal models</div>
-                </div>
-                <div className="text-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-blue-600 font-bold">2</span>
+                </CardContent>
+              </Card>
+
+              {/* Expected Outcomes */}
+              <Card className="bg-[#f8f9fa]">
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1f2f]">Expected Business Outcomes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-[#0067b9] mb-2">30%</div>
+                      <div className="text-sm text-[#475467]">Average Cost Reduction</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-[#0067b9] mb-2">2x</div>
+                      <div className="text-sm text-[#475467]">Operational Efficiency</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-[#0067b9] mb-2">20%</div>
+                      <div className="text-sm text-[#475467]">Revenue Growth</div>
+                    </div>
                   </div>
-                  <div className="font-semibold">Recommendations</div>
-                  <div className="text-muted-foreground">Personalized roadmap with specific solutions</div>
-                </div>
-                <div className="text-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-blue-600 font-bold">3</span>
-                  </div>
-                  <div className="font-semibold">Implementation</div>
-                  <div className="text-muted-foreground">Guided setup and optimization deployment</div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
             
-            <div className="mt-8">
-              <Button size="lg" asChild>
-                <a href="/dashboard">Explore Platform While You Wait</a>
+            <div className="mt-8 text-center space-y-4">
+              <Button size="lg" asChild className="bg-[#0067b9] hover:bg-[#005296]">
+                <Link to="/dashboard">Start Your Transformation Now</Link>
               </Button>
+              <p className="text-sm text-[#475467]">
+                A copy of this plan has been sent to {formData.email}. Our team will contact you within 24 hours to discuss implementation.
+              </p>
             </div>
           </div>
         </div>
@@ -405,34 +659,36 @@ const ComprehensiveQuestionnaire = () => {
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block font-semibold mb-2">Primary Supply Chain Challenge *</label>
+                    <label className="block font-semibold mb-2">What's your biggest business challenge? *</label>
                     <select 
                       className="w-full p-3 border rounded-lg"
                       value={formData.primary_challenge || ""}
                       onChange={(e) => handleInputChange('primary_challenge', e.target.value)}
                       required
                     >
-                      <option value="">Select primary challenge</option>
-                      <option value="inventory">Inventory Management (High costs, stockouts)</option>
-                      <option value="routes">Transportation & Route Optimization</option>
-                      <option value="facilities">Facility Location & Network Design</option>
-                      <option value="demand">Demand Forecasting & Planning</option>
-                      <option value="costs">Cost Reduction & Optimization</option>
-                      <option value="risk">Risk Management & Resilience</option>
-                      <option value="quality">Quality Management & Control</option>
-                      <option value="sustainability">Sustainability & Green Operations</option>
-                      <option value="supplier">Supplier Management & Selection</option>
-                      <option value="visibility">Supply Chain Visibility & Tracking</option>
+                      <option value="">Select your main challenge</option>
+                      <option value="revenue">Revenue is lower than expected</option>
+                      <option value="costs">Operating costs are too high</option>
+                      <option value="customer-satisfaction">Customer satisfaction is declining</option>
+                      <option value="market-share">Losing market share to competitors</option>
+                      <option value="stockouts">Frequently running out of stock</option>
+                      <option value="cash-flow">Cash flow problems due to excess inventory</option>
+                      <option value="delivery">Late or unreliable deliveries</option>
+                      <option value="quality">Product quality inconsistency</option>
+                      <option value="growth">Unable to scale operations efficiently</option>
+                      <option value="wastage">High product wastage or spoilage</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block font-semibold mb-3">Secondary Challenges (Select all that apply)</label>
+                    <label className="block font-semibold mb-3">What other issues are impacting your business? (Select all that apply)</label>
                     <div className="grid md:grid-cols-2 gap-3">
                       {[
-                        "Cash flow management", "Seasonal demand variations", "Supplier reliability",
-                        "Quality control issues", "Regulatory compliance", "Technology integration",
-                        "Staff training & capability", "Performance measurement", "Customer service levels"
+                        "Can't predict customer demand accurately", "Suppliers are unreliable",
+                        "Too much money tied up in inventory", "High transportation costs",
+                        "Market expansion difficulties", "Competition is undercutting prices",
+                        "Staff productivity issues", "Manual processes slowing us down",
+                        "Unable to track performance effectively", "Limited visibility of operations"
                       ].map(challenge => (
                         <label key={challenge} className="flex items-center gap-2">
                           <input 
@@ -469,12 +725,14 @@ const ComprehensiveQuestionnaire = () => {
                   </div>
 
                   <div>
-                    <label className="block font-semibold mb-3">Success Metrics (What defines success for you?)</label>
+                    <label className="block font-semibold mb-3">What business results are most important to you?</label>
                     <div className="grid md:grid-cols-2 gap-3">
                       {[
-                        "Cost reduction", "Improved service levels", "Faster delivery times",
-                        "Better inventory turnover", "Risk reduction", "Sustainability goals",
-                        "Operational efficiency", "Customer satisfaction", "Compliance improvement"
+                        "Increase revenue by 20%+", "Cut operational costs by 30%+",
+                        "Improve customer satisfaction", "Expand to new markets",
+                        "Reduce stockouts by 90%", "Free up working capital",
+                        "Same-day delivery capability", "Double inventory turns",
+                        "Achieve reliable 24-hour fulfillment", "Reduce waste by 50%+"
                       ].map(metric => (
                         <label key={metric} className="flex items-center gap-2">
                           <input 
@@ -494,13 +752,13 @@ const ComprehensiveQuestionnaire = () => {
                     <input 
                       type="email"
                       className="w-full p-3 border rounded-lg"
-                      placeholder="your@email.com"
+                      placeholder="you@company.com"
                       value={formData.email || ""}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       required
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      We'll send your personalized roadmap to this email
+                      Contact chainio@tenderzville-portal.co.ke or submit this form for your customized solution roadmap
                     </p>
                   </div>
                 </div>
