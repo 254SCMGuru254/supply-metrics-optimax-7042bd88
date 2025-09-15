@@ -6,6 +6,13 @@ export interface SupplyChainModel {
   formulas: ModelFormula[];
 }
 
+export interface BusinessContext {
+  problem: string;
+  impact: string;
+  application: string;
+  constraints: string[];
+}
+
 export interface ModelFormula {
   id: string;
   name: string;
@@ -17,6 +24,7 @@ export interface ModelFormula {
   backendFunction: string;
   inputs: ModelInput[];
   outputs: ModelOutput[];
+  businessContext?: BusinessContext;
 }
 
 export interface ModelInput {

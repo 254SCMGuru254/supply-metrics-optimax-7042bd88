@@ -2,19 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Play,
-<<<<<<< Updated upstream
-  Square,
-  RotateCcw,
-  Settings
-} from '@/utils/iconImports';
-import {
-  Activity,
-=======
+  Play as PlayIcon,
   Settings,
   Activity,
-  Settings as SettingsIcon,
->>>>>>> Stashed changes
   BarChart3
 } from 'lucide-react';
 
@@ -32,7 +22,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Play className="mr-2 h-5 w-5" />
+              <PlayIcon className="mr-2 h-5 w-5" />
               Start Simulation
             </CardTitle>
             <CardDescription>Run new simulation scenarios</CardDescription>
@@ -42,7 +32,7 @@ const Simulation = () => {
               Create and execute simulation models to test different supply chain configurations.
             </p>
             <Button className="w-full">
-              <Play className="mr-2 h-4 w-4" />
+              <PlayIcon className="mr-2 h-4 w-4" />
               New Simulation
             </Button>
           </CardContent>
