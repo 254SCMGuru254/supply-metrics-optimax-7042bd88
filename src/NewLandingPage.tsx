@@ -86,45 +86,43 @@ const NewLandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-white">
       {/* Professional Header */}
       <ProfessionalHeader />
 
       {/* Hero Section - Balanced Layout */}
-      <section className="pt-16 pb-12 px-4 sm:px-6 lg:px-8">
+      <section className="pt-16 pb-12 px-4 sm:px-6 lg:px-8 bg-[#f8f9fa]">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[600px]">
             {/* Left side - Content */}
             <div className="space-y-8">
-              <div className="space-y-4">
-                <Badge className="px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border-blue-200">
+              <div className="space-y-6">
+                <Badge className="px-4 py-2 bg-[#0067b9] text-white border-0">
                   <Target className="h-4 w-4 mr-2" />
-                  Enterprise-Grade Supply Chain Optimization
+                  Kenya's Leading Supply Chain Platform
                 </Badge>
                 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                    Intelligent Supply Chain
-                  </span>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-[#1a1f2f]">
+                  <span>Transform Your</span>
                   <br />
-                  <span className="text-gray-900">Optimization Platform</span>
+                  <span>Supply Chain with AI</span>
                 </h1>
                 
-                <p className="text-xl text-gray-600 leading-relaxed">
-                  Transform your supply chain with AI-powered optimization. 40+ advanced models, 
-                  real-time analytics, and Kenya-focused solutions for enterprise-scale operations.
+                <p className="text-xl text-[#475467] leading-relaxed max-w-2xl">
+                  Leverage advanced AI and machine learning to optimize your operations, 
+                  reduce costs, and drive sustainable growth. Purpose-built for Kenyan enterprises.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/dashboard">
-                  <Button size="lg" className="px-8 py-4 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                    Start Optimizing Now
+                  <Button size="lg" className="px-8 py-4 text-lg bg-[#0067b9] hover:bg-[#005296] text-white">
+                    Start Free Trial
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 
-                <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-2 hover:bg-gray-50">
+                <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-2 border-[#0067b9] text-[#0067b9] hover:bg-[#f8f9fa]">
                   <Play className="mr-2 h-5 w-5" />
                   Watch Demo
                 </Button>
@@ -180,30 +178,30 @@ const NewLandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white/50">
+      <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Powerful Features for Modern Supply Chains
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1a1f2f] mb-4">
+              Built for Kenyan Supply Chains
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to optimize, analyze, and transform your supply chain operations
+            <p className="text-xl text-[#475467] max-w-3xl mx-auto">
+              Comprehensive solutions tailored for local business needs and challenges
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border border-[#e5e7eb] rounded-lg">
                 <CardHeader className="pb-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <div className="text-blue-600">
+                  <div className="w-12 h-12 bg-[#f8f9fa] rounded-lg flex items-center justify-center mb-4">
+                    <div className="text-[#0067b9]">
                       {feature.icon}
                     </div>
                   </div>
-                  <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-[#1a1f2f]">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-gray-600 leading-relaxed">
+                  <CardDescription className="text-[#475467] leading-relaxed">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
@@ -214,25 +212,25 @@ const NewLandingPage = () => {
       </section>
 
       {/* Models Section */}
-      <section id="models" className="py-20">
+      <section id="models" className="py-20 bg-[#f8f9fa]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1a1f2f] mb-4">
               40+ Advanced Optimization Models
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-[#475467] max-w-3xl mx-auto">
               From basic algorithms to enterprise-scale multi-echelon optimization
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {models.map((model, index) => (
-              <div key={index} className="p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 hover:shadow-lg hover:border-blue-200 transition-all duration-300 group">
+              <div key={index} className="p-4 bg-white rounded-lg border border-[#e5e7eb] hover:shadow-lg hover:border-[#0067b9] transition-all duration-300 group">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Settings className="h-4 w-4 text-blue-600" />
+                  <div className="w-8 h-8 bg-[#f8f9fa] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Settings className="h-4 w-4 text-[#0067b9]" />
                   </div>
-                  <span className="font-medium text-gray-900">{model}</span>
+                  <span className="font-medium text-[#1a1f2f]">{model}</span>
                 </div>
               </div>
             ))}
@@ -250,31 +248,31 @@ const NewLandingPage = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1a1f2f] mb-4">
               Trusted by Supply Chain Leaders
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-[#475467]">
               See how organizations transform their operations with Supply Metrics Optimax
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={index} className="border border-[#e5e7eb] rounded-lg hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <CheckCircle key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                      <CheckCircle key={i} className="h-5 w-5 text-[#0067b9] fill-current" />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-6 leading-relaxed">"{testimonial.content}"</p>
+                  <p className="text-[#475467] mb-6 leading-relaxed">"{testimonial.content}"</p>
                   <div>
-                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                    <div className="text-sm text-gray-600">{testimonial.role}</div>
-                    <div className="text-sm text-blue-600">{testimonial.company}</div>
+                    <div className="font-semibold text-[#1a1f2f]">{testimonial.name}</div>
+                    <div className="text-sm text-[#475467]">{testimonial.role}</div>
+                    <div className="text-sm text-[#0067b9]">{testimonial.company}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -284,25 +282,25 @@ const NewLandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-[#0067b9]">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Transform Your Supply Chain?
           </h2>
-          <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+          <p className="text-xl text-white/90 mb-8 leading-relaxed">
             Join thousands of professionals who trust Supply Metrics Optimax for enterprise-scale optimization
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/dashboard">
-              <Button size="lg" className="px-8 py-4 text-lg bg-white text-blue-600 hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all duration-300">
+              <Button size="lg" className="px-8 py-4 text-lg bg-white text-[#0067b9] hover:bg-gray-50">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             
             <Link to="/pricing">
-              <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-2 border-white text-white hover:bg-white hover:text-blue-600">
+              <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-2 border-white text-white hover:bg-[#f8f9fa] hover:text-[#0067b9]">
                 View Pricing
               </Button>
             </Link>
