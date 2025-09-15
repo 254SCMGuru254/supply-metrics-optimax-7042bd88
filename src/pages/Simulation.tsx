@@ -3,12 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   Play,
+<<<<<<< Updated upstream
   Square,
   RotateCcw,
   Settings
 } from '@/utils/iconImports';
 import {
   Activity,
+=======
+  Settings,
+  Activity,
+  Settings as SettingsIcon,
+>>>>>>> Stashed changes
   BarChart3
 } from 'lucide-react';
 
@@ -45,7 +51,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Square className="mr-2 h-5 w-5" />
+              <Settings className="mr-2 h-5 w-5" />
               Control Center
             </CardTitle>
             <CardDescription>Monitor running simulations</CardDescription>
@@ -64,7 +70,7 @@ const Simulation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <RotateCcw className="mr-2 h-5 w-5" />
+              <BarChart3 className="mr-2 h-5 w-5" />
               Results Analysis
             </CardTitle>
             <CardDescription>Analyze simulation outcomes</CardDescription>

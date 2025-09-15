@@ -3,10 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   Send,
+<<<<<<< Updated upstream
   Clipboard
 } from '@/utils/iconImports';
 import {
   MessageSquare
+=======
+  MessageSquare,
+  FileText
+>>>>>>> Stashed changes
 } from 'lucide-react';
 
 const ChatAssistant = () => {
@@ -40,7 +45,7 @@ const ChatAssistant = () => {
         <Card className="bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center text-gray-900 dark:text-white">
-              <Clipboard className="mr-2 h-5 w-5" />
+              <FileText className="mr-2 h-5 w-5" />
               Knowledge Base
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">Access our comprehensive documentation and guides.</CardDescription>

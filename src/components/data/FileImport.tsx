@@ -3,8 +3,12 @@ import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+<<<<<<< Updated upstream
 import { Upload, FileSpreadsheet, AlertCircle } from '@/utils/iconImports';
 import { Database } from 'lucide-react';
+=======
+import { Upload, FileText, Database } from 'lucide-react';
+>>>>>>> Stashed changes
 import { supabase } from '@/integrations/supabase/client';
 
 interface FileImportProps {
@@ -109,7 +113,7 @@ export const FileImport: React.FC<FileImportProps> = ({ projectId }) => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <FileSpreadsheet className="h-8 w-8 text-green-600" />
+                  <FileText className="h-8 w-8 text-green-600" />
                   <div>
                     <h3 className="font-medium">CSV Format</h3>
                     <p className="text-sm text-gray-600">Comma-separated values</p>

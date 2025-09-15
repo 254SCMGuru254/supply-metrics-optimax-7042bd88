@@ -4,13 +4,17 @@ import { Button } from "@/components/ui/button";
 import {
   BookOpen,
   FileText,
-  Code,
+  Settings,
   Play,
   Download,
+<<<<<<< Updated upstream
   ExternalLink,
   Settings
 } from '@/utils/iconImports';
 import {
+=======
+  Settings as SettingsIcon,
+>>>>>>> Stashed changes
   Lightbulb
 } from 'lucide-react';
 
@@ -47,7 +51,7 @@ const Documentation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Code className="mr-2 h-5 w-5" />
+              <FileText className="mr-2 h-5 w-5" />
               API Reference
             </CardTitle>
             <CardDescription>Complete API documentation</CardDescription>
@@ -57,7 +61,7 @@ const Documentation = () => {
               Detailed reference for all endpoints and data structures.
             </p>
             <Button className="w-full">
-              <ExternalLink className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" />
               View API Docs
             </Button>
           </CardContent>

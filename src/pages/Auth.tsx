@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import {
+<<<<<<< Updated upstream
   Eye,
   EyeOff,
   Lock,
@@ -19,6 +20,11 @@ import {
 import {
   Users,
   TrendingUp,
+=======
+  Users,
+  TrendingUp,
+  User,
+>>>>>>> Stashed changes
   Shield,
   BarChart3,
   Globe
@@ -89,7 +95,7 @@ const Auth = () => {
 
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
-                <Zap className="h-6 w-6 text-blue-600" />
+                <TrendingUp className="h-6 w-6 text-blue-600" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">AI Optimization</h3>
@@ -120,11 +126,11 @@ const Auth = () => {
 
           <div className="bg-white p-6 rounded-lg shadow-sm border">
             <div className="flex items-center space-x-2 mb-3">
-              <Star className="h-5 w-5 text-yellow-500" />
-              <Star className="h-5 w-5 text-yellow-500" />
-              <Star className="h-5 w-5 text-yellow-500" />
-              <Star className="h-5 w-5 text-yellow-500" />
-              <Star className="h-5 w-5 text-yellow-500" />
+              <BarChart3 className="h-5 w-5 text-yellow-500" />
+              <BarChart3 className="h-5 w-5 text-yellow-500" />
+              <BarChart3 className="h-5 w-5 text-yellow-500" />
+              <BarChart3 className="h-5 w-5 text-yellow-500" />
+              <BarChart3 className="h-5 w-5 text-yellow-500" />
             </div>
             <blockquote className="text-gray-700 italic">
               "This platform transformed our supply chain efficiency by 40%. The AI recommendations are incredibly accurate."
@@ -154,7 +160,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signin-email">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-email"
                           type="email"
@@ -170,7 +176,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signin-password">Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Shield className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-password"
                           type={showPassword ? "text" : "password"}
@@ -188,9 +194,9 @@ const Auth = () => {
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-400" />
+                            <Shield className="h-4 w-4 text-gray-400" />
                           ) : (
-                            <Eye className="h-4 w-4 text-gray-400" />
+                            <User className="h-4 w-4 text-gray-400" />
                           )}
                         </Button>
                       </div>
@@ -239,7 +245,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-email"
                           type="email"
@@ -255,7 +261,7 @@ const Auth = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Shield className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-password"
                           type={showPassword ? "text" : "password"}
@@ -273,9 +279,9 @@ const Auth = () => {
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-400" />
+                            <Shield className="h-4 w-4 text-gray-400" />
                           ) : (
-                            <Eye className="h-4 w-4 text-gray-400" />
+                            <User className="h-4 w-4 text-gray-400" />
                           )}
                         </Button>
                       </div>
